@@ -3,16 +3,19 @@
 ------------------------------
 
 
-lex = {
+local lex_mt = {
 	name = "",
 	curline = 1,
 	curcol = 1,
 	code = "",
 	token="",
 	tokentype="",
+	tokenline=1,
+	tokencol=1,
+	errstr = "",
 };
 
-lex.__index = lex;
+lex_mt.__index = lex_mt;
 
 local l_pattern_sp = {
 	'%s+',  '//.-\n', '/*.-*/',
@@ -42,11 +45,12 @@ local l_pattern_word = {
 
 local l_pattern_token = {
 	{'[_%a][_%w]*' , 'sym', l_pattern_word},
+	{'0x%x+[_%a]+', 'err', 'unexpected character after number'},
+	{'%d+%.%d+[eE][%+%-]?%d+[_%a]+', 'err', 'unexpected character after number'},
+	{'%d+%[eE][%+%-]?%d+[_%a]+', 'err' , 'unexpected character after number'},
+	{'%d+%.%d+[_%a]+', 'err', 'unexpected character after number'},
+	{'%d+[_%a]+', 'err', 'unexpected character after number'},
 	{'0x%x+', 'num'},
-	{'%d+%.%d+[eE][%+%-]?%d+[_%w]+', 'err', 'unexpected '},
-	{'%d+%[eE][%+%-]?%d+[_%w]+', 'err'},
-	{'%d+%.%d+[_%w]+', 'err'},
-	{'%d+[_%w]+', 'err'},
 	{'%d+%.%d+[eE][%+%-]?%d+', 'num'},
 	{'%d+%[eE][%+%-]?%d+', 'num'},
 	{'%d+%.%d+', 'num'},
@@ -81,7 +85,7 @@ local l_pattern_token = {
 	{';', 'op'},
 };
 
-function lex.new(self, name, code)
+function lex_mt:new( name, code)
 	local l = {
 		name = name,
 		code = code,
@@ -92,11 +96,22 @@ end
 
 
 
+function lex_mt:eof()
+	return self.tokentype == 'eof';	
+end
+
+function lex_mt:fail()
+	return self.tokentype == 'err';	
+end
 
 -- returrn tokentype, token, line, col
-function lex.next(self)
-	if(self.tokentype=='err' or self.tokentype=='eof') then
-		return self.tokentype, self.token, self.curline, self.curcol;
+function lex_mt:next()
+	if(self.tokentype=='err') then
+		return false, self.strerr;
+	end
+	
+	if(self.tokentype=='eof') then
+		return true, self.tokentype, self.token;
 	end
 	
 		
@@ -138,7 +153,7 @@ function lex.next(self)
 	if(self.code == '') then
 		self.token='';
 		self.tokentype='eof';
-		return self.tokentype, self.token, self.curline, self.curcol;
+		return true, self.tokentype, self.token ;
 	end
 	
 	-- get token
@@ -146,6 +161,7 @@ function lex.next(self)
 	for i, v in ipairs(l_pattern_token) do
 		s,e,str = string.find(self.code, '^('..v[1]..')');
 		if ( s ) then
+			--print(s, e, str, v[1], v[2], v[3]);
 			if (v[2] == 'sym') then
 				self.token = str;
 				self.tokentype = v[2];
@@ -163,16 +179,20 @@ function lex.next(self)
 				while(string.sub(str, sl-1, sl-1) == '\\') do
 					--local  remain = string.sub(self.code, e+1);
 					local pattern = string.gsub(str, '.', '.')..v[3];
-					local s, e, str = string.find(self.code, '^('..pattern..')');
+					--print(sl,pattern);
+					s, e, str = string.find(self.code, '^('..pattern..')');
+					--print(s,e,str);
 					if( not s) then
 						self.token='';
 						self.tokentype='err';
-						return self.tokentype, self.token, self.curline, self.curcol, 'endless string.';	
+						self.strerr = 'endless string.';
+						return false, self.strerr;
 					end
 					sl = string.len(str);
 				end
 				
-				local ts = str;
+				local ts = string.sub(str, 2, sl-1);
+				--print("ts=", ts);
 				-- process escape char
 				ts = string.gsub(ts, '\\a', '\a');
 				ts = string.gsub(ts, '\\t', '\t');
@@ -184,13 +204,16 @@ function lex.next(self)
 				ts = string.gsub(ts, '\\x(%x%x?)', function(x) return string.char(tonumber('0x'..x)); end);
 				--str = string.gsub(str, '\\u(%x%x%x%x)', function(x) return ; end);
 				ts = string.gsub(ts, '\\(.)', '%1');
+
+				--print("ts=", ts);
 				
 				self.token = ts;
 				self.tokentype = v[2];
-			elseif(v2 == 'err') then
+			elseif(v[2] == 'err') then
 				self.token='';
 				self.tokentype='err';
-				return self.tokentype, self.token, self.curline, self.curcol, v[3];
+				self.strerr = v[3];
+				return false, v[3];
 			else
 				self.token = str;
 				self.tokentype = v[2];
@@ -202,11 +225,12 @@ function lex.next(self)
 	if (not s) then
 		self.token='';
 		self.tokentype='err';
-		return self.tokentype, self.token, self.curline, self.curcol, 'invalid character';
+		self.strerr = 'invalid character'
+		return false, self.strerr;
 	end
 	
-	local lastline = self.curline;
-	local lastcol  = self.curcol;
+	self.tokenline = self.curline;
+	self.tokencol  = self.curcol;
 	
 	self.code = string.sub(self.code, e+1);
 	
@@ -223,13 +247,50 @@ function lex.next(self)
 	
 	self.curcol = self.curcol + string.len(str);
 
-	return self.tokentype, self.token, lastline, lastcol;
+	return true, self.tokentype, self.token;
 end
 
 -- exports 
 
 
+function new_lex(name, code)
+	local l = lex_mt:new(name,code);
+	local t = {
+		-- return true,tokentype, token; 
+		-- return false, errstr;
+		next = function()      return l:next();    end,
+		-- return true;
+		-- return false;
+		eof = function()       return l:eof();     end,
+		-- return true;
+		-- return false;
+		fail = function()      return l:fail();    end,	
+		-- return token;
+		token = function()     return l.token;     end,
+		-- return tokentyope;
+		tokentype = function() return l.tokentype; end,		
+		-- return curline;
+		curline = function()   return l.curline;   end,
+		-- return curcol;
+		curcol = function()    return l.curcol;    end,
+		-- return tokenline;
+		tokenline = function() return l.tokenline; end,
+		-- return tokencol;
+		tokencol = function()  return l.tokencol;  end,
+		-- return errstr;
+		errstr = function()    return l.errstr;    end,
+		-- return name;
+		name   = function()    return l.name;      end,
+		-- return trmain;
+		remain = function()    return l.code;      end,
+	};
+	
+	return t;
+end
 
+--------------------------------------------------------------------------------
+-- test function
+--------------------------------------------------------------------------------
 
 function main(fname)
 	fin = io.open(fname, "r");
@@ -241,11 +302,15 @@ function main(fname)
 	
 	local code = fin:read("*a");
 	
-	l = lex:new(fname, code);
+	l = new_lex(fname, code);
 
-	while(l.tokentype ~= 'err' and l.tokentype ~= 'eof') do
-		local tt, tk, ln, col, serr = l:next();
-		print(tt, tk, ln, col, serr);
+	while(not l.eof() and not l.fail()) do
+		local t, tt, tk = l:next();
+		if(t) then
+			print('get a token: type=\''..tt..'\': '..tk);
+		else
+			print(l.name()..'('..l.curline()..') col '..l.curcol()..': '..tt);
+		end
 	end
 		
 	
@@ -257,3 +322,4 @@ main("e:\\d.txt");
 
 
 
+--]]
