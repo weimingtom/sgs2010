@@ -2,6 +2,7 @@
 -- File: parse_msg.lua
 --------------------------------------------------
 
+dofile('lex.lua');
 
 --[[
 
@@ -247,13 +248,6 @@ function is_positive_integer_or_zero(n)
 	return type(n)=='number' and math.floor(n)==n and n >= 0;
 end
 
-function skip_str(code, s)
-	if(string.sub(code, 1, string.len(s)) == s) then
-		return true, string.sub(code, string.len(s)+1);
-	end
-	return false, code;
-end
-
 
 
 function vtos(v)
@@ -289,6 +283,17 @@ function vtos(v)
 		return tostring(v);
 	end	
 end
+
+
+function skip_token(lin, tt, to)
+	if(lin.tokentype() == tt and lin.token() == to) then
+		lin.next();
+		return true;
+	end
+	return false;
+end
+
+
 
 -- parse a value symtax unit
 function parse_value(code, syntax)
@@ -1176,36 +1181,36 @@ function get_expr_field(code, syntax)
 	return false, code;
 end
 
-function get_field(code, syntax)
+function get_field(lin, syntax)
 
-	local s, e, name, n;
-	local f, remain;
+	local f, name, n,err;
 	
-	f, remain = skip_str(code, '[');
+	f = skip_token(lin, 'op', '[');
 	
 	if(f)then
 		-- field name
-		name, remain = parse_new_name(remain, syntax);
+		name, err = parse_new_name(lin, syntax);
 
 		if(not name) then
-			print("error: expected a new symbol for field name: "..code);
-			return false, code;
+			--print("error: expected a new symbol for field name: "..code);
+			return false, err;
 		end
 		
 		local field = { name = name };
 		
-		f, remain = skip_str(remain, ':');
+		f = skip_str(lin, 'op', ':');
 		if(not f) then
-			print("error expected a ':' after field name: "..code);
-			return false, code;
+			--print("error expected a ':' after field name: "..code);
+			return false, "expected a ':' after field name";
 		end
 		
 		-- get field type name
-		s,e,name = string.find(remain, "^([_%a][_%w]*)");
+		--s,e,name = string.find(remain, "^([_%a][_%w]*)");
+		lin.next();
 		
-		if(not s) then
-			print("error: expected a field type at : "..code);
-			return false, code;
+		if(lin.fail()) then
+			--print("error: expected a field type at : "..code);
+			return false, lin.errstr();
 		end
 		
 		field.vt=name;
@@ -1298,15 +1303,14 @@ function get_field(code, syntax)
 
 end
 
-function parse(code, syntax)
-	local s = code;
+function parse(lin, syntax)
 	local f = true;
 	while(f) do
-		f, s = get_field(s, syntax);
+		f = get_field(lin, syntax);
 	end
 
-	if(s ~= "") then
-		print("prase error at code: "..s);
+	if(not lin.eof()) then
+		print("prase error at: ", lin.curline(), lin.curcol());
 	end
 end
 
@@ -1385,12 +1389,12 @@ function Main(fn)
 	local fin = io.open(fn);
 
 	if(fin == nil) then
-	
+		print("open file '"..fn.."' failed.");
 		return;
 	end
 	
 	local code = (fin:read("*a"));
-
+--[[
 	-- È¥µô×¢ÊÍ	
 	code = string.gsub(code, "/*.-*/", "");
 	-- È¥µô×¢ÊÍ	
@@ -1399,8 +1403,10 @@ function Main(fn)
 	code = string.gsub(code, "%s*([%[%]%(%):%|%*;%+%-%*/%%\\%^%{%}])%s*", "%1");
 	--typename.symbol .Á½±ßµÄ¿Õ°×
 	code = string.gsub(code, "([_%a]%d*)%s*(%.)%s*([_%a])", "%1%2%3");
-	
+--]]	
 	print(code);
+	
+	local lin = lex_new(fn, code);
 	
 	local syntax = { 
 		count=0, 
@@ -1412,7 +1418,9 @@ function Main(fn)
 		records = {},
 	};
 	
-	parse(code, syntax);
+	lin.next();
+	
+	parse(lin, syntax);
 	
 	print_table(syntax);
 	
