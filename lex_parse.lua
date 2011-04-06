@@ -10,6 +10,7 @@ local pattern_str_escape = {
 	{ 'x(%x%x?)', function(lex, token, hex) lex.ud.token = lex.ud.token .. string.char(tonumber('0x'..hex)); end, },
 	{ '.', function(lex, token) lex.ud.token = lex.ud.token .. token; end, },
 	always = function(lex, token)lex.pop_pattern(); end,
+	checkeof = function(lex) return false, 'unexpected end of input while parse a string.'; end, 
 };
 
 
@@ -35,6 +36,7 @@ local pattern_str = {
 			lex.ud.token = lex.ud.token .. token;
 		end
 	},
+	checkeof = function(lex) return false, 'unexpected end of input while parse a string.'; end, 
 };
 
 local keywords = {
@@ -120,9 +122,9 @@ function main(fname)
 	while(not l.eof() and not l.fail()) do
 		local tt, tk = l.next();
 		if(tt) then
-			print('get a token: type=\''..tt..'\': '..tostring(tk));
+			print('get a token: type=\''..l.tokentype()..'\': '..tostring(l.token())..", line:"..l.tokenline()..',col:'..l.tokencol());
 		else
-			print(l.name()..'('..l.curline()..') col '..l.curcol()..': '..tk);
+			print(l.name()..'('..l.curline()..') col '..l.curcol()..': '..l.errstr());
 		end
 	end
 		

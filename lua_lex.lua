@@ -63,7 +63,7 @@ end
 function lex_priv:next()
 	-- error ?
 	if(self.iserror) then
-		return nil, self.strerr;
+		return nil, self.errstr;
 	end
 	
 	-- eof ?
@@ -72,6 +72,13 @@ function lex_priv:next()
 	end
 	
 	if(self.code == '') then
+		if(self.curpattern.checkeof) then
+			local f, serr = self.curpattern.checkeof(self.usercallback);
+			if(not f ) then
+				self:error(serr);
+				return nil, self.errstr;
+			end
+		end
 		self.tokentype = 'eof';
 		self.token = nil;
 		return self.tokentype, self.token;
@@ -154,7 +161,7 @@ function lex_priv:next()
 			self:trace(' * lex function is nil, do nothing.');
 		end
 		
-		if(self.iserror) then return nil, self.strerr; end
+		if(self.iserror) then return nil, self.errstr; end
 
 		-- call global handle function
 		if(pattern.matched) then
@@ -166,7 +173,7 @@ function lex_priv:next()
 		end
 		
 		-- call handle is set the error ?
-		if(self.iserror) then return nil, self.strerr;  end
+		if(self.iserror) then return nil, self.errstr;  end
 
 		-- return token or continue parse 
 		if (rtt) then
@@ -200,16 +207,16 @@ function lex_priv:next()
 		self:error('unexcepected character: \''..string.sub(self.code, 1,1)..'\'');
 	end
 
-	self:trace(' * return unmatched error : \"'.. self.strerr);
+	self:trace(' * return unmatched error : \"'.. self.errstr);
 	-- return unmatch error
-	return nil, self.strerr;
+	return nil, self.errstr;
 end
 
 
 
 function lex_priv:error(str)
 	self:trace(" * host parser set error :" .. str);
-	self.strerr = str;
+	self.errstr = str;
 	self.iserror = true;
 end
 
