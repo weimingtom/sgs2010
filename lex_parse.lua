@@ -122,7 +122,7 @@ function main(fname)
 	while(not l.eof() and not l.fail()) do
 		local tt, tk = l.next();
 		if(tt) then
-			print('get a token: type=\''..l.tokentype()..'\': '..tostring(l.token())..", line:"..l.tokenline()..',col:'..l.tokencol());
+			print(string.format('[%3d,%3d] : ', l.tokenline(), l.tokencol())..'get a token: type=\''..l.tokentype()..'\': '..tostring(l.token()));
 		else
 			print(l.name()..'('..l.curline()..') col '..l.curcol()..': '..l.errstr());
 		end

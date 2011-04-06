@@ -10,8 +10,9 @@ local syntax_pattern = {
 	},
 
 	mul_expr = {
-		{'mul_expr', '*', 'unary_expr', function(syntax, a, b, c)  return { op = b, left = a, righrt = c }; end, },
-		{'mul_expr', '/', 'unary_expr', function(syntax, a, b, c)  return { op = b, left = a, righrt = c }; end, },
+		{'mul_expr', '*', 'unary_expr', function(s, a, b, c)  return { op = b, left = a, righrt = c }; end, },
+		{'mul_expr', '/', 'unary_expr', function(s, a, b, c)  return { op = b, left = a, righrt = c }; end, },
+		{'unary_expr',                  function(s, a)        return a; end },
 	},
 	
 	unary_expr = {
@@ -27,6 +28,9 @@ local syntax_pattern = {
 		{'expression', function(s, a)  return { a }; end, }
 		{'arglist', 'expression', function(s, a, b)  a[table.getn(a)+1] = b;  return { a }; end, }
 	},
+	
+	trace = print,
+	
 };
 
 

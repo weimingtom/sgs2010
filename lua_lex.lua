@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- lua_lex.lua
--- description: a common grammar syn
+-- description: a common lixical analysor in lua
 --------------------------------------------------------------------------------
 
 local lex_priv = {
@@ -23,12 +23,7 @@ local lex_priv = {
 
 lex_priv.__index = lex_priv;
 
-local lex_usercallback = {
-};
 
-lex_usercallback.__index = lex_usercallback;
-
---lex_priv.usercallback = lex_usercallback;
 
 function lex_priv:trace(...)
 	if(self.tracefunc) then
