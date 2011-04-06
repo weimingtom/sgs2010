@@ -63,7 +63,7 @@ end
 function lex_priv:next()
 	-- error ?
 	if(self.iserror) then
-		return nil, strerr;
+		return nil, self.strerr;
 	end
 	
 	-- eof ?
@@ -292,6 +292,8 @@ function lex_create(name, code, pattern)
 		lock_token_linecol = function() lex:lock_token_linecol() end,
 		unlock_token_linecol = function() lex:unlock_token_linecol() end,
 
+		-- table for store custom user data
+		ud = {},
 	};
 	
 	lex.usercallback = lex_itf;

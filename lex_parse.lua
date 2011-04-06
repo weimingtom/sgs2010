@@ -3,12 +3,12 @@ dofile("e:\\proc\\krh\\sgs2010\\lua_lex.lua");
 
 
 local pattern_str_escape = {
-	{ 'n', function(lex, token) lex.token = lex.token .. '\n'; end, },
-	{ 'r', function(lex, token) lex.token = lex.token .. '\r'; end, },
-	{ 't', function(lex, token) lex.token = lex.token .. '\t'; end, },
-	{ 'v', function(lex, token) lex.token = lex.token .. '\v'; end, },
-	{ 'x(%x%x?)', function(lex, token, hex) lex.token = lex.token .. string.char(tonumber('0x'..hex)); end, },
-	{ '.', function(lex, token) lex.token = lex.token .. token; end, },
+	{ 'n', function(lex, token) lex.ud.token = lex.ud.token .. '\n'; end, },
+	{ 'r', function(lex, token) lex.ud.token = lex.ud.token .. '\r'; end, },
+	{ 't', function(lex, token) lex.ud.token = lex.ud.token .. '\t'; end, },
+	{ 'v', function(lex, token) lex.ud.token = lex.ud.token .. '\v'; end, },
+	{ 'x(%x%x?)', function(lex, token, hex) lex.ud.token = lex.ud.token .. string.char(tonumber('0x'..hex)); end, },
+	{ '.', function(lex, token) lex.ud.token = lex.ud.token .. token; end, },
 	always = function(lex, token)lex.pop_pattern(); end,
 };
 
@@ -16,12 +16,12 @@ local pattern_str_escape = {
 local pattern_str = {
 	{ { '\'', '\"' }, 
 		function(lex, token)
-			if(lex.sq==token) then
+			if(lex.ud.sq==token) then
 				lex.pop_pattern();
 				lex.unlock_token_linecol();
-				return 'str',lex.token;
+				return 'str',lex.ud.token;
 			else
-				lex.token = lex.token .. token;
+				lex.ud.token = lex.ud.token .. token;
 			end
 		end
 	},
@@ -32,22 +32,22 @@ local pattern_str = {
 	},
 	{ '[^\'\"\\]+',
 		function(lex, token)
-			lex.token = lex.token .. token;
+			lex.ud.token = lex.ud.token .. token;
 		end
 	},
 };
 
 local keywords = {
 	'if', 'for', 'else', 'then', 'do', 'while', 'end', 'elseif', 'break', 'return', 'in' , 'function', 
-	'and', 'or', 'not', 'true', 'false', 'var', 'local', 'define', 
+	'and', 'or', 'not', 'true', 'false', 'nil', 'local', 'type', 
 };
 
 
 local pattern = {
 	-- skip the space
 	{ '%s+', --[[ function (lex, token) lex.trace('skip space ... '..string.len(token)..' chars.'); end--]] },	
-	{ '/%*.-%*/', --[[function (lex, token) lex.trace('skip multi-line common ... '..string.len(token)..' chars.'); end--]] },
-	{ '//.-\n', --[[function (lex, token) lex.trace('skip single-line common ... '..string.len(token)..' chars.'); end--]] },
+	{ '%-%-%[%[.-%-%-%]%]', --[[function (lex, token) lex.trace('skip multi-line common ... '..string.len(token)..' chars.'); end--]] },
+	{ '%-%-.-\n', --[[function (lex, token) lex.trace('skip single-line common ... '..string.len(token)..' chars.'); end--]] },
 
 	-- symbol and keyword
 	{ '[%a_][%w_]*', 
@@ -75,8 +75,8 @@ local pattern = {
 	-- for string start with ' or "
 	{ {"'", '"' } ,  
 		function(lex,token) 
-			lex.sq=token;
-			lex.token='';
+			lex.ud.sq=token;
+			lex.ud.token='';
 			lex.push_pattern(pattern_str);
 			lex.lock_token_linecol();
 		end,
@@ -84,9 +84,9 @@ local pattern = {
 	
 	-- operators
 	{ plain = true,
-		{'==', '!=', '>=', '<=', '+=', '-=', '*=', '/=', '%=', '++', '--', '<>', 
-		'!', '%', '^', '&', '*', '/', '-', '+', '=', '[', ']', '(',')', ':', ';', 
-		'<', '>', '.', ',', }, 
+		{'==', '~=', '>=', '<=', '...', '..', 
+		'%', '^', '*', '/', '-', '+', '=', '[', ']', '(',')', ':', ';', 
+		'<', '>', '.', ',', '{', '}', '|'}, 
 		function(lex, token) return token; end,
 	},
 	-- unmatch handle, report a error
@@ -131,7 +131,7 @@ end
 
 
 
-main("e:\\xtest.txt");
+main("e:\\parse_msg.lua");
 
 
 
