@@ -35,7 +35,7 @@ local syntax_priv = {
 	non_term_map = {},
 
 	-- trace function
-	trace = nil,	
+	tracefunc = nil,	
 };
 
 
@@ -44,25 +44,87 @@ syntax_priv.__index = syntax_priv;
 -- use to generate the lalr analyse table
 local syntax_gen = {
 	-- terminator and non-terminator table : each as {name, is_term}
-	elems = {},
+	tokens = {},
 	-- rules table, index to elements, each as {non-terminator, element1, element2, ... }
 	rules = {},
 	-- the start element index
-	begin_elem = -1,
+	begin_token_id = -1,
 	-- the extended start rule index
 	begin_rule = -1,
 	-- the eof element index
-	eof_elem = -1,
+	eof_token_id = -1,
 	-- the cluster of the item sets
 	clust = {},
 	
+	tracefunc = nil,
+
 };
 
 syntax_gen.__inde = syntax_gen;
 
 
+function syntax_gen:valid_token_name(e)
+	return type(e) == 'string' and string.len(e) > 0;
+end
 
 
+
+
+function syntax_gen:find_token(t)
+	for id, v in ipairs(self.tokens) do
+		if(
+	end
+end
+
+function syntax_gen:add_token(t)
+	local id = self:find_token(t);
+	if( id > 0 ) then
+		return id;
+	end
+	
+	id = table.getn(self.tokens)+1;
+	self.tokens[id] = t;
+	return id;
+end
+
+function syntax_gen:add_rule(n, m, r)
+	
+end
+
+
+-- generate the lalr analyse table
+function syntax_gen:generate(g)
+	-- parse the rules and elements
+	if(not self:valid_token_name(g.start)) then
+		return nil, 'not specified  or invald start token.';
+	end
+	
+	-- add the 'eof' to token set
+	elems[table.getn(elems)+1] = { is_term = true, name = 'eof' };
+	eof_elem = table.getn(elems);
+	
+	
+	
+	for n, rus in ipairs(g) do
+		if(type(rus) ~= 'table') then
+			return nil, 'invald define of rule group '..tostring(n)..', must a table.';
+		end
+		if(not self:valid_token_name(rus[1])) then
+			return nil, 'invald leader token of rule group '..tostring(n)..'.';
+		end
+		
+		local m = 2;
+		while(true) do
+			if(rus[m] == nil) then
+				break;
+				self:add_rule(n, m, rus[m]);
+			end
+		end
+		
+	end
+	
+	
+end
 
 
 
