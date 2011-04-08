@@ -50,11 +50,11 @@ local syntax_gen = {
 	-- the start element index
 	begin_token_id = -1,
 	-- the extended start rule index
-	begin_rule = -1,
+	begin_rule_id = -1,
 	-- the eof element index
 	eof_token_id = -1,
 	-- the cluster of the item sets
-	clust = {},
+	cluster = {},
 	
 	tracefunc = nil,
 
@@ -64,7 +64,8 @@ syntax_gen.__inde = syntax_gen;
 
 
 local function valid_token_name(e)
-	return type(e) == 'string' and string.len(e) > 0;
+	-- S' is used for extended start non-terminator
+	return type(e) == 'string' and string.find(e, '^.+$') and e ~= "S'";
 end
 
 
@@ -110,7 +111,7 @@ local function table_equal(ts1, ts2)
 	end
 	
 	for i = 1, table.getn(ts1) do
-		if(ts1[i] ~= ts2[i]) then
+		if( not (ts1[i] == ts2[i]) ) then
 			return false;
 		end
 	end
@@ -130,20 +131,12 @@ function syntax_gen:find_rule(r)
 	return -1;
 end
 
-function syntax_gen:add_rule(n, m, leader_id, r, func)
-	if(type(r) ~= 'table') then
-		return false, 'invalid rule body define st rule: '..n..', body: '..m..'.';
-	end
+function syntax_gen:add_rule(rule)
+	local id = table.getn(self.rules) + 1;
 	
-	local rule = { 
-		leader = leader_id, 
-		tokens = {},
-		func = nil,
-	};
+	self.rules[id] = rule;
 	
-	for i, t in ipairs(r) do
-		
-	end
+	return id;
 end
 
 
@@ -205,6 +198,9 @@ function syntax_gen:check_grammar(g)
 end
 
 function syntax_gen:add_all_non_term(g, non_terms)
+	-- add extended start token S'
+	self.begin_token_id = self:add_token({ name = "S'", is_term = false });
+	non_terms["S'"] = 1;
 	-- each rules group
 	for n, rus in ipairs(g) do
 		self:add_token({ name = rus[1], is_term = false });
@@ -243,10 +239,20 @@ function syntax_gen:add_all_term(g, non_terms)
 			mi = mi + 1;
 		end
 	end	
+	-- add 'eof' token to terminator table
+	self.eof_token_id = self:add_token({ name = 'eof', is_term = true });
 	return true;
 end
 
 function syntax_gen:add_all_rule(g)
+	-- add extended start rule
+	local begin_rule = {
+		leader = begin_token_id,
+		tokens = { self:find_token(g.start), },
+		func = function(s, a) return a; end,
+	};
+	begin_rule_id = self:add_rule(begin_rule);
+
 	-- for each rules group
 	for n, rus in ipairs(g) do
 		
@@ -289,13 +295,109 @@ function syntax_gen:add_all_rule(g)
 					tokens[ii] = self:find_token_by_name(rt);
 				end	
 				
+				local rule = {
+					leader = leader_id,
+					tokens = tokens,
+					func = func,
+				};
+				
+				if(self:find_rule(rule)) then
+					return nil, 'duplicated define at rule: '..n..', body: '..rn..'.'';
+				end
+				
+				self:add_rule(rule);
+				
 				rn = rn+1;				
 			end
 			mi = mi + 1;
 		end
 	end	
 	return true;
+end
+
+-- the closure function for item set...
+function syntax_gen:closure(items)
+	-- closure output
+	local citems = {
+	};
+	
+	local queue = {};
+	
+	-- copy tne kernel items to result set
+	for i, item in ipairs(items) do
+		if(item.rule_id == self.begin_rule_id or item.pos > 1) then
+			-- copy the item content
+			local ki = { 
+				rule_id = item.rule_id,
+				pos = item.pos,
+				forward_id = item.forward,
+			};
+			
+			citems[table.getn(citems) + 1] =  ki;
+			queue[table.getn(queue) + 1] = ki;
+		end
+	end
+	
+	
+	while(queue[1]) do
+		local qitem = queue[1];
+		table.remove(queue, 1);
 		
+		local rule = self.rules[qitem.rule_id];
+		local next_token_id = rule.tokens[qitem.pos];
+		
+		if(next_token_id) then
+			local token = self.tokens[next_token_id]
+			if(not token.is_term) then
+				-- add all of the rule for this non-terminator
+				for i, r in ipairs(self.rules) do
+					if(r.leader == next_token_id) then
+						local newitem = {
+							rule_id = 
+						};
+					end
+				end
+			end
+		end
+	end
+	
+	
+
+end
+
+function syntax_gen:gen_cluster()
+
+	-- generate first item set
+	local itemset = {
+		id = -1,
+		items = {},
+		gotos = {},
+	};
+	
+	local cid = 1;
+	
+	-- add the primary item : S'-> . S, $
+	itemset.items[1] = { 
+		rule_id = self.begin_rule_id,
+		pos = 1,
+		forward_id = eof_token_id,
+	};
+	
+	itemset.id = cid;
+	cid = cid + 1;
+	
+	self.cluster[table.getn(self.cluster)+1] = itemset;
+	
+	-- loop for all item clusters, calc closure(c), goto(c)
+	local queue = { itemset };
+		
+	while(queue[1]) do
+		local iset = queue[1];
+		table.remove(queue, 1);
+		local cset = self:closure(iset.items);
+		
+	end
+
 end
 
 
@@ -316,6 +418,9 @@ function syntax_gen:generate(g)
 	end
 	if(f) then
 		f,serr = self:add_all_rule(g);
+	end
+	if(f) then
+		f,serr = self:gen_cluster();
 	end
 	if(f) then
 		f,serr = self:gen_all_item();

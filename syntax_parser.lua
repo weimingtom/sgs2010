@@ -17,7 +17,7 @@ local syntax_pattern = {
 	
 	{ 'unary_expr',
 		{ {'-', 'expression'},          function(s, a, b)        return { op = 'neg', right = b, } end, },
-		{ {'(', 'expression', ')'},     function(s, a, b, c)     return c; end, },
+		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
 		{ {'sym', '(', 'arglist', ')'}, function(s, a, b, c, d)  return { op ='call', fun = a, args = c}; end, },
 		{ {'sym'},                      function(s, a) return { op = 'sym',   name  = a}; end, },
 		{ {'num'},                      function(s, a) return { op = 'const', value = a}; end, },
