@@ -150,7 +150,7 @@ function lex_priv:next()
 		if (tv[2]) then
 			rtt, rtk = tv[2](self.usercallback, ttk, tv1, tv2,tv3,tv4,tv5,tv6,tv7,tv8,tv9);
 			self:trace(' * call lex function return : \"'..tostring(rtt)..'", '..tostring(rtk));
-			if(rtt == 'eof;) then
+			if(rtt == 'eof') then
 				self:trace('Warning: pattern handle function return \'eof\', the remain code will not be processed!');
 			end
 		else
