@@ -78,15 +78,18 @@ local syntax_pattern = {
 	{ 'unary_expr',
 		{ {'-', 'unary_expr'},          function(s, a, b)        return { op = 'neg', right = b, } end, },
 		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
-		{ {'sym', '(', 'arglist', ')'}, function(s, a, b, c, d)  return { op ='call', fun = a, args = c}; end, },
+		{ {'sym', '(', 'optarglist', ')'}, function(s, a, b, c, d)  return { op ='call', fun = a, args = c}; end, },
 		{ {'sym'},                      function(s, a) return { op = 'sym',   name  = a}; end, },
 		{ {'num'},                      function(s, a) return { op = 'const', value = a}; end, },
 	},
 	
-	
-	{ 'arglist',
+	{ 'optarglist',
 		{ {},                         function(s)  return { }; end, },
-		{ {'arglist', ',', 'expression'},  function(s, a, b)  a[table.getn(a)+1] = b;  return { a }; end, },
+		{ {'arglist'},                function(s, a)    return a; end, },
+	},
+	{ 'arglist',
+		{ {'expression'},                  function(s, a)  return {a }; end, },
+		{ {'arglist', ',', 'expression'},  function(s, a, b, c)  a[table.getn(a)+1] = c;  return  a; end, },
 	},
 	
 	start = 'expression',
@@ -144,7 +147,7 @@ function main(fname)
 	if(tree) then
 		print_table(tree);
 	else
-		print('parse error: '..serr);
+		print(l.name()..'('..l.tokenline()..') col '..l.tokencol()..': '..serr);
 	end
 end
 

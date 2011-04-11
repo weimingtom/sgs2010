@@ -1098,7 +1098,7 @@ function syntax_gen:calc_lalr_table(tout)
 		for tid, act in pairs(t) do
 			local a_index = st * tout.term_count + tid;
 			if (act.action == ACTION_SHIFT) then
-				tout.action_table[a_index] = act.action * 4 + ACTION_SHIFT;
+				tout.action_table[a_index] = act.state * 4 + ACTION_SHIFT;
 			elseif (act.action == ACTION_REDUCE) then
 				tout.action_table[a_index] = act.rule * 4 + ACTION_REDUCE;
 			elseif (act.action == ACTION_ACCEPT) then
@@ -1212,15 +1212,16 @@ function syntax_priv:init(g)
 	return true;
 end
 
-function syntax_priv:dump_stack(state_stack, token_stack)
-	local s = ''
-	for i, v in ipairs(state_stack) do
-		s = s .. tostring(v)..',';
+function syntax_priv:dump_stack(state_stack, state_stack_cnt, token_stack, token_stack_cnt)
+	local s = 'state_stack: '
+	for i = 1, state_stack_cnt do
+		s = s .. tostring(state_stack[i])..' ';
 	end
 	self.tracefunc(s);
-	s = '';
-	for i, v in ipairs(token_stack) do
-		s = s ..(v.is_term and self.term_str[v.id] or self.non_term_str[v.id])..',';
+	s = 'token_stack: ';
+	for i = 1, token_stack_cnt do
+		local v = token_stack[i];
+		s = s ..(v.is_term and self.term_str[v.id] or self.non_term_str[v.id])..' ';
 	end
 	self.tracefunc(s);
 end
@@ -1237,6 +1238,9 @@ function syntax_priv:parse(lexfunc)
 	state_stack_cnt = state_stack_cnt + 1;
 	state_stack[state_stack_cnt] = cur_state;
 	
+	if(self.tracefunc) then
+		self.tracefunc('get next token...');
+	end
 	local tokentype, token = lexfunc();
 	
 	if(not tokentype) then
@@ -1246,7 +1250,7 @@ function syntax_priv:parse(lexfunc)
 	while ( true ) do
 		cur_state = state_stack[state_stack_cnt];
 		if(self.tracefunc) then
-			self:dump_stack(state_stack, token_stack);
+			self:dump_stack(state_stack, state_stack_cnt, token_stack, token_stack_cnt);
 			self.tracefunc('cur state : '..cur_state);
 		end
 		local tokid = self.term_idx[tokentype];
@@ -1262,6 +1266,9 @@ function syntax_priv:parse(lexfunc)
 		if(action) then
 			local ac  = action % 4;
 			local acid = math.floor(action/4);
+			if(self.tracefunc) then
+				self.tracefunc('action('..action..') : ', ac, acid);
+			end
 			if (ac == ACTION_SHIFT) then
 				-- push 
 				token_stack_cnt = token_stack_cnt + 1;
@@ -1272,13 +1279,16 @@ function syntax_priv:parse(lexfunc)
 					self.tracefunc(string.format("shift %d(%s), goto state: %d", tokid, self.term_str[tokid], acid));
 				end
 				-- next input
+				if(self.tracefunc) then
+					self.tracefunc('get next token...');
+				end
 				tokentype, token = lexfunc();
 				if(not tokentype) then
 					return nil, token; -- token is error message
 				end
 			elseif (ac == ACTION_REDUCE) then
 				if(self.tracefunc) then
-					self.tracefunc(string.format("reduce use rule: %d(%s)", acid, self.rule_str[acid]));
+					self.tracefunc(string.format('reduce use: '..self.rule_str[acid]));
 				end
 				-- pop state and token from stack
 				local pop = self.pop_table[acid];
@@ -1324,12 +1334,25 @@ function syntax_priv:parse(lexfunc)
 			end
 		else
 			local  expected = '';
+			local  tt = {};
 			local  nbase = 	self.term_count * cur_state;
 			for i = 1, self.term_count do
 				local n = nbase + i;
 				if(self.action_table[n]) then
-					expected = expected..self.term_str[i]..';'
+					tt[table.getn(tt)+1] = i;
 				end
+			end
+			for n = 1, table.getn(tt) do
+				expected = expected..self.term_str[tt[n]];
+				if(n == table.getn(tt) - 1) then
+					expected = expected..' or ';
+				elseif(n < table.getn(tt)) then
+					expected = expected..', ';
+				end
+					
+			end
+			if(self.tracefunc) then
+				self.tracefunc('expected: '..expected);
 			end
 			return nil, 'unexpected input token :' .. self.term_str[tokid]..', expected: '.. expected;
 		end
@@ -1384,7 +1407,7 @@ function syntax_create(grammar)
 	end
 	
 	local y_itf = {
-		parse = function (lexfunc) y:parse(lexfunc); end,
+		parse = function (lexfunc) return y:parse(lexfunc); end,
 		
 		-- for temp user data store
 		ud = {},
