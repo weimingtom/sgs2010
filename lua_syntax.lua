@@ -10,7 +10,7 @@ function print_table(t)
 	local tbs = {};
 	
 	local line2str = function()
-		return string.format("%04d: ",lineno);
+		return string.format("%04d ",lineno);
 	end
 	
 	local val2str = function(v)
@@ -71,11 +71,11 @@ function print_table(t)
 		for i, v in pairs(t) do
 			if(type(v)=='table') then
 				if(tbs[v] ~= nil) then
-					print(line2str()..intend..index2str(i).. ' = '..tostring(v)..': { refer to line '..tbs[v]..' },');
+					print(line2str()..intend..index2str(i).. ' = { -- refer to line '..tbs[v]..' },');
 					lineno = lineno+1;
 				else
 					tbs[v] = lineno;				
-					print(line2str()..intend..index2str(i).. ' = '..tostring(v)..': {');
+					print(line2str()..intend..index2str(i).. ' = { -- '..tostring(v));
 					lineno = lineno+1;
 					fun(v, intend..'  ', fun);
 					print(line2str()..intend..'},');
@@ -90,7 +90,7 @@ function print_table(t)
 	
 	if(type(t)=='table') then
 		tbs[t] = lineno;
-		print(line2str()..tostring(t)..': {');
+		print(line2str()..': { -- '..tostring(t));
 		lineno = lineno+1;
 		p_(t, "  ", p_);
 		print(line2str()..'}');
@@ -1239,7 +1239,8 @@ function syntax_priv:parse(lexfunc)
 	state_stack[state_stack_cnt] = cur_state;
 	
 	if(self.tracefunc) then
-		self.tracefunc('get next token...');
+		self.tracefunc('init state : '..cur_state);
+		self.tracefunc('get next input token...');
 	end
 	local tokentype, token = lexfunc();
 	
@@ -1258,7 +1259,7 @@ function syntax_priv:parse(lexfunc)
 			return nil, 'unknown input terminator type: \''..tokentype..'\'.'; 
 		end
 		if(self.tracefunc) then
-			self.tracefunc('cur input : '..tokid..'('..self.term_str[tokid]..')');
+			self.tracefunc('cur input : '..tokid..'('..self.term_str[tokid]..')', token);
 		end
 		local action = self.action_table[self.term_count * cur_state + tokid];
 	
@@ -1267,8 +1268,9 @@ function syntax_priv:parse(lexfunc)
 			local ac  = action % 4;
 			local acid = math.floor(action/4);
 			if(self.tracefunc) then
-				self.tracefunc('action('..action..') : ', ac, acid);
+				self.tracefunc('action('..action..') : '..ac..', '..acid);
 			end
+			
 			if (ac == ACTION_SHIFT) then
 				-- push 
 				token_stack_cnt = token_stack_cnt + 1;
@@ -1280,7 +1282,7 @@ function syntax_priv:parse(lexfunc)
 				end
 				-- next input
 				if(self.tracefunc) then
-					self.tracefunc('get next token...');
+					self.tracefunc('get next input token...');
 				end
 				tokentype, token = lexfunc();
 				if(not tokentype) then
@@ -1336,6 +1338,7 @@ function syntax_priv:parse(lexfunc)
 			local  expected = '';
 			local  tt = {};
 			local  nbase = 	self.term_count * cur_state;
+			local  tt = {};
 			for i = 1, self.term_count do
 				local n = nbase + i;
 				if(self.action_table[n]) then
@@ -1345,16 +1348,17 @@ function syntax_priv:parse(lexfunc)
 			for n = 1, table.getn(tt) do
 				expected = expected..self.term_str[tt[n]];
 				if(n == table.getn(tt) - 1) then
-					expected = expected..' or ';
+					expected = expected..' or '
 				elseif(n < table.getn(tt)) then
-					expected = expected..', ';
+					expected = expected..', '
 				end
-					
 			end
+
 			if(self.tracefunc) then
-				self.tracefunc('expected: '..expected);
+				self.tracefunc('error: invalid token, expected '..expected);
 			end
-			return nil, 'unexpected input token :' .. self.term_str[tokid]..', expected: '.. expected;
+
+			return nil, 'unexpected input token '.. self.term_str[tokid]..', expected: '..expected;
 		end
 		
 	end

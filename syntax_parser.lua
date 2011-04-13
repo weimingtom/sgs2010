@@ -18,7 +18,7 @@ local lex_pattern = {
 		function (lex, token)  
 			for _, t in ipairs(keywords) do
 				if(token == t) then
-					return t;
+					return t, t;
 				end
 			end
 			return 'sym', token;		
@@ -40,7 +40,7 @@ local lex_pattern = {
 	-- operators
 	{ plain = true,
 		{'+', '-', '*', '/', '(', ')', ',' }, 
-		function(lex, token) return token; end,
+		function(lex, token) return token, token; end,
 	},
 	-- unmatch handle, report a error
 	--unmatched = function(lex) lex.error('invalid character.'); end,
@@ -52,7 +52,7 @@ local lex_pattern = {
 		lex.trace('matched handle is called!');
 	end,
 	
-	trace = print,
+	trace = nil,
 };
 
 
@@ -74,7 +74,7 @@ local syntax_pattern = {
 		  {'mul_expr', '/', 'unary_expr'}, function(s, a, b, c)  return { op = b, left = a, righrt = c }; end, },
 		{ {'unary_expr'},                  function(s, a)        return a; end },
 	},
-	
+
 	{ 'unary_expr',
 		{ {'-', 'unary_expr'},          function(s, a, b)        return { op = 'neg', right = b, } end, },
 		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
@@ -82,10 +82,10 @@ local syntax_pattern = {
 		{ {'sym'},                      function(s, a) return { op = 'sym',   name  = a}; end, },
 		{ {'num'},                      function(s, a) return { op = 'const', value = a}; end, },
 	},
-	
+
 	{ 'optarglist',
-		{ {},                         function(s)  return { }; end, },
-		{ {'arglist'},                function(s, a)    return a; end, },
+		{ {},                         function(s)     return   {}; end, },
+		{ {'arglist'},                function(s, a)  return   a;  end, },
 	},
 	{ 'arglist',
 		{ {'expression'},                  function(s, a)  return {a }; end, },
