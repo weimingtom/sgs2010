@@ -1417,7 +1417,7 @@ function syntax_create(grammar)
 		ud = {},
 	};
 	
-	y.usercallnback = y_itf;
+	y.usercallback = y_itf;
 	
 	return  y_itf;
 end

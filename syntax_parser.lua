@@ -39,7 +39,7 @@ local lex_pattern = {
 	
 	-- operators
 	{ plain = true,
-		{'+', '-', '*', '/', '(', ')', ',' }, 
+		{'+', '-', '*', '/', '(', ')', ',' , '=' , ';' }, 
 		function(lex, token) return token, token; end,
 	},
 	-- unmatch handle, report a error
@@ -59,28 +59,37 @@ local lex_pattern = {
 
 -- [[
 local syntax_pattern = {
+	{ 'statm_list',
+		{ {}, function(s) return true; end},
+		{ {'statm_list', 'statment'}, function(s) return true; end},
+	},
+	{ 'statment',
+		{ { 'sym' , '=', 'expression', ';'}, function(s, a, b, c) s.ud.val[a] = c; return true; end },
+		{ { 'expression', ';' },              function(s, a) print(a); return true; end },
+		{ { ';' }, function(s) return true; end },
+	},
 	{ 'expression',
 		{ {'add_expr'}, function(s, a)  return a; end },
 	},
 
 	{ 'add_expr',
-		{ {'add_expr', '+', 'mul_expr'}, 
-		  {'add_expr', '-', 'mul_expr'}, function(s, a, b, c)  return { op = b, left = a, righrt = c }; end,},
+		{ {'add_expr', '+', 'mul_expr'}, function(s, a, b, c)  return a + c; end,},
+		{ {'add_expr', '-', 'mul_expr'}, function(s, a, b, c)  return a - c; end,},
 		{ {'mul_expr' },                 function(s, a)        return a; end },
 	},
 
 	{ 'mul_expr',
-		{ {'mul_expr', '*', 'unary_expr'}, 
-		  {'mul_expr', '/', 'unary_expr'}, function(s, a, b, c)  return { op = b, left = a, righrt = c }; end, },
+		{ {'mul_expr', '*', 'unary_expr'}, function(s, a, b, c)  return a * c; end, },
+		{ {'mul_expr', '/', 'unary_expr'}, function(s, a, b, c)  return a / c; end, },
 		{ {'unary_expr'},                  function(s, a)        return a; end },
 	},
 
 	{ 'unary_expr',
-		{ {'-', 'unary_expr'},          function(s, a, b)        return { op = 'neg', right = b, } end, },
+		{ {'-', 'unary_expr'},          function(s, a, b)        return -b; end, },
 		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
-		{ {'sym', '(', 'optarglist', ')'}, function(s, a, b, c, d)  return { op ='call', fun = a, args = c}; end, },
-		{ {'sym'},                      function(s, a) return { op = 'sym',   name  = a}; end, },
-		{ {'num'},                      function(s, a) return { op = 'const', value = a}; end, },
+		{ {'sym', '(', 'optarglist', ')'}, function(s, a, b, c, d) if( s.ud.fun[a]) then  return s.ud.fun[a](unpack(c)); else return nil, 'function named \''..a..'\' is not found.'; end end, },
+		{ {'sym'},                      function(s, a) if( s.ud.val[a]) then return s.ud.val[a]; else return nil, 'variable named \''..a..'\' is not found.'; end end, },
+		{ {'num'},                      function(s, a) return a end, },
 	},
 
 	{ 'optarglist',
@@ -92,9 +101,9 @@ local syntax_pattern = {
 		{ {'arglist', ',', 'expression'},  function(s, a, b, c)  a[table.getn(a)+1] = c;  return  a; end, },
 	},
 	
-	start = 'expression',
+	start = 'statm_list',
 	
-	trace = print,
+	--trace = print,
 	
 };
 --]]
@@ -142,16 +151,28 @@ function main(fname)
 		print(err);
 		return nil;
 	end
+	
+	syntax.ud.val = {};
+	syntax.ud.fun = {};
+	
+	syntax.ud.val.e = math.exp(1.0);
+	syntax.ud.val.PI = math.pi;
+	
+	for name, fun in pairs(math) do
+		if(type(fun) == 'function') then 
+			syntax.ud.fun[name] = fun;
+		end
+	end
 
 	local tree, serr = syntax.parse(function() return l.next(); end);
 	if(tree) then
-		print_table(tree);
+		--print_table(tree);
 	else
 		print(l.name()..'('..l.tokenline()..') col '..l.tokencol()..': '..serr);
 	end
 end
 
-
+--print_table(_G);
 main("e:\\proc\\krh\\sgs2010\\input.txt");
 
 
