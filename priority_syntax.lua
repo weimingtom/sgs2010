@@ -1,3 +1,6 @@
+--------------------------------------------------------
+-- priority_syntax.lua -- for test the expression priority with specified order to resovle the confilicit
+--------------------------------------------------------
 
 dofile("e:\\proc\\krh\\sgs2010\\lua_syntax.lua");
 dofile("e:\\proc\\krh\\sgs2010\\lua_lex.lua");
@@ -57,7 +60,8 @@ local lex_pattern = {
 
 
 
--- [[
+
+
 local syntax_pattern = {
 	{ 'statm_list',
 		{ {}, function(s) return true; end},
@@ -69,31 +73,18 @@ local syntax_pattern = {
 		{ { ';' }, function(s) return true; end },
 	},
 	{ 'expression',
-		{ {'add_expr'}, function(s, a)  return a; end },
-	},
-
-	{ 'add_expr',
-		{ {'add_expr', '+', 'mul_expr'}, function(s, a, b, c)  return a + c; end,},
-		{ {'add_expr', '-', 'mul_expr'}, function(s, a, b, c)  return a - c; end,},
-		{ {'mul_expr' },                 function(s, a)        return a; end },
-	},
-
-	{ 'mul_expr',
-		{ {'mul_expr', '*', 'unary_expr'}, function(s, a, b, c)  return a * c; end, },
-		{ {'mul_expr', '/', 'unary_expr'}, function(s, a, b, c)  return a / c; end, },
-		{ {'mul_expr', '%', 'unary_expr'}, function(s, a, b, c)  return a % c; end, },
-		{ {'unary_expr'},                  function(s, a)        return a; end },
-	},
-
-	{ 'unary_expr',
-		{ {'-', 'unary_expr'},          function(s, a, b)        return -b; end, },
-		{ {'+', 'unary_expr'},          function(s, a, b)        return  b; end, },
+		{ {'expression', '+', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a+c; end },
+		{ {'expression', '-', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a-c; end },
+		{ {'expression', '*', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a*c; end },
+		{ {'expression', '/', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a/c; end },
+		{ {'expression', '%', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a%c; end },
+		{ {'-', 'expression', priority={1, 'right'} },          function(s, a, b)        return -b; end, },
+		{ {'+', 'expression', priority={1, 'right'} },          function(s, a, b)        return  b; end, },
 		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
 		{ {'sym', '(', 'optarglist', ')'}, function(s, a, b, c, d) if( s.ud.fun[a]) then  return s.ud.fun[a](unpack(c)); else return nil, 'function named \''..a..'\' is not found.'; end end, },
 		{ {'sym'},                      function(s, a) if( s.ud.val[a]) then return s.ud.val[a]; else return nil, 'variable named \''..a..'\' is not found.'; end end, },
 		{ {'num'},                      function(s, a) return a end, },
 	},
-
 	{ 'optarglist',
 		{ {},                         function(s)     return   {}; end, },
 		{ {'arglist'},                function(s, a)  return   a;  end, },
@@ -109,29 +100,7 @@ local syntax_pattern = {
 	trace = print,
 
 };
---]]
---[[
--- for test
-local syntax_pattern = {
-	{ 'S',
-		{ { 'A', 'B', 'C' }, function (s, a, b, c)  end },
-	},
-	{ 'A',
-		{ { 'a'}, { 'D' , 'a' }, function (s, a)  end },
-	},
-	{ 'B',
-		{ { 'b'}, { 'D' , 'b' }, function (s, a)  end },
-	},
-	{ 'C',
-		{ { 'c'}, { 'D' , 'c' }, function (s, a)  end },
-	},
-	{ 'D',
-		{ { 'A', 'd'}, { 'B' , 'e' }, {'C', 'f'}, function (s, a)  end },
-	},
-	start = 'S',
-	trace = print,
-};
---]]
+
 
 function main(fname)
 	--print_table(syntax_pattern);
@@ -177,5 +146,6 @@ end
 
 --print_table(_G);
 main("e:\\proc\\krh\\sgs2010\\input.txt");
+
 
 

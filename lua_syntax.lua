@@ -8,11 +8,11 @@ function print_table(t)
 	--local intend = '';
 	local lineno = 1;
 	local tbs = {};
-	
+
 	local line2str = function()
 		return string.format("%04d ",lineno);
 	end
-	
+
 	local val2str = function(v)
 		if(type(v)=='string')then
 			local s = string.gsub(v,'([\n\r\t\v\a\\])',
@@ -24,7 +24,7 @@ function print_table(t)
 							['\v'] = '\\v',
 							['\a'] = '\\a',
 							['\\'] = '\\\\',
-						}; 
+						};
 					return c[a];
 				end);
 			if(not string.find(s, "'")) then
@@ -35,11 +35,11 @@ function print_table(t)
 				s = string.gsub(s,'"','\\"');
 				return '"'..s..'"';
 			end
-		end	
-		
+		end
+
 		return tostring(v);
 	end
-	
+
 	local index2str = function(i)
 		if(type(i)=='number') then
 			return '['..tostring(i)..']';
@@ -55,8 +55,8 @@ function print_table(t)
 			return '['..tostring(i)..']';
 		end
 	end
-	
-	
+
+
 	local p_ = function(t, intend, fun)
 		local mt = getmetatable(t);
 		if(mt)then
@@ -65,8 +65,8 @@ function print_table(t)
 			lineno = lineno+1;
 			fun(mt, intend..'  ', fun);
 			print(line2str()..intend..'},');
-			lineno = lineno+1;					
-			
+			lineno = lineno+1;
+
 		end
 		for i, v in pairs(t) do
 			if(type(v)=='table') then
@@ -74,12 +74,12 @@ function print_table(t)
 					print(line2str()..intend..index2str(i).. ' = { -- refer to line '..tbs[v]..' },');
 					lineno = lineno+1;
 				else
-					tbs[v] = lineno;				
+					tbs[v] = lineno;
 					print(line2str()..intend..index2str(i).. ' = { -- '..tostring(v));
 					lineno = lineno+1;
 					fun(v, intend..'  ', fun);
 					print(line2str()..intend..'},');
-					lineno = lineno+1;					
+					lineno = lineno+1;
 				end
 			else
 				print(line2str()..intend..index2str(i).. ' = '..val2str(v)..',');
@@ -87,7 +87,7 @@ function print_table(t)
 			end
 		end
 	end
-	
+
 	if(type(t)=='table') then
 		tbs[t] = lineno;
 		print(line2str()..': { -- '..tostring(t));
@@ -96,7 +96,7 @@ function print_table(t)
 		print(line2str()..'}');
 		lineno = lineno+1;
 	else
-		print(line2str()..val2str(t));		
+		print(line2str()..val2str(t));
 	end
 end
 
@@ -122,23 +122,23 @@ local syntax_priv = {
 	goto_table = {},
 	pop_table = {},
 	push_table = {},
-	
+
 	rule_handle = {},
 
-	--  the term, non-term, rule string, for to print trace info and output error msg. 
+	--  the term, non-term, rule string, for to print trace info and output error msg.
 	term_str = {},
 	non_term_str = {},
 	rule_str = {},
-	
+
 	term_idx = {},
-	
+
 	-- map the terminator string to term id
 	term_map = {},
 	-- map the non-terminator string to non-term id
 	non_term_map = {},
 
 	-- trace function
-	tracefunc = nil,	
+	tracefunc = nil,
 };
 
 
@@ -158,7 +158,7 @@ local syntax_gen = {
 	eof_token_id = -1,
 	-- the cluster of the item sets
 	cluster = {},
-	
+
 	tracefunc = nil,
 
 };
@@ -172,13 +172,13 @@ function syntax_gen:create()
 		begin_token_id = -1,
 		begin_rule_id = -1,
 		eof_token_id = -1,
-		cluster = {},		
+		cluster = {},
 	};
 	setmetatable(gen, syntax_gen);
-	
+
 	return gen;
 end
-	
+
 
 local function valid_token_name(e)
 	-- S' is used for extended start non-terminator
@@ -196,7 +196,7 @@ function syntax_gen:find_token(t)
 			return id;
 		end
 	end
-	
+
 	return nil;
 end
 
@@ -206,7 +206,7 @@ function syntax_gen:find_token_by_name(t)
 			return id;
 		end
 	end
-	
+
 	return nil;
 end
 
@@ -216,7 +216,7 @@ function syntax_gen:add_token(t)
 	if( id ) then
 		return id;
 	end
-	
+
 	id = table.getn(self.tokens)+1;
 	self.tokens[id] = t;
 	return id;
@@ -226,7 +226,7 @@ local function table_equal(ts1, ts2)
 	if(table.getn(ts1) ~= table.getn(ts2)) then
 		return fasle;
 	end
-	
+
 	for i = 1, table.getn(ts1) do
 		if( not (ts1[i] == ts2[i]) ) then
 			return false;
@@ -250,23 +250,23 @@ end
 
 function syntax_gen:add_rule(rule)
 	local id = table.getn(self.rules) + 1;
-	
+
 	self.rules[id] = rule;
-	
+
 	return id;
 end
 
 
-function syntax_gen:check_grammar(g)
+local function check_grammar(g)
 	if(type(g) ~= 'table') then
 		return nil, 'invalid input grammar definition, need a table.';
 	end
 	if(not valid_token_name(g.start)) then
 		return nil, 'not specified or invald start token.';
 	end
-	
+
 	local start_f = false;
-	
+
 	-- each rules group
 	for n, rus in ipairs(g) do
 		if(type(rus) ~= 'table') then
@@ -275,11 +275,11 @@ function syntax_gen:check_grammar(g)
 		if(not valid_token_name(rus[1])) then
 			return nil, 'not specified or invald leader token of rule ('..tostring(n)..').';
 		end
-		
+
 		if(rus[1]==g.start) then
 			start_f = true;
 		end
-		
+
 		local mi = 2;
 		local rn = 1;
 		-- check each child groups
@@ -287,7 +287,7 @@ function syntax_gen:check_grammar(g)
 			if(type(rus[mi]) ~= 'table') then
 				return nil, 'invald define of rule group body of rule ('..tostring(n)..'), body ('..tostring(rn)..'), must a table.';
 			end
-			
+
 			local func;
 			local rcnt = 0;
 			-- check each child rule body
@@ -297,7 +297,7 @@ function syntax_gen:check_grammar(g)
 					break;
 				end
 				 rcnt = rcnt + 1;
-				
+
 				-- check rule body tokens
 				for ii, rt in ipairs(r) do
 					if(not valid_token_name(rt)) then
@@ -305,29 +305,45 @@ function syntax_gen:check_grammar(g)
 									.. 'at child rule body ('.. tostring(rn)..'), token ('..tostring(ii)..').';
 					end
 				end
-				
-				rn = rn+1;	
+				-- check rule body priority field
+				if(r.priority) then
+					if(type(r.priority) ~= 'table') then
+						return nil, 'invald priority define of rule ('..tostring(n)..'), '
+									.. 'at child rule body ('.. tostring(rn)..'), must be a table';
+					end
+					if(not r.priority[1] or type(r.priority[1]) ~= 'number') then
+						return nil, 'invald priority define of rule ('..tostring(n)..'), '
+									.. 'at child rule body ('.. tostring(rn)..'), the first of priority field must be a number';
+					end
+					if(r.priority[2]) then
+						if(type(r.priority[2]) ~= 'string' or (r.priority[2] ~= 'left' and r.priority[2] ~= 'right')) then
+							return nil, 'invald priority define of rule ('..tostring(n)..'), '
+										.. 'at child rule body ('.. tostring(rn)..'), the second of priority field must be \'left\' or \'right\' or nil';
+						end
+					end
+				end
+				rn = rn+1;
 			end
-			
+
 			if(rcnt == 0) then
 				return nil, 'not find any rule body define at rule ('..tostring(n)..'), '
 								..' child group ('..tostring(mi-1)..').';
 			end
-			
+
 			if(type(func) ~= 'function') then
 				return nil, 'need a rule callback function for the rule ('..tostring(n)..'), '
 								..'at child group ('..tostring(mi-1)..').';
 			end
 
-						
+
 			mi = mi + 1;
 		end
 	end
-	
+
 	if not start_f then
 		return nil, 'the start token is not a defined non-terminator.';
 	end
-	
+
 	return true;
 end
 
@@ -339,7 +355,7 @@ function syntax_gen:add_all_non_term(g, non_terms)
 	for n, rus in ipairs(g) do
 		self:add_token({ name = rus[1], is_term = false });
 		non_terms[rus[1]] = 1;
-	end	
+	end
 	return true;
 end
 
@@ -349,26 +365,26 @@ function syntax_gen:add_all_term(g, non_terms)
 		local mi = 2;
 		local rn = 1;
 		-- loop each child groups
-		while(rus[mi]) do						
+		while(rus[mi]) do
 			-- loop each child rule body
 			for i, r in ipairs(rus[mi]) do
 				if(type(r) ~= 'table') then
 					break;
 				end
-				
+
 				-- loop rule body tokens
 				for ii, rt in ipairs(r) do
 					if(not non_terms[rt]) then
 						self:add_token({ name = rt, is_term = true });
 					end
 				end
-				
-				rn = rn+1;		
+
+				rn = rn+1;
 			end
 
 			mi = mi + 1;
 		end
-	end	
+	end
 	-- add 'eof' token to terminator table
 	self.eof_token_id = self:add_token({ name = 'eof', is_term = true });
 	return true;
@@ -385,16 +401,16 @@ function syntax_gen:add_all_rule(g)
 
 	-- for each rules group
 	for n, rus in ipairs(g) do
-		
+
 		local leader_id = self:find_token_by_name(rus[1]);
 		if( not leader_id) then
 			return nil, 'internal error while generate lalr analyse table.';
 		end
-		
+
 		local mi = 2;
 		local rn = 1;
 		-- loop each child groups
-		while(rus[mi]) do			
+		while(rus[mi]) do
 			-- get the function
 			local func;
 			for i, r in ipairs(rus[mi]) do
@@ -403,7 +419,7 @@ function syntax_gen:add_all_rule(g)
 					break;
 				end
 			end
-			
+
 			if(type(func)~='function') then
 				return nil, 'internal error while generate lalr analyse table.';
 			end
@@ -413,37 +429,38 @@ function syntax_gen:add_all_rule(g)
 				if(type(r) ~= 'table') then
 					break;
 				end
-				
+
 				local tokens = { };
-				
+
 				-- loop rule body tokens
 				for ii, rt in ipairs(r) do
 					tokens[ii] = self:find_token_by_name(rt) or -1;
-				end	
-				
+				end
+
 				local rule = {
 					leader = leader_id,
 					tokens = tokens,
 					func = func,
+					priority=r.priority,
 				};
-				
-				if(self:find_rule(rule )) then
+
+				if(self:find_rule(rule)) then
 					return nil, 'duplicated define at rule: '..n..', body: '..rn..'.';
 				end
-				
+
 				self:add_rule(rule);
-				
-				rn = rn+1;				
+
+				rn = rn+1;
 			end
 			mi = mi + 1;
 		end
-	end	
+	end
 	return true;
 end
 
 local function item_equal(item1, item2)
-	return item1.rule_id == item2.rule_id 
-			and item1.pos == item2.pos 
+	return item1.rule_id == item2.rule_id
+			and item1.pos == item2.pos
 			and item1.forward_id == item2.forward_id;
 end
 
@@ -480,13 +497,13 @@ local function itemset_equal(iset1, iset2)
 	if(table.getn(iset1) ~= table.getn(iset2)) then
 		return false;
 	end
-	
+
 	for i = 1, table.getn(iset1) do
 		if(not item_equal(iset1[i], iset2[i])) then
 			return false;
 		end
 	end
-	
+
 	return true;
 end
 
@@ -505,32 +522,32 @@ function syntax_gen:calc_closure(items)
 	-- closure output
 	local citems = {
 	};
-	
+
 	local queue = {};
-	
+
 	-- copy tne kernel items to result set
 	for i, item in ipairs(items) do
 		if(item.rule_id == self.begin_rule_id or item.pos > 1) then
 			-- copy the item content
-			local ki = { 
+			local ki = {
 				rule_id = item.rule_id,
 				pos = item.pos,
 				forward_id = item.forward_id,
 			};
-			
+
 			citems[table.getn(citems) + 1] =  ki;
 			queue[table.getn(queue) + 1] = ki;
 		end
 	end
-	
-	
+
+
 	while(queue[1]) do
 		local qitem = queue[1];
 		table.remove(queue, 1);
-		
+
 		local rule = self.rules[qitem.rule_id];
 		local next_token_id = rule.tokens[qitem.pos];
-		
+
 		if(next_token_id) then
 			local token = self.tokens[next_token_id]
 			if(not token.is_term) then
@@ -544,23 +561,23 @@ function syntax_gen:calc_closure(items)
 						};
 						if(not find_item(citems, newitem)) then
 							citems[table.getn(citems) + 1] =  newitem;
-							queue[table.getn(queue) + 1] = newitem; 
+							queue[table.getn(queue) + 1] = newitem;
 						end
 					end
 				end
 			end
 		end
 	end
-	
+
 	table.sort(citems, item_less);
-	
+
 	return citems;
 end
 
 
 function syntax_gen:calc_goto(items, tid)
 	local next_set = {};
-	
+
 	for i, v in ipairs(items) do
 		local rule = self.rules[v.rule_id];
 		if(rule.tokens[v.pos] == tid) then
@@ -573,7 +590,7 @@ function syntax_gen:calc_goto(items, tid)
 	end
 
 	table.sort(next_set, item_less);
-	
+
 	return next_set;
 end
 
@@ -587,7 +604,7 @@ function syntax_gen:rule2str(rid, n)
 	for i, t in ipairs(r.tokens) do
 		str = str..' '..self:token2str(t);
 	end
-	
+
 	if(n) then
 		str = str..'(rule:'..tostring(n)..')';
 	end
@@ -644,27 +661,27 @@ function syntax_gen:calc_cluster()
 		items = {},
 		gotos = {},
 	};
-	
+
 	local cid = 1;
-	
+
 	-- add the primary item : S'-> . S, $
-	itemset.items[1] = { 
+	itemset.items[1] = {
 		rule_id = self.begin_rule_id,
 		pos = 1,
 		forward_id = self.eof_token_id,
 	};
-	
+
 	itemset.id = cid;
 	cid = cid + 1;
-	
+
 	self.cluster[table.getn(self.cluster)+1] = itemset;
-	
+
 	--print('first itemset: ');
 	--print_table(itemset);
-	
+
 	-- loop for all item clusters, calc closure(c), goto(c)
 	local queue = { itemset };
-		
+
 	while(queue[1]) do
 		local iset = queue[1];
 		table.remove(queue, 1);
@@ -688,7 +705,7 @@ function syntax_gen:calc_cluster()
 				end
 				iset.gotos[token_id] = nsetex;
 			end
-		end	
+		end
 	end
 	--print('>>>>>>>>>>>>>>>>>>>>>>>>> dump cluster begin:');
 	--print_table(self.cluster);
@@ -744,7 +761,7 @@ function syntax_gen:first_of(tokens)
 	for _, ttt in ipairs(tokens) do sss = sss..(ttt==-1 and '#' or self:token2str(ttt))..' '; end
 	sss = sss..') = '
 	for ttt,_ in pairs(tks) do sss = sss..(ttt==-1 and '#' or self:token2str(ttt))..' '; end
-	print(sss);	
+	print(sss);
 	--]]
 	return tks, bn;
 end
@@ -755,15 +772,15 @@ function syntax_gen:lr1_closure(iset)
 	local queue = {};
 	for i, v  in ipairs(iset) do
 		queue[table.getn(queue)+1] = v;
-	end	
-	
+	end
+
 	while(queue[1]) do
 		local qitem = queue[1];
 		table.remove(queue, 1);
 
 		local rule = self.rules[qitem.rule_id];
 		local next_token_id = rule.tokens[qitem.pos];
-		
+
 		if next_token_id then
 			local token = self.tokens[next_token_id];
 			-- only for non-terminator
@@ -774,9 +791,9 @@ function syntax_gen:lr1_closure(iset)
 					tokens[table.getn(tokens)+1] = rule.tokens[n];
 				end
 				tokens[table.getn(tokens)+1] = qitem.forward_id;
-				
+
 				local ftks, can_be_nil = self:first_of(tokens);
-				
+
 				for rule_id, rule  in ipairs(self.rules) do
 					if(rule.leader == next_token_id) then
 						for forward_id, _ in pairs(ftks) do
@@ -801,7 +818,7 @@ end
 function syntax_gen:calc_forward()
 	while(true) do
 		local changed = false;
-		
+
 		for n, isetex in ipairs(self.cluster) do
 			for m, item in ipairs(isetex.items) do
 				if item.forward_id > 0 and (item.rule_id == self.begin_rule_id or item.pos > 1) then
@@ -814,7 +831,7 @@ function syntax_gen:calc_forward()
 						kitem,
 					};
 					self:lr1_closure(kset);
-					
+
 					for k, kitem in ipairs(kset) do
 						if(kitem.forward_id > 0) then
 							local rule = self.rules[kitem.rule_id];
@@ -833,7 +850,7 @@ function syntax_gen:calc_forward()
 								end
 							end
 						else
-							-- 
+							--
 							local rule = self.rules[kitem.rule_id];
 							local ntk = rule.tokens[kitem.pos];
 							if(ntk) then
@@ -849,13 +866,13 @@ function syntax_gen:calc_forward()
 									changed = true;
 								end
 							end
-							
+
 						end
 					end
 				end
 			end
 		end
-		
+
 		if not changed then
 			break;
 		end
@@ -868,9 +885,9 @@ function syntax_gen:calc_forward()
 				table.remove(isetex.items, m);
 			end
 		end
-	end	
+	end
 	--self:dump_cluster();
-	
+
 	return true;
 end
 
@@ -888,7 +905,7 @@ function syntax_gen:calc_lalr_table(tout)
 		--local kitems = {};
 		--for m, item in ipairs(iset.items) do
 		--	kitems[m] = item;
-		--end 
+		--end
 
 		self:lr1_closure(iset.items);
 
@@ -919,28 +936,28 @@ function syntax_gen:calc_lalr_table(tout)
 			end
 		end
 	end
-	
+
 	-- add 'eof';
 	if(not term_chk[self.eof_token_id]) then
 		term_chk[self.eof_token_id] = table.getn(term_ids)+1;
 		term_ids[table.getn(term_ids)+1] = self.eof_token_id;
 	end
-	
+
 	-- warning then unused rule, token.
 	--
-	
+
 	-- calc action table and goto table
 	tout.state_count = table.getn(self.cluster);
 	tout.term_count = table.getn(term_ids);
 	tout.non_term_count = table.getn(non_term_ids);
 	tout.rule_count = table.getn(rule_ids);
-	
+
 	tout.term_str = {};
 	tout.non_term_str = {};
 	tout.rule_str = {};
 	tout.term_idx = {};
 	tout.rule_handle = {};
-	
+
 	for n, id in ipairs(term_ids) do
 		tout.term_str[n] = self:token2str(id);
 		tout.term_idx[self.tokens[id].name] = n;
@@ -952,17 +969,17 @@ function syntax_gen:calc_lalr_table(tout)
 		tout.rule_str[n] = self:rule2str(id, n);
 		tout.rule_handle[n] = self.rules[id].func;
 	end
-	
+
 	-- sort the cluster
-	table.sort(self.cluster, 
+	table.sort(self.cluster,
 		function(a, b)
 			return a.id < b.id;
 		end);
-		
+
 	-- action and goto table
 	local actions = {};
 	tout.goto_table = {};
-	
+
 	for n, iset in ipairs(self.cluster) do
 		actions[iset.id] = {};
 		for m, item in ipairs(iset.items) do
@@ -996,14 +1013,50 @@ function syntax_gen:calc_lalr_table(tout)
 							..'    reduce use rule '..rule_chk[item.rule_id]..' according item: '..self:item2str(item)..'\n'
 							..'    reduce use rule '..actions[iset.id][t_index].rule..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n';
 					elseif (actions[iset.id][t_index].action == ACTION_SHIFT) then
-						return false, 'at state '..iset.id..': shift-reduce confliction: \n'
-							..'    shift and got state '..actions[iset.id][t_index].state..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n'
-							..'    reduce use rule '..rule_chk[item.rule_id]..' according item: '..self:item2str(item)..'\n';						
+						local ro = self.rules[actions[iset.id][t_index].item.rule_id];
+						local rn = self.rules[item.rule_id];
+						local nact = 'error';
+						if(ro.priority and rn.priority) then
+							if(ro.priority[1] < rn.priority[1]) then
+								-- old with higher priority, do nothing,  keep shift action
+								nact = 'shift';
+							elseif ro.priority[1] > rn.priority[1] then
+								-- old with lower priority, instead old action, do reduce action
+								nact = 'reduce';
+							else
+								if((ro.priority[2] or 'left') == (rn.priority[2] or 'left')) then
+									if( not ro.priority[2] or ro.priority[2] == 'left') then
+										-- left combine, do reduce
+										nact = 'reduce';
+									else
+										nact = 'shift';
+									end
+								else
+									return false, 'at state '..iset.id..': rule priority define confliction(same priority level, but differnt combine character): \n'
+											..'    shift and got state '..actions[iset.id][t_index].state..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n'
+											..'    reduce use rule '..rule_chk[item.rule_id]..' according item: '..self:item2str(item)..'\n';
+								end
+							end
+						end
+						if(nact == 'reduce') then
+							actions[iset.id][t_index] = {
+								action = ACTION_REDUCE,
+								rule = rule_chk[item.rule_id],
+								item = item,
+							};
+						elseif(nact == 'shift') then
+							-- keep the old shift action
+						else
+							-- confliction
+							return false, 'at state '..iset.id..': shift-reduce confliction: \n'
+									..'    shift and got state '..actions[iset.id][t_index].state..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n'
+									..'    reduce use rule '..rule_chk[item.rule_id]..' according item: '..self:item2str(item)..'\n';
+						end
 					else
 						--print_table(actions[iset.id][t_index]);
 						return false, 'internal error at reduce confliction at state '..iset.id..', item: '..self:item2str(item)..'.';
 					end
-					
+
 				end
 			else
 				-- shift action
@@ -1011,7 +1064,7 @@ function syntax_gen:calc_lalr_table(tout)
 				local tid = rule.tokens[item.pos];
 				local token = self.tokens[tid];
 				local nextiset = iset.gotos[tid];
-				
+
 				if (token.is_term) then
 					local t_index = term_chk[tid];
 					--print(iset.id, t_index, 'shift', nextiset.id, self:item2str(item));
@@ -1022,11 +1075,53 @@ function syntax_gen:calc_lalr_table(tout)
 							item = item,
 						};
 					elseif (actions[iset.id][t_index].action == ACTION_REDUCE) then
-						return false, 'at state '..iset.id..': shift-reduce confliction: \n'
-							..'    shift and got state '..nextiset.id..' according item: '..self:item2str(item)..'\n'
-							..'    reduce use rule '..actions[iset.id][t_index].rule..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n';						
+						local ro = self.rules[actions[iset.id][t_index].item.rule_id];
+						local rn = self.rules[item.rule_id];
+						local nact = 'error';
+						if(ro.priority and rn.priority) then
+							if(ro.priority[1] < rn.priority[1]) then
+								-- old with higher priority, do nothing,  keep  action
+								nact = 'reduce';
+							elseif ro.priority[1] > rn.priority[1] then
+								-- old with lower priority, instead old action, do shift action
+								nact = 'shift';
+							else
+								if((ro.priority[2] or 'left') == (rn.priority[2] or 'left')) then
+									if( not ro.priority[2] or ro.priority[2] == 'left') then
+										-- left combine, do reduce
+										nact = 'reduce';
+									else
+										nact = 'shift';
+									end
+								else
+									return false, 'at state '..iset.id..': rule priority define confliction(same priority level, but differnt combine character): \n'
+										..'    shift and got state '..nextiset.id..' according item: '..self:item2str(item)..'\n'
+										..'    reduce use rule '..actions[iset.id][t_index].rule..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n';
+								end
+							end
+						end
+
+						if(nact == 'reduce') then
+							-- keep old reduce
+						elseif(nact == 'shift') then
+							actions[iset.id][t_index] = {
+								action = ACTION_SHIFT,
+								state = nextiset.id,
+								item = item,
+							};
+						else
+							-- confliction
+							return false, 'at state '..iset.id..': shift-reduce confliction: \n'
+								..'    shift and got state '..nextiset.id..' according item: '..self:item2str(item)..'\n'
+								..'    reduce use rule '..actions[iset.id][t_index].rule..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n';
+						end
 					elseif (actions[iset.id][t_index].action == ACTION_SHIFT) then
 						-- shift according another item..
+						if(actions[iset.id][t_index].state ~= nextiset.id) then
+							return false, 'internal error at state '..iset.id..': shift-shift confliction: \n'
+								..'    shift and got state '..nextiset.id..' according item: '..self:item2str(item)..'\n'
+								..'    shift and got state '..actions[iset.id][t_index].state..' according item: '..self:item2str(actions[iset.id][t_index].item)..'\n';
+						end
 					end
 				else
 					local t_index = non_term_chk[tid];
@@ -1037,7 +1132,7 @@ function syntax_gen:calc_lalr_table(tout)
 			end
 		end
 	end
-	
+
 	--- dump actions
 	if(self.tracefunc) then
 		self.tracefunc('terminators:');
@@ -1045,7 +1140,7 @@ function syntax_gen:calc_lalr_table(tout)
 			self.tracefunc(n..': '..self:token2str(tid));
 		end
 		self.tracefunc('');
-		
+
 		self.tracefunc('non-terminators:');
 		for n, tid in ipairs(non_term_ids) do
 			self.tracefunc(n..': '..self:token2str(tid));
@@ -1079,7 +1174,7 @@ function syntax_gen:calc_lalr_table(tout)
 				end
 			end
 			self.tracefunc('');
-			
+
 			for m, tid in ipairs(non_term_ids) do
 				local g_index = iset.id * tout.non_term_count + m
 				if(tout.goto_table[g_index]) then
@@ -1090,10 +1185,10 @@ function syntax_gen:calc_lalr_table(tout)
 			self.tracefunc('');
 		end
 	end
-	
+
 	-- calc action table
 	tout.action_table = {};
-	
+
 	for st, t in pairs(actions) do
 		for tid, act in pairs(t) do
 			local a_index = st * tout.term_count + tid;
@@ -1105,8 +1200,8 @@ function syntax_gen:calc_lalr_table(tout)
 				tout.action_table[a_index] = act.rule * 4 + ACTION_ACCEPT;
 			end
 		end
-	end	
-	
+	end
+
 	-- push and pop table
 	tout.push_table = {};
 	tout.pop_table = {};
@@ -1114,7 +1209,7 @@ function syntax_gen:calc_lalr_table(tout)
 		tout.push_table[n] = self.rules[rid].leader;
 		tout.pop_table[n] = table.getn(self.rules[rid].tokens);
 	end
-	
+
 	if(self.tracefunc) then
 		self.tracefunc("action table:");
 		for st = 1, tout.state_count do
@@ -1124,7 +1219,7 @@ function syntax_gen:calc_lalr_table(tout)
 				str = str..string.format("%4d, ", tout.action_table[index_i + tr] or 0);
 			end
 			self.tracefunc(str);
-		end	
+		end
 		self.tracefunc("goto table:");
 		for st = 1, tout.state_count do
 			local index_i = tout.non_term_count * st;
@@ -1133,7 +1228,7 @@ function syntax_gen:calc_lalr_table(tout)
 				str = str..string.format("%4d, ", tout.goto_table[index_i + tr] or -1);
 			end
 			self.tracefunc(str);
-		end	
+		end
 		self.tracefunc("push table:");
 		for n, v in ipairs(tout.push_table) do
 			self.tracefunc(v);
@@ -1146,15 +1241,17 @@ function syntax_gen:calc_lalr_table(tout)
 	return true;
 end
 
+
 -- generate the lalr analyse table
 function syntax_gen:generate(g, tout)
 	-- parse the rules and elements
-	
+
 	local f, serr;
 	local non_terms = {};
-	
-	f,serr = self:check_grammar(g);
-	
+
+	--f,serr = self:check_grammar(g);
+	f = true;
+
 	if(f) then
 		f,serr = self:add_all_non_term(g, non_terms);
 	end
@@ -1164,7 +1261,7 @@ function syntax_gen:generate(g, tout)
 	if(f) then
 		f,serr = self:add_all_rule(g);
 	end
-	
+
 	--print_table(self.tokens);
 	--print_table(self.rules);
 	if(f) then
@@ -1178,9 +1275,9 @@ function syntax_gen:generate(g, tout)
 	end
 
 	if(not f) then
-		return 	false, serr;
+		return  false, serr;
 	end
-	
+
 	return true;
 end
 
@@ -1193,22 +1290,26 @@ function syntax_priv:trace(...)
 end
 
 function syntax_priv:init(g)
+	local f, serr;
+	f, serr = check_grammar(g);
+	if(not f) then
+		return f, serr;
+	end
+
 	local gen = syntax_gen:create();
 	if( not gen) then
 		return false, 'error create lalr syntax generator.';
 	end
-	
-	gen.tracefunc = g.trace;
-	
-	local f, serr;
 
-	-- generate the lalr syntax analyser table		
+	gen.tracefunc = g.trace;
+
+	-- generate the lalr syntax analyser table
 	f, serr = gen:generate(g, self);
-	
+
 	if(not f) then
 		return false,serr;
 	end
-	
+
 	return true;
 end
 
@@ -1230,24 +1331,24 @@ function syntax_priv:parse(lexfunc)
 	local cur_state = 1;  -- initialize state
 	local state_stack = {};
 	local state_stack_cnt = 0;
-	
+
 	local token_stack = {};
 	local token_stack_cnt = 0;
-	
+
 	-- push init state
 	state_stack_cnt = state_stack_cnt + 1;
 	state_stack[state_stack_cnt] = cur_state;
-	
+
 	if(self.tracefunc) then
 		self.tracefunc('init state : '..cur_state);
 		self.tracefunc('get next input token...');
 	end
 	local tokentype, token = lexfunc();
-	
+
 	if(not tokentype) then
 		return nil, token; -- token is error message
 	end
-	
+
 	while ( true ) do
 		cur_state = state_stack[state_stack_cnt];
 		if(self.tracefunc) then
@@ -1256,27 +1357,27 @@ function syntax_priv:parse(lexfunc)
 		end
 		local tokid = self.term_idx[tokentype];
 		if(not tokid) then
-			return nil, 'unknown input terminator type: \''..tokentype..'\'.'; 
+			return nil, 'unknown input terminator type: \''..tokentype..'\'.';
 		end
 		if(self.tracefunc) then
 			self.tracefunc('cur input : '..tokid..'('..self.term_str[tokid]..')', token);
 		end
 		local action = self.action_table[self.term_count * cur_state + tokid];
-	
-		local ok;	
+
+		local ok;
 		if(action) then
 			local ac  = action % 4;
 			local acid = math.floor(action/4);
 			if(self.tracefunc) then
 				self.tracefunc('action('..action..') : '..ac..', '..acid);
 			end
-			
+
 			if (ac == ACTION_SHIFT) then
-				-- push 
+				-- push
 				token_stack_cnt = token_stack_cnt + 1;
 				token_stack[token_stack_cnt] = { is_term = true, id = tokid, token = token };
 				state_stack_cnt = state_stack_cnt + 1;
-				state_stack[state_stack_cnt] = acid; 
+				state_stack[state_stack_cnt] = acid;
 				if(self.tracefunc) then
 					self.tracefunc(string.format("shift %d(%s), goto state: %d", tokid, self.term_str[tokid], acid));
 				end
@@ -1311,25 +1412,25 @@ function syntax_priv:parse(lexfunc)
 					end
 					return nil, serr;
 				end
-				
+
 				-- goto
 				cur_state = state_stack[state_stack_cnt];
 				local push = self.push_table[acid];
 				cur_state = self.goto_table[cur_state * self.non_term_count + push];
-				
+
 				token_stack_cnt = token_stack_cnt + 1;
 				token_stack[token_stack_cnt] = { is_term = false, id = push, token = r_token };
 				state_stack_cnt = state_stack_cnt + 1;
-				state_stack[state_stack_cnt] = cur_state; 
+				state_stack[state_stack_cnt] = cur_state;
 
 				if(self.tracefunc) then
 					self.tracefunc(string.format('push: %d(%s), goto state %d', push, self.non_term_str[push], cur_state));
 				end
-				
+
 			elseif (ac == ACTION_ACCEPT) then
 				if(self.tracefunc) then
 					self.tracefunc("accept.");
-					self.tracefunc(string.format("last state: %d. last elem: %d(%s)", state_stack[state_stack_cnt], 
+					self.tracefunc(string.format("last state: %d. last elem: %d(%s)", state_stack[state_stack_cnt],
 					token_stack[token_stack_cnt].id, self.non_term_str[token_stack[token_stack_cnt].id]));
 				end
 				return token_stack[token_stack_cnt].token;
@@ -1360,15 +1461,16 @@ function syntax_priv:parse(lexfunc)
 
 			return nil, 'unexpected input token '.. self.term_str[tokid]..', expected: '..expected;
 		end
-		
+
 	end
-	
+
 	return nil, 'internal parser error.';
 end
 
 
 
 function syntax_create(grammar)
+
 	local y = {
 		term_count = 0,
 		non_term_count = 0,
@@ -1381,44 +1483,45 @@ function syntax_create(grammar)
 		goto_table = {},
 		pop_table = {},
 		push_table = {},
-		
+
 		rule_handle = {},
-	
-		--  the term, non-term, rule string, for to print trace info and output error msg. 
+
+		--  the term, non-term, rule string, for to print trace info and output error msg.
 		term_str = {},
 		non_term_str = {},
 		rule_str = {},
-		
+
 		term_idx = {},
-		
+
 		-- map the terminator string to term id
 		term_map = {},
 		-- map the non-terminator string to non-term id
 		non_term_map = {},
-	
+
 		-- trace function
-		tracefunc = grammar.trace,	
+		-- tracefunc = grammar.trace, -- moves to after inited
 	};
-	
-	
+
+
 	setmetatable(y, syntax_priv);
 
-	
+
 	local f, serr = y:init(grammar);
-	
+
 	if not f then
 		return nil, serr;
 	end
-	
+
 	local y_itf = {
 		parse = function (lexfunc) return y:parse(lexfunc); end,
-		
+
 		-- for temp user data store
 		ud = {},
 	};
-	
+
 	y.usercallback = y_itf;
-	
+	y.tracefunc = grammar.trace;
+
 	return  y_itf;
 end
 
