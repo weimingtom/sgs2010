@@ -17,6 +17,7 @@ local lex_priv = {
 	lock_token_linecol_cnt = 0,
 	errstr = "",
 	iserror = false,
+	iseof = false,
 	curpattern = nil,
 	patternstack = { count = 0 },
 };
@@ -62,19 +63,19 @@ function lex_priv:next()
 	end
 	
 	-- eof ?
-	if(self.tokentype == 'eof') then
+	if(self.iseof ) then
 		return self.tokentype, self.token;
 	end
 	
 	if(self.code == '') then
 		if(self.curpattern.checkeof) then
-			local f, serr = self.curpattern.checkeof(self.usercallback);
-			if(not f ) then
-				self:error(serr);
+			self.curpattern.checkeof(self.usercallback);
+			if( self.iserror ) then
 				return nil, self.errstr;
 			end
 		end
-		self.tokentype = 'eof';
+		self.iseof = true;
+		self.tokentype = self.curpattern.eof or 'eof';
 		self.token = nil;
 		return self.tokentype, self.token;
 	end
@@ -150,9 +151,9 @@ function lex_priv:next()
 		if (tv[2]) then
 			rtt, rtk = tv[2](self.usercallback, ttk, tv1, tv2,tv3,tv4,tv5,tv6,tv7,tv8,tv9);
 			self:trace(' * call lex function return : \"'..tostring(rtt)..'", '..tostring(rtk));
-			if(rtt == 'eof') then
-				self:trace('Warning: pattern handle function return \'eof\', the remain code will not be processed!');
-			end
+			--if(rtt == 'eof') then
+			--	self:trace('Warning: pattern handle function return \'eof\', the remain code will not be processed!');
+			--end
 		else
 			rtt = nil;
 			rtk = nil;
@@ -262,8 +263,8 @@ end
 
 function lex_create(name, code, pattern)
 	local lex = {
-		name = name,
-		code = code,
+		name = name ~= nil and tostring(name) or '',
+		code = code ~= nil and tostring(code) or '',
 		curpattern = pattern,
 		tracefunc = pattern.trace,
 	};
@@ -285,7 +286,7 @@ function lex_create(name, code, pattern)
 		curpattern = function() return lex.curpattern; end,
 		name = function() return lex.name; end,
 		code = function() return lex.code; end,
-		eof = function() return lex.tokentype=='eof'; end,
+		iseof = function() return lex.iseof; end,
 		fail = function() return lex.iserror; end,
 		trace = function(...) return lex:trace(unpack(arg)); end,
 		
