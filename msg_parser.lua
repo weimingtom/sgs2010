@@ -57,9 +57,11 @@ local lex_pattern_str = {
 };
 
 local keywords = {
-	'const', 'typedef', 'enum', 'bitdef', 'record', 'caseof', 'endof', 'endif', 'countof', 
-	'supper', 'this', 'fields', 'false', 'true', 'null', 'uint32', 'int32', 'uint16', 'int16',
-	'uint8', 'int8', 'uint64', 'int64', 'not', 'and', 'or', 'xor', 'bnot', 'band', 'bor', 'bxor',
+	'define', 'typedef', 'enum', 'bitdef', 'record', 'caseof', 'endof', 'endif', 'countof', 
+	--'supper', 'this', 'fields', 
+	'false', 'true', 'null', 
+	'uint32', 'int32', 'uint16', 'int16', 'uint8', 'int8', 'uint64', 'int64',
+	'not', 'and', 'or', 'xor', 'bnot', 'band', 'bor', 'bxor',
 };
 
 local keywords_chk = {};
@@ -145,12 +147,35 @@ end
 
 
 local syntax_pattern = {
+	-- program
+	{ 'program',
+		{ { 'expression', }, function(s, a) return  a; end}, 
+	},
 	-- expression
 	{ 'expression', 
-		{ { 'expression', '[', 'expression', ']', priority={1, 'left'}, }, function(s, a, b, c, d) return syntax_expr_index(s, a, c); end, },
-		{ { 'expression', '.', 'sym',             priority={1, 'left'}, }, function(s, a, b, c   ) return syntax_expr_member(s, a, c); end, },
-		{ { 'expression', '(', 'optarglist', ')', priority={1, 'left'}, } ,function(s, a, b, c, d) return syntax_expr_call(s, a, c); end, },
+		{ { 'sym', },   function(s,a) return { op = 'ref', name=a}; end, },
+		{ { 'num', },   function(s,a) return { op = 'num', val=a}; end, },
+		{ { 'true', },  function(s,a) return { op = 'bool', val=true}; end, },
+		{ { 'false', }, function(s,a) return { op = 'bool', val=false}; end, },
+		{ { 'null', },  function(s,a) return { op = 'null'}; end, },
+		{ { '(', 'expression', ')', }, function(s,a, b, c) return b; end, },
+		{ { 'expression', '[', 'expression', ']', priority={1, 'left'}, }, 
+			function(s, a, b, c, d) return syntax_expr_index(s, a, c); end, },
+		{ { 'expression', '.', 'sym',             priority={1, 'left'}, }, 
+			function(s, a, b, c   ) return syntax_expr_member(s, a, c); end, },
+		{ { 'expression', '(', 'optarglist', ')', priority={1, 'left'}, } ,
+			function(s, a, b, c, d) return syntax_expr_call(s, a, c); end, },
 	},
+	-- macro
+	{ 'macro_field'
+		{ { '{', 'optname', ':', 'caseof', '(', 'reference', ')' , ':' 'case_body', '}' },
+			function(s, a,b,c,d,e,f,g,h,i,j) return { op='caseof', name=b, ref=f, tb=i}; end, },
+		{ { '{', ':', 'define', '(', 'sym', ')', ':', 'expression', '}', },
+			function(s, a,b,c,d,e,f,g,h,i) return { op='define', name=e, val=h}; end, },
+	},
+	
+	start = 'program',
+	trace = print,
 };
 
 
@@ -165,7 +190,15 @@ function main(fname)
 	local code = fin:read("*a");
 	
 	local l = lex_create(fname, code, lex_pattern);
+	
+	local syntax, err = syntax_create(syntax_pattern);
 
+	if(not syntax) then
+		print(err);
+		return nil;
+	end
+
+--[[
 	while(not l.iseof() and not l.fail()) do
 		local tt, tk = l.next();
 		if(tt) then
@@ -174,8 +207,15 @@ function main(fname)
 			print(l.name()..'('..l.curline()..') col '..l.curcol()..': '..l.errstr());
 		end
 	end
-		
-	
+--]]
+
+	local tree, serr = syntax.parse(function() return l.next(); end);
+	if(tree) then
+		print_table(tree);
+	else
+		print(l.name()..'('..l.tokenline()..') col '..l.tokencol()..': '..serr);
+	end
+
 end
 
 
