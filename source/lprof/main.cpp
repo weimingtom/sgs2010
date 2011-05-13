@@ -30,8 +30,8 @@ extern "C" {
 #endif
 
 
-void create_ui();
-void close_ui();
+static void create_ui();
+static void close_ui();
 
 
 struct ProfStat;
@@ -57,8 +57,8 @@ struct ProfStat {
 	ProfStatMap  children;
 };
 
-FuncInfoMap  s_funcs;
-ProfStat   s_root_stat;
+static FuncInfoMap  s_funcs;
+static ProfStat   s_root_stat;
 
 
 static void clear_stats(struct ProfStat* stat)
@@ -122,8 +122,12 @@ static void lprof_hook_callret(lua_State* L, lua_Debug* ar)
 		{
 			int n = lua_gettop(L);
 			printf("%p:%s\n", lua_tostring(L, -n-1), lua_typename(L,lua_type(L, -n-1)));
-			FuncInfo  fi;
-			fi.pv = lua_topointer(L, -n-1);
+			const void* pv = lua_topointer(L, -n-1);
+			FuncInfoMap::iterator it = s_funcs.find(pv);
+			if(it == s_funcs.end())
+			{
+
+			}
 		}
 		printf("%ld.%03d: lua function `%s' is begin called(at %s: %d).\n", 
 			sec, msec, ar->name, ar->short_src, ar->currentline);
@@ -192,9 +196,13 @@ extern "C" __declspec(dllexport) int luaopen_lprof(lua_State* L)
 
 
 
+
+
 HINSTANCE  g_hInst;
 HANDLE     g_uiThread;
 HWND       g_uiDlg;
+
+
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -206,20 +214,21 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		g_uiDlg = NULL;		
 		break;
 	case DLL_PROCESS_DETACH:
-		close_ui();
+		//close_ui();
 		break;
 	}
 	return TRUE;
 }
 
+static VOID UI_OnSize(HWND hDlg, int cx, int cy, int nSizeType);
 
-
-VOID UI_OnInitDialog(HWND hDlg)
+static VOID UI_OnInitDialog(HWND hDlg)
 {
 	RECT  rc;
 	GetWindowRect(hDlg, &rc);
 	HWND hTab = GetDlgItem(hDlg, IDC_TAB);
 
+	// init tab ctrl
 	TCITEM  tcitem;
 	ZeroMemory(&tcitem, sizeof(tcitem));
 
@@ -233,71 +242,135 @@ VOID UI_OnInitDialog(HWND hDlg)
 
 	SendMessage(hTab, TCM_SETCURSEL, (WPARAM)0, (LPARAM)0);
 
-
 	HWND hLstCallStack = GetDlgItem(hDlg, IDC_LST_CALLSTACK);
+	HWND hTreeProf = GetDlgItem(hDlg, IDC_TREE_PROF);
+	HWND hLstStat = GetDlgItem(hDlg, IDC_LST_STAT);
+
+	// init callstack list ctrl
+	DWORD  dwlvextstyle = LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_HEADERDRAGDROP|LVS_EX_INFOTIP;
+
+	LVCOLUMN  lvcol;
+	ZeroMemory(&lvcol, sizeof(lvcol));
+
+	lvcol.mask = LVCF_FMT|LVCF_WIDTH|LVCF_TEXT;
+	lvcol.fmt = LVCFMT_LEFT;
+	lvcol.cx = 32;
+	lvcol.pszText = (LPTSTR)_T("");
+	::SendMessage(hLstCallStack, LVM_INSERTCOLUMN, (WPARAM)0, (LPARAM)&lvcol);
+	lvcol.cx = 320;
+	lvcol.pszText = (LPTSTR)_T("Function:");
+	::SendMessage(hLstCallStack, LVM_INSERTCOLUMN, (WPARAM)1, (LPARAM)&lvcol);
+	lvcol.cx = 64;
+	lvcol.pszText = (LPTSTR)_T("Language");
+	::SendMessage(hLstCallStack, LVM_INSERTCOLUMN, (WPARAM)2, (LPARAM)&lvcol);
+	::SendMessage(hLstCallStack, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)dwlvextstyle, (LPARAM)dwlvextstyle);
+
+	TVINSERTSTRUCT  tvins;
+	ZeroMemory(&tvins, sizeof(tvins));
+	tvins.hParent = TVI_ROOT;
+	tvins.hInsertAfter = TVI_LAST;
+	tvins.item.mask = TVIF_TEXT|TVIF_STATE;	
+	tvins.item.state = TVIS_BOLD;
+	tvins.item.stateMask = TVIS_BOLD;
+	tvins.item.pszText = (LPTSTR)_T("Root");
+	::SendMessage(hTreeProf, TVM_INSERTITEM, (WPARAM)0, (LPARAM)&tvins);
+
+
+	// init stat list ctrl
+	//LVCOLUMN  lvcol;
+	ZeroMemory(&lvcol, sizeof(lvcol));
+
+	lvcol.mask = LVCF_FMT|LVCF_WIDTH|LVCF_TEXT;
+	lvcol.fmt = LVCFMT_LEFT;
+	lvcol.cx = 32;
+	lvcol.pszText = (LPTSTR)_T("");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)0, (LPARAM)&lvcol);
+	lvcol.cx = 180;
+	lvcol.pszText = (LPTSTR)_T("Function");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)1, (LPARAM)&lvcol);
+	lvcol.fmt = LVCFMT_RIGHT;
+	lvcol.cx = 80;
+	lvcol.pszText = (LPTSTR)_T("Count");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)2, (LPARAM)&lvcol);
+	lvcol.fmt = LVCFMT_RIGHT;
+	lvcol.cx = 80;
+	lvcol.pszText = (LPTSTR)_T("Time");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)3, (LPARAM)&lvcol);
+	lvcol.fmt = LVCFMT_RIGHT;
+	lvcol.cx = 80;
+	lvcol.pszText = (LPTSTR)_T("Average");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)4, (LPARAM)&lvcol);
+	lvcol.cx = 80;
+	lvcol.pszText = (LPTSTR)_T("Max Time");
+	::SendMessage(hLstStat, LVM_INSERTCOLUMN, (WPARAM)5, (LPARAM)&lvcol);
+	::SendMessage(hLstStat, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)dwlvextstyle, (LPARAM)dwlvextstyle);
+
+
+
 	SetParent(hLstCallStack, hTab);
 	ShowWindow(hLstCallStack, SW_SHOW);
 
-	HWND hTreeProf = GetDlgItem(hDlg, IDC_TREE_PROF);
 	SetParent(hTreeProf, hTab);
 	ShowWindow(hTreeProf, SW_HIDE);
 
 
-	HWND hLstStat = GetDlgItem(hDlg, IDC_LST_STAT);
 	SetParent(hLstStat, hTab);
 	ShowWindow(hLstStat, SW_HIDE);
 
+	UI_OnSize(hDlg, rc.right-rc.left, rc.bottom-rc.top, 0);
 }
 
 
-VOID UI_OnSize(HWND hDlg, int cx, int cy, int nSizeType)
+static VOID UI_OnSize(HWND hDlg, int cx, int cy, int nSizeType)
 {
 	if(IsWindow(hDlg))
 	{
-		HDWP hDWP = BeginDeferWindowPos(10);
+		//HDWP hDWP = BeginDeferWindowPos(10);
 		RECT  rcDisp;
 		GetClientRect(hDlg, &rcDisp);
 		HWND hTab = GetDlgItem(hDlg, IDC_TAB);
 		//MoveWindow(hTab, rcDisp.left, rcDisp.top, rcDisp.right-rcDisp.left, rcDisp.bottom-rcDisp.top, TRUE);
-		hDWP = DeferWindowPos(hDWP, hTab, NULL, rcDisp.left, rcDisp.top, 
+		SetWindowPos(hTab, NULL, rcDisp.left, rcDisp.top, 
 			rcDisp.right-rcDisp.left, rcDisp.bottom-rcDisp.top, SWP_NOOWNERZORDER|SWP_NOACTIVATE);
-		SendMessage(hTab, TCM_ADJUSTRECT, (WPARAM)TRUE, (LPARAM)&rcDisp);
-		HWND hLstCallStack = GetDlgItem(hDlg, IDC_LST_CALLSTACK);
-		HWND hTreeProf = GetDlgItem(hDlg, IDC_TREE_PROF);
-		HWND hLstStat = GetDlgItem(hDlg, IDC_LST_STAT);
-		hDWP = DeferWindowPos(hDWP, hLstCallStack, NULL, rcDisp.left, rcDisp.top, 
+		SendMessage(hTab, TCM_ADJUSTRECT, (WPARAM)FALSE, (LPARAM)&rcDisp);
+		HWND hLstCallStack = GetDlgItem(hTab, IDC_LST_CALLSTACK);
+		HWND hTreeProf = GetDlgItem(hTab, IDC_TREE_PROF);
+		HWND hLstStat = GetDlgItem(hTab, IDC_LST_STAT);
+		SetWindowPos(hLstCallStack, NULL, rcDisp.left, rcDisp.top, 
 			rcDisp.right-rcDisp.left, rcDisp.bottom-rcDisp.top, SWP_NOOWNERZORDER|SWP_NOACTIVATE);
-		hDWP = DeferWindowPos(hDWP, hTreeProf, NULL, rcDisp.left, rcDisp.top, 
+		SetWindowPos(hTreeProf, NULL, rcDisp.left, rcDisp.top, 
 			rcDisp.right-rcDisp.left, rcDisp.bottom-rcDisp.top, SWP_NOOWNERZORDER|SWP_NOACTIVATE);
-		hDWP = DeferWindowPos(hDWP, hLstStat, NULL, rcDisp.left, rcDisp.top, 
+		SetWindowPos(hLstStat, NULL, rcDisp.left, rcDisp.top, 
 			rcDisp.right-rcDisp.left, rcDisp.bottom-rcDisp.top, SWP_NOOWNERZORDER|SWP_NOACTIVATE);
 
-		EndDeferWindowPos(hDWP);
+		//EndDeferWindowPos(hDWP);
 	}
 }
 
-VOID UI_TabSelChanged(HWND hDlg, HWND hCtrl)
+static VOID UI_TabSelChanged(HWND hDlg, HWND hCtrl)
 {
 	int nSel = SendMessage(hCtrl, TCM_GETCURSEL, 0, 0);
 
-	HWND hLstCallStack = GetDlgItem(hDlg, IDC_LST_CALLSTACK);
+	HWND hLstCallStack = GetDlgItem(hCtrl, IDC_LST_CALLSTACK);
 	ShowWindow(hLstCallStack, nSel == 0 ? SW_SHOW : SW_HIDE);
 
-	HWND hTreeProf = GetDlgItem(hDlg, IDC_TREE_PROF);
-	ShowWindow(hTreeProf, nSel == 0 ? SW_SHOW : SW_HIDE);
+	HWND hTreeProf = GetDlgItem(hCtrl, IDC_TREE_PROF);
+	ShowWindow(hTreeProf, nSel == 1 ? SW_SHOW : SW_HIDE);
 
 
-	HWND hLstStat = GetDlgItem(hDlg, IDC_LST_STAT);
-	ShowWindow(hLstStat, nSel == 0 ? SW_SHOW : SW_HIDE);
+	HWND hLstStat = GetDlgItem(hCtrl, IDC_LST_STAT);
+	ShowWindow(hLstStat, nSel == 2 ? SW_SHOW : SW_HIDE);
+
+	UpdateWindow(hDlg);
 
 }
 
 
-BOOL UI_OnNotify(HWND hDlg, UINT id, LPNMHDR lpNMHDR)
+static BOOL UI_OnNotify(HWND hDlg, UINT id, LPNMHDR lpNMHDR)
 {
 	if(lpNMHDR->idFrom == IDC_TAB)
 	{
-		if(lpNMHDR->code == TCN_SELCHANGING)
+		if(lpNMHDR->code == TCN_SELCHANGE)
 		{	
 			UI_TabSelChanged(hDlg, lpNMHDR->hwndFrom);
 			return TRUE;
@@ -306,21 +379,21 @@ BOOL UI_OnNotify(HWND hDlg, UINT id, LPNMHDR lpNMHDR)
 	return FALSE;
 }
 
-VOID UI_OnDestroy(HWND hDlg)
+static VOID UI_OnDestroy(HWND hDlg)
 {
 	PostQuitMessage(0);
 }
 
-INT_PTR CALLBACK UIProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK UIProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
 		UI_OnInitDialog(hwndDlg);
-		return TRUE;
+		break;
 	case WM_SIZE:
 		UI_OnSize(hwndDlg, LOWORD(lParam), HIWORD(lParam), wParam);
-		return TRUE;
+		break;
 	case WM_TIMER:
 		break;
 	case WM_COMMAND:
@@ -330,16 +403,16 @@ INT_PTR CALLBACK UIProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		break;
 	case WM_DESTROY:
 		UI_OnDestroy(hwndDlg);
-		return TRUE;
+		break;
 	case WM_CLOSE:
 		DestroyWindow(hwndDlg);
-		return TRUE;
+		break;
 	}
 	return FALSE;
 }
 
 
-HWND  ThCreateUI()
+static HWND  ThCreateUI()
 {
 	HWND h = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_LPROF_UI), NULL,  UIProc);
 	if(h == NULL)
@@ -351,7 +424,7 @@ HWND  ThCreateUI()
 	return h;
 }
 
-DWORD WINAPI UIThreadProc(LPVOID lpParameter)
+static DWORD WINAPI UIThreadProc(LPVOID lpParameter)
 {
 	HWND hUI = ThCreateUI();
 
@@ -368,7 +441,7 @@ DWORD WINAPI UIThreadProc(LPVOID lpParameter)
 }
 
 
-BOOL CreateUIThread()
+static BOOL CreateUIThread()
 {
 	DWORD  dwID = 0;
 	HANDLE hthUI = CreateThread(NULL, 0,  UIThreadProc, NULL, 0, &dwID);
@@ -376,7 +449,7 @@ BOOL CreateUIThread()
 	return hthUI != NULL;
 }
 
-void create_ui()
+static void create_ui()
 {
 	if(g_uiThread == NULL)
 	{
@@ -384,7 +457,7 @@ void create_ui()
 	}
 }
 
-void close_ui()
+static void close_ui()
 {
 	if(g_uiThread!=NULL)
 	{

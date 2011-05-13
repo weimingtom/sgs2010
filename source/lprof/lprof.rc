@@ -59,12 +59,16 @@ CAPTION "lprof monitor"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_TAB,"SysTabControl32",0x0,17,20,129,108
-    CONTROL         "",IDC_LST_CALLSTACK,"SysListView32",LVS_ALIGNLEFT | 
-                    WS_BORDER | WS_TABSTOP,176,18,100,42
-    CONTROL         "",IDC_TREE_PROF,"SysTreeView32",TVS_NOSCROLL | 
-                    WS_BORDER | WS_TABSTOP,181,76,92,64
-    CONTROL         "",IDC_LST_STAT,"SysListView32",LVS_ALIGNLEFT | 
-                    WS_BORDER | WS_TABSTOP,178,159,93,56
+    CONTROL         "",IDC_LST_CALLSTACK,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,176,18,100,42
+    CONTROL         "",IDC_TREE_PROF,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    TVS_SHOWSELALWAYS | TVS_NOSCROLL | WS_BORDER | 
+                    WS_TABSTOP,181,76,92,64
+    CONTROL         "",IDC_LST_STAT,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,178,159,93,56
 END
 
 
