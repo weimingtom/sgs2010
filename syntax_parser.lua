@@ -1,8 +1,9 @@
+io.stdout:setvbuf("no");
 
 dofile("e:\\proc\\krh\\sgs2010\\lua_syntax.lua");
 dofile("e:\\proc\\krh\\sgs2010\\lua_lex.lua");
 
-
+require("lprof");
 
 local keywords = {
 };
@@ -106,7 +107,7 @@ local syntax_pattern = {
 	start = 'statm_list',
 
 
-	trace = print,
+	--trace = print,
 
 };
 --]]
@@ -175,7 +176,12 @@ function main(fname)
 	end
 end
 
+lprof.enable(true);
+
 --print_table(_G);
 main("e:\\proc\\krh\\sgs2010\\input.txt");
 
 
+print(lprof.stat(10));
+
+lprof.enable(false);

@@ -458,6 +458,17 @@ function syntax_gen:add_all_rule(g)
 	return true;
 end
 
+local function item_index(item)
+	--return "item"..tostring(item.rule_id)..
+	--		"#"..tostring(item.pos)..
+	--		"#"..tostring(item.forward_id);
+	-- 按照规则,item的属性是不会修改的.修改属性时会创建一个新的item
+	if(item.__index__ == nil) then
+		item.__index__ = string.format("item%d#%d#%d",item.rule_id, item.pos, item.forward_id);
+	end
+	return item.__index__;
+end
+
 local function item_equal(item1, item2)
 	return item1.rule_id == item2.rule_id
 			and item1.pos == item2.pos
@@ -465,12 +476,14 @@ local function item_equal(item1, item2)
 end
 
 local function find_item(itemset, item)
-	for i, v in ipairs(itemset) do
-		if(item_equal(v, item)) then
-			return i;
-		end
-	end
-	return nil;
+	--for i, v in ipairs(itemset) do
+	--	if(item_equal(v, item)) then
+	--		return i;
+	--	end
+	--end
+	--return nil;
+	local idx = item_index(item);
+	return itemset.index[idx];
 end
 
 
@@ -521,6 +534,7 @@ end
 function syntax_gen:calc_closure(items)
 	-- closure output
 	local citems = {
+		index = {},
 	};
 
 	local queue = {};
@@ -536,6 +550,7 @@ function syntax_gen:calc_closure(items)
 			};
 
 			citems[table.getn(citems) + 1] =  ki;
+			citems.index[item_index(ki)]=ki;
 			queue[table.getn(queue) + 1] = ki;
 		end
 	end
@@ -561,6 +576,7 @@ function syntax_gen:calc_closure(items)
 						};
 						if(not find_item(citems, newitem)) then
 							citems[table.getn(citems) + 1] =  newitem;
+							citems.index[item_index(newitem)] = newitem;
 							queue[table.getn(queue) + 1] = newitem;
 						end
 					end
@@ -576,16 +592,20 @@ end
 
 
 function syntax_gen:calc_goto(items, tid)
-	local next_set = {};
+	local next_set = {
+		index = {},
+	};
 
 	for i, v in ipairs(items) do
 		local rule = self.rules[v.rule_id];
 		if(rule.tokens[v.pos] == tid) then
-			next_set[table.getn(next_set)+1] = {
+			local item = {
 				rule_id = v.rule_id,
 				pos = v.pos + 1,
 				forward_id = -1,
 			};
+			next_set[table.getn(next_set)+1] = item;
+			next_set.index[item_index(item)]=item;
 		end
 	end
 
@@ -658,7 +678,9 @@ function syntax_gen:calc_cluster()
 	-- generate first item set
 	local itemset = {
 		id = -1,
-		items = {},
+		items = {
+			index={},
+		},
 		gotos = {},
 	};
 
@@ -804,6 +826,7 @@ function syntax_gen:lr1_closure(iset)
 							};
 							if(not find_item(iset, ext_item)) then
 								iset[table.getn(iset)+1] = ext_item;
+								iset.index[item_index(ext_item)]=ext_item;
 								queue[table.getn(queue)+1] = ext_item;
 							end
 						end
@@ -816,6 +839,10 @@ function syntax_gen:lr1_closure(iset)
 end
 
 function syntax_gen:calc_forward()
+
+	-- 缓冲,已经计算的关键项目的closure
+	local ki_closure_cache = {};
+
 	while(true) do
 		local changed = false;
 
@@ -827,10 +854,19 @@ function syntax_gen:calc_forward()
 						pos     = item.pos,
 						forward_id = -1,
 					};
-					local kset = {
-						kitem,
-					};
-					self:lr1_closure(kset);
+					local kset;
+					if(not ki_closure_cache[item_index(kitem)]) then
+						kset = {
+							kitem,
+							index={
+								[item_index(kitem)] = kitem,
+							},
+						};
+						self:lr1_closure(kset);
+						ki_closure_cache[item_index(kitem)] = kset;
+					else
+						kset = ki_closure_cache[item_index(kitem)];
+					end
 
 					for k, kitem in ipairs(kset) do
 						if(kitem.forward_id > 0) then
@@ -845,6 +881,7 @@ function syntax_gen:calc_forward()
 								};
 								if(not find_item(next_isetex.items, next_kitem)) then
 									next_isetex.items[table.getn(next_isetex.items)+1] = next_kitem;
+									next_isetex.items.index[item_index(next_kitem)] = next_kitem;
 									table.sort(next_isetex.items, item_less);
 									changed = true;
 								end
@@ -862,6 +899,7 @@ function syntax_gen:calc_forward()
 								};
 								if(not find_item(next_isetex.items, next_kitem)) then
 									next_isetex.items[table.getn(next_isetex.items)+1] = next_kitem;
+									next_isetex.items.index[item_index(next_kitem)] = next_kitem;
 									table.sort(next_isetex.items, item_less);
 									changed = true;
 								end

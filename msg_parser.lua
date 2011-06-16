@@ -167,8 +167,8 @@ local syntax_pattern = {
 			function(s, a, b, c, d) return syntax_expr_call(s, a, c); end, },
 	},
 	-- macro
-	{ 'macro_field'
-		{ { '{', 'optname', ':', 'caseof', '(', 'reference', ')' , ':' 'case_body', '}' },
+	{ 'macro_field',
+		{ { '{', 'optname', ':', 'caseof', '(', 'reference', ')' , ':', 'case_body', '}' },
 			function(s, a,b,c,d,e,f,g,h,i,j) return { op='caseof', name=b, ref=f, tb=i}; end, },
 		{ { '{', ':', 'define', '(', 'sym', ')', ':', 'expression', '}', },
 			function(s, a,b,c,d,e,f,g,h,i) return { op='define', name=e, val=h}; end, },
