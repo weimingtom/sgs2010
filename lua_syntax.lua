@@ -535,6 +535,7 @@ function syntax_gen:calc_closure(items)
 	-- closure output
 	local citems = {
 		index = {},
+		count = 0,
 	};
 
 	local queue = {};
@@ -548,8 +549,8 @@ function syntax_gen:calc_closure(items)
 				pos = item.pos,
 				forward_id = item.forward_id,
 			};
-
-			citems[table.getn(citems) + 1] =  ki;
+			citems.count = citems.count+1;
+			citems[citems.count] =  ki;
 			citems.index[item_index(ki)]=ki;
 			queue[table.getn(queue) + 1] = ki;
 		end
@@ -575,7 +576,8 @@ function syntax_gen:calc_closure(items)
 							forward_id = -1,
 						};
 						if(not find_item(citems, newitem)) then
-							citems[table.getn(citems) + 1] =  newitem;
+							citems.count = citems.count+1;
+							citems[citems.count] =  newitem;
 							citems.index[item_index(newitem)] = newitem;
 							queue[table.getn(queue) + 1] = newitem;
 						end
@@ -594,6 +596,7 @@ end
 function syntax_gen:calc_goto(items, tid)
 	local next_set = {
 		index = {},
+		count = 0,
 	};
 
 	for i, v in ipairs(items) do
@@ -604,7 +607,8 @@ function syntax_gen:calc_goto(items, tid)
 				pos = v.pos + 1,
 				forward_id = -1,
 			};
-			next_set[table.getn(next_set)+1] = item;
+			next_set.count = next_set.count + 1;
+			next_set[next_set.count] = item;
 			next_set.index[item_index(item)]=item;
 		end
 	end
@@ -680,6 +684,7 @@ function syntax_gen:calc_cluster()
 		id = -1,
 		items = {
 			index={},
+			count = 0,
 		},
 		gotos = {},
 	};
@@ -687,11 +692,14 @@ function syntax_gen:calc_cluster()
 	local cid = 1;
 
 	-- add the primary item : S'-> . S, $
-	itemset.items[1] = {
+	local start_item = {
 		rule_id = self.begin_rule_id,
 		pos = 1,
 		forward_id = self.eof_token_id,
 	};
+	itemset.items.count = itemset.items.count + 1;
+	itemset.items[itemset.items.count] = start_item;
+	itemset.items.index[item_index(start_item)] = start_item;
 
 	itemset.id = cid;
 	cid = cid + 1;
@@ -710,7 +718,7 @@ function syntax_gen:calc_cluster()
 		local cset = self:calc_closure(iset.items);
 		for token_id = 1, table.getn(self.tokens) do
 			local next_set = self:calc_goto(cset, token_id);
-			if(table.getn(next_set) > 0) then
+			if(next_set.count > 0) then
 				local nsetex = self:find_itemsetex(next_set);
 				if(nsetex == nil) then
 					nsetex = {
@@ -825,7 +833,8 @@ function syntax_gen:lr1_closure(iset)
 								forward_id = forward_id,
 							};
 							if(not find_item(iset, ext_item)) then
-								iset[table.getn(iset)+1] = ext_item;
+								iset.count = iset.count + 1;
+								iset[iset.count] = ext_item;
 								iset.index[item_index(ext_item)]=ext_item;
 								queue[table.getn(queue)+1] = ext_item;
 							end
@@ -842,10 +851,29 @@ function syntax_gen:calc_forward()
 
 	-- 缓冲,已经计算的关键项目的closure
 	local ki_closure_cache = {};
+	
+	-- 每个项只需要计算一次	
+	local itlist = {
+		count = 0,
+	};
+	
+	for n, isetex in ipairs(self.cluster) do
+		for m, item in ipairs(isetex.items) do
+			if item.forward_id > 0 and (item.rule_id == self.begin_rule_id or item.pos > 1) then
+				itlist.count = itlist.count + 1;
+				itlist[itlist.count] = {
+					set = isetex, 
+					item = item,
+				};
+			end
+		end
+	end
+
+	local itid = 1;
 
 	while(true) do
 		local changed = false;
-
+		--[[
 		for n, isetex in ipairs(self.cluster) do
 			for m, item in ipairs(isetex.items) do
 				if item.forward_id > 0 and (item.rule_id == self.begin_rule_id or item.pos > 1) then
@@ -854,63 +882,161 @@ function syntax_gen:calc_forward()
 						pos     = item.pos,
 						forward_id = -1,
 					};
+					
 					local kset;
 					if(not ki_closure_cache[item_index(kitem)]) then
+						ki_closure_cache[item_index(kitem)] = true;
 						kset = {
 							kitem,
 							index={
 								[item_index(kitem)] = kitem,
 							},
+							count = 1,
 						};
 						self:lr1_closure(kset);
 						ki_closure_cache[item_index(kitem)] = kset;
 					else
 						kset = ki_closure_cache[item_index(kitem)];
 					end
-
-					for k, kitem in ipairs(kset) do
-						if(kitem.forward_id > 0) then
-							local rule = self.rules[kitem.rule_id];
-							local ntk = rule.tokens[kitem.pos];
-							if(ntk) then
-								local next_isetex = isetex.gotos[ntk];
-								local next_kitem = {
-									rule_id = kitem.rule_id,
-									pos = kitem.pos + 1,
-									forward_id = kitem.forward_id,
-								};
-								if(not find_item(next_isetex.items, next_kitem)) then
-									next_isetex.items[table.getn(next_isetex.items)+1] = next_kitem;
-									next_isetex.items.index[item_index(next_kitem)] = next_kitem;
-									table.sort(next_isetex.items, item_less);
-									changed = true;
+					
+					do
+						for k, kitem in ipairs(kset) do
+							if(kitem.forward_id > 0) then
+								local rule = self.rules[kitem.rule_id];
+								local ntk = rule.tokens[kitem.pos];
+								if(ntk) then
+									local next_isetex = isetex.gotos[ntk];
+									local next_kitem = {
+										rule_id = kitem.rule_id,
+										pos = kitem.pos + 1,
+										forward_id = kitem.forward_id,
+									};
+									if(not find_item(next_isetex.items, next_kitem)) then
+										next_isetex.items.count = next_isetex.items.count + 1;
+										next_isetex.items[next_isetex.items.count] = next_kitem;
+										next_isetex.items.index[item_index(next_kitem)] = next_kitem;
+										table.sort(next_isetex.items, item_less);
+										changed = true;
+									end
 								end
-							end
-						else
-							--
-							local rule = self.rules[kitem.rule_id];
-							local ntk = rule.tokens[kitem.pos];
-							if(ntk) then
-								local next_isetex = isetex.gotos[ntk];
-								local next_kitem = {
-									rule_id = kitem.rule_id,
-									pos = kitem.pos + 1,
-									forward_id = item.forward_id,
-								};
-								if(not find_item(next_isetex.items, next_kitem)) then
-									next_isetex.items[table.getn(next_isetex.items)+1] = next_kitem;
-									next_isetex.items.index[item_index(next_kitem)] = next_kitem;
-									table.sort(next_isetex.items, item_less);
-									changed = true;
+							else
+								--
+								local rule = self.rules[kitem.rule_id];
+								local ntk = rule.tokens[kitem.pos];
+								if(ntk) then
+									local next_isetex = isetex.gotos[ntk];
+									local next_kitem = {
+										rule_id = kitem.rule_id,
+										pos = kitem.pos + 1,
+										forward_id = item.forward_id,
+									};
+									if(not find_item(next_isetex.items, next_kitem)) then
+										next_isetex.items.count = next_isetex.items.count + 1;
+										next_isetex.items[next_isetex.items.count] = next_kitem;
+										next_isetex.items.index[item_index(next_kitem)] = next_kitem;
+										table.sort(next_isetex.items, item_less);
+										changed = true;
+									end
 								end
+	
 							end
-
 						end
 					end
 				end
 			end
 		end
-
+		--]]
+		
+		while(itlist[itid]) do
+			local itl = itlist[itid];
+			itid = itid + 1;
+			local item = itl.item;
+			local isetex = itl.set;
+			local kitem = {
+				rule_id = item.rule_id,
+				pos     = item.pos,
+				forward_id = -1,
+			};
+			
+			local kset;
+			if(not ki_closure_cache[item_index(kitem)]) then
+				ki_closure_cache[item_index(kitem)] = true;
+				kset = {
+					kitem,
+					index={
+						[item_index(kitem)] = kitem,
+					},
+					count = 1,
+				};
+				self:lr1_closure(kset);
+				ki_closure_cache[item_index(kitem)] = kset;
+			else
+				kset = ki_closure_cache[item_index(kitem)];
+			end
+			--[[
+			local kset = {
+				index = {},
+				count = 0,
+			};
+			kset.count = kset.count + 1;
+			kset[kset.count] = kitem;
+			kset.index[item_index(kitem)] = kitem;
+			self:lr1_closure(kset);
+			--]]
+			do
+				for k, kitem in ipairs(kset) do
+					if(kitem.forward_id > 0) then
+						local rule = self.rules[kitem.rule_id];
+						local ntk = rule.tokens[kitem.pos];
+						if(ntk) then
+							local next_isetex = isetex.gotos[ntk];
+							local next_kitem = {
+								rule_id = kitem.rule_id,
+								pos = kitem.pos + 1,
+								forward_id = kitem.forward_id,
+							};
+							if(not find_item(next_isetex.items, next_kitem)) then
+								next_isetex.items.count = next_isetex.items.count + 1;
+								next_isetex.items[next_isetex.items.count] = next_kitem;
+								next_isetex.items.index[item_index(next_kitem)] = next_kitem;
+								--table.sort(next_isetex.items, item_less);
+								changed = true;
+								itlist.count = itlist.count + 1;
+								itlist[itlist.count] = {
+									set = next_isetex,
+									item = next_kitem,
+								};
+							end
+						end
+					else
+						--
+						local rule = self.rules[kitem.rule_id];
+						local ntk = rule.tokens[kitem.pos];
+						if(ntk) then
+							local next_isetex = isetex.gotos[ntk];
+							local next_kitem = {
+								rule_id = kitem.rule_id,
+								pos = kitem.pos + 1,
+								forward_id = item.forward_id,
+							};
+							if(not find_item(next_isetex.items, next_kitem)) then
+								next_isetex.items.count = next_isetex.items.count + 1;
+								next_isetex.items[next_isetex.items.count] = next_kitem;
+								next_isetex.items.index[item_index(next_kitem)] = next_kitem;
+								--table.sort(next_isetex.items, item_less);
+								changed = true;
+								itlist.count = itlist.count + 1;
+								itlist[itlist.count] = {
+									set = next_isetex,
+									item = next_kitem,
+								};
+							end
+						end
+					end
+				end
+			end
+		end
+		
 		if not changed then
 			break;
 		end
@@ -921,10 +1047,12 @@ function syntax_gen:calc_forward()
 		for m, item in ipairs(isetex.items) do
 			if item.forward_id == -1 then
 				table.remove(isetex.items, m);
+				isetex.items.count = isetex.items.count - 1;
 			end
 		end
+		table.sort(isetex.items, item_less);
 	end
-	--self:dump_cluster();
+	self:dump_cluster();
 
 	return true;
 end

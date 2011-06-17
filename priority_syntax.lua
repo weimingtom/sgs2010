@@ -1,13 +1,19 @@
 --------------------------------------------------------
 -- priority_syntax.lua -- for test the expression priority with specified order to resovle the confilicit
 --------------------------------------------------------
+io.stdout:setvbuf("no");
 
 dofile("e:\\proc\\krh\\sgs2010\\lua_syntax.lua");
 dofile("e:\\proc\\krh\\sgs2010\\lua_lex.lua");
 
+require("lprof");
 
 
 local keywords = {
+	'not',
+	'and',
+	'or',
+	'xor',
 };
 
 local lex_pattern = {
@@ -42,7 +48,8 @@ local lex_pattern = {
 
 	-- operators
 	{ plain = true,
-		{'+', '-', '*', '/', '%', '(', ')', ',' , '=' , ';' },
+		{'+', '-', '*', '/', '%', '(', ')', ',' , '=' , ';' ,
+			'==', '<>', '!=', '>', '<', '>=', '<=', },
 		function(lex, token) return token, token; end,
 	},
 	-- unmatch handle, report a error
@@ -59,7 +66,9 @@ local lex_pattern = {
 };
 
 
-
+local function nozore(a)
+	return a == 0 and 0 or 1;
+end
 
 
 local syntax_pattern = {
@@ -73,11 +82,22 @@ local syntax_pattern = {
 		{ { ';' }, function(s) return true; end },
 	},
 	{ 'expression',
+		--{ {'expression', 'xor', 'expression', priority={8, 'left'} }, function(s, a, b, c)  return (a~=0 and c==0 or a==0 and c~=0) and 1 or 0; end },
+		--{ {'expression', 'or', 'expression', priority={7, 'left'} }, function(s, a, b, c)  return (a~=0 or c~=0) and 1 or 0; end },
+		--{ {'expression', 'and', 'expression', priority={6, 'left'} }, function(s, a, b, c)  return (a~=0 and c~=0) and 1 or 0; end },
+		--{ {'expression', '<', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<c and 1 or 0; end },
+		--{ {'expression', '>', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>c and 1 or 0; end },
+		--{ {'expression', '<=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<=c and 1 or 0; end },
+		--{ {'expression', '>=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>=c and 1 or 0; end },
+		--{ {'expression', '<>', 'expression', priority={4, 'left'} }, 
+		--  {'expression', '!=', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a~=c and 1 or 0; end },
+		--{ {'expression', '==', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a==c and 1 or 0; end },
 		{ {'expression', '+', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a+c; end },
 		{ {'expression', '-', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a-c; end },
 		{ {'expression', '*', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a*c; end },
 		{ {'expression', '/', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a/c; end },
 		{ {'expression', '%', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a%c; end },
+		{ {'not', 'expression', priority={1, 'right'} },          function(s, a, b)        return b ~= 0 and 1 or 0; end, },
 		{ {'-', 'expression', priority={1, 'right'} },          function(s, a, b)        return -b; end, },
 		{ {'+', 'expression', priority={1, 'right'} },          function(s, a, b)        return  b; end, },
 		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
@@ -144,8 +164,11 @@ function main(fname)
 	end
 end
 
+lprof.enable(true);
+
 --print_table(_G);
 main("e:\\proc\\krh\\sgs2010\\input.txt");
 
+print(lprof.stat(1));
 
-
+lprof.enable(false);
