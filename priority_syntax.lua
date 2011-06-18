@@ -82,16 +82,16 @@ local syntax_pattern = {
 		{ { ';' }, function(s) return true; end },
 	},
 	{ 'expression',
-		--{ {'expression', 'xor', 'expression', priority={8, 'left'} }, function(s, a, b, c)  return (a~=0 and c==0 or a==0 and c~=0) and 1 or 0; end },
-		--{ {'expression', 'or', 'expression', priority={7, 'left'} }, function(s, a, b, c)  return (a~=0 or c~=0) and 1 or 0; end },
-		--{ {'expression', 'and', 'expression', priority={6, 'left'} }, function(s, a, b, c)  return (a~=0 and c~=0) and 1 or 0; end },
-		--{ {'expression', '<', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<c and 1 or 0; end },
-		--{ {'expression', '>', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>c and 1 or 0; end },
-		--{ {'expression', '<=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<=c and 1 or 0; end },
-		--{ {'expression', '>=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>=c and 1 or 0; end },
-		--{ {'expression', '<>', 'expression', priority={4, 'left'} }, 
-		--  {'expression', '!=', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a~=c and 1 or 0; end },
-		--{ {'expression', '==', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a==c and 1 or 0; end },
+		{ {'expression', 'xor', 'expression', priority={8, 'left'} }, function(s, a, b, c)  return (a~=0 and c==0 or a==0 and c~=0) and 1 or 0; end },
+		{ {'expression', 'or', 'expression', priority={7, 'left'} }, function(s, a, b, c)  return (a~=0 or c~=0) and 1 or 0; end },
+		{ {'expression', 'and', 'expression', priority={6, 'left'} }, function(s, a, b, c)  return (a~=0 and c~=0) and 1 or 0; end },
+		{ {'expression', '<', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<c and 1 or 0; end },
+		{ {'expression', '>', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>c and 1 or 0; end },
+		{ {'expression', '<=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a<=c and 1 or 0; end },
+		{ {'expression', '>=', 'expression', priority={5, 'left'} }, function(s, a, b, c)  return a>=c and 1 or 0; end },
+		{ {'expression', '<>', 'expression', priority={4, 'left'} },
+		  {'expression', '!=', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a~=c and 1 or 0; end },
+		{ {'expression', '==', 'expression', priority={4, 'left'} }, function(s, a, b, c)  return a==c and 1 or 0; end },
 		{ {'expression', '+', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a+c; end },
 		{ {'expression', '-', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a-c; end },
 		{ {'expression', '*', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a*c; end },
@@ -117,7 +117,7 @@ local syntax_pattern = {
 	start = 'statm_list',
 
 
-	trace = print,
+	--trace = print,
 
 };
 

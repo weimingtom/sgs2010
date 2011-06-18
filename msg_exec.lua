@@ -2,3 +2,5 @@
 -- msg_exec.lua : 
 -------------------------------------------------------------
 
+function exec_expr_index(context, ref, index)
+end

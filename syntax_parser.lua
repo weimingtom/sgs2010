@@ -70,28 +70,28 @@ local syntax_pattern = {
 		{ { ';' }, function(s) return true; end },
 	},
 	{ 'expression',
-		{ {'add_expr'}, function(s, a)  return a; end },
-	},
-
-	{ 'add_expr',
-		{ {'add_expr', '+', 'mul_expr'}, function(s, a, b, c)  return a + c; end,},
-		{ {'add_expr', '-', 'mul_expr'}, function(s, a, b, c)  return a - c; end,},
-		{ {'mul_expr' },                 function(s, a)        return a; end },
-	},
-
-	{ 'mul_expr',
-		{ {'mul_expr', '*', 'unary_expr'}, function(s, a, b, c)  return a * c; end, },
-		{ {'mul_expr', '/', 'unary_expr'}, function(s, a, b, c)  return a / c; end, },
-		{ {'mul_expr', '%', 'unary_expr'}, function(s, a, b, c)  return a % c; end, },
-		{ {'unary_expr'},                  function(s, a)        return a; end },
-	},
-
-	{ 'unary_expr',
-		{ {'-', 'unary_expr'},          function(s, a, b)        return -b; end, },
-		{ {'+', 'unary_expr'},          function(s, a, b)        return  b; end, },
-		{ {'(', 'expression', ')'},     function(s, a, b, c)     return b; end, },
-		{ {'sym', '(', 'optarglist', ')'}, function(s, a, b, c, d) if( s.ud.fun[a]) then  return s.ud.fun[a](unpack(c)); else return nil, 'function named \''..a..'\' is not found.'; end end, },
-		{ {'sym'},                      function(s, a) if( s.ud.val[a]) then return s.ud.val[a]; else return nil, 'variable named \''..a..'\' is not found.'; end end, },
+		{ {'expression', '+', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a+c; end },
+		{ {'expression', '-', 'expression', priority={3, 'left'} }, function(s, a, b, c)  return a-c; end },
+		{ {'expression', '*', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a*c; end },
+		{ {'expression', '/', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a/c; end },
+		{ {'expression', '%', 'expression', priority={2, 'left'} }, function(s, a, b, c)  return a%c; end },
+		{ {'-', 'expression',               priority={1, 'right'} },function(s, a, b)        return -b; end, },
+		{ {'+', 'expression',               priority={1, 'right'} },function(s, a, b)        return  b; end, },
+		{ {'(', 'expression', ')'},                                 function(s, a, b, c)     return b; end, },
+		{ {'sym', '(', 'optarglist', ')'},  function(s, a, b, c, d)
+												if( s.ud.fun[a]) then
+													return s.ud.fun[a](unpack(c));
+												else
+													return nil, 'function named \''..a..'\' is not found.';
+												end
+											end, },
+		{ {'sym'},      function(s, a)
+							if( s.ud.val[a]) then
+								return s.ud.val[a];
+							else
+								return nil, 'variable named \''..a..'\' is not found.';
+							end
+						end, },
 		{ {'num'},                      function(s, a) return a end, },
 	},
 

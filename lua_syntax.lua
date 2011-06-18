@@ -804,9 +804,11 @@ function syntax_gen:lr1_closure(iset)
 		queue[table.getn(queue)+1] = v;
 	end
 
-	while(queue[1]) do
-		local qitem = queue[1];
-		table.remove(queue, 1);
+	local n = 1;
+	while(queue[n]) do
+		local qitem = queue[n];
+		--table.remove(queue, 1);
+		n = n + 1;
 
 		local rule = self.rules[qitem.rule_id];
 		local next_token_id = rule.tokens[qitem.pos];
@@ -851,18 +853,18 @@ function syntax_gen:calc_forward()
 
 	-- 缓冲,已经计算的关键项目的closure
 	local ki_closure_cache = {};
-	
-	-- 每个项只需要计算一次	
+
+	-- 每个项只需要计算一次
 	local itlist = {
 		count = 0,
 	};
-	
+
 	for n, isetex in ipairs(self.cluster) do
 		for m, item in ipairs(isetex.items) do
 			if item.forward_id > 0 and (item.rule_id == self.begin_rule_id or item.pos > 1) then
 				itlist.count = itlist.count + 1;
 				itlist[itlist.count] = {
-					set = isetex, 
+					set = isetex,
 					item = item,
 				};
 			end
@@ -882,7 +884,7 @@ function syntax_gen:calc_forward()
 						pos     = item.pos,
 						forward_id = -1,
 					};
-					
+
 					local kset;
 					if(not ki_closure_cache[item_index(kitem)]) then
 						ki_closure_cache[item_index(kitem)] = true;
@@ -898,7 +900,7 @@ function syntax_gen:calc_forward()
 					else
 						kset = ki_closure_cache[item_index(kitem)];
 					end
-					
+
 					do
 						for k, kitem in ipairs(kset) do
 							if(kitem.forward_id > 0) then
@@ -938,7 +940,7 @@ function syntax_gen:calc_forward()
 										changed = true;
 									end
 								end
-	
+
 							end
 						end
 					end
@@ -946,7 +948,7 @@ function syntax_gen:calc_forward()
 			end
 		end
 		--]]
-		
+
 		while(itlist[itid]) do
 			local itl = itlist[itid];
 			itid = itid + 1;
@@ -957,7 +959,7 @@ function syntax_gen:calc_forward()
 				pos     = item.pos,
 				forward_id = -1,
 			};
-			
+
 			local kset;
 			if(not ki_closure_cache[item_index(kitem)]) then
 				ki_closure_cache[item_index(kitem)] = true;
@@ -1036,7 +1038,7 @@ function syntax_gen:calc_forward()
 				end
 			end
 		end
-		
+
 		if not changed then
 			break;
 		end
@@ -1044,15 +1046,18 @@ function syntax_gen:calc_forward()
 
 	-- delete the invalid forward
 	for n, isetex in ipairs(self.cluster) do
-		for m, item in ipairs(isetex.items) do
-			if item.forward_id == -1 then
+		local m = 1;
+		while(isetex.items[m]) do
+			if isetex.items[m].forward_id == -1 then
 				table.remove(isetex.items, m);
 				isetex.items.count = isetex.items.count - 1;
+			else
+				m = m + 1;
 			end
 		end
 		table.sort(isetex.items, item_less);
 	end
-	self:dump_cluster();
+	--self:dump_cluster();
 
 	return true;
 end
