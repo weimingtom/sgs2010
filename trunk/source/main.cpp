@@ -1,5 +1,4 @@
-#define  WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "stdafx.h"
 #include "../include/resource.h"
 
 
