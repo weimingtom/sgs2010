@@ -1,2 +1,27 @@
-#define  WIN32_LEAN_AND_MEAN
-#include <windows.h>
+//#define  WIN32_LEAN_AND_MEAN
+//#include <windows.h>
+
+
+#ifndef __STDAFX_H__
+#define __STDAFX_H__
+
+
+// compiler detection; includes setup.h
+#include "wx/defs.h"
+
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+
+
+
+
+#endif /* __STDAFX_H__ */
