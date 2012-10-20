@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\include" /I "E:\proc\wxWidgets-2.8.12\include" /I "E:\proc\wxWidgets-2.8.12\lib\vc_lib\mswd" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "__WXMSW__" /D "__WXDEBUG__" /YX"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept
+# ADD LINK32 wxbase28d.lib wxbase28d_net.lib wxbase28d_xml.lib wxjpegd.lib wxmsw28d_core.lib wxmsw28d_adv.lib wxmsw28d_aui.lib wxmsw28d_html.lib wxpngd.lib wxtiffd.lib wxregexd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  winmm.lib rpcrt4.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib"
 
 !ENDIF 
 
