@@ -42,6 +42,7 @@ namespace sgs
 
 		void OnPaint(wxPaintEvent& event);
 
+		virtual void OnDraw(wxDC&  dc);
 
 	private:
 		DECLARE_EVENT_TABLE()
@@ -58,7 +59,7 @@ namespace sgs
 	bool GameApp::OnInit()
 	{
 		// create main window
-		GameMainFrame* pFrame = new GameMainFrame(_("sgs2010"), wxDefaultPosition, wxDefaultSize);
+		GameMainFrame* pFrame = new GameMainFrame(_("sgs2010"), wxDefaultPosition, wxSize(800,600));
 		pFrame->Show(true);
 		SetTopWindow(pFrame);
 
@@ -106,9 +107,30 @@ namespace sgs
 
 	void GameCanvas::OnPaint(wxPaintEvent& event)
 	{
+		wxPaintDC  paintDC(this);
 
+#if wxUSE_GRAPHICS_CONTEXT
+		wxGCDC  gdc(paintDC);
+		wxDC& dc = gdc;
+#else
+		wxDC& dc = paintDC;
+#endif
+		PrepareDC(dc);
+
+		OnDraw(dc);
 	}
 
+
+	void GameCanvas::OnDraw(wxDC& dc)
+	{
+		dc.SetBackgroundMode(wxTRANSPARENT);
+		dc.SetBackground(*wxBLACK_BRUSH);
+		dc.SetTextForeground(*wxRED);
+
+		dc.DrawText(_("This is a test string!!!"), 10,10);
+
+		wxBitmap*  image = new wxBitmap()
+	}
 
 }
 
