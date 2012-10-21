@@ -20,6 +20,10 @@
 #include "wx/wx.h"
 #endif
 
+#include "wx/filename.h"
+#include "wx/stdpaths.h"
+#include "wx/dcbuffer.h"
+
 
 
 
