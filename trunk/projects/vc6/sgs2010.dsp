@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 wxbase28d.lib wxbase28d_net.lib wxbase28d_xml.lib wxjpegd.lib wxmsw28d_core.lib wxmsw28d_adv.lib wxmsw28d_aui.lib wxmsw28d_html.lib wxpngd.lib wxtiffd.lib wxregexd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  winmm.lib rpcrt4.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib"
+# ADD LINK32 wxbase28d.lib wxbase28d_net.lib wxbase28d_xml.lib wxjpegd.lib wxmsw28d_core.lib wxmsw28d_adv.lib wxmsw28d_aui.lib wxmsw28d_html.lib wxpngd.lib wxtiffd.lib wxregexd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib rpcrt4.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib"
 
 !ENDIF 
 
@@ -90,6 +90,18 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\..\source\GameApp.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\GameCanvas.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\GameMainFrame.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\source\main.cpp
@@ -106,6 +118,18 @@ SOURCE=..\..\source\stdafx.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\source\GameApp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\GameCanvas.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\GameMainFrame.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\include\resource.h
