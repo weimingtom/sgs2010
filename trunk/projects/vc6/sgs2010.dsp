@@ -92,6 +92,14 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\..\source\CardBaseInfo.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\CardRender.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\source\GameApp.cpp
 # End Source File
 # Begin Source File
@@ -120,6 +128,14 @@ SOURCE=..\..\source\stdafx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\source\CardBaseInfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\CardRender.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\source\GameApp.h
 # End Source File
 # Begin Source File
@@ -142,6 +158,18 @@ SOURCE=..\..\source\stdafx.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# Begin Group "Interface"
+
+# PROP Default_Filter "itf"
+# Begin Source File
+
+SOURCE=..\..\include\RenderItf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\ScriptItf.h
+# End Source File
 # End Group
 # End Target
 # End Project
