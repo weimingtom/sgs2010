@@ -24,8 +24,22 @@
 #include "wx/stdpaths.h"
 #include "wx/dcbuffer.h"
 
+//  for lua script
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+	
+#ifdef __cplusplus
+};
+#endif
 
 
+#include "tolua++.h"
 
 
 #endif /* __STDAFX_H__ */

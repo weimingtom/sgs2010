@@ -8,6 +8,7 @@
 #ifndef __ITF_RENDER_H__
 #define __ITF_RENDER_H__
 
+// tolua_begin
 
 struct IRender
 {
@@ -16,6 +17,8 @@ public:
 	virtual void DrawIcon() = 0;
 };
 
+
+// tolua_end
 
 #endif /* __ITF_RENDER_H__ */
 
