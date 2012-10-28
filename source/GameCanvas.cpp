@@ -92,6 +92,7 @@ namespace sgs {
 			m_flag = 1;
 
 
+
 		dc.DrawBitmap(*m_bitmap, 10, 100, true);
 
 	}
