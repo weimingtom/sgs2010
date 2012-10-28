@@ -17,10 +17,12 @@ namespace sgs
 		virtual bool OnInit();
 
 		virtual int OnExit();
+
+	private:
+		lua_State* m_L;
 	};
 
 	DECLARE_APP(GameApp)
-
 }
 
 

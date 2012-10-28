@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "GameApp.h"
 #include "GameMainFrame.h"
+#include "../package/sgs_plugin.h"
 
 namespace sgs {
 
@@ -22,13 +23,22 @@ namespace sgs {
 		pFrame->Show(true);
 		SetTopWindow(pFrame);
 
+		m_L = lua_open();
+		wxASSERT(m_L);
+		if(m_L == NULL)
+		{
+			return false;
+		}
+
+		tolua_sgs_open(m_L);
 
 		return true;
 	}
 
 	int GameApp::OnExit()
 	{
-
+		if(m_L)
+			lua_close(m_L);
 		return 0;
 	}
 

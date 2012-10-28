@@ -11,7 +11,7 @@ struct IScript;
 struct IScriptHostObject;
 struct IScriptErrorInfo;
 
-
+// tolua_begin
 
 struct ScriptMethodParam
 {
@@ -36,7 +36,7 @@ struct ScriptMethodParam
 		t_unknown = -1,
 	};
 	int type;
-	union {
+	union _v {
 		/* for input params */
 		long        vl;
 		double      vd;
@@ -49,14 +49,14 @@ struct ScriptMethodParam
 		var_char**           pvsp;
 		IScriptHostObject**  pvo;
 		*/
-	};
+	} v;
 };
 
-#define SCRIPT_METHOD_NAME_MAX_LENGTH 128
+//#define SCRIPT_METHOD_NAME_MAX_LENGTH 128
 
 struct ScriptMethodInfo
 {
-	char  name[SCRIPT_METHOD_NAME_MAX_LENGTH + 1];
+	char  name[256];
 	int   type;
 	int   in_param_count;
 	int   out_param_count;
@@ -117,10 +117,11 @@ public:
 	virtual bool removeHostObject(const char* name) = 0;
 	virtual int  call(const char* obj_name, const char* method_name, const ScriptMethodParam* in_params, int in_param_count, 
 						ScriptMethodParam** out_params, int* out_params_count, IScriptErrorInfo** error_info) = 0;
-	virtual int  get(const char* obj_name, const char* prop_name, ScriptMethodParam* out_value, IScriptErrorInfo** error_info) = 0
-	virtual int  set(const char* obj_name, const char* prop_name, const ScriptMethodParam* out_value, IScriptErrorInfo** error_info) = 0
+	virtual int  get(const char* obj_name, const char* prop_name, ScriptMethodParam* out_value, IScriptErrorInfo** error_info) = 0;
+	virtual int  set(const char* obj_name, const char* prop_name, const ScriptMethodParam* out_value, IScriptErrorInfo** error_info) = 0;
 };
 
+// tolua_end
 
 #endif /* __ITF_SCRIPT_H__ */
 
