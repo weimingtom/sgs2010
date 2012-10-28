@@ -26,7 +26,7 @@ namespace sgs {
 
 	void GameMainFrame::OnClose(wxCloseEvent& event)
 	{
-		Close();
+		Destroy();
 	}
 
 
