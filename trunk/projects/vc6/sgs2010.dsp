@@ -112,6 +112,10 @@ SOURCE=..\..\source\GameMainFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\source\Imageset.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\source\main.cpp
 # End Source File
 # Begin Source File
@@ -149,6 +153,10 @@ SOURCE=..\..\source\GameCanvas.h
 # Begin Source File
 
 SOURCE=..\..\source\GameMainFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\Imageset.h
 # End Source File
 # Begin Source File
 
