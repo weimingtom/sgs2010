@@ -92,8 +92,12 @@ namespace sgs {
 			m_flag = 1;
 
 
+		wxMemoryDC  memDC;
+		memDC.SelectObject(*m_bitmap);
 
-		dc.DrawBitmap(*m_bitmap, 10, 100, true);
+		dc.Blit(10, 100, 61, 79, &memDC, 0, 0, wxCOPY, true, -1, -1);
+
+		//dc.DrawBitmap(*m_bitmap, 10, 100, true);
 
 	}
 
