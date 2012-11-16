@@ -10,11 +10,11 @@
 
 // tolua_begin
 
-struct IRender
+class IRender
 {
 public:
-	virtual void DrawBitmap() = 0;
-	virtual void DrawIcon() = 0;
+	virtual void DrawBitmap(const wxBitmap& mbp, long x, long y, long cx, long cy, long srcx, long srcy) = 0;
+	virtual void DrawText(const wxFont& font, const wxString& text, long x, long y, long angle) = 0;
 };
 
 

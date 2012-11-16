@@ -49,6 +49,23 @@ template <typename T> struct TypeDefaultValueT_Help {
 */
 
 template<typename T>
+class Size2T
+{
+public:
+	Size2T() : cx(DEFAULT_VALUE_T(T)), cy(DEFAULT_VALUE_T(T)) {}
+	Size2T(T cx, T cy) : cx(cx), cy(cy) { }
+	Size2T(const Size2T& sz) : cx(sz.cx), y(sz.cy) { } 
+	const Size2T& operator = (const Size2T& sz) {
+		if(this != &sz) { 
+			cx = sz.cx; cy = sz.cy; 
+		} 
+		return *this; 
+	} 
+	T cx, cy;
+};
+
+
+template<typename T>
 class Point2T
 {
 public:
@@ -111,21 +128,81 @@ public:
 };
 
 
+typedef Size2T<float>   Size2F;
 typedef Point2T<float>   Point2F;
 typedef Point3T<float>   Point3F;
 typedef RectT<float>   RectF;
 
-class Imageset : public wxObject
+typedef wxString  String;
+typedef wxStringHash  StringHash;
+typedef wxStringEqual StringEqual;
+
+typedef wxBitmap  Bitmap;
+typedef wxPoint   Point;
+typedef wxSize    Size;
+typedef wxRect    Rect;
+typedef long      angle_t;
+typedef long      alpha_t;
+typedef wxColour  Color;
+
+
+class Imageset;
+
+
+class Image
+{
+public:
+	Image(Imageset* pSet, const Rect& rcPos) 
+		: m_pSet(pSet), m_rcPos(rcPos)
+	{
+
+	}
+
+	~Image()
+	{
+	}
+
+	Size getSize() const {
+		return m_rcPos.GetSize();
+	}
+
+	Point getPosition() const {
+		return m_rcPos.GetTopLeft();
+	}
+
+	void render(IRender* pRender, const Point& pos);
+	void renderEx(IRender* pRender, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
+
+
+private:
+	Rect  m_rcPos;
+	Imageset* m_pSet;
+
+
+};
+
+
+WX_DECLARE_HASH_MAP(String, Image*, StringHash, StringEqual, ImageMap);
+
+
+class Imageset
 {
 public:
 	Imageset();	
 	virtual ~Imageset();
 
-	bool load(wxStreamBase&  stream);
+	bool loadImageset(const String&  fileName, const Color& clTransparent);
+	void addImage(const String& name, const Rect& position);
 
-	void render(IRender* pRender, const RectF& srcRect, const RectF& destRect);
+	void delImage(const String& name);
+	void clear();
+
+	void render(IRender* pRender, const Rect& rcScrPosition, const Point& pos);
+	void renderEx(IRender* pRender, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
+
 private:
-
+	Bitmap   m_bitmap;
+	ImageMap m_imageMap; 
 	DECLARE_NO_COPY_CLASS(Imageset)
 };
 

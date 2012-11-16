@@ -96,6 +96,8 @@ namespace sgs {
 		memDC.SelectObject(*m_bitmap);
 
 		dc.Blit(10, 100, 61, 79, &memDC, 0, 0, wxCOPY, true, -1, -1);
+		dc.Blit(12, 104, 13, 14, &memDC, 126, 317, wxCOPY, true, -1, -1);
+		dc.Blit(13, 118, 11, 11, &memDC, 36, 347, wxCOPY, true, -1, -1);
 
 		//dc.DrawBitmap(*m_bitmap, 10, 100, true);
 
