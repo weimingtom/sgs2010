@@ -7,22 +7,22 @@
 
 
 // compiler detection; includes setup.h
-#include "wx/defs.h"
+#include <wx/defs.h>
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/filename.h"
-#include "wx/stdpaths.h"
-#include "wx/dcbuffer.h"
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
+#include <wx/dcbuffer.h>
 
 //  for lua script
 
@@ -30,16 +30,16 @@
 extern "C" {
 #endif
 	
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 	
 #ifdef __cplusplus
 };
 #endif
 
 
-#include "tolua++.h"
+#include <tolua++.h>
 
 
 #endif /* __STDAFX_H__ */

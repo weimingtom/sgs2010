@@ -11,7 +11,7 @@
 
 namespace sgs {
 	BEGIN_EVENT_TABLE(GameMainFrame, wxFrame)
-		EVT_CLOSE(OnClose)
+		EVT_CLOSE(GameMainFrame::OnClose)
 	END_EVENT_TABLE()
 
 

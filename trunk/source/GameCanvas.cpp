@@ -13,9 +13,9 @@ namespace sgs {
 
 	// event table of GameCanvas
 	BEGIN_EVENT_TABLE(GameCanvas,wxPanel)
-		EVT_PAINT(OnPaint)
-		EVT_SIZE(OnSize)
-		EVT_TIMER(ID_TIMER_REFRESH, OnTimer)
+		EVT_PAINT(GameCanvas::OnPaint)
+		EVT_SIZE(GameCanvas::OnSize)
+		EVT_TIMER(ID_TIMER_REFRESH, GameCanvas::OnTimer)
 	END_EVENT_TABLE()
 
 	
