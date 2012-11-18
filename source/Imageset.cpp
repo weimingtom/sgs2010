@@ -1,28 +1,26 @@
-#include <stdafx.h>
+#include "stdafx.h"
 
 #include "Imageset.h"
-#include "RenderItf.h"
+//#include "RenderItf.h"
 
 namespace com {
 
-void Image::render(IRender* pRender, const Point& pos)
+void Image::render(DC* pDC, const Point& pos)
 {
-	m_pSet->render(pRender, m_rcPos, pos);
+	m_pSet->render(pDC, m_rcPos, pos);
 }
 
-void Image::renderEx(IRender* pRender, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha)
+void Image::renderEx(DC* pDC, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha)
 {
-	m_pSet->renderEx(pRender, m_rcPos, pos, size, angle, alpha);
+	m_pSet->renderEx(pDC, m_rcPos, pos, size, angle, alpha);
 }
 
 Imageset::Imageset()
 {
-
 }
 
 Imageset::~Imageset()
 {
-
 }
 
 bool Imageset::loadImageset(const String&  fileName, const Color& clTransparent)
@@ -33,6 +31,9 @@ bool Imageset::loadImageset(const String&  fileName, const Color& clTransparent)
 	{
 		m_bitmap.SetMask(&wxMask(m_bitmap, clTransparent));
 	}
+
+	m_memdc.SelectObject(m_bitmap);
+
 	return true;
 }
 
@@ -55,12 +56,12 @@ void Imageset::clear()
 	m_imageMap.clear();
 }
 
-void Imageset::render(IRender* pRender, const Rect& rcScrPosition, const Point& pos)
+void Imageset::render(DC* pDC, const Rect& rcScrPosition, const Point& pos)
 {
-	pRender->DrawBitmap(m_bitmap, pos.x, pos.y, rcScrPosition.GetWidth(), rcScrPosition.GetHeight(), rcScrPosition.GetLeft(), rcScrPosition.GetTop());
+	pDC->Blit(pos, rcScrPosition.GetSize(), &m_memdc, rcScrPosition.GetTopLeft(), wxCOPY, true);
 }
 
-void Imageset::renderEx(IRender* pRender, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha)
+void Imageset::renderEx(DC* pDC, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha)
 {
 }
 

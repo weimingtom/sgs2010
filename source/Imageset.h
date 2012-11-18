@@ -7,7 +7,7 @@
 #ifndef __COM_IMAGESET_H__
 #define __COM_IMAGESET_H__
 
-class IRender;
+//class IRender;
 
 
 namespace com  {
@@ -144,6 +144,8 @@ typedef wxRect    Rect;
 typedef long      angle_t;
 typedef long      alpha_t;
 typedef wxColour  Color;
+typedef wxDC      DC;
+typedef wxMemoryDC  MemoryDC;
 
 
 class Imageset;
@@ -170,8 +172,8 @@ public:
 		return m_rcPos.GetTopLeft();
 	}
 
-	void render(IRender* pRender, const Point& pos);
-	void renderEx(IRender* pRender, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
+	void render(DC* pDC, const Point& pos);
+	void renderEx(DC* pDC, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
 
 
 private:
@@ -197,11 +199,12 @@ public:
 	void delImage(const String& name);
 	void clear();
 
-	void render(IRender* pRender, const Rect& rcScrPosition, const Point& pos);
-	void renderEx(IRender* pRender, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
+	void render(DC* pDC, const Rect& rcScrPosition, const Point& pos);
+	void renderEx(DC* pDC, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
 
 private:
 	Bitmap   m_bitmap;
+	MemoryDC  m_memdc;
 	ImageMap m_imageMap; 
 	DECLARE_NO_COPY_CLASS(Imageset)
 };
