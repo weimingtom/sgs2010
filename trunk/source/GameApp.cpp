@@ -9,11 +9,11 @@
 #include "GameMainFrame.h"
 #include "../package/sgs_plugin.h"
 
+IMPLEMENT_APP(sgs::GameApp)
+
 namespace sgs {
 
 	// implements
-
-	IMPLEMENT_APP(GameApp)
 
 
 	bool GameApp::OnInit()
