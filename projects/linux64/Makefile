@@ -3,8 +3,8 @@
 CC=g++
 TOLUA=$(HOME)/proc/tolua++-1.0.93/src/bin/tolua++
 INCL=-I../../source -I../../include -I$(HOME)/proc/tolua++-1.0.93/include
-CFLAGS=-Wall -O3 -fPIC $(shell wx-config --cxxflags) $(INCL)
-LIBS=-L~/proc/tolua++-1.0.93 -ltolua++ -llua -lm `wx-config --libs`
+CFLAGS=-Wall -g -O3 -fPIC $(shell wx-config --cxxflags) $(INCL)
+LIBS=-L$(HOME)/proc/tolua++-1.0.93/src/lib -ltolua++ -llua -lm $(shell wx-config --libs base,core)
 
 SOURCE1=$(shell ls ../../source/*.cpp)
 SOURCE2=$(shell ls ../../package/*.cpp)
@@ -31,5 +31,14 @@ bin: $(OUT)
 $(OUT): $(OBJS)
 	$(CC) -o $@ $^ $(LIBS)
 
+clean:
+	-rm -Rf $(OUT)
+	-rm -Rf $(OBJS)
+	-rm -Rf ../.../source/*.d
+	-rm -Rf ../../pakage/*.d
+	echo clean done.
+
+-include ../../source/*.d
+-include ../../package/*.d
 
 

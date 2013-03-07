@@ -54,7 +54,7 @@ class Size2T
 public:
 	Size2T() : cx(DEFAULT_VALUE_T(T)), cy(DEFAULT_VALUE_T(T)) {}
 	Size2T(T cx, T cy) : cx(cx), cy(cy) { }
-	Size2T(const Size2T& sz) : cx(sz.cx), y(sz.cy) { } 
+	Size2T(const Size2T& sz) : cx(sz.cx), cy(sz.cy) { } 
 	const Size2T& operator = (const Size2T& sz) {
 		if(this != &sz) { 
 			cx = sz.cx; cy = sz.cy; 
@@ -155,7 +155,7 @@ class Image
 {
 public:
 	Image(Imageset* pSet, const Rect& rcPos) 
-		: m_pSet(pSet), m_rcPos(rcPos)
+		: m_rcPos(rcPos), m_pSet(pSet)
 	{
 
 	}

@@ -81,6 +81,7 @@ namespace sgs {
 		dc.SetBrush(wxBrush(wxColour(0,117,58),wxSOLID));
 
 		dc.DrawRectangle(0, 0, size.GetWidth(), size.GetHeight());
+		dc.SetFont(wxFont(24,wxNORMAL,wxNORMAL,wxNORMAL));
 
 		wxString  text(_("This is a test string!!!"));
 		dc.DrawText(text, m_step,10);
