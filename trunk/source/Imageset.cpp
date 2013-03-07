@@ -29,7 +29,8 @@ bool Imageset::loadImageset(const String&  fileName, const Color& clTransparent)
 		return false;
 	if(clTransparent.IsOk())
 	{
-		m_bitmap.SetMask(&wxMask(m_bitmap, clTransparent));
+		wxMask  mask(m_bitmap, clTransparent);
+		m_bitmap.SetMask(&mask);
 	}
 
 	m_memdc.SelectObject(m_bitmap);
