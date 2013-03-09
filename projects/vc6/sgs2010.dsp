@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386 /out:"..\..\bin\sgs2010_vc6.exe"
+# ADD LINK32 tolualib.lib LuaStaticLib.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxbase28_xml.lib wxjpeg.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_aui.lib wxmsw28_html.lib wxpng.lib wxtiff.lib wxregex.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386 /out:"..\..\bin\sgs2010_vc6.exe" /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib" /libpath:"E:\proc\lua-5.1\lib" /libpath:"E:\proc\tolua++-1.0.93\lib"
 
 !ELSEIF  "$(CFG)" == "sgs2010 - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 tolualibd.lib LuaStaticLibd.lib wxbase28d.lib wxbase28d_net.lib wxbase28d_xml.lib wxjpegd.lib wxmsw28d_core.lib wxmsw28d_adv.lib wxmsw28d_aui.lib wxmsw28d_html.lib wxpngd.lib wxtiffd.lib wxregexd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib rpcrt4.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib" /libpath:"E:\proc\lua-5.1\lib" /libpath:"E:\proc\tolua++-1.0.93\lib"
+# ADD LINK32 tolualibd.lib LuaStaticLibd.lib wxexpatd.lib wxbase28d.lib wxbase28d_net.lib wxbase28d_xml.lib wxjpegd.lib wxmsw28d_core.lib wxmsw28d_adv.lib wxmsw28d_aui.lib wxmsw28d_html.lib wxpngd.lib wxtiffd.lib wxregexd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib rpcrt4.lib /nologo /subsystem:windows /debug /machine:I386 /out:"..\..\bin\sgs2010_vc6d.exe" /pdbtype:sept /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib" /libpath:"E:\proc\lua-5.1\lib" /libpath:"E:\proc\tolua++-1.0.93\lib"
 
 !ENDIF 
 
@@ -90,6 +90,14 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\..\source\Canvas_wxDC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\Card.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\source\CardBaseInfo.cpp
@@ -136,7 +144,23 @@ SOURCE=..\..\source\stdafx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\source\Canvas.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\Canvas_wxDC.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\Card.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\source\CardBaseInfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\source\CardDef.h
 # End Source File
 # Begin Source File
 
@@ -176,11 +200,47 @@ SOURCE=..\..\source\stdafx.h
 # PROP Default_Filter "itf"
 # Begin Source File
 
-SOURCE=..\..\include\RenderItf.h
+SOURCE=..\..\include\IModule.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\ScriptItf.h
+SOURCE=..\..\include\IRender.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\IScript.h
+# End Source File
+# End Group
+# Begin Group "Package"
+
+# PROP Default_Filter "pkg"
+# Begin Source File
+
+SOURCE=..\..\package\sgs_plugin.pkg
+
+!IF  "$(CFG)" == "sgs2010 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "sgs2010 - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\proc\krh\sgs2010\trunk\package
+InputPath=..\..\package\sgs_plugin.pkg
+
+BuildCmds= \
+	cd /d $(InputDir) \
+	set toluapp="e:\proc\tolua++-1.0.93\bin\toluapp.exe" \
+	%toluapp% -n sgs -o sgs_plugin.cpp -H sgs_plugin.h sgs_plugin.pkg \
+	
+
+"..\..\package\sgs_plugin.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"..\..\package\sgs_plugin.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Target

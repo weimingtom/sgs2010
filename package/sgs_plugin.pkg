@@ -1,3 +1,4 @@
-$cfile "../include/ScriptItf.h"
-$cfile "../include/RenderItf.h"
+$cfile "../include/IScript.h"
+$cfile "../include/IRender.h"
+$cfile "../source/CardDef.h"
 
