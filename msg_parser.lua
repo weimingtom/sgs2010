@@ -274,7 +274,7 @@ local syntax_pattern = {
 			function(s, a, b, c   ) return syntax_expr_member(s, a, c); end, },
 		{ { 'expression', '(', 'optarglist', ')', priority={1, 'left'}, } ,
 			function(s, a, b, c, d) return syntax_expr_call(s, a, c); end, },
-		{ { '-', 'expression', priority={2, 'right'}, } ,function(s, a, b) return syntax_expr_neg(s, b); end, },
+		{ { '-', 'expression', priority={2, 'right'}, } ,function(s, a, b) return { op = 'neg', right=b}; end, },
 		{ { '+', 'expression', priority={2, 'right'}, } ,function(s, a, b) return b; end, },
 		{ { 'not', 'expression', priority={2, 'right'}, } ,function(s, a, b) return syntax_expr_not(s, b); end, },
 		{ { 'bnot', 'expression', priority={2, 'right'}, } ,function(s, a, b) return syntax_expr_bnot(s, b); end, },

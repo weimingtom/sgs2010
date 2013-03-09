@@ -1,12 +1,52 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 
-<resources>
-	<images>
-		<imageset name="p1" file="data/card.bmp" type="bitmap" mask="#FF00FF" >
-			<image name="sha"  x=0 y=0 width=61 height=79 />
-			<image name="shan"  x=61 y=0 width=61 height=79 />
-			<image name="tao"  x=122 y=0 width=61 height=79 />
-		</imageset>
-	</images>
-</resources>
+<imagesets>
+	<imageset name="p1" file="card.bmp" type="bitmap" mask="#FF00FF" >
+		<image name="sha" x="0" y="0" width="61" height="79" />
+		<image name="shan" x="61" y="0" width="61" height="79" />
+		<image name="tao"  x="122" y="0" width="61" height="79" />
+		<image name="wjqf"  x="183" y="0" width="61" height="79" />
+		<image name="nmrq"  x="244" y="0" width="61" height="79" />
+		<image name="shand"  x="305" y="0" width="61" height="79" />
+		<image name="lbss"  x="366" y="0" width="61" height="79" />
+		<image name="wxkj"  x="427" y="0" width="61" height="79" />
+		<image name="jdsr"  x="488" y="0" width="61" height="79" />
+		<image name="wgfd"  x="549" y="0" width="61" height="79" />
+		<image name="wzsy" x="0" y="79" width="61" height="79" />
+		<image name="tyjy" x="61" y="79" width="61" height="79" />
+		
+		<image name="ba" x="0" y="317" width="13" height="14" />
+		<image name="b2" x="14" y="317" width="13" height="14" />
+		<image name="b3" x="28" y="317" width="13" height="14" />
+		<image name="b4" x="42" y="317" width="13" height="14" />
+		<image name="b5" x="56" y="317" width="13" height="14" />
+		<image name="b6" x="70" y="317" width="13" height="14" />
+		<image name="b7" x="84" y="317" width="13" height="14" />
+		<image name="b8" x="98" y="317" width="13" height="14" />
+		<image name="b9" x="112" y="317" width="13" height="14" />
+		<image name="b10" x="126" y="317" width="13" height="14" />
+		<image name="bj" x="140" y="317" width="13" height="14" />
+		<image name="bq" x="154" y="317" width="13" height="14" />
+		<image name="bk" x="168" y="317" width="13" height="14" />
+		
+		<image name="ra" x="0" y="332" width="13" height="14" />
+		<image name="r2" x="14" y="332" width="13" height="14" />
+		<image name="r3" x="28" y="332" width="13" height="14" />
+		<image name="r4" x="42" y="332" width="13" height="14" />
+		<image name="r5" x="56" y="332" width="13" height="14" />
+		<image name="r6" x="70" y="332" width="13" height="14" />
+		<image name="r7" x="84" y="332" width="13" height="14" />
+		<image name="r8" x="98" y="332" width="13" height="14" />
+		<image name="r9" x="112" y="332" width="13" height="14" />
+		<image name="r10" x="126" y="332" width="13" height="14" />
+		<image name="rj" x="140" y="332" width="13" height="14" />
+		<image name="rq" x="154" y="332" width="13" height="14" />
+		<image name="rk" x="168" y="332" width="13" height="14" />
 
+		<image name="heart" x="0" y="347" width="11" height="11" />
+		<image name="diamond" x="12" y="347" width="11" height="11" />
+		<image name="spade" x="24" y="347" width="11" height="11" />
+		<image name="club" x="36" y="347" width="11" height="11" />
+
+	</imageset>
+</imagesets>

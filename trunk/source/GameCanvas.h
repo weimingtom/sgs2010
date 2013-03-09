@@ -7,6 +7,8 @@
 #ifndef __SGS_GAMECANVAS_H__
 #define __SGS_GAMECANVAS_H__
 
+#include "Imageset.h"
+
 namespace sgs
 {
 	class GameApp;
@@ -32,6 +34,8 @@ namespace sgs
 		wxTimer     m_timer;
 		long        m_step;
 		long        m_flag;
+
+		com::ImagesetManager   m_imageMgr;
 
 		DECLARE_EVENT_TABLE()
 	};

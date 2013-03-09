@@ -25,7 +25,8 @@ namespace sgs
 
 	private:
 		wxString  m_cardName;
-		wxBitmap  m_cardImage;
+		wxString  m_cardImage;
+		wxString  m_cardBackImage;
 
 		DECLARE_NO_COPY_CLASS(CardBaseInfo)
 	};

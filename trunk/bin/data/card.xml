@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<cardBaseInfo>
+	<card type="Common" name="杀" >
+		<back set="p1" image="back" />
+		<face set="p1" image="sha" />
+		<driver file="script/card/sha.lua">
+			<
+		</drive>			
+	</card>
+	<card type="Common" name="闪" back="p1.back" face="p1.shan" />
+</cardBaseInfo>
+
+

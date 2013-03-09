@@ -23,6 +23,8 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 #include <wx/dcbuffer.h>
+#include <wx/xml/xml.h>
+
 
 //  for lua script
 

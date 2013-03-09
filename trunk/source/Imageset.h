@@ -147,8 +147,11 @@ typedef wxColour  Color;
 typedef wxDC      DC;
 typedef wxMemoryDC  MemoryDC;
 
-
+class Image;
 class Imageset;
+
+WX_DECLARE_HASH_MAP(String, Image*, StringHash, StringEqual, ImageMap);
+WX_DECLARE_HASH_MAP(String, Imageset*, StringHash, StringEqual, ImagesetMap);
 
 
 class Image
@@ -176,15 +179,14 @@ public:
 	void renderEx(DC* pDC, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
 
 
+
 private:
 	Rect  m_rcPos;
 	Imageset* m_pSet;
 
-
 };
 
 
-WX_DECLARE_HASH_MAP(String, Image*, StringHash, StringEqual, ImageMap);
 
 
 class Imageset
@@ -193,11 +195,13 @@ public:
 	Imageset();	
 	virtual ~Imageset();
 
-	bool loadImageset(const String&  fileName, const Color& clTransparent);
+	bool loadImageset(const String&  fileName, long lType, const Color& clTransparent);
 	void addImage(const String& name, const Rect& position);
 
 	void delImage(const String& name);
 	void clear();
+
+	Image* getImage(const String& nameImage);
 
 	void render(DC* pDC, const Rect& rcScrPosition, const Point& pos);
 	void renderEx(DC* pDC, const Rect& rcScrPosition, const Point& pos, const Size& size, angle_t  angle,  alpha_t alpha);
@@ -209,7 +213,27 @@ private:
 	DECLARE_NO_COPY_CLASS(Imageset)
 };
 
+class ImagesetManager
+{
+public:
+	ImagesetManager();
+	~ImagesetManager();
 
+	bool loadFromXml(const String& fileName);
+
+	void clear();
+
+	Imageset* getImageset(const String& nameSet);
+	Image* getImage(const String& nameSet, const String& nameImage);
+
+protected:
+	Imageset* newImageset(const String& setName, const String& imageFile, long lType, const Color& clMask);
+
+private:
+	ImagesetMap   m_imagesetMap;
+
+	DECLARE_NO_COPY_CLASS(ImagesetManager)
+};
 
 }
 

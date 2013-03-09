@@ -35,6 +35,11 @@ namespace sgs {
 		// for double buffer paint
 		SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
+		wxFileName  xmlPath(wxStandardPaths().GetExecutablePath());
+		xmlPath.AppendDir(wxT("data"));
+		xmlPath.SetFullName(wxT("resource.xml"));
+		m_imageMgr.loadFromXml(xmlPath.GetFullPath());
+
 		m_timer.Start(40);
 		m_step = 0;
 		m_flag = 1;
@@ -83,6 +88,7 @@ namespace sgs {
 		dc.DrawRectangle(0, 0, size.GetWidth(), size.GetHeight());
 		dc.SetFont(wxFont(24,wxNORMAL,wxNORMAL,wxNORMAL));
 
+		dc.SetFont(wxFont(24, wxDECORATIVE, wxNORMAL, wxNORMAL));
 		wxString  text(_("This is a test string!!!"));
 		dc.DrawText(text, m_step,10);
 		wxSize szText = dc.GetTextExtent(text);
@@ -93,15 +99,22 @@ namespace sgs {
 			m_flag = 1;
 
 
-		wxMemoryDC  memDC;
-		memDC.SelectObject(*m_bitmap);
+		//wxMemoryDC  memDC;
+		//memDC.SelectObject(*m_bitmap);
 
-		dc.Blit(10, 100, 61, 79, &memDC, 0, 0, wxCOPY, true, -1, -1);
-		dc.Blit(12, 104, 13, 14, &memDC, 126, 317, wxCOPY, true, -1, -1);
-		dc.Blit(13, 118, 11, 11, &memDC, 36, 347, wxCOPY, true, -1, -1);
+		com::Image* pImage = m_imageMgr.getImage(wxT("p1"), wxT("sha"));
+
+		pImage->render(&dc, com::Point(10,100));
+
+		//dc.Blit(10, 100, 61, 79, &memDC, 0, 0, wxCOPY, true, -1, -1);
+		//dc.Blit(12, 104, 13, 14, &memDC, 126, 317, wxCOPY, true, -1, -1);
+		//dc.Blit(13, 118, 11, 11, &memDC, 36, 347, wxCOPY, true, -1, -1);
+
+		//dc.Blit(75, 100, 61, 79, &memDC, 61, 0, wxCOPY, true, -1, -1);
+		//dc.Blit(77, 104, 13, 14, &memDC, 126, 317, wxCOPY, true, -1, -1);
+		//dc.Blit(78, 118, 11, 11, &memDC, 36, 347, wxCOPY, true, -1, -1);
 
 		//dc.DrawBitmap(*m_bitmap, 10, 100, true);
-
 	}
 
 
