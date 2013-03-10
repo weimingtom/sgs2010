@@ -1,10 +1,10 @@
 .SUFFIXES: .o .c .h .cpp .hpp .pkg
 
-CC=g++
+CC=gcc
 TOLUA=$(HOME)/proc/tolua++-1.0.93/src/bin/tolua++
 INCL=-I../../source -I../../include -I$(HOME)/proc/tolua++-1.0.93/include
 CFLAGS=-Wall -O3 -fPIC $(shell wx-config --cxxflags) $(INCL)
-LIBS=-L~/proc/tolua++-1.0.93 -ltolua++ -llua -lm `wx-config --libs`
+LIBS=-L$(HOME)/proc/tolua++-1.0.93/src/lib  -ltolua++ -llua -lm -ldl $(shell wx-config --libs) -lstdc++
 
 SOURCE1=$(shell ls ../../source/*.cpp)
 SOURCE2=$(shell ls ../../package/*.cpp)
@@ -23,13 +23,13 @@ dep: $(SOURCE)
 
 
 .cpp.o:
-	$(CC) -c -o $@ $(CFLAGS) -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MD -MP  $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCL) -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MD -MP  $<
 
 
 bin: $(OUT)
 
 $(OUT): $(OBJS)
-	$(CC) -o $@ $^ $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 
 

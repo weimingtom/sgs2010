@@ -26,7 +26,7 @@ Imageset::~Imageset()
 
 bool Imageset::loadImageset(const String&  fileName, long lType, const Color& clTransparent)
 {
-	if(!m_bitmap.LoadFile(fileName, lType))
+	if(!m_bitmap.LoadFile(fileName, (wxBitmapType)lType))
 		return false;
 	if(clTransparent.IsOk())
 	{
