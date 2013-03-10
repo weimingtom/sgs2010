@@ -8,11 +8,11 @@
 #ifndef __ITF_RENDER_H__
 #define __ITF_RENDER_H__
 
-#include "IModule.h"
+//#include "IModule.h"
 
 // tolua_begin
 
-class IRender : IModule
+class IRender// : IModule
 {
 public:
 };

@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX"stdafx.h" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\include" /I "E:\proc\wxWidgets-2.8.12\include" /I "E:\proc\wxWidgets-2.8.12\lib\vc_lib\mswd" /I "E:\proc\lua-5.1\include" /I "E:\proc\tolua++-1.0.93\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "__WXMSW__" /YX"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 tolualib.lib LuaStaticLib.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxbase28_xml.lib wxjpeg.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_aui.lib wxmsw28_html.lib wxpng.lib wxtiff.lib wxregex.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386 /out:"..\..\bin\sgs2010_vc6.exe" /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib" /libpath:"E:\proc\lua-5.1\lib" /libpath:"E:\proc\tolua++-1.0.93\lib"
+# ADD LINK32 tolualib.lib LuaStaticLib.lib wxexpat.lib wxbase28.lib wxbase28_net.lib wxbase28_xml.lib wxjpeg.lib wxmsw28_core.lib wxmsw28_adv.lib wxmsw28_aui.lib wxmsw28_html.lib wxpng.lib wxtiff.lib wxregex.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib rpcrt4.lib  /nologo /subsystem:windows /machine:I386 /out:"..\..\bin\sgs2010_vc6.exe" /libpath:"E:\proc\wxWidgets-2.8.12\lib\vc_lib" /libpath:"E:\proc\lua-5.1\lib" /libpath:"E:\proc\tolua++-1.0.93\lib"
 
 !ELSEIF  "$(CFG)" == "sgs2010 - Win32 Debug"
 
