@@ -1,5 +1,7 @@
 #include "config.h"
 #include "card.h"
+#include "player.h"
+
 
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"
