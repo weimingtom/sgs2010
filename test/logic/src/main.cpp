@@ -1,7 +1,8 @@
 #include "config.h"
 #include "card.h"
+#include "card_stack.h"
 #include "player.h"
-
+#include "game.h"
 
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"
@@ -66,7 +67,7 @@ int main(int argc, char** argv)
 	int players = 0;
 	const PlayerConfig* pConfig;
 
-	CardStack  stCardStack;
+	GameContext   stGameContext;
 
 	srand((int)time(NULL));
 
@@ -81,9 +82,9 @@ int main(int argc, char** argv)
 	players = pConfig->players;
 
 
-	init_card_stack(&stCardStack);
-	card_stack_random(&stCardStack);
-	card_stack_dump(&stCardStack);
+	init_game_context(&stGameContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+
+	card_stack_dump(&stGameContext.cardStack);
 
 
 	return 0;
