@@ -63,22 +63,22 @@ enum CardValue
 
 
 
-struct Card
+typedef struct tagCard
 {
 	int type;
 	int id;
 	int color;
 	int value;
-};
+}Card;
 
 
 #define CARD_STACK_SIZE    108
 
-struct CardStack
+typedef struct tagCardStack
 {
 	int    count;
 	Card   cards[CARD_STACK_SIZE];
-};
+}CardStack;
 
 
 int init_card_stack(CardStack* pCardStack);
