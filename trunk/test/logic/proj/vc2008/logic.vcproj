@@ -179,6 +179,10 @@
 				RelativePath="..\..\src\main.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\player.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -191,6 +195,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\player.h"
 				>
 			</File>
 		</Filter>
