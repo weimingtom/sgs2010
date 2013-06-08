@@ -1,0 +1,45 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luadll", "lua.vcproj", "{362E42DE-695D-453A-AD30-EBB0FD19F4A7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luaexe", "luaexe.vcproj", "{CEA8BC46-8A4A-4291-AE74-523B81C63D0D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luac", "luac.vcproj", "{4318A4A6-9723-48D8-AE18-4B28527AA277}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "liblua", "liblua.vcproj", "{94ECB547-6CC8-4536-9914-2542BD867463}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{362E42DE-695D-453A-AD30-EBB0FD19F4A7}.Debug.ActiveCfg = Debug|Win32
+		{362E42DE-695D-453A-AD30-EBB0FD19F4A7}.Debug.Build.0 = Debug|Win32
+		{362E42DE-695D-453A-AD30-EBB0FD19F4A7}.Release.ActiveCfg = Release|Win32
+		{362E42DE-695D-453A-AD30-EBB0FD19F4A7}.Release.Build.0 = Release|Win32
+		{CEA8BC46-8A4A-4291-AE74-523B81C63D0D}.Debug.ActiveCfg = Debug|Win32
+		{CEA8BC46-8A4A-4291-AE74-523B81C63D0D}.Debug.Build.0 = Debug|Win32
+		{CEA8BC46-8A4A-4291-AE74-523B81C63D0D}.Release.ActiveCfg = Release|Win32
+		{CEA8BC46-8A4A-4291-AE74-523B81C63D0D}.Release.Build.0 = Release|Win32
+		{4318A4A6-9723-48D8-AE18-4B28527AA277}.Debug.ActiveCfg = Debug|Win32
+		{4318A4A6-9723-48D8-AE18-4B28527AA277}.Debug.Build.0 = Debug|Win32
+		{4318A4A6-9723-48D8-AE18-4B28527AA277}.Release.ActiveCfg = Release|Win32
+		{4318A4A6-9723-48D8-AE18-4B28527AA277}.Release.Build.0 = Release|Win32
+		{94ECB547-6CC8-4536-9914-2542BD867463}.Debug.ActiveCfg = Debug|Win32
+		{94ECB547-6CC8-4536-9914-2542BD867463}.Debug.Build.0 = Debug|Win32
+		{94ECB547-6CC8-4536-9914-2542BD867463}.Release.ActiveCfg = Release|Win32
+		{94ECB547-6CC8-4536-9914-2542BD867463}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
