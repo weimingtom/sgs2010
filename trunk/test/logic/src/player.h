@@ -1,6 +1,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
+#include "card.h"
 
 enum PlayerID
 {
@@ -10,10 +11,14 @@ enum PlayerID
 	PlayerID_Minster = 2,
 	PlayerID_Spy = 3,
 	PlayerID_Mutineer = 4,
+
+
+	PlayerID_Valid_Min = PlayerID_Master,
+	PlayerID_Valid_Max = PlayerID_Mutineer,
+
 };
 
 
-#define  MAX_NAME_LEN  32
 
 #define MAX_HAND_CARD   16
 #define MAX_JUDGMENT_CARD  8
@@ -23,7 +28,8 @@ typedef  struct  tagPlayer
 {
 	int id;
 	int hero;
-	int life;
+	int maxLife;
+	int curLife;
 	char name[MAX_NAME_LEN];
 	int   nHandCardNum;
 	int   nJudgmentCardNum;
@@ -36,7 +42,7 @@ typedef  struct  tagPlayer
 } Player;
 
 
-int init_player(Player* pPlayer);
+int init_player(Player* pPlayer, int id, int hero);
 
 
 #endif /* __PLAYER_H__ */

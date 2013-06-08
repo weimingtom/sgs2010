@@ -176,21 +176,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\main.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\player.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="include"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
 				RelativePath="..\..\src\card.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\card_stack.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\card_stack.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\comm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\comm.h"
 				>
 			</File>
 			<File
@@ -198,9 +200,47 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hero.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hero.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\player.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\player.h"
 				>
 			</File>
+			<Filter
+				Name="card_impl"
+				>
+			</Filter>
+			<Filter
+				Name="hero_impl"
+				>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="include"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 		</Filter>
 		<Filter
 			Name="res"

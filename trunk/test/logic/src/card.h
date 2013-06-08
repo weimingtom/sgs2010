@@ -72,23 +72,6 @@ typedef struct tagCard
 }Card;
 
 
-#define CARD_STACK_SIZE    108
-
-typedef struct tagCardStack
-{
-	int    count;
-	Card   cards[CARD_STACK_SIZE];
-}CardStack;
-
-
-int init_card_stack(CardStack* pCardStack);
-
-int card_stack_random(CardStack* pCardStack);
-
-
-void card_stack_dump(const CardStack* pCardStack);
-
-
 
 
 
