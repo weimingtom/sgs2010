@@ -72,7 +72,7 @@ static int refresh_card_stack(GameContext* pGame)
 	}
 
 	pGame->cardStack = pGame->cardOut;
-	pGame->cardOut->count = 0;
+	pGame->cardOut.count = 0;
 
 	card_stack_random(&pGame->cardStack);
 
@@ -94,7 +94,7 @@ static int get_hand_card(GameContext* pGame)
 		refresh_card_stack(pGame);
 	}
 
-	pGame->players[pGame->nCurPlayer].stHandCards
+	pGame->players[pGame->nCurPlayer].stHandCards;
 
 	return 0;
 }

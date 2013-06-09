@@ -350,7 +350,7 @@ int cmd_loop(GameContext* pContext)
 		{
 			if(*next != 0)
 			{
-				printf("error cmd at col %d!\n", next-cmdline);
+				printf("error cmd at col %d!\n", (int)(next-cmdline));
 			}
 		}
 	}

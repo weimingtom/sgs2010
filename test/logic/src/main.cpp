@@ -23,7 +23,7 @@ static const PlayerConfig s_configs [] = {
 	{ 8, 1, 2, 1, 4 },
 };
 
-#define CONFIG_SIZE    (COUNT(s_configs))
+#define CONFIG_SIZE   (int)(COUNT(s_configs))
 
 
 static const PlayerConfig* select_config()
