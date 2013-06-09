@@ -19,6 +19,8 @@ int card_stack_random(CardStack* pCardStack);
 
 int card_stack_clear(CardStack* pCardStack);
 
+#define card_stack_empty(p) ((p)->count > 0)
+
 void card_stack_dump(const CardStack* pCardStack);
 
 
