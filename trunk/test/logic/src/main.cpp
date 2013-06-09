@@ -5,7 +5,7 @@
 #include "game.h"
 #include "cmd.h"
 
-
+/*
 
 typedef struct tagPlayerConfig
 {
@@ -60,6 +60,7 @@ static const PlayerConfig* select_config()
 	return pConfig;
 }
 
+*/
 
 int main(int argc, char** argv)
 {
@@ -82,8 +83,6 @@ int main(int argc, char** argv)
 
 
 	//init_game_context(&stGameContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
-
-	//card_stack_dump(&stGameContext.cardStack);
 
 	ST_ZREO(stGameContext);
 

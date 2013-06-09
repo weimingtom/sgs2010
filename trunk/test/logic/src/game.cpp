@@ -138,10 +138,10 @@ int game_step(GameContext* pGame)
 	switch(pGame->status)
 	{
 	case Status_FirstGetCard:
-		get_first_hand_card();
+		get_first_hand_card(pGame);
 		break;
 	case Status_Round_Begin:
-
+		break;
 	}
 
 	return 0;

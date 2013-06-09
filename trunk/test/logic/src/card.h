@@ -72,7 +72,13 @@ typedef struct tagCard
 }Card;
 
 
+const char* card_type_str(int type);
+const char* card_id_str(int id);
+const char* card_color_str(int color);
+const char* card_value_str(int value);
 
+
+void card_dump(const Card* pCard);
 
 
 #endif /* __CARD_H__ */
