@@ -3,9 +3,8 @@
 #include "card_stack.h"
 #include "player.h"
 #include "game.h"
+#include "cmd.h"
 
-#define PROJ_NAME    "SGS. Test Logic"
-#define VERSION_STR  "v0.1.0"
 
 
 typedef struct tagPlayerConfig
@@ -24,7 +23,7 @@ static const PlayerConfig s_configs [] = {
 	{ 8, 1, 2, 1, 4 },
 };
 
-#define CONFIG_SIZE    (sizeof(s_configs)/sizeof(s_configs[0]))
+#define CONFIG_SIZE    (COUNT(s_configs))
 
 
 static const PlayerConfig* select_config()
@@ -32,7 +31,7 @@ static const PlayerConfig* select_config()
 	int n; 
 	const PlayerConfig* pConfig;
 
-	while(true)
+	while(1)
 	{
 		printf("Please input players config: \n");
 
@@ -42,7 +41,7 @@ static const PlayerConfig* select_config()
 			printf("  (%d) Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n", n+1, 
 				pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
 		}
-		printf("CONFIG> ");
+		printf("$ ");
 
 		n = -1;
 		scanf("%d", &n);
@@ -65,7 +64,7 @@ static const PlayerConfig* select_config()
 int main(int argc, char** argv)
 {
 	int players = 0;
-	const PlayerConfig* pConfig;
+	//const PlayerConfig* pConfig;
 
 	GameContext   stGameContext;
 
@@ -74,18 +73,21 @@ int main(int argc, char** argv)
 	printf(PROJ_NAME" "VERSION_STR"\n");
 
 
-	pConfig = select_config();
+	//pConfig = select_config();
 
-	printf("your select is: Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n",
-		pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+	//printf("your select is: Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n",
+	//	pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
 
-	players = pConfig->players;
+	//players = pConfig->players;
 
 
-	init_game_context(&stGameContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+	//init_game_context(&stGameContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
 
-	card_stack_dump(&stGameContext.cardStack);
+	//card_stack_dump(&stGameContext.cardStack);
 
+	ST_ZREO(stGameContext);
+
+	cmd_loop(&stGameContext);
 
 	return 0;
 }

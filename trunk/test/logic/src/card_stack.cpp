@@ -63,7 +63,7 @@ static const Card   s_init_cards[] =
 };
 
 // INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE
-#define INIT_CARD_SIZE    (sizeof(s_init_cards)/sizeof(s_init_cards[0]))
+#define INIT_CARD_SIZE    COUNT(s_init_cards)
 
 //#if (INIT_CARD_SIZE > CARD_STACK_SIZE)
 //#error "INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE!"
@@ -109,6 +109,13 @@ int card_stack_random(CardStack* pCardStack)
 	return 0;
 }
 
+int card_stack_clear(CardStack* pCardStack)
+{
+	pCardStack->count = 0;
+	return 0;
+}
+
+
 
 void card_stack_dump(const CardStack* pCardStack)
 {
@@ -123,4 +130,44 @@ void card_stack_dump(const CardStack* pCardStack)
 }
 
 
+int card_stack_check(CardStack* pCardStack, int offset, Card* pCard)
+{
+	return 0;
+}
 
+int card_stack_push(CardStack* pCardStack, const Card* pCard)
+{
+
+	return 0;
+}
+
+int card_stack_push_back(CardStack* pCardStack, const Card* pCard)
+{
+
+	return 0;
+}
+
+
+int card_stack_pop(CardStack* pCardStack, Card* pCard)
+{
+	
+	return 0;
+}
+
+int card_stack_pop_back(CardStack* pCardStack, Card* pCard)
+{
+	
+	return 0;
+}
+
+int card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard)
+{
+
+	return 0;
+}
+
+int card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
+{
+
+	return 0;
+}

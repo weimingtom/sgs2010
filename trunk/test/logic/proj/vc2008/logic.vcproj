@@ -188,6 +188,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\cmd.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cmd.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\comm.cpp"
 				>
 			</File>

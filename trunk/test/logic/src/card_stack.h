@@ -17,10 +17,18 @@ int init_card_stack(CardStack* pCardStack);
 
 int card_stack_random(CardStack* pCardStack);
 
+int card_stack_clear(CardStack* pCardStack);
 
 void card_stack_dump(const CardStack* pCardStack);
 
 
+int card_stack_check(CardStack* pCardStack, int offset, Card* pCard);
+int card_stack_push(CardStack* pCardStack, const Card* pCard);
+int card_stack_push_back(CardStack* pCardStack, const Card* pCard);
+int card_stack_pop(CardStack* pCardStack, Card* pCard);
+int card_stack_pop_back(CardStack* pCardStack, Card* pCard);
+int card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard);
+int card_stack_remove(CardStack* pCardStack, int offset, Card* pCard);
 
 
 
