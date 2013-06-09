@@ -7,6 +7,20 @@
 #include "card_stack.h"
 
 
+enum Status
+{
+	Status_None = 0, // not start game yet
+	Status_FirstGetCard=1, // the first time all player get card
+	Status_Round_Begin,
+	Status_Round_Judge,
+	Status_Round_Get,
+	Status_Round_Out,
+	Status_Round_Discard,
+	Status_Round_End,
+};
+
+
+
 
 
 typedef struct tagGameContext
@@ -18,7 +32,10 @@ typedef struct tagGameContext
 	Player     players[MAX_PLAYER_NUM];
 	CardStack  cardStack;
 	CardStack  cardOut;
-	
+	int        nRoundNum;
+	int        nRoundPlayer;
+	int        nCurPlayer;
+	int        status;
 } GameContext;
 
 
@@ -27,6 +44,7 @@ typedef struct tagGameContext
 int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 
 
+int game_step(GameContext* pGame);
 
 #endif /* __GAME_H__ */
 
