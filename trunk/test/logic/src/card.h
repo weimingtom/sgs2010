@@ -60,7 +60,19 @@ enum CardValue
 	CardValue_A = 14,
 };
 
+typedef struct tagGameContext GameContext;
+typedef struct tagGameEventContext GameEventContext;
+typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
+typedef int  (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 
+
+typedef struct tagCardConfig
+{
+	int  id;
+	char desc[MAX_DESC_LEN];
+	CARDCHECKFUN check;
+	CARDOUTFUN   out;
+}CardConfig;
 
 
 typedef struct tagCard

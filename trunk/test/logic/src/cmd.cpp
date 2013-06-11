@@ -192,20 +192,50 @@ static int cmd_start(char* param, GameContext* pContext)
 	}
 
 	// new game
-	if(0 != init_game_context(pContext, pConfig->mutineers, pConfig->spies, pConfig->mutineers))
+	if(0 != init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers))
 	{
 		printf("start init new game failed!");
 		return CMD_RET_SUCC;
 	}
 
-	// start first step
-	game_step(pContext);
+	// game loop
+
+	ret = game_loop(pContext);
+
+	// print game result
+
 
 	return CMD_RET_SUCC;
 }
 
 static int cmd_info(char* param, GameContext* pContext)
 {
+	char* w = get_word(param, &param);
+	if(w == NULL) // self info
+	{
+
+	}
+	else if(!strcmp(w, "game") || !strcmp(w, "g")) // game global info
+	{
+
+	}
+	else if(!strcmp(w, "gamefull")) // game full info 
+	{
+
+	}
+	else if(!strcmp(w, "cardstack")) // list card stack cards
+	{
+
+	}
+	else if(!strcmp(w, "outcard")) // list out cards
+	{
+
+	}
+	else if(!strcmp(w, "player") || !strcmp(w, "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
+	{
+
+	}
+
 	return CMD_RET_SUCC;
 }
 

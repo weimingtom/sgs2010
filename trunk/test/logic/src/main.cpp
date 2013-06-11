@@ -4,6 +4,7 @@
 #include "player.h"
 #include "game.h"
 #include "cmd.h"
+#include "comm.h"
 
 /*
 
@@ -62,6 +63,7 @@ static const PlayerConfig* select_config()
 
 */
 
+
 int main(int argc, char** argv)
 {
 	int players = 0;
@@ -72,17 +74,6 @@ int main(int argc, char** argv)
 	srand((int)time(NULL));
 
 	printf(PROJ_NAME" "VERSION_STR"\n");
-
-
-	//pConfig = select_config();
-
-	//printf("your select is: Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n",
-	//	pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
-
-	//players = pConfig->players;
-
-
-	//init_game_context(&stGameContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
 
 	ST_ZREO(stGameContext);
 
