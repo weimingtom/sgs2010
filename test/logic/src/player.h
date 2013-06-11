@@ -19,10 +19,30 @@ enum PlayerID
 };
 
 
+enum PlayerFlag
+{
+	PlayerFlag_SkipNextRound = 0x1,
+	PlayerFlag_SkipThisRound = 0x2,
+	PlayerFlag_SkipThisRoundJudge = 0x4,
+	PlayerFlag_SkipThisRoundGet = 0x8,
+	PlayerFlag_SkipThisRoundOut = 0xf,
+	PlayerFlag_SkipThisRoundDiscard = 0x10,
+	PlayerFlag_AllThisSkipFlag = PlayerFlag_SkipThisRound
+		|PlayerFlag_SkipThisRoundJudge|PlayerFlag_SkipThisRoundGet
+		|PlayerFlag_SkipThisRoundOut|PlayerFlag_SkipThisRoundDiscard,
+	PlayerFlag_AllSkipFlag = PlayerFlag_SkipNextRound|PlayerFlag_AllThisSkipFlag,
+};
 
-#define MAX_HAND_CARD   16
+
+#define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
+#define PLAYER_SET_FLAG(p,f)  ((p)->flag |= f)
+#define PLAYER_CLR_FLAG(p,f)  ((p)->flag &= ~f)
+#define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = 0)
+
+
+#define MAX_HAND_CARD   20
 #define MAX_JUDGMENT_CARD  8
-
+#define MAX_PLAYER_PARAM  10
 
 typedef  struct  tagPlayer
 {
@@ -39,10 +59,17 @@ typedef  struct  tagPlayer
 	Card  stHorseChaseCard;
 	Card  stHorseRunCard;
 	Card  stJudgmentCards[MAX_JUDGMENT_CARD];
+	unsigned long flag;
+	int   params[MAX_PLAYER_PARAM];
 } Player;
 
 
 int init_player(Player* pPlayer, int id, int hero);
+
+
+const char* player_id_str(int id);
+
+
 
 
 #endif /* __PLAYER_H__ */
