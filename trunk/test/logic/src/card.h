@@ -17,13 +17,40 @@ enum CardType
 // card identification
 enum CardID
 {
+	CardID_None = 0,
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
-	CardID_Defend = 2,   // SHAN - a normal defend card, counteract the effect of the SHA card
-	CardID_Medicine = 3, // TAO - a normal medicine card, the target restore one life when used to.
-	CardID_AllAttack = 4, // WANJIANQIFA - attack all player except Attacker. all of the target lose 1 life unless the target out a SHAN card
-	CardID_AllMedicine = 5, // TAOYUANJIEYI - medicine all player include out player.  all of the targets restore one life.
-	CardID_Deul = 6, // JUEDOU
-	CardID_Aggression = 7, // NANMANRUQING
+	CardID_Defend,   // SHAN - a normal defend card, counteract the effect of the SHA card
+	CardID_Medicine, // TAO - a normal medicine card, the target restore one life when used to.
+	CardID_Ligntning, // SHANDIAN
+	CardID_Happy,     // LEBUSISHU
+	CardID_Unassailable, // WUXIEJEJI
+	CardID_OtherAttack,   // JIEDAOSHAREN
+	CardID_Foison,    // WUGUFENGDENG
+	CardID_GenWithAir, // WUZHONGSHENGYOU
+	CardID_Deul, // JUEDOU
+	CardID_MakeBrother, // TAOYUANJIEYI
+	CardID_Aggression, // NANMANRUQING
+	CardID_AllAttack, // WANJIANQIFA - attack all player except Attacker. all of the target lose 1 life unless the target out a SHAN card
+	CardID_Snitch, // SHUNGSHOUQIANYANG
+	CardID_KickLadder, // GUOHECAIQIAO
+	CardID_ZhuaHuang, 
+	CardID_DiLu, 
+	CardID_JueYing, 
+	CardID_CiTu, 
+	CardID_ZhiXing, 
+	CardID_DaWan, 
+	CardID_LianNu,
+	CardID_SwordHanBing,
+	CardID_SwordQingHong,
+	CardID_SwordChiXiong,
+	CardID_AxeGuanShi,
+	CardID_SwordQingLong,
+	CardID_SpearZhangBa,
+	CardID_HalberdFangTian,
+	CardID_BowQiLing,
+	CardID_BaGua,
+	CardID_SheildRenWang,
+	CardID_Max,
 };
 
 // card color
@@ -68,7 +95,8 @@ typedef int  (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 
 typedef struct tagCardConfig
 {
-	int  id;
+	char id;
+	char type;
 	char desc[MAX_DESC_LEN];
 	CARDCHECKFUN check;
 	CARDOUTFUN   out;
@@ -77,10 +105,15 @@ typedef struct tagCardConfig
 
 typedef struct tagCard
 {
-	int type;
-	int id;
-	int color;
-	int value;
+	union {
+		struct {
+			char id;
+			char color;
+			char value;
+			char flag;
+		};
+		unsigned long ul;
+	};
 }Card;
 
 
@@ -89,6 +122,7 @@ const char* card_id_str(int id);
 const char* card_color_str(int color);
 const char* card_value_str(int value);
 
+const CardConfig* get_card_config(int id);
 
 void card_dump(const Card* pCard);
 
