@@ -2,68 +2,60 @@
 #include "card_stack.h"
 #include "comm.h"
 
-static const Card   s_init_cards[] = 
+static const char s_szInitCard[] = 
 {
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_2 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_3 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_4 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Spade,	CardValue_5 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_6 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_7 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Spade,	CardValue_8 },
-	{ CardType_Strategy,	CardID_AllAttack,	CardColor_Spade,	CardValue_9 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Spade,	CardValue_10 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Spade,	CardValue_J },
-	{ CardType_Strategy,	CardID_Aggression,	CardColor_Spade,	CardValue_Q },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Spade,	CardValue_K },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Spade,	CardValue_A },
-
-	{ CardType_Normal,		CardID_Defend,		CardColor_Club,		CardValue_2 },
-	{ CardType_Strategy,	CardID_Aggression,	CardColor_Club,		CardValue_3 },
-	{ CardType_Strategy,	CardID_Deul,		CardColor_Club,		CardValue_4 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Club,		CardValue_5 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Club,		CardValue_6 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Club,		CardValue_7 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Club,		CardValue_8 },
-	{ CardType_Strategy,	CardID_AllAttack,	CardColor_Club,		CardValue_9 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Club,		CardValue_10 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Club,		CardValue_J },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Club,		CardValue_Q },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Club,		CardValue_K },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Club,		CardValue_A },
-
-	{ CardType_Normal,		CardID_Defend,		CardColor_Heart,	CardValue_2 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Heart,	CardValue_3 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Heart,	CardValue_4 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Heart,	CardValue_5 },
-	{ CardType_Normal,		CardID_Attack,		CardColor_Heart,	CardValue_6 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Heart,	CardValue_7 },
-	{ CardType_Strategy,	CardID_AllMedicine,	CardColor_Heart,	CardValue_8 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Heart,	CardValue_9 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Heart,	CardValue_10 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Heart,	CardValue_J },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Heart,	CardValue_Q },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Heart,	CardValue_K },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Heart,	CardValue_A },
-
-	{ CardType_Normal,		CardID_Attack,		CardColor_Diamond,	CardValue_2 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_3 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Diamond,	CardValue_4 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_5 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_6 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Diamond,	CardValue_7 },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_8 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Diamond,	CardValue_9 },
-	{ CardType_Strategy,	CardID_AllMedicine,	CardColor_Diamond,	CardValue_10 },
-	{ CardType_Normal,		CardID_Medicine,	CardColor_Diamond,	CardValue_J },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_Q },
-	{ CardType_Normal,		CardID_Defend,		CardColor_Diamond,	CardValue_K },
-	{ CardType_Strategy,	CardID_Deul,		CardColor_Diamond,	CardValue_A },
+	CardID_Attack, CardColor_Diamond, CardValue_7, CardColor_Diamond, CardValue_8, CardColor_Diamond, CardValue_9, CardColor_Diamond, CardValue_10, 
+		CardColor_Diamond, CardValue_K,  CardColor_Spade, CardValue_7, CardColor_Spade, CardValue_8, CardColor_Spade, CardValue_8, 
+		CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_10, CardColor_Spade, CardValue_10,
+		CardColor_Heart, CardValue_10, CardColor_Heart,	CardValue_10, CardColor_Heart,	CardValue_J, 
+		CardColor_Club, CardValue_2, CardColor_Club, CardValue_3, CardColor_Club, CardValue_4, CardColor_Club, CardValue_5,
+		CardColor_Club, CardValue_6, CardColor_Club, CardValue_7, CardColor_Club, CardValue_8, CardColor_Club, CardValue_8, 
+		CardColor_Club, CardValue_9, CardColor_Club, CardValue_9, CardColor_Club, CardValue_10,CardColor_Club, CardValue_10, 
+		CardColor_Club, CardValue_J, CardColor_Club, CardValue_J, 0,
+	CardID_Defend, CardColor_Diamond, CardValue_2, CardColor_Diamond, CardValue_2, CardColor_Diamond, CardValue_3, CardColor_Diamond, CardValue_4, 
+		CardColor_Diamond, CardValue_5, CardColor_Diamond, CardValue_6, CardColor_Diamond, CardValue_7, CardColor_Diamond, CardValue_8, 
+		CardColor_Diamond, CardValue_9, CardColor_Diamond, CardValue_10, CardColor_Diamond, CardValue_J, CardColor_Diamond, CardValue_J, 
+		CardColor_Heart, CardValue_2, CardColor_Heart, CardValue_2, CardColor_Heart, CardValue_K, 0,
+	CardID_Medicine, CardColor_Diamond, CardValue_Q, CardColor_Heart, CardValue_3, CardColor_Heart, CardValue_4, CardColor_Heart, CardValue_6,
+		CardColor_Heart, CardValue_7, CardColor_Heart, CardValue_8, CardColor_Heart, CardValue_9, CardColor_Heart, CardValue_Q, 0,
+	CardID_Ligntning, CardColor_Spade, CardValue_A, CardColor_Heart, CardValue_Q, 0,
+	CardID_Happy, CardColor_Club, CardValue_6, CardColor_Spade, CardValue_6, CardColor_Heart, CardValue_6, 0,
+	CardID_Unassailable, CardColor_Diamond, CardValue_Q, CardColor_Spade, CardValue_J, CardColor_Club, CardValue_Q, CardColor_Club, CardValue_K, 0,
+	CardID_OtherAttack, CardColor_Club, CardValue_Q, CardColor_Club, CardValue_K, 0,
+	CardID_Foison, CardColor_Heart, CardValue_3, CardColor_Heart, CardValue_4, 0,
+	CardID_GenWithAir, CardColor_Heart, CardValue_7, CardColor_Heart, CardValue_8, CardColor_Heart, CardValue_9, CardColor_Heart, CardValue_J, 0,
+	CardID_Deul, CardColor_Spade, CardValue_A, CardColor_Club, CardValue_A, CardColor_Diamond, CardValue_A, 0,
+	CardID_MakeBrother, CardColor_Heart, CardValue_A, 0,
+	CardID_Aggression, CardColor_Spade, CardValue_7, CardColor_Spade, CardValue_K,CardColor_Club, CardValue_7, 0,
+	CardID_AllAttack, CardColor_Heart, CardValue_A, 0,
+	CardID_Snitch, CardColor_Diamond, CardValue_3, CardColor_Diamond, CardValue_4, CardColor_Spade, CardValue_3, CardColor_Spade, CardValue_4, 
+		CardColor_Spade, CardValue_J, 0,
+	CardID_KickLadder, CardColor_Spade, CardValue_3, CardColor_Spade, CardValue_4, CardColor_Spade, CardValue_Q, CardColor_Heart, CardValue_Q, 
+		CardColor_Club, CardValue_3, CardColor_Club, CardValue_4, 0,
+	CardID_ZhuaHuang, CardColor_Heart, CardValue_K, 0,
+	CardID_DiLu, CardColor_Club, CardValue_5, 0,
+	CardID_DiLu, CardColor_Spade, CardValue_5, 0,
+	CardID_CiTu, CardColor_Heart, CardValue_5, 0,
+	CardID_ZhiXing, CardColor_Diamond, CardValue_K, 0,
+	CardID_DaWan, CardColor_Spade, CardValue_K, 0,
+	CardID_LianNu, CardColor_Diamond, CardValue_A, CardColor_Club, CardValue_A, 0,
+	CardID_SwordHanBing, CardColor_Spade, CardValue_2, 0, 
+	CardID_SwordQingHong, CardColor_Spade, CardValue_6, 0, 
+	CardID_SwordChiXiong, CardColor_Spade, CardValue_2, 0, 
+	CardID_AxeGuanShi, CardColor_Diamond, CardValue_5, 0,
+	CardID_SwordQingLong, CardColor_Spade, CardValue_5, 0, 
+	CardID_SpearZhangBa, CardColor_Spade, CardValue_Q, 0, 
+	CardID_HalberdFangTian, CardColor_Diamond, CardValue_Q, 0, 
+	CardID_BowQiLing, CardColor_Heart, CardValue_5, 0,
+	CardID_BaGua, CardColor_Spade, CardValue_2, CardColor_Club, CardValue_2, 0,
+	CardID_SheildRenWang, CardColor_Club, CardValue_2, 0,
+	0,
 
 };
 
+
 // INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE
-#define INIT_CARD_SIZE    COUNT(s_init_cards)
+#define INIT_CARD_SIZE    COUNT(s_szInitCard)
 
 //#if (INIT_CARD_SIZE > CARD_STACK_SIZE)
 //#error "INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE!"
@@ -71,9 +63,26 @@ static const Card   s_init_cards[] =
 
 int init_card_stack(CardStack* pCardStack)
 {
-	pCardStack->count = INIT_CARD_SIZE;
-	memcpy(pCardStack->cards, s_init_cards, sizeof(s_init_cards));
+	int n, id;
 
+	pCardStack->count = 0;
+
+	n = 0;
+	while(1)
+	{
+		id = s_szInitCard[n++];
+		if(id == 0)
+			break;
+		while(s_szInitCard[n] != 0)
+		{
+			pCardStack->cards[pCardStack->count].id = id;
+			pCardStack->cards[pCardStack->count].color = s_szInitCard[n++];
+			pCardStack->cards[pCardStack->count].value = s_szInitCard[n++];
+			pCardStack->cards[pCardStack->count].flag = 0;
+			pCardStack->count++;
+		}
+		n++;
+	}
 	return 0;
 }
 

@@ -28,7 +28,7 @@ const char* card_id_str(int id)
 	case CardID_Defend: return "闪";
 	case CardID_Medicine: return "桃";
 	case CardID_AllAttack: return "万箭齐发";
-	case CardID_AllMedicine: return "桃园结义";
+	//case CardID_AllMedicine: return "桃园结义";
 	case CardID_Deul: return "决斗";
 	case CardID_Aggression: return "南蛮入侵";
 	default: return "Invalid";
@@ -74,7 +74,17 @@ const char* card_value_str(int value)
 	}
 }
 
+const CardConfig* get_card_config(int id)
+{
+	switch(id)
+	{
+	case CardID_Attack:  return NULL;
+	}
+	return NULL;
+}
+
+
 void card_dump(const Card* pCard)
 {
-	printf("(type:%s, id:%s, color:%s, value:%s)", card_type_str(pCard->type), card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));	
+	printf("(id:%s, color:%s, value:%s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));	
 }
