@@ -9,23 +9,30 @@ enum HeroID
 {
 	HeroID_None = 0,
 	HeroID_CaoCao = 1,
-	HeroID_LiuBei = 2,
-	HeroID_SunQuan = 3,
+	HeroID_LiuBei,
+	HeroID_SunQuan,
 
-	HeroID_GuanYu = 4,
-	HeroID_ZhangFei = 5,
-	HeroID_ZhaoYun = 6,
-	HeroID_MaChao = 7,
-	HeroID_XiaHouDun = 8,
-	HeroID_ZhangHe = 9,
-	HeroID_LuXun = 10,
+	HeroID_GuanYu,
+	HeroID_ZhangFei,
+	HeroID_ZhaoYun,
+	HeroID_MaChao,
+	HeroID_XiaHouDun,
+	HeroID_ZhangLiao,
+	HeroID_LuXun,
+	HeroID_SunShangXiang,
 
 
-	HeroID_Min = HeroID_CaoCao,
-	HeroID_Max = HeroID_LuXun,
+	HeroID_Max,
 
 };
 
+
+enum HeroSex
+{
+	HeroSex_None = 0,
+	HeroSex_Male = 1,
+	HeroSex_Female = 2,
+};
 
 enum HeroGroup
 {
@@ -58,14 +65,19 @@ typedef struct tagHeroSkill
 } HeroSkill;
 
 
+#define MAX_HERO_SKILL_NUM    5
+
 typedef struct  tagHeroConfig
 {
 	int  id;
 	char name[MAX_NAME_LEN];
 	int  life;
-	int  isMaster;
+	YESNO  isMaster;
 	int  group;
-	char desc[MAX_NAME_LEN];
+	int  sex;
+	char desc[MAX_DESC_LEN];
+	int  skillNum;
+	HeroSkill skills[MAX_HERO_SKILL_NUM];
 } HeroConfig;
 
 
@@ -73,7 +85,6 @@ typedef struct  tagHeroConfig
 
 const HeroConfig* get_hero_config(int id);
 
-int random_hero_id(int isMaster);
 
 
 #endif /* __HERO_H__ */

@@ -14,7 +14,7 @@ int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers
 {
 	int n, c;
 	int pids[MAX_PLAYER_NUM];
-	int hids[HeroID_Max+1];
+	int hids[HeroID_Max];
 	int hcnt;
 	int hmcnt;
 	int hscnt;
@@ -29,7 +29,7 @@ int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers
 	
 	hcnt = 0;
 	hmcnt = 0;
-	for(n = HeroID_Min; n <= HeroID_Max; n++)
+	for(n = 0; n < HeroID_Max; n++)
 	{
 		pHero = get_hero_config(n);
 		if(pHero)
@@ -187,7 +187,7 @@ static int get_hand_card(GameContext* pGame)
 	Player* pPlayer = &pGame->players[pGame->nCurPlayer];
 	if(pPlayer->nHandCardNum >= MAX_HAND_CARD)
 	{
-		printf("get_hand_card: player [%d] handle card id full!\n", pGame->nCurPlayer);
+		printf("get_hand_card: player [%d] handle card full!\n", pGame->nCurPlayer);
 		return -1;
 	}
 
