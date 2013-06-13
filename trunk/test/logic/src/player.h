@@ -44,6 +44,23 @@ enum PlayerFlag
 #define MAX_JUDGMENT_CARD  8
 #define MAX_PLAYER_PARAM  10
 
+
+
+enum EquipIdx {
+	EquipIdx_Weapon = 0,
+	EquipIdx_Aomor,
+	EquipIdx_HorseInc,
+	EquipIdx_HorseDec,
+	EquipIdx_Max,
+};
+
+
+enum PlayerCardWhere{
+	PlayerCard_Hand = 1,
+	PlayerCard_Equip = 2,
+	PlayerCard_Judgment = 3,
+};
+
 typedef  struct  tagPlayer
 {
 	int id;
@@ -54,14 +71,17 @@ typedef  struct  tagPlayer
 	int   nHandCardNum;
 	int   nJudgmentCardNum;
 	Card  stHandCards[MAX_HAND_CARD];
-	Card  stWeaponCard;
-	Card  stAomorCard;
-	Card  stHorseChaseCard;
-	Card  stHorseRunCard;
+	Card  stEquipCard[EquipIdx_Max];
 	Card  stJudgmentCards[MAX_JUDGMENT_CARD];
 	unsigned long flag;
 	int   params[MAX_PLAYER_PARAM];
 } Player;
+
+
+
+
+#define PLAYER_CARD_WHERE(pos)     ((pos>>8) & 0xff)
+#define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
 
 
 int init_player(Player* pPlayer, int id, int hero);
@@ -69,6 +89,7 @@ int init_player(Player* pPlayer, int id, int hero);
 
 const char* player_id_str(int id);
 
+int player_remove_card(Player* pPlayer, int pos);
 
 
 

@@ -7,22 +7,18 @@
 static int out_card_check_event(GameContext* pGame, GameEventContext* pParentEvent, int player, int target)
 {
 	GameEventContext  event;
-	event.id = GameEvent_OutCardCheck;
-	event.trigger = player;
-	event.target = target;
-	event.parent_event = pParentEvent;
-	event.out_check.card.id = CardID_Attack;
-	event.out_check.result = Check_Unknown;
+	INIT_EVENT(&event, GameEvent_OutCardCheck, player, target, pParentEvent);
+	event.card.id = CardID_Attack;
+	event.result = Result_None;
 
 	trigger_game_event(pGame, &event);
 
-	if(event.out_check.result == Check_Yes )
+	if(event.result ==Result_Yes )
 		return 1;
-	else if(event.out_check.result == Check_No)
+	else if(event.result ==Result_No)
 		return 0;
 	// default
 	return pGame->players[player].params[0] == 0;
-
 }
 
 
@@ -46,7 +42,7 @@ static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int
 
 
 		// use in force out 
-		if(pEvent->id == GameEvent_PassiveOutCard && pEvent->passive_out.id == CardID_Attack)
+		if(pEvent->id == GameEvent_PassiveOutCard && pEvent->card.id == CardID_Attack)
 			return YES;
 	}
 

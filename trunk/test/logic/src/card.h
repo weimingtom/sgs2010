@@ -118,6 +118,24 @@ typedef struct tagCard
 }Card;
 
 
+typedef struct tagPosCard
+{
+	Card card;
+	int  pos;
+}PosCard;
+
+typedef struct tagOutCard OutCard;
+
+#define MAX_RCARD_NUM  5
+
+struct tagOutCard
+{
+	PosCard vcard;    //  use as card (virtaul) 
+	int  nrcard;   //  real card number ,. if 0 vcard is also real card 
+	PosCard rcards[MAX_RCARD_NUM];  // rcard array;
+};
+
+
 const char* card_type_str(int type);
 const char* card_id_str(int id);
 const char* card_color_str(int color);
@@ -127,6 +145,7 @@ const CardConfig* get_card_config(int id);
 
 void card_dump(const Card* pCard);
 
+char* card_str(const Card* pCard, char* buffer, int buflen);
 
 #endif /* __CARD_H__ */
 

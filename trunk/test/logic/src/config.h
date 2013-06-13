@@ -9,6 +9,18 @@
 #include <ctype.h>
 #include <malloc.h>
 
+#ifdef WIN32
+
+
+#define snprintf _snprintf
+
+#elif defined(LINUX)
+
+
+#endif
+
+
+
 
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"

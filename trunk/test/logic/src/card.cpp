@@ -179,10 +179,17 @@ const CardConfig* get_card_config(int id)
 	return NULL;
 }
 
+char* card_str(const Card* pCard, char* buffer, int buflen)
+{
+	snprintf(buffer, buflen, "(%s, %s %s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));
+	return buffer;
+}
+
 
 void card_dump(const Card* pCard)
 {
-	printf("(%s, %s %s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));	
+	char buffer[128];
+	printf("%s", card_str(pCard, buffer, sizeof(buffer)));	
 }
 
 
