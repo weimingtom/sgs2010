@@ -1,6 +1,7 @@
 #include "config.h"
 #include "player.h"
 #include "hero.h"
+#include "comm.h"
 
 int init_player(Player* pPlayer, int id, int hero)
 {
@@ -72,15 +73,39 @@ const char* player_id_str(int id)
 
 
 
+int player_remove_card(Player* pPlayer, int pos)
+{
+	int where = PLAYER_CARD_WHERE(pos);
+	int index = PLAYER_CARD_INDEX(pos);
 
+	switch(where)
+	{
+	case PlayerCard_Hand:
+		if(pos < pPlayer->nHandCardNum)
+		{
+			arrray_remove_t(pPlayer->stHandCards, sizeof(pPlayer->stHandCards[0]), &pPlayer->nHandCardNum, index, NULL);
+			return 0;
+		}
 
+		break;
+	case PlayerCard_Equip:
+		if(pos < EquipIdx_Max && pPlayer->stEquipCard[index].id != CardID_None)
+		{
+			memset(&pPlayer->stEquipCard[index], 0, sizeof(pPlayer->stEquipCard[index]));
+			return 0;
+		}
+		break;
+	case PlayerCard_Judgment:
+		if(pos < pPlayer->nJudgmentCardNum)
+		{
+			arrray_remove_t(pPlayer->stJudgmentCards, sizeof(pPlayer->stJudgmentCards[0]), &pPlayer->nJudgmentCardNum, index, NULL);
+			return 0;
+		}
+		break;
+	}
 
-
-
-
-
-
-
+	return -1;
+}
 
 
 

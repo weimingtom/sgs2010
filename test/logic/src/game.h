@@ -93,13 +93,15 @@ enum GameEvent
 	GameEvent_PostCardJudgeCalc,
 	GameEvent_OutCardCheck,
 	GameEvent_PassiveOutCard,
+	GameEvent_SupplyCard,
 };
 
-enum CheckResult
+enum EventResult
 {
-	Check_Unknown = 0,
-	Check_Yes = 1,
-	Check_No = 2,
+	Result_None = 0,
+	Result_Yes = 1,
+	Result_No  = 2,
+	Result_Cancel = 3,
 };
 
 typedef struct tagGameEventContext GameEventContext;
@@ -107,19 +109,25 @@ typedef struct tagGameEventContext GameEventContext;
 
 struct tagGameEventContext
 {
-	int  id;
-	int  trigger;
-	int  target;
+	int      id;
+	int      trigger;
+	int      target;
 	GameEventContext* parent_event;
-	int  block;
-	union {
-		struct {
-			Card card;
-			int  result;
-		} out_check;
-		Card passive_out;
-	};
+	int      result;
+	int      block;
+	Card     card;
+	OutCard  out;
 };
+
+
+#define INIT_EVENT(event, eid, tr, tg, p)   \
+do { \
+	memset((event), 0, sizeof(*event)); \
+	(event)->id = (eid); \
+	(event)->trigger = (tr); \
+	(event)->target = (tg); \
+	(event)->parent_event = (p); \
+} while(0)
 
 
 int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
