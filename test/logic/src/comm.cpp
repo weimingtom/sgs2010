@@ -86,7 +86,7 @@ void rand_array_t(void* pv, int memsize, int count, int rn)
 	}
 }
 
-void sort_array_t(void* pv, int memsize, int count, int (*comp)(const void*,const void*,void*), void* ud)
+void sort_array_t(void* pv, int memsize, int count, COMPFUN comp, void* ud)
 {
 	int i, j, inc;
 	void* t;
@@ -163,7 +163,7 @@ int arrray_remove_t(void* pv, int memsize, int* pCount, int pos, void* val)
 	return pos;
 }
 
-int arrray_remove_value_first_t(void* pv, int memsize, int* pCount, const void* val, int (*comp)(const void*,const void*,void*), void* ud)
+int arrray_remove_value_first_t(void* pv, int memsize, int* pCount, const void* val, COMPFUN comp, void* ud)
 {
 	int n;
 	for(n = 0; n < *pCount; n++)
@@ -176,7 +176,7 @@ int arrray_remove_value_first_t(void* pv, int memsize, int* pCount, const void* 
 	return -1;
 }
 
-int arrray_remove_value_last_t(void* pv, int memsize, int* pCount, const void* val, int (*comp)(const void*,const void*,void*), void* ud)
+int arrray_remove_value_last_t(void* pv, int memsize, int* pCount, const void* val, COMPFUN comp, void* ud)
 {
 	int n;
 	for(n = *pCount - 1; n >= 0; n--)
@@ -189,7 +189,7 @@ int arrray_remove_value_last_t(void* pv, int memsize, int* pCount, const void* v
 	return -1;
 }
 
-int arrray_bsearch_t(void* pv, int memsize, int count, const void* val, int (*comp)(const void*,const void*,void*), void* ud)
+int arrray_bsearch_t(void* pv, int memsize, int count, const void* val, COMPFUN comp, void* ud)
 {
 	int a, b, n;
 	int c;

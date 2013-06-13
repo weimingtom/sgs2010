@@ -21,13 +21,13 @@ enum CardID
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
 	CardID_Defend,   // SHAN - a normal defend card, counteract the effect of the SHA card
 	CardID_Medicine, // TAO - a normal medicine card, the target restore one life when used to.
-	CardID_Ligntning, // SHANDIAN
+	CardID_Lightning, // SHANDIAN
 	CardID_Happy,     // LEBUSISHU
 	CardID_Unassailable, // WUXIEJEJI
 	CardID_OtherAttack,   // JIEDAOSHAREN
 	CardID_Foison,    // WUGUFENGDENG
 	CardID_GenWithAir, // WUZHONGSHENGYOU
-	CardID_Deul, // JUEDOU
+	CardID_Duel, // JUEDOU
 	CardID_MakeBrother, // TAOYUANJIEYI
 	CardID_Aggression, // NANMANRUQING
 	CardID_AllAttack, // WANJIANQIFA - attack all player except Attacker. all of the target lose 1 life unless the target out a SHAN card
@@ -36,8 +36,8 @@ enum CardID
 	CardID_ZhuaHuang, 
 	CardID_DiLu, 
 	CardID_JueYing, 
-	CardID_CiTu, 
-	CardID_ZhiXing, 
+	CardID_ChiTu, 
+	CardID_ZiXing, 
 	CardID_DaWan, 
 	CardID_LianNu,
 	CardID_SwordHanBing,
@@ -97,6 +97,7 @@ typedef struct tagCardConfig
 {
 	char id;
 	char type;
+	char name[MAX_NAME_LEN];
 	char desc[MAX_DESC_LEN];
 	CARDCHECKFUN check;
 	CARDOUTFUN   out;

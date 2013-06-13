@@ -91,26 +91,41 @@ enum GameEvent
 	GameEvent_PostCardJudge,
 	GameEvent_PerCardJudgeCalc,    
 	GameEvent_PostCardJudgeCalc,
-
+	GameEvent_OutCardCheck,
+	GameEvent_PassiveOutCard,
 };
 
-
-typedef struct tagGameEventContext
+enum CheckResult
 {
-	int  event;
+	Check_Unknown = 0,
+	Check_Yes = 1,
+	Check_No = 2,
+};
+
+typedef struct tagGameEventContext GameEventContext;
+
+
+struct tagGameEventContext
+{
+	int  id;
 	int  trigger;
 	int  target;
+	GameEventContext* parent_event;
 	int  block;
 	union {
 		struct {
-			Card card;	
-		}judge;
+			Card card;
+			int  result;
+		} out_check;
+		Card passive_out;
 	};
-} GameEventContext;
+};
 
 
 int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 
+
+int trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 
 int game_loop(GameContext* pGame);
 
