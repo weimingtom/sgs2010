@@ -4,10 +4,10 @@
 
 static const char s_szInitCard[] = 
 {
-	CardID_Attack, CardColor_Diamond, CardValue_7, CardColor_Diamond, CardValue_8, CardColor_Diamond, CardValue_9, CardColor_Diamond, CardValue_10, 
-		CardColor_Diamond, CardValue_K,  CardColor_Spade, CardValue_7, CardColor_Spade, CardValue_8, CardColor_Spade, CardValue_8, 
-		CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_10, CardColor_Spade, CardValue_10,
-		CardColor_Heart, CardValue_10, CardColor_Heart,	CardValue_10, CardColor_Heart,	CardValue_J, 
+	CardID_Attack, CardColor_Diamond, CardValue_6, CardColor_Diamond, CardValue_7, CardColor_Diamond, CardValue_8, CardColor_Diamond, CardValue_9, 
+		CardColor_Diamond, CardValue_10, CardColor_Diamond, CardValue_K,  CardColor_Spade, CardValue_7, CardColor_Spade, CardValue_8,
+		CardColor_Spade, CardValue_8, CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_9, CardColor_Spade, CardValue_10, 
+		CardColor_Spade, CardValue_10, CardColor_Heart, CardValue_10, CardColor_Heart,	CardValue_10, CardColor_Heart,	CardValue_J, 
 		CardColor_Club, CardValue_2, CardColor_Club, CardValue_3, CardColor_Club, CardValue_4, CardColor_Club, CardValue_5,
 		CardColor_Club, CardValue_6, CardColor_Club, CardValue_7, CardColor_Club, CardValue_8, CardColor_Club, CardValue_8, 
 		CardColor_Club, CardValue_9, CardColor_Club, CardValue_9, CardColor_Club, CardValue_10,CardColor_Club, CardValue_10, 
@@ -18,13 +18,13 @@ static const char s_szInitCard[] =
 		CardColor_Heart, CardValue_2, CardColor_Heart, CardValue_2, CardColor_Heart, CardValue_K, 0,
 	CardID_Medicine, CardColor_Diamond, CardValue_Q, CardColor_Heart, CardValue_3, CardColor_Heart, CardValue_4, CardColor_Heart, CardValue_6,
 		CardColor_Heart, CardValue_7, CardColor_Heart, CardValue_8, CardColor_Heart, CardValue_9, CardColor_Heart, CardValue_Q, 0,
-	CardID_Ligntning, CardColor_Spade, CardValue_A, CardColor_Heart, CardValue_Q, 0,
+	CardID_Lightning, CardColor_Spade, CardValue_A, CardColor_Heart, CardValue_Q, 0,
 	CardID_Happy, CardColor_Club, CardValue_6, CardColor_Spade, CardValue_6, CardColor_Heart, CardValue_6, 0,
 	CardID_Unassailable, CardColor_Diamond, CardValue_Q, CardColor_Spade, CardValue_J, CardColor_Club, CardValue_Q, CardColor_Club, CardValue_K, 0,
 	CardID_OtherAttack, CardColor_Club, CardValue_Q, CardColor_Club, CardValue_K, 0,
 	CardID_Foison, CardColor_Heart, CardValue_3, CardColor_Heart, CardValue_4, 0,
 	CardID_GenWithAir, CardColor_Heart, CardValue_7, CardColor_Heart, CardValue_8, CardColor_Heart, CardValue_9, CardColor_Heart, CardValue_J, 0,
-	CardID_Deul, CardColor_Spade, CardValue_A, CardColor_Club, CardValue_A, CardColor_Diamond, CardValue_A, 0,
+	CardID_Duel, CardColor_Spade, CardValue_A, CardColor_Club, CardValue_A, CardColor_Diamond, CardValue_A, 0,
 	CardID_MakeBrother, CardColor_Heart, CardValue_A, 0,
 	CardID_Aggression, CardColor_Spade, CardValue_7, CardColor_Spade, CardValue_K,CardColor_Club, CardValue_7, 0,
 	CardID_AllAttack, CardColor_Heart, CardValue_A, 0,
@@ -34,9 +34,9 @@ static const char s_szInitCard[] =
 		CardColor_Club, CardValue_3, CardColor_Club, CardValue_4, 0,
 	CardID_ZhuaHuang, CardColor_Heart, CardValue_K, 0,
 	CardID_DiLu, CardColor_Club, CardValue_5, 0,
-	CardID_DiLu, CardColor_Spade, CardValue_5, 0,
-	CardID_CiTu, CardColor_Heart, CardValue_5, 0,
-	CardID_ZhiXing, CardColor_Diamond, CardValue_K, 0,
+	CardID_JueYing, CardColor_Spade, CardValue_5, 0,
+	CardID_ChiTu, CardColor_Heart, CardValue_5, 0,
+	CardID_ZiXing, CardColor_Diamond, CardValue_K, 0,
 	CardID_DaWan, CardColor_Spade, CardValue_K, 0,
 	CardID_LianNu, CardColor_Diamond, CardValue_A, CardColor_Club, CardValue_A, 0,
 	CardID_SwordHanBing, CardColor_Spade, CardValue_2, 0, 
@@ -61,6 +61,16 @@ static const char s_szInitCard[] =
 //#error "INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE!"
 //#endif
 
+int card_comp_cv(const void* a, const void* b, void*)
+{
+	if(((Card*)a)->color < ((Card*)b)->color) return -1;
+	if(((Card*)a)->color > ((Card*)b)->color) return 1;
+	if(((Card*)a)->value < ((Card*)b)->value) return -1;
+	if(((Card*)a)->value > ((Card*)b)->value) return 1;
+	return 0;
+}
+
+
 int init_card_stack(CardStack* pCardStack)
 {
 	int n, id;
@@ -83,6 +93,8 @@ int init_card_stack(CardStack* pCardStack)
 		}
 		n++;
 	}
+	//sort_array_t(pCardStack->cards, sizeof(Card), pCardStack->count, card_comp_cv, NULL);
+	//card_stack_dump(pCardStack);
 	return 0;
 }
 

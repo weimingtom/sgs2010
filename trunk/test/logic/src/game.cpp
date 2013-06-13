@@ -251,7 +251,7 @@ static int game_event_check_player(GameContext* pGame, GameEventContext* pEvent,
 	return 0;
 }
 
-static int trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
+int trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n;
 	int m = pGame->nCurPlayer;
@@ -271,7 +271,7 @@ static int trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 static int game_round_begin(GameContext* pGame)
 {
 	GameEventContext  event;
-	event.event = GameEvent_RoundBegin;
+	event.id = GameEvent_RoundBegin;
 	event.trigger = pGame->nCurPlayer;
 	event.target = 0;
 	event.block = 0;	
