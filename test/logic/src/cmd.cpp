@@ -1,6 +1,10 @@
 #include "config.h"
 #include "cmd.h"
 #include "game.h"
+#include "card.h"
+#include "hero.h"
+
+
 
 #define C2I(c)  ((int)(unsigned char)(c))
 
@@ -213,27 +217,240 @@ static int cmd_info(char* param, GameContext* pContext)
 	char* w = get_word(param, &param);
 	if(w == NULL) // self info
 	{
+		if(pContext->status == Status_None)
+		{
+			printf("not in game!\n");
+		}
+		else
+		{
+			int n;
+			char buf[128];
+			Player* p = &pContext->players[pContext->nCurPlayer];
+			// base info
+			printf("Current Player: %d, %s, %s, life: %d/%d\n", pContext->nCurPlayer, player_id_str(p->id), p->name, p->curLife, p->maxLife);
+			// hand cards
+			printf("Hand cards (%d):\n",  p->nHandCardNum);
+			for(n = 0; n < p->nHandCardNum; n++)
+			{
+				//if(n > 0 && n % 4 == 0) printf("\n           ");
+				printf("  (%d) %s;\n", n+1, card_str(&p->stHandCards[n], buf, sizeof(buf)));
+			}
 
+			// equiped cards
+			printf("Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+			printf("Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+			printf("Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+			printf("Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+
+			// judgment cards
+			printf("Judgment cards (%d):\n",  p->nJudgmentCardNum);
+			for(n = 0; n < p->nJudgmentCardNum; n++)
+			{
+				//if(n > 0 && n % 4 == 0) printf("\n           ");
+				printf("  (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+			}
+		}
+	}
+	else if(!strcmp(w, "event") || !strcmp(w, "e")) // game global info
+	{
+		printf("current event: No\n");
 	}
 	else if(!strcmp(w, "game") || !strcmp(w, "g")) // game global info
 	{
+		if(pContext->status == Status_None)
+		{
+			printf("not in game!\n");
+		}
+		else
+		{
+			int n, k;
+			char buf[128];
+			Player* p;
+			printf("game info: \n");
 
+			printf("(*) %d players (%d+%d+%d+%d): \n", pContext->nPlayerCount, 1, pContext->nMinsterCount, pContext->nSpyCount, pContext->nMutineerCount);
+			
+			for(k = 0; k < pContext->nPlayerCount; k++)
+			{
+				p = &pContext->players[k];
+
+				printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1, pContext->nRoundPlayer == k ? "R":"-", pContext->nCurPlayer == k ? "C":"-",
+					(k - pContext->nCurPlayer + pContext->nPlayerCount) % pContext->nPlayerCount, 
+					(pContext->nCurPlayer - k + pContext->nPlayerCount) % pContext->nPlayerCount, 
+					player_id_str(p->id), p->name, p->curLife, p->maxLife, p->nHandCardNum);
+
+				// equiped cards
+				printf("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+				printf("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+				printf("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+				printf("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+
+				// judgment cards
+				printf("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
+				for(n = 0; n < p->nJudgmentCardNum; n++)
+				{
+					//if(n > 0 && n % 4 == 0) printf("\n           ");
+					printf("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+				}
+			}
+			printf("(*) stack cards: %d\n", pContext->cardStack.count);
+			printf("(*) out   cards: %d\n", pContext->cardOut.count);
+
+		}
 	}
-	else if(!strcmp(w, "gamefull")) // game full info 
+	else if(!strcmp(w, "gamefull") || !strcmp(w, "gf")) // game full info 
 	{
 
 	}
-	else if(!strcmp(w, "cardstack")) // list card stack cards
-	{
-
-	}
-	else if(!strcmp(w, "outcard")) // list out cards
+	else if(!strcmp(w, "out") || !strcmp(w, "o")) // list out cards
 	{
 
 	}
 	else if(!strcmp(w, "player") || !strcmp(w, "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
 	{
+		const char* pp = get_word(param, &param);
+		char cp = 0;
+		int n = 0;
+		char buf[128];
 
+		if(pp == NULL)
+		{
+			param_error("info");
+			return CMD_RET_SUCC;
+		}
+
+		if(*pp == '+' || *pp == '-')
+		{
+			cp = *pp;
+			pp++;
+		}
+
+
+		if(*pp ==0 )
+		{
+			param_error("info");
+			return CMD_RET_SUCC;
+		}
+
+
+		while(*pp >= '0' && *pp <= '9')
+		{
+			n = n * 10 + (*pp -'0');
+			pp++;
+		}
+
+		if(*pp != 0 )
+		{
+			param_error("info");
+			return CMD_RET_SUCC;
+		}
+
+		if(cp == '+')
+		{
+			n = (n + pContext->nCurPlayer) % pContext->nPlayerCount;
+		}
+		else if(cp == '-')
+		{
+			n = (pContext->nCurPlayer - n % pContext->nPlayerCount + pContext->nPlayerCount) % pContext->nPlayerCount;
+		}
+		else
+		{
+			n = n % pContext->nPlayerCount;
+		}
+
+		Player* pPlayer = &pContext->players[n];
+
+		printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", n + 1, pContext->nRoundPlayer == n ? "R":"-", pContext->nCurPlayer == n ? "C":"-",
+			(n - pContext->nCurPlayer + pContext->nPlayerCount) % pContext->nPlayerCount, 
+			(pContext->nCurPlayer - n + pContext->nPlayerCount) % pContext->nPlayerCount, 
+			player_id_str(pPlayer->id), pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
+
+		// equiped cards
+		printf("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+		printf("    Armor : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+		printf("    Horse(+1) : %s\n", card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+		printf("    Horse(-1) : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+
+		// judgment cards
+		printf("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
+		for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
+		{
+			//if(n > 0 && n % 4 == 0) printf("\n           ");
+			printf("      (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
+		}
+	}
+	else if(!strcmp(w, "card") || !strcmp(w, "c"))
+	{
+		const char* pp = get_word(param, &param);
+		int id;
+		const CardConfig *pCardCfg;
+		if(pp ==NULL)
+		{
+			for(id = 1; id < CardID_Max; id++)
+			{
+				pCardCfg = get_card_config(id);
+
+				if(pCardCfg)
+				{
+					printf("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
+				}
+			}
+		}
+		else
+		{
+			id = atoi(pp);
+			pCardCfg = get_card_config(id);
+			if(pCardCfg == NULL)
+			{
+				printf("no card id  is %d!\n", id);
+			}
+			else
+			{
+				printf("(%d) %s, %s\n%s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type), pCardCfg->desc);
+			}
+		}				
+	}
+	else if(!strcmp(w, "hero") || !strcmp(w, "h"))
+	{
+		const char* pp = get_word(param, &param);
+		int id;
+		int n;
+		const HeroConfig *pHero;
+		if(pp ==NULL)
+		{
+			for(id = 1; id < HeroID_Max; id++)
+			{
+				pHero = get_hero_config(id);
+
+				if(pHero)
+				{
+					printf("(%d) %s, %s, %s, life %d\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
+				}
+			}
+		}
+		else
+		{
+			id = atoi(pp);
+			pHero = get_hero_config(id);
+			if(pHero == NULL)
+			{
+				printf("no card id  is %d!\n", id);
+			}
+			else
+			{
+				printf("(%d) %s, %s, %s, life %d\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
+				for(n = 0; n < pHero->skillNum; n++)
+				{
+					printf(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
+				}
+			}
+		}				
+
+	}
+	else
+	{
+		param_error("info");
+		return CMD_RET_SUCC;
 	}
 
 	return CMD_RET_SUCC;
@@ -282,7 +499,11 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		"\t* 8 players: 1 master, 2 minsters, 1 spy, 4 mutineers."},
 	{ "info", "i",	cmd_info, 
 		"info/i\n\tshow current player info, handle cards, aromo card, etc.\n"
-		"info/i game\n\t show the game current global info", 
+		"info/i game/g\n\t show the game current global info\n"
+		"info/i event/e\n\t show the game current event info\n"
+		"info/i player/p <+n|-n|n>\n\t show the other player info\n"
+		"info/i card/c <name>\n\t show card info by name\n"
+		"info/i hero/h <name>\n\t show hero info by name", 
 		NULL},
 	{ "get", "g",   cmd_get,
 		"get/g\n\tget card from card stack.", 

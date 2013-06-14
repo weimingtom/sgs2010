@@ -186,6 +186,12 @@ char* card_str(const Card* pCard, char* buffer, int buflen)
 }
 
 
+char* card_simple_str(const Card* pCard, char* buffer, int buflen)
+{
+	return "";
+}
+
+
 void card_dump(const Card* pCard)
 {
 	char buffer[128];

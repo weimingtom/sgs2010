@@ -48,7 +48,7 @@ enum PlayerFlag
 
 enum EquipIdx {
 	EquipIdx_Weapon = 0,
-	EquipIdx_Aomor,
+	EquipIdx_Armor,
 	EquipIdx_HorseInc,
 	EquipIdx_HorseDec,
 	EquipIdx_Max,
