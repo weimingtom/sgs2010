@@ -84,7 +84,8 @@ typedef struct  tagHeroConfig
 
 
 const HeroConfig* get_hero_config(int id);
-
+const char* hero_group_str(int group);
+const char* hero_sex_str(int sex);
 
 
 #endif /* __HERO_H__ */

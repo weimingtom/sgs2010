@@ -2,6 +2,7 @@
 #include "game.h"
 #include "comm.h"
 #include "hero.h"
+#include "cmd.h"
 
 #define NEXT_ROUND(pGame)   ((pGame)->nRoundPlayer = ((pGame)->nRoundPlayer + 1) % (pGame)->nPlayerCount)
 #define NEXT_CUR(pGame)   ((pGame)->nCurPlayer = ((pGame)->nCurPlayer + 1) % (pGame)->nPlayerCount)
@@ -294,6 +295,7 @@ static int game_round_getcard(GameContext* pGame)
 
 static int game_round_outcard(GameContext* pGame)
 {
+	cmd_loop(pGame);
 	return 0;
 }
 

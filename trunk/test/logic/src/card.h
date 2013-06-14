@@ -147,6 +147,10 @@ void card_dump(const Card* pCard);
 
 char* card_str(const Card* pCard, char* buffer, int buflen);
 
+char* card_simple_str(const Card* pCard, char* buffer, int buflen);
+
+#define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
+
 #endif /* __CARD_H__ */
 
 

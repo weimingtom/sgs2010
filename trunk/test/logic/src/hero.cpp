@@ -2,6 +2,33 @@
 #include "hero.h"
 
 
+
+const char* hero_group_str(int group)
+{
+	switch(group)
+	{
+	case HeroGroup_None: return "无";
+	case HeroGroup_Wei: return "魏";
+	case HeroGroup_Shu: return "蜀";
+	case HeroGroup_Wu: return "吴";
+	case HeroGroup_People: return "群雄";
+	}
+	return "Invalid";
+}
+
+const char* hero_sex_str(int sex)
+{
+	switch(sex)
+	{
+	case HeroSex_None: return "无";
+	case HeroSex_Male: return "男";
+	case HeroSex_Female: return "女";
+	}
+	return "Invalid";	
+}
+
+
+
 extern const HeroConfig* get_hero_cacao();
 extern const HeroConfig* get_hero_liube();
 extern const HeroConfig* get_hero_sunquan();
