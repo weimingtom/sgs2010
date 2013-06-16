@@ -20,13 +20,30 @@ SRC+=$(shell find $(SRC_DIR/card_impl) -name '*.cpp' -type f)
 SRC+=$(shell find $(SRC_DIR/hero_impl) -name '*.cpp' -type f)
 
 OBJS=$(SRC:.cpp=.obj) 
+DEPS=$(SRC:.cpp=.dep)
+
+
+all:$(OUT)
 
 
 $(OUT): $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	@echo generating $@ ...
+	@$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	@echo done.
 
 .cpp.obj:
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCL) -MT $@ -MF `echo $@ | sed -e 's,\.obj$$,.dep,'` -MD -MP
+	@echo compiling $@ ...
+	@$(CC) -c -o $@ $< $(CFLAGS) $(INCL) -MT $@ -MF `echo $@ | sed -e 's,\.obj$$,.dep,'` -MD -MP
+
+clean:
+	-rm -rf $(OBJS)
+	-rm -rf $(DEPS)
+	-rm -rf $(OUT)
+
+
+
+-include $(DEPS)
+
 
 
 
