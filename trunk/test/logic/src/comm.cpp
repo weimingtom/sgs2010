@@ -91,7 +91,7 @@ void sort_array_t(void* pv, int memsize, int count, COMPFUN comp, void* ud)
 	int i, j, inc;
 	void* t;
 
-	t = _alloca(memsize);
+	t = alloca(memsize);
 
 	// calc the start inc 
 	inc = 1;
