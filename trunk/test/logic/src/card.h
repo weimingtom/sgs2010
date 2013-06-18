@@ -121,6 +121,7 @@ typedef struct tagCard
 typedef struct tagPosCard
 {
 	Card card;
+	int  where;
 	int  pos;
 }PosCard;
 

@@ -28,6 +28,13 @@ int compare_l(const void* a,const void* b,void*);
 int compare_f(const void* a,const void* b,void*);
 int compare_ul(const void* a,const void* b,void*);
 
+
+
+int to_int(const char* text, int* pv);
+int to_uint(const char* text, unsigned int* pv);
+int to_float(const char* text, float* pv);
+
+
 #endif /* __COMM_H__ */
 
 

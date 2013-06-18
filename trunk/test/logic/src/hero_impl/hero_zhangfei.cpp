@@ -18,9 +18,37 @@ static YESNO paoxiao_check(GameContext* pGame, GameEventContext* pEvent, int pla
 static int paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	//reset attack count in this round
-	pGame->players[player].params[0] = 0;
+	//pGame->players[player].params[0] = 0;
+	
+	//printf("please out a card 'sha' or cancel skill:");
+
+	Card card;
+	card.color = CardColor_None;
+	card.id = CardID_Attack;
+	card.value = CardValue_None;
+
+
+	return game_appoint_out(pGame, player,  PlayerCard_Hand, &card, 1, 1, "please out a card 'sha' or cancel the skill:");
+
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const HeroConfig* get_hero_zhangfei()

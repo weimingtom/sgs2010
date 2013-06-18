@@ -53,7 +53,11 @@ static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int
 static int card_attack_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	// select target
-
+	while(1)
+	{
+		printf("select target:\n");
+			
+	}
 	
 	return 0;
 }
