@@ -60,6 +60,7 @@ enum YESNO
 #define MIN(a,b)   ((a)<(b)?(a):(b))
 #define MAX(a,b)   ((a)>(b)?(a):(b))
 
+#define C2I(c)  ((int)(unsigned char)(c))
 
 #endif /* __CONFIG_H__ */
 

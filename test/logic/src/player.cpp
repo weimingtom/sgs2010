@@ -108,4 +108,42 @@ int player_remove_card(Player* pPlayer, int pos)
 }
 
 
+int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
+{
+	int n;
+	if(idx < 1 )
+		return -1;
+
+	if(idx <= player->nHandCardNum)
+	{
+		*where = PlayerCard_Hand;
+		*pos = idx - 1;
+		return 0;
+	}
+
+	idx -= player->nHandCardNum;
+
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(player->stEquipCard[n].id != CardID_None)
+		{
+			if(idx == 1)
+			{
+				*where = PlayerCard_Equip;
+				*pos = n;
+			}
+			idx--;
+		}
+	}
+
+	if(idx <= player->nJudgmentCardNum)
+	{
+		*where = PlayerCard_Judgment;
+		*pos = idx - 1;
+		return 0;
+	}
+
+	return -1;
+}
+
 

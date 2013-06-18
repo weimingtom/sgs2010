@@ -11,6 +11,167 @@
 #define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
 
 
+static void get_first_hand_card(GameContext* pGame);
+
+
+
+int game_status(GameContext* pGame)
+{
+	return pGame->status;
+}
+
+int get_game_cur_player(GameContext* pGame)
+{
+	return pGame->nCurPlayer;
+}
+
+int get_game_round_player(GameContext* pGame)
+{
+	return pGame->nRoundPlayer;
+}
+
+int game_cur_info(GameContext* pGame)
+{
+	int n;
+	char buf[128];
+	Player* p;
+	const HeroConfig*  pHero;
+	int  idx = 1;
+
+	if(game_status(pGame) == Status_None)
+	{
+		printf("not in game!\n");
+		return -1;
+	}
+
+	p = CUR_PLAYER(pGame);
+	// base info
+	printf("Current Player: %d, %s, %s, life: %d/%d\n", pGame->nCurPlayer, player_id_str(p->id), p->name, p->curLife, p->maxLife);
+	// hand cards
+	printf("Hand cards (%d):\n",  p->nHandCardNum);
+	for(n = 0; n < p->nHandCardNum; n++)
+	{
+		//if(n > 0 && n % 4 == 0) printf("\n           ");
+		printf("  (%d) %s;\n", idx++, card_str(&p->stHandCards[n], buf, sizeof(buf)));
+	}
+
+	// equiped cards
+	if(p->stEquipCard[EquipIdx_Weapon].id != CardID_None)
+		printf("Weapon    : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf)) );
+	if(p->stEquipCard[EquipIdx_Armor].id != CardID_None)
+		printf("Armor     : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf)) );
+	if(p->stEquipCard[EquipIdx_HorseInc].id != CardID_None)
+		printf("Horse(+1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf)) );
+	if(p->stEquipCard[EquipIdx_HorseDec].id != CardID_None)
+		printf("Horse(-1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf)) );
+
+	// judgment cards
+	printf("Judgment cards (%d):\n",  p->nJudgmentCardNum);
+	for(n = 0; n < p->nJudgmentCardNum; n++)
+	{
+		//if(n > 0 && n % 4 == 0) printf("\n           ");
+		printf("  (%d) %s;\n", idx++, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+	}
+
+	// skills
+
+	pHero = get_hero_config(p->id);
+
+	if(pHero && pHero->skillNum > 0)
+	{
+		printf("Hero Skills:\n");
+		for(n = 0; n < pHero->skillNum; n++)
+		{
+			printf(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
+		}
+	}
+
+	return 0;
+}
+
+int game_other_player_info(GameContext* pGame, int player)
+{
+	int n;
+	char buf[128];
+	Player* pPlayer;
+
+	if(game_status(pGame) == Status_None)
+	{
+		printf("not in game!\n");
+		return -1;
+	}
+
+	pPlayer = &pGame->players[player];
+
+	printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", player + 1, pGame->nRoundPlayer == player ? "R":"-", pGame->nCurPlayer == player  ? "C":"-",
+		(player - pGame->nCurPlayer + pGame->nPlayerCount) % pGame->nPlayerCount, 
+		(pGame->nCurPlayer - player + pGame->nPlayerCount) % pGame->nPlayerCount, 
+		player_id_str(pPlayer->id), pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
+
+	// equiped cards
+	printf("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+	printf("    Armor : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+	printf("    Horse(+1) : %s\n", card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+	printf("    Horse(-1) : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+
+	// judgment cards
+	printf("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
+	for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
+	{
+		//if(n > 0 && n % 4 == 0) printf("\n           ");
+		printf("      (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
+	}
+	return 0;
+}
+
+
+int game_global_info(GameContext* pGame)
+{
+	int n, k;
+	char buf[128];
+	Player* p;
+
+
+	if(game_status(pGame) == Status_None)
+	{
+		printf("not in game!\n");
+		return -1;
+	}
+
+
+	printf("game global info: \n");
+
+	printf("(*) %d players (%d+%d+%d+%d): \n", pGame->nPlayerCount, 1, pGame->nMinsterCount, pGame->nSpyCount, pGame->nMutineerCount);
+
+	for(k = 0; k < pGame->nPlayerCount; k++)
+	{
+		p = &pGame->players[k];
+
+		printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1, pGame->nRoundPlayer == k ? "R":"-", pGame->nCurPlayer == k ? "C":"-",
+			(k - pGame->nCurPlayer + pGame->nPlayerCount) % pGame->nPlayerCount, 
+			(pGame->nCurPlayer - k + pGame->nPlayerCount) % pGame->nPlayerCount, 
+			player_id_str(p->id), p->name, p->curLife, p->maxLife, p->nHandCardNum);
+
+		// equiped cards
+		printf("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+		printf("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+		printf("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+		printf("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+
+		// judgment cards
+		printf("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
+		for(n = 0; n < p->nJudgmentCardNum; n++)
+		{
+			//if(n > 0 && n % 4 == 0) printf("\n           ");
+			printf("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+		}
+	}
+	printf("(*) stack cards: %d\n", pGame->cardStack.count);
+	printf("(*) out   cards: %d\n", pGame->cardOut.count);
+	return 0;
+}
+
+
 int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers)
 {
 	int n, c;
@@ -149,6 +310,10 @@ int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers
 
 	pGame->status = Status_FirstGetCard;
 	pGame->nRoundNum = 0;
+
+	// first get 4 cards per player
+
+	get_first_hand_card(pGame);
 
 
 	return 0;
@@ -295,7 +460,7 @@ static int game_round_getcard(GameContext* pGame)
 
 static int game_round_outcard(GameContext* pGame)
 {
-	cmd_loop(pGame);
+	cmd_loop(pGame, NULL, NULL, NULL);
 	return 0;
 }
 
@@ -309,8 +474,13 @@ static int game_round_end(GameContext* pGame)
 	return 0;
 }
 
+// 
+int game_continue(GameContext* pGame)
+{
+	return 0;
+}
 
-
+/*
 int game_loop(GameContext* pGame)
 {
 	// first get card
@@ -408,7 +578,218 @@ int game_loop(GameContext* pGame)
 	return 0;
 }
 
+*/
 
 
 
 
+static int per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+{
+	GameEventContext  event;
+	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, target, pParentEvent);
+	event.out = *pOut;
+
+	trigger_game_event(pGame, &event);
+
+	return event.result;
+}
+
+static int post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+{
+	GameEventContext  event;
+	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, target, pParentEvent);
+	event.out = *pOut;
+
+	trigger_game_event(pGame, &event);
+
+	*pOut = event.out;
+
+	return event.result;	
+}
+
+static int remove_out_card(GameContext* pGame, int supply, OutCard* pOut)
+{
+	int n;
+	char buf[128];
+	if(pOut->nrcard == 0)
+	{
+		if(0 != player_remove_card(&pGame->players[supply], pOut->vcard.pos))
+		{
+			printf("remove out card [%s]  from player [%d] pos [%d] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)), supply, pOut->vcard.pos);
+			return -1;
+		}
+	}
+	else
+	{
+		for(n = 0; n < pOut->nrcard; n++)
+		{
+			player_remove_card(&pGame->players[supply], pOut->rcards[n].pos);
+			printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), supply, pOut->rcards[n].pos);
+			return -1;
+		}
+	}
+	return 0;
+}
+
+static int add_out_stack(GameContext* pGame, OutCard* pOut)
+{
+	int n;
+	char buf[128];
+	if(pOut->nrcard > 0)
+	{
+		for(n = 0; n < pOut->nrcard; n++)
+		{
+			if(0 != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
+			{
+				printf("add out card [%s] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
+				return -1;
+			}
+		}
+	}
+	else if(pOut->vcard.card.id != CardID_None)
+	{
+		if(0 != card_stack_push(&pGame->cardOut, &pOut->vcard.card))
+		{
+			printf("add out card [%s] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)));
+			return -1;
+		}
+	}
+	return 0;
+}
+
+static int out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, int supply, OutCard* pOut)
+{
+	if(Result_Cancel == per_out_card(pGame, pParentEvent, trigger, target, pOut))
+		return -1;
+
+	remove_out_card(pGame, supply, pOut);
+
+	post_out_card(pGame, pParentEvent, trigger, target, pOut);
+
+	add_out_stack(pGame, pOut);
+
+	return 0;
+}
+
+
+
+
+int game_getcard(GameContext* pGame)
+{
+	if(game_status(pGame) != Status_Round_Get)
+		return -1;
+
+	// get 2 card
+	get_hand_card(pGame);
+	get_hand_card(pGame);
+
+	// goto out status
+
+	pGame->status = Status_Round_Out;
+
+	return 0;
+}
+
+int game_outcard(GameContext* pGame, int idx)
+{
+
+	if(game_status(pGame) != Status_Round_Out)
+		return -1;
+
+	int where; int pos;
+	if(0 != player_card_idx_to_pos(CUR_PLAYER(pGame), idx, &where, &pos))
+	{
+		printf("input card idx error!\n");
+		return -1;
+	}
+
+	if(where != PlayerCard_Hand)
+	{
+		printf("only can out hand card!\n");
+		return -1;
+	}
+
+	// check can out?
+	Card* pCard = CUR_PLAYER(pGame)->stHandCards[pos];
+
+	const CardConfig* pCardConfig = get_card_config(pCard->id);
+
+	if(pCardConfig == NULL || YES != (*pCardConfig->check)(pGame, NULL, pGame->nCurPlayer))
+	{
+		printf("can not out this card: %s!\n", card_str(pCard));
+		return -1;
+	}
+
+
+	return (*pCardConfig->out)(pGame, NULL, pGame->nCurPlayer);
+
+	return 0;
+}
+
+int game_useskill(GameContext* pGame, int idx)
+{
+	Player* p = CUR_PLAYER(pGame);
+
+	const HeroConfig* pHero = get_hero_config(p->id);
+
+	if(pHero == NULL)
+	{
+		printf("skill (%d) not exist!\n", idx );
+		return -1;
+	}
+
+	if(idx < 1 || idx > pHero->skillNum)
+	{
+		printf("invalid skill (%d) !\n", idx );
+		return -1;
+	}
+
+
+	if(pHero->skills[idx-1].check == NULL || (*pHero->skills[idx-1].check)(pGame, NULL, pGame->nCurPlayer) != YES)
+	{
+		printf("cannot use skill '%s'!\n", pHero->skills[idx-1].name );
+		return -1;
+	}
+
+	return (*pHero->skills[idx-1].check)(pGame, NULL, pGame->nCurPlayer);
+
+	return 0;
+}
+
+
+struct CmdLoopCallback
+{
+	const Card* pCard;
+	int num;
+	int where;
+	int cancel;
+	int ret;
+};
+
+int f_callback(const char** argv, int argc, GameContext* pGame, void* ud)
+{
+	CmdLoopCallback* pu = (CmdLoopCallback*)ud;
+
+	
+	if(!strcmp(argv[0], "out") || !strcmp(argv[0], "o"))
+	{
+
+	}
+
+
+	return CMD_RET_DEF;
+}
+
+int game_appoint_out(GameContext* pGame, int player, int where, const Card* pCard, int num, int canCancel, const char* alter_text)
+{
+	CmdLoopCallback  callback;
+	callback.pCard = pCard;
+	callback.num = num;
+	callback.where = where;
+	callback.cancel = canCancel;
+	callback.ret = 0;
+
+	cmd_loop(pGame, alter_text, f_callback, &callback);
+	
+	return callback.ret;
+}

@@ -54,11 +54,12 @@ enum EquipIdx {
 	EquipIdx_Max,
 };
 
-
+// need or bits
 enum PlayerCardWhere{
+	PlayerCard_Invald = 0,
 	PlayerCard_Hand = 1,
 	PlayerCard_Equip = 2,
-	PlayerCard_Judgment = 3,
+	PlayerCard_Judgment = 4,
 };
 
 typedef  struct  tagPlayer
@@ -90,6 +91,7 @@ int init_player(Player* pPlayer, int id, int hero);
 const char* player_id_str(int id);
 
 int player_remove_card(Player* pPlayer, int pos);
+int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
 
 
 

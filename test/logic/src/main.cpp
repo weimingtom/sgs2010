@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
 	ST_ZREO(stGameContext);
 
-	cmd_loop(&stGameContext);
+	cmd_loop(&stGameContext, NULL, NULL, NULL);
 
 	return 0;
 }

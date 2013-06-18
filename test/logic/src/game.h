@@ -135,7 +135,22 @@ int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers
 
 int trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 
-int game_loop(GameContext* pGame);
+int game_continue(GameContext* pGame);
+int game_cur_info(GameContext* pGame);
+int game_global_info(GameContext* pGame);
+int game_other_player_info(GameContext* pGame, int player);
+
+int game_getcard(GameContext* pGame);
+int game_outcard(GameContext* pGame, int idx);
+int game_useskill(GameContext* pGame, int idx);
+
+
+int game_status(GameContext* pGame);
+int get_game_cur_player(GameContext* pGame);
+int get_game_round_player(GameContext* pGame);
+
+// 按指定的方式出牌
+int game_appoint_out(GameContext* pGame, int player, int where, const Card* pCard, int num, int canCancel, const char* alter_text);
 
 #endif /* __GAME_H__ */
 

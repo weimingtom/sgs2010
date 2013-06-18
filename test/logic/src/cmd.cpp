@@ -3,10 +3,9 @@
 #include "game.h"
 #include "card.h"
 #include "hero.h"
+#include "comm.h"
 
 
-
-#define C2I(c)  ((int)(unsigned char)(c))
 
 // get a world from cmd split with space,return the point to the word first valid char, null if no more any words 
 static char* get_word(char* cmd, char** next)
@@ -62,41 +61,26 @@ static char* get_word(char* cmd, char** next)
 	return p;
 }
 
-enum {
-	GET_INT_SUCC = 0,
-	GET_INT_ERR = -1,
-	GET_INT_EOL  = -2,
-};
-
-static int get_int(char* cmd, int* val, char** next)
-{
-	char* p;
-	char* ret = get_word(cmd, next);
-
-	if(ret == NULL)
-		return GET_INT_EOL;
-
-
-	long lr = strtol(ret, &p, 0);
-
-	if(*p)
-		return GET_INT_ERR;
-
-	*val = lr;
-
-	return GET_INT_SUCC;
-}
-
 
 static char* get_line(char* buf, int size)
 {
 	int n,c;
+
+
+	fflush(stdin);
+
 	printf("$ ");
 
 	for(n = 0; n < size-1; n++)
 	{
-		c = getc(stdin);
-		if(c == EOF || c=='\n')
+		c = getchar();
+		if(c == EOF)
+		{
+			if(n == 0)
+				return NULL;
+			break;
+		}
+		else if(c=='\n')
 		{
 			break;
 		}
@@ -111,10 +95,11 @@ static char* get_line(char* buf, int size)
 
 
 static void cmd_help_i(const char* cmd);
-static int cmd_help(char* param, GameContext* pContext)
+
+static int cmd_help(const char** argv, int argc, GameContext* pContext)
 {
 	printf(PROJ_NAME" "VERSION_STR"\n");
-	cmd_help_i(get_word(param, NULL));
+	cmd_help_i(argc > 1 ? argv[1] : NULL);
 	return 0;
 }
 
@@ -124,7 +109,7 @@ static void param_error(const char* cmd)
 	cmd_help_i(cmd);
 }
 
-static int cmd_quit(char* param, GameContext* pContext)
+static int cmd_quit(const char** argv, int argc, GameContext* pContext)
 {
 	//exit(0);
 	return CMD_RET_EXIT;
@@ -165,7 +150,7 @@ const PlayerConfig* select_config(int players)
 }
 
 
-static int cmd_start(char* param, GameContext* pContext)
+static int cmd_start(const char** argv, int argc, GameContext* pContext)
 {
 
 	int ret;
@@ -177,12 +162,9 @@ static int cmd_start(char* param, GameContext* pContext)
 		return CMD_RET_SUCC;
 	}
 
-	// read cfg num
-	ret = get_int(param, &cfg, NULL);
-
-	if(ret != GET_INT_SUCC)
+	if(argc < 2 || 0 != to_int(argv[1], &cfg))
 	{
-		param_error("start");
+		param_error(argv[0]);
 		return CMD_RET_SUCC;
 	}
 
@@ -191,7 +173,7 @@ static int cmd_start(char* param, GameContext* pContext)
 
 	if(pConfig == NULL )
 	{
-		param_error("start");
+		param_error(argv[0]);
 		return CMD_RET_SUCC;
 	}
 
@@ -204,7 +186,7 @@ static int cmd_start(char* param, GameContext* pContext)
 
 	// game loop
 
-	ret = game_loop(pContext);
+	ret = game_continue(pContext);
 
 	// print game result
 
@@ -212,10 +194,9 @@ static int cmd_start(char* param, GameContext* pContext)
 	return CMD_RET_SUCC;
 }
 
-static int cmd_info(char* param, GameContext* pContext)
+static int cmd_info(const char** argv, int argc, GameContext* pContext)
 {
-	char* w = get_word(param, &param);
-	if(w == NULL) // self info
+	if(argc <= 1) // self info
 	{
 		if(pContext->status == Status_None)
 		{
@@ -223,39 +204,14 @@ static int cmd_info(char* param, GameContext* pContext)
 		}
 		else
 		{
-			int n;
-			char buf[128];
-			Player* p = &pContext->players[pContext->nCurPlayer];
-			// base info
-			printf("Current Player: %d, %s, %s, life: %d/%d\n", pContext->nCurPlayer, player_id_str(p->id), p->name, p->curLife, p->maxLife);
-			// hand cards
-			printf("Hand cards (%d):\n",  p->nHandCardNum);
-			for(n = 0; n < p->nHandCardNum; n++)
-			{
-				//if(n > 0 && n % 4 == 0) printf("\n           ");
-				printf("  (%d) %s;\n", n+1, card_str(&p->stHandCards[n], buf, sizeof(buf)));
-			}
-
-			// equiped cards
-			printf("Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-			printf("Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-			printf("Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-			printf("Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
-
-			// judgment cards
-			printf("Judgment cards (%d):\n",  p->nJudgmentCardNum);
-			for(n = 0; n < p->nJudgmentCardNum; n++)
-			{
-				//if(n > 0 && n % 4 == 0) printf("\n           ");
-				printf("  (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
-			}
+			game_cur_info(pContext);
 		}
 	}
-	else if(!strcmp(w, "event") || !strcmp(w, "e")) // game global info
+	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game global info
 	{
 		printf("current event: No\n");
 	}
-	else if(!strcmp(w, "game") || !strcmp(w, "g")) // game global info
+	else if(!strcmp(argv[1], "game") || !strcmp(argv[1], "g")) // game global info
 	{
 		if(pContext->status == Status_None)
 		{
@@ -263,61 +219,30 @@ static int cmd_info(char* param, GameContext* pContext)
 		}
 		else
 		{
-			int n, k;
-			char buf[128];
-			Player* p;
-			printf("game info: \n");
-
-			printf("(*) %d players (%d+%d+%d+%d): \n", pContext->nPlayerCount, 1, pContext->nMinsterCount, pContext->nSpyCount, pContext->nMutineerCount);
-			
-			for(k = 0; k < pContext->nPlayerCount; k++)
-			{
-				p = &pContext->players[k];
-
-				printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1, pContext->nRoundPlayer == k ? "R":"-", pContext->nCurPlayer == k ? "C":"-",
-					(k - pContext->nCurPlayer + pContext->nPlayerCount) % pContext->nPlayerCount, 
-					(pContext->nCurPlayer - k + pContext->nPlayerCount) % pContext->nPlayerCount, 
-					player_id_str(p->id), p->name, p->curLife, p->maxLife, p->nHandCardNum);
-
-				// equiped cards
-				printf("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-				printf("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-				printf("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-				printf("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
-
-				// judgment cards
-				printf("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
-				for(n = 0; n < p->nJudgmentCardNum; n++)
-				{
-					//if(n > 0 && n % 4 == 0) printf("\n           ");
-					printf("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
-				}
-			}
-			printf("(*) stack cards: %d\n", pContext->cardStack.count);
-			printf("(*) out   cards: %d\n", pContext->cardOut.count);
-
+			game_global_info(pContext);
 		}
 	}
-	else if(!strcmp(w, "gamefull") || !strcmp(w, "gf")) // game full info 
+	else if(!strcmp(argv[1], "gamefull") || !strcmp(argv[1], "gf")) // game full info 
 	{
 
 	}
-	else if(!strcmp(w, "out") || !strcmp(w, "o")) // list out cards
+	else if(!strcmp(argv[1], "out") || !strcmp(argv[1], "o")) // list out cards
 	{
 
 	}
-	else if(!strcmp(w, "player") || !strcmp(w, "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
+	else if(!strcmp(argv[1], "player") || !strcmp(argv[1], "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
 	{
-		const char* pp = get_word(param, &param);
+		const char* pp;
 		char cp = 0;
 		int n = 0;
-		char buf[128];
 
-		if(pp == NULL)
+		if(argc < 3)
 		{
-			param_error("info");
+			param_error(argv[0]);
 			return CMD_RET_SUCC;
 		}
+
+		pp = argv[2];
 
 		if(*pp == '+' || *pp == '-')
 		{
@@ -328,7 +253,7 @@ static int cmd_info(char* param, GameContext* pContext)
 
 		if(*pp ==0 )
 		{
-			param_error("info");
+			param_error(argv[0]);
 			return CMD_RET_SUCC;
 		}
 
@@ -341,7 +266,7 @@ static int cmd_info(char* param, GameContext* pContext)
 
 		if(*pp != 0 )
 		{
-			param_error("info");
+			param_error(argv[0]);
 			return CMD_RET_SUCC;
 		}
 
@@ -358,33 +283,13 @@ static int cmd_info(char* param, GameContext* pContext)
 			n = n % pContext->nPlayerCount;
 		}
 
-		Player* pPlayer = &pContext->players[n];
-
-		printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", n + 1, pContext->nRoundPlayer == n ? "R":"-", pContext->nCurPlayer == n ? "C":"-",
-			(n - pContext->nCurPlayer + pContext->nPlayerCount) % pContext->nPlayerCount, 
-			(pContext->nCurPlayer - n + pContext->nPlayerCount) % pContext->nPlayerCount, 
-			player_id_str(pPlayer->id), pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
-
-		// equiped cards
-		printf("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-		printf("    Armor : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-		printf("    Horse(+1) : %s\n", card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-		printf("    Horse(-1) : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
-
-		// judgment cards
-		printf("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
-		for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
-		{
-			//if(n > 0 && n % 4 == 0) printf("\n           ");
-			printf("      (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
-		}
+		game_other_player_info(pContext, n);
 	}
-	else if(!strcmp(w, "card") || !strcmp(w, "c"))
+	else if(!strcmp(argv[1], "card") || !strcmp(argv[1], "c"))
 	{
-		const char* pp = get_word(param, &param);
 		int id;
 		const CardConfig *pCardCfg;
-		if(pp ==NULL)
+		if(argc < 3)
 		{
 			for(id = 1; id < CardID_Max; id++)
 			{
@@ -398,7 +303,7 @@ static int cmd_info(char* param, GameContext* pContext)
 		}
 		else
 		{
-			id = atoi(pp);
+			id = atoi(argv[2]);
 			pCardCfg = get_card_config(id);
 			if(pCardCfg == NULL)
 			{
@@ -410,13 +315,12 @@ static int cmd_info(char* param, GameContext* pContext)
 			}
 		}				
 	}
-	else if(!strcmp(w, "hero") || !strcmp(w, "h"))
+	else if(!strcmp(argv[1], "hero") || !strcmp(argv[1], "h"))
 	{
-		const char* pp = get_word(param, &param);
 		int id;
 		int n;
 		const HeroConfig *pHero;
-		if(pp ==NULL)
+		if(argc < 3)
 		{
 			for(id = 1; id < HeroID_Max; id++)
 			{
@@ -430,7 +334,7 @@ static int cmd_info(char* param, GameContext* pContext)
 		}
 		else
 		{
-			id = atoi(pp);
+			id = atoi(argv[2]);
 			pHero = get_hero_config(id);
 			if(pHero == NULL)
 			{
@@ -449,29 +353,96 @@ static int cmd_info(char* param, GameContext* pContext)
 	}
 	else
 	{
-		param_error("info");
+		param_error(argv[0]);
 		return CMD_RET_SUCC;
 	}
 
 	return CMD_RET_SUCC;
 }
 
-static int cmd_get(char* param, GameContext* pContext)
+static int cmd_get(const char** argv, int argc, GameContext* pContext)
+{
+	if(game_status(pContext) != Status_Round_Get)
+	{
+		printf("not in get status!\n");
+		return CMD_RET_SUCC;
+	}
+
+
+	game_getcard(pContext);
+
+	return CMD_RET_SUCC;
+}
+
+static int cmd_out(const char** argv, int argc, GameContext* pContext)
+{
+	if(game_status(pContext) != Status_Round_Out)
+	{
+		printf("not in get status!\n");
+		return CMD_RET_SUCC;
+	}
+
+	int idx;
+
+
+	if(argc >= 2 && 0 == to_int(argv[1], &idx))
+	{
+		game_outcard(pContext,idx);
+
+	}
+	else
+	{
+		param_error(argv[0]);
+	}
+
+
+	return CMD_RET_SUCC;
+}
+
+
+static int cmd_useskill(const char** argv, int argc, GameContext* pContext)
+{
+	if(pContext->status == Status_None)
+	{
+		printf("not in game!\n");
+		return CMD_RET_SUCC;
+	}
+	int idx;
+
+
+	if(argc >= 2 && 0 == to_int(argv[1], &idx))
+	{
+		game_useskill(pContext, idx);
+
+	}
+	else
+	{
+		param_error(argv[0]);
+	}
+	
+	return CMD_RET_SUCC;
+}
+
+static int cmd_cancelskill(const char** argv, int argc, GameContext* pContext)
+{
+	if(pContext->status == Status_None)
+	{
+		printf("not in game!\n");
+		return CMD_RET_SUCC;
+	}
+
+	printf("not in skill using!\n");
+
+	return CMD_RET_SUCC;
+}
+
+
+static int cmd_pass(const char** argv, int argc, GameContext* pContext)
 {
 	return CMD_RET_SUCC;
 }
 
-static int cmd_out(char* param, GameContext* pContext)
-{
-	return CMD_RET_SUCC;
-}
-
-static int cmd_pass(char* param, GameContext* pContext)
-{
-	return CMD_RET_SUCC;
-}
-
-typedef int (*FunCmd)(char* param, GameContext* pContext);
+typedef int (*FunCmd)(const char** argv, int argc, GameContext* pContext);
 
 
 struct tagCmdDispatch
@@ -510,6 +481,12 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		NULL},
 	{ "out", "o",	cmd_out, 
 		"out/o <card idx> ...\n\tout one or more card.", 
+		NULL},
+	{ "useskill", "u",	cmd_useskill, 
+		"useskill/u <skill idx> ...\n\use a skill.", 
+		NULL},
+	{ "cancel", "c",	cmd_cancelskill, 
+		"cancel/c \n\tcancel the skill in using.", 
 		NULL},
 	{ "pass", "p", cmd_pass,
 		"pass/p\n\tno out card, so pass this round.", 
@@ -562,50 +539,74 @@ static void cmd_help_i(const char* cmd)
 }
 
 
-int cmd_loop(GameContext* pContext)
+int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funper, void* ud)
 {
 	char  cmdline[1024];
+	const char*  argv[64];
+	int   argc;
 	char  *next, *w;
 	int   n;
 	int   ret;
 
-	fflush(stdin);
-	while(get_line(cmdline, sizeof(cmdline)))
+	while( (alter_text ? printf("%s\n", alter_text) : 0), 
+		get_line(cmdline, sizeof(cmdline)))
 	{
-		w = get_word(cmdline, &next);
-
-		if(w != NULL)
-		{	
-			for(n= 0; n < CMD_NUM; n++)
+		next =  cmdline;
+		argc = 0;
+		memset(argv, 0, sizeof(argv));
+		while( NULL != (w = get_word(next, &next) ) )
+		{
+			if(argc < COUNT(argv))
 			{
-				if(!strcmp(w, s_cmdDispatch[n].name) || (s_cmdDispatch[n].sort_name && !strcmp(w, s_cmdDispatch[n].sort_name)))
-				{
-					break;
-				}
-			}
-
-			if(n < CMD_NUM)
-			{
-				ret = (*s_cmdDispatch[n].func)(next, pContext);
-
-				// return < 0 back to parent caller
-				if(ret < 0)
-					return ret;
-			}
-			else
-			{
-				printf("invalid cmd \'%s\'!\n", w);
+				argv[argc++] = w;
 			}
 		}
-		else
+
+		if(*next != 0)
 		{
-			if(*next != 0)
+			printf("error cmd at col %d!\n", (int)(next - cmdline));
+		}
+		else if(argc > 0)
+		{
+			ret = CMD_RET_DEF;
+
+			if(funper != NULL)
 			{
-				printf("error cmd at col %d!\n", (int)(next-cmdline));
+				ret = (*funper)(argv, argc, pContext, ud);
+
+
+				if(ret < 0)
+					return ret;
+
+			}
+
+			if(ret == CMD_RET_DEF)
+			{
+				for(n= 0; n < CMD_NUM; n++)
+				{
+					if(!strcmp(argv[0], s_cmdDispatch[n].name) || (s_cmdDispatch[n].sort_name && !strcmp(argv[0], s_cmdDispatch[n].sort_name)))
+					{
+						break;
+					}
+				}
+
+				if(n < CMD_NUM)
+				{
+
+					ret = (*s_cmdDispatch[n].func)(argv, argc, pContext);
+
+					// return < 0 back to parent caller
+					if(ret < 0)
+						return ret;
+				}
+				else
+				{
+					printf("invalid cmd \'%s\'!\n", argv[0]);
+				}
 			}
 		}
 	}
-	return 0;
+	return CMD_RET_SUCC;
 }
 
 

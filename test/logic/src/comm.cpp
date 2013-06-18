@@ -244,3 +244,48 @@ int compare_ul(const void* a,const void* b,void*)
 	return 0;
 }
 
+int to_int(const char* text, int* pv)
+{
+	char* p;
+	long l = strtol(text, &p, 0);
+
+	while(*p && isspace(C2I(*p))) p++;
+
+	if(*p != '\0')
+		return -1;
+
+	*pv = l;
+	return 0;
+}
+
+int to_uint(const char* text, unsigned int* pv)
+{
+	char* p;
+	unsigned long ul = strtoul(text, &p, 0);
+
+	while(*p && isspace(C2I(*p))) p++;
+
+	if(*p != '\0')
+		return -1;
+
+	*pv = ul;
+	return 0;
+
+}
+
+int to_float(const char* text, float* pv)
+{
+	char* p;
+	float f = strtod(text, &p);
+
+	while(*p && isspace(C2I(*p))) p++;
+
+	if(*p != '\0')
+		return -1;
+
+	*pv = f;
+	return 0;
+
+}
+
+
