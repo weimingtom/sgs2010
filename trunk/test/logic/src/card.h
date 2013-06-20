@@ -90,7 +90,7 @@ enum CardValue
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
+typedef int  (*CARDUSEFUN)(GameContext*, GameEventContext*, int);
 
 
 typedef struct tagCardConfig
@@ -100,7 +100,7 @@ typedef struct tagCardConfig
 	char name[MAX_NAME_LEN];
 	char desc[MAX_DESC_LEN];
 	CARDCHECKFUN check;
-	CARDOUTFUN   out;
+	CARDUSEFUN   use;
 }CardConfig;
 
 

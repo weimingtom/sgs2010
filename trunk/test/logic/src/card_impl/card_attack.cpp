@@ -50,17 +50,27 @@ static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int
 	return  NO;
 }
 
-static int card_attack_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static int card_attack_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	// select target
 	while(1)
 	{
 		printf("select target:\n");
-			
+		
 	}
 	
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
 
 const CardConfig* get_card_attack()
 {
@@ -72,7 +82,7 @@ const CardConfig* get_card_attack()
 		"\n★游戏开始时你的攻击范围是1	。"
 		"\n★每个出牌阶段你只能使用一张【杀】。",
 		card_attack_check,
-		card_attack_out,
+		card_attack_use,
 	};
 
 	return &card_attack;
