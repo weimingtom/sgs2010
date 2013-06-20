@@ -437,18 +437,50 @@ int trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 static int game_round_begin(GameContext* pGame)
 {
 	GameEventContext  event;
-	event.id = GameEvent_RoundBegin;
-	event.trigger = pGame->nCurPlayer;
-	event.target = 0;
-	event.block = 0;	
+	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, NULL);
+
 
 	trigger_game_event(pGame, &event);
+
+
+	pGame->status = Status_Round_Judge;
 
 	return 0;
 }
 
 static int game_round_judge(GameContext* pGame)
 {
+
+	GameEventContext  event;
+	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->nRoundPlayer, 0, NULL);
+	trigger_game_event(pGame, &event);
+
+	// judge cards
+	Player* pPlayer = ROUND_PLAYER(pGame);
+	int n;
+	Card* pCard;
+	const CardConfig* pCardConfig;
+
+	for(n = pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
+	{
+		pCard = &pPlayer->stJudgmentCards[n];
+		pCardConfig = get_card_config(pCard->id);
+
+		if(pCardConfig)
+		{
+			(*pCardConfig->judge)()
+		}
+		else
+		{
+			printf("card config [%d] not found!\n", pCard->id);
+		}
+	}
+
+	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->nRoundPlayer, 0, NULL);
+	trigger_game_event(pGame, &event);
+
+	pGame->status = Status_Round_Get;
+
 	return 0;
 }
 
@@ -466,17 +498,54 @@ static int game_round_outcard(GameContext* pGame)
 
 static int game_round_discardcard(GameContext* pGame)
 {
+	// trigger round discard event
+
+	// wait cmd_loop discard cmd execute
+
+
 	return 0;
 }
 
 static int game_round_end(GameContext* pGame)
 {
+	// trigger round end event
+
+	// calc next round player
+
+	// set status round begin
 	return 0;
+}
+
+
+static int game_step(GameContext* pGame)
+{
+	switch(pGame->status)
+	{
+	case Status_Round_Begin:
+		return game_round_begin(pGame);
+		break;
+	case Status_Round_Judge:
+		return game_round_judge(pGame);
+		break;
+	case Status_Round_Get:
+		return game_round_getcard(pGame);
+		break;
+	case Status_Round_Out:
+		return game_round_outcard(pGame);
+		break;
+	case Status_Round_Discard:
+		return game_round_discardcard(pGame);
+		break;
+	case Status_Round_End:
+		return game_round_end(pGame);
+	}
+	return -1;
 }
 
 // 
 int game_continue(GameContext* pGame)
 {
+	while(pGame->status )
 	return 0;
 }
 

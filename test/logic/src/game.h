@@ -127,6 +127,8 @@ do { \
 	(event)->trigger = (tr); \
 	(event)->target = (tg); \
 	(event)->parent_event = (p); \
+	(event)->block = 0; \
+	(event)->result = 0; \
 } while(0)
 
 
