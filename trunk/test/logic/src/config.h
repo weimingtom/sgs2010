@@ -8,6 +8,8 @@
 #include <time.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <stdarg.h>
+#include <setjmp.h>
 
 #ifdef WIN32
 

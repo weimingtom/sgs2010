@@ -434,8 +434,16 @@ int trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 	return 0;
 }
 
+static int game_next_round(GameContext* pGame);
+
 static int game_round_begin(GameContext* pGame)
 {
+
+	if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipNextRound))
+		return game_next_round(pGame);
+
+	pGame->nCurPlayer = pGame->nRoundPlayer;
+
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, NULL);
 
@@ -455,24 +463,71 @@ static int game_round_judge(GameContext* pGame)
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->nRoundPlayer, 0, NULL);
 	trigger_game_event(pGame, &event);
 
+	// is ot not skip this round step ?
+	
+
 	// judge cards
 	Player* pPlayer = ROUND_PLAYER(pGame);
-	int n;
-	Card* pCard;
+	Card stCard;
 	const CardConfig* pCardConfig;
 
-	for(n = pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
+
+
+	while(pPlayer->nJudgmentCardNum > 0)
 	{
-		pCard = &pPlayer->stJudgmentCards[n];
-		pCardConfig = get_card_config(pCard->id);
+		stCard = pPlayer->stJudgmentCards[pPlayer->nJudgmentCardNum-1];
+		pCardConfig = get_card_config(stCard.id);
 
 		if(pCardConfig)
 		{
-			(*pCardConfig->judge)()
+			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->nRoundPlayer, 0, NULL);
+			event.card = stCard;
+			trigger_game_event(pGame, &event);
+
+			if(event.result != Result_Cancel) // if card calc is cancel .
+			{
+				if(pCardConfig->calc != NULL)
+				{
+					INIT_EVENT(&event, GameEvent_CardCalc, pGame->nRoundPlayer, 0, NULL);
+					event.card = stCard;
+
+					pGame->nCurPlayer = pGame->nRoundPlayer;
+					(*pCardConfig->calc)(pGame, &event, pGame->nCurPlayer);
+				}
+
+				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->nRoundPlayer, 0, NULL);
+				event.card = stCard;
+				trigger_game_event(pGame, &event);
+
+				stCard = event.card;
+
+			}
+
+			// after calc
+			if(stCard.id == CardID_None)
+			{
+				// card is lost
+				pPlayer->nJudgmentCardNum--;
+			}
+			else
+			{
+				if(pCardConfig->fini != NULL)
+				{
+					(*pCardConfig->fini)(pGame, NULL, pGame->nCurPlayer);
+				}
+				else
+				{
+					// after calc discard card?
+					card_stack_push(&pGame->cardOut, &stCard);
+
+					pPlayer->nJudgmentCardNum--;
+
+				}
+			}
 		}
 		else
 		{
-			printf("card config [%d] not found!\n", pCard->id);
+			printf("card config [%d] not found!\n", stCard.id,  pGame->nRoundPlayer);
 		}
 	}
 
@@ -487,12 +542,27 @@ static int game_round_judge(GameContext* pGame)
 
 static int game_round_getcard(GameContext* pGame)
 {
+	GameEventContext  event;
+	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->nRoundPlayer, 0, NULL);
+	trigger_game_event(pGame, &event);
+
+
+
+
+
+
+	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->nRoundPlayer, 0, NULL);
+	trigger_game_event(pGame, &event);
+
+	pGame->status = Status_Round_Out;
+
 	return 0;
 }
 
 static int game_round_outcard(GameContext* pGame)
 {
-	cmd_loop(pGame, NULL, NULL, NULL);
+	
+	pGame->status = Status_Round_Discard;
 	return 0;
 }
 
@@ -503,16 +573,31 @@ static int game_round_discardcard(GameContext* pGame)
 	// wait cmd_loop discard cmd execute
 
 
+	pGame->status = Status_Round_End;
 	return 0;
 }
 
 static int game_round_end(GameContext* pGame)
 {
 	// trigger round end event
+	GameEventContext  event;
+	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, NULL);
 
+	trigger_game_event(pGame, &event);
+
+	game_next_round(pGame);
+	return 0;
+}
+
+
+static int game_next_round(GameContext* pGame)
+{
 	// calc next round player
+	pGame->nRoundPlayer = (pGame->nRoundPlayer + 1) & pGame->nPlayerCount;
+	pGame->nRoundNum++;
 
 	// set status round begin
+	pGame->status = Status_Round_Begin;
 	return 0;
 }
 
@@ -545,7 +630,8 @@ static int game_step(GameContext* pGame)
 // 
 int game_continue(GameContext* pGame)
 {
-	while(pGame->status )
+	while(1)
+		game_step(pGame);
 	return 0;
 }
 
@@ -761,7 +847,7 @@ int game_getcard(GameContext* pGame)
 
 int game_outcard(GameContext* pGame, int idx)
 {
-
+	char buffer[128];
 	if(game_status(pGame) != Status_Round_Out)
 		return -1;
 
@@ -779,13 +865,13 @@ int game_outcard(GameContext* pGame, int idx)
 	}
 
 	// check can out?
-	Card* pCard = CUR_PLAYER(pGame)->stHandCards[pos];
+	Card stCard = CUR_PLAYER(pGame)->stHandCards[pos];
 
-	const CardConfig* pCardConfig = get_card_config(pCard->id);
+	const CardConfig* pCardConfig = get_card_config(stCard.id);
 
-	if(pCardConfig == NULL || YES != (*pCardConfig->check)(pGame, NULL, pGame->nCurPlayer))
+	if(pCardConfig == NULL || pCardConfig->check == NULL || YES != (*pCardConfig->check)(pGame, NULL, pGame->nCurPlayer))
 	{
-		printf("can not out this card: %s!\n", card_str(pCard));
+		printf("can not out this card: %s!\n", card_str(&stCard, buffer, sizeof(buffer)));
 		return -1;
 	}
 
@@ -828,7 +914,7 @@ int game_useskill(GameContext* pGame, int idx)
 
 struct CmdLoopCallback
 {
-	const Card* pCard;
+	const CardPattern* patterns;
 	int num;
 	int where;
 	int cancel;
@@ -838,21 +924,26 @@ struct CmdLoopCallback
 int f_callback(const char** argv, int argc, GameContext* pGame, void* ud)
 {
 	CmdLoopCallback* pu = (CmdLoopCallback*)ud;
-
+	
 	
 	if(!strcmp(argv[0], "out") || !strcmp(argv[0], "o"))
 	{
 
+		return CMD_RET_BACK;
+	}
+	else if(!strcmp(argv[0], "cancel") || !strcmp(argv[0], "c"))
+	{
+		return CMD_RET_BACK;
 	}
 
 
 	return CMD_RET_DEF;
 }
 
-int game_appoint_out(GameContext* pGame, int player, int where, const Card* pCard, int num, int canCancel, const char* alter_text)
+int game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text)
 {
 	CmdLoopCallback  callback;
-	callback.pCard = pCard;
+	callback.patterns = patterns;
 	callback.num = num;
 	callback.where = where;
 	callback.cancel = canCancel;

@@ -22,13 +22,11 @@ static int paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int player)
 	
 	//printf("please out a card 'sha' or cancel skill:");
 
-	Card card;
-	card.color = CardColor_None;
-	card.id = CardID_Attack;
-	card.value = CardValue_None;
+	CardPattern pattern;
+	INIT_CARDPATTERN_USE_ID(&pattern, CardID_Attack);
 
 
-	return game_appoint_out(pGame, player,  PlayerCard_Hand, &card, 1, 1, "please out a card 'sha' or cancel the skill:");
+	return game_appoint_out(pGame, player,  PlayerCard_Hand, &pattern, 1, 1, "please out a card 'sha' or cancel the skill:");
 
 	return 0;
 }
