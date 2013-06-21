@@ -90,7 +90,9 @@ enum CardValue
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*CARDUSEFUN)(GameContext*, GameEventContext*, int);
+typedef int  (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
+typedef int  (*CARDCALCFUN)(GameContext*, GameEventContext*, int);
+typedef int  (*CARDFINIFUN)(GameContext*, GameEventContext*, int);
 
 
 typedef struct tagCardConfig
@@ -99,8 +101,10 @@ typedef struct tagCardConfig
 	char type;
 	char name[MAX_NAME_LEN];
 	char desc[MAX_DESC_LEN];
-	CARDCHECKFUN check;
-	CARDUSEFUN   use;
+	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
+	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
+	CARDCALCFUN  calc;    // called when card effect is needed to calc     default NULL. no effect
+	CARDCALCFUN  fini;    // called when card calc finished (if card still exist after calc)  default NULL, discard to out card stack
 }CardConfig;
 
 
@@ -137,6 +141,33 @@ struct tagOutCard
 };
 
 
+typedef struct tagCardPattern CardPattern;
+
+struct tagCardPattern
+{
+	char id;
+	char color;
+	char value_min;
+	char value_max;
+};
+
+
+typedef struct tagOutCardPattern OutCardPattern;
+
+struct tagOutCardPattern
+{
+	int num;
+	CardPattern patterns[MAX_RCARD_NUM];
+};
+
+
+
+#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
+#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
+
+
 const char* card_type_str(int type);
 const char* card_id_str(int id);
 const char* card_color_str(int color);
@@ -151,6 +182,10 @@ char* card_str(const Card* pCard, char* buffer, int buflen);
 char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
+
+
+int card_match(const Card* pCard, const CardPattern* pPattern, int num);
+
 
 #endif /* __CARD_H__ */
 

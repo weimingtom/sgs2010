@@ -112,6 +112,12 @@ static void param_error(const char* cmd)
 static int cmd_quit(const char** argv, int argc, GameContext* pContext)
 {
 	//exit(0);
+
+	if(pContext->status != Status_None)
+	{
+		longjmp(pContext->__jb__, CMD_RET_EXIT);
+	}
+
 	return CMD_RET_EXIT;
 }
 
@@ -185,13 +191,16 @@ static int cmd_start(const char** argv, int argc, GameContext* pContext)
 	}
 
 	// game loop
+	ret = setjmp( pContext->__jb__);
 
-	ret = game_continue(pContext);
+	if(ret == 0)
+	{
+		game_continue(pContext);
+		ret = CMD_RET_SUCC;
+	}
 
 	// print game result
-
-
-	return CMD_RET_SUCC;
+	return ret;
 }
 
 static int cmd_info(const char** argv, int argc, GameContext* pContext)

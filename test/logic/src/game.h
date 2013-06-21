@@ -35,6 +35,7 @@ typedef struct tagGameContext
 	int        nRoundPlayer;
 	int        nCurPlayer;
 	int        status;
+	jmp_buf    __jb__;
 } GameContext;
 
 
@@ -67,6 +68,7 @@ enum GameEvent
 	GameEvent_PerOutCard,
 	GameEvent_PostOutCard,
 	GameEvent_PerCardCalc,
+	GameEvent_CardCalc,
 	GameEvent_PostCardCalc,
 	GameEvent_PerRoundDiscard,
 	GameEvent_PostRoundDiscard,
@@ -115,8 +117,11 @@ struct tagGameEventContext
 	GameEventContext* parent_event;
 	int      result;
 	int      block;
-	Card     card;
-	OutCard  out;
+	union {
+		Card     card;
+		OutCard  out;
+		OutCardPattern pattern;
+	};
 };
 
 
@@ -152,7 +157,7 @@ int get_game_cur_player(GameContext* pGame);
 int get_game_round_player(GameContext* pGame);
 
 // 按指定的方式出牌
-int game_appoint_out(GameContext* pGame, int player, int where, const Card* pCard, int num, int canCancel, const char* alter_text);
+int game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text);
 
 #endif /* __GAME_H__ */
 

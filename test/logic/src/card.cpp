@@ -199,3 +199,141 @@ void card_dump(const Card* pCard)
 }
 
 
+static int card_match_one(const Card* pCard, const CardPattern* pPattern)
+{
+	if(pPattern->id != CardID_None)
+	{
+		if(pPattern->id < 0)
+		{
+			 // a id type
+			const CardConfig* pCardConfig = get_card_config(pCard->id);
+			if(pCardConfig == NULL || pCardConfig->type != -pPattern->id)
+				return -1;
+		}
+		else
+		{
+			// a real id
+			if(pCard->id != pPattern->id)
+				return -1;
+		}
+	}
+
+	if(pPattern->color != CardColor_None)
+	{
+		switch(pPattern->color)
+		{
+		case CardColor_Spade:
+		case CardColor_Club:
+		case CardColor_Heart:
+		case CardColor_Diamond:
+			if(pCard->color != pPattern->color)
+				return -1;
+			break;
+		case CardColor_GeneralBlack:
+			if(pCard->color != CardColor_Spade && pCard->color != CardColor_Club)
+				return -1;
+			break;
+		case CardColor_GeneralRed:
+			if(pCard->color != CardColor_Heart && pCard->color != CardColor_Diamond)
+				return -1;
+			break;
+		default:
+			return -1;
+		}
+
+	}
+
+	// check card value
+	if(pPattern->value_min != CardValue_None)
+	{
+		if(pCard->value < pPattern->value_min)
+			return -1;
+	}
+	if(pPattern->value_max != CardValue_None)
+	{
+		if(pCard->value > pPattern->value_min)
+			return -1;
+	}
+
+	return 0;
+}
+
+int card_match(const Card* pCard, const CardPattern* pPattern, int num)
+{
+	int n, m, p;
+	int index [MAX_RCARD_NUM];
+
+	// too many card
+	if(num > MAX_RCARD_NUM)
+		return -1;
+
+	// fill_array_inc_i(index, num, 0, 1);
+
+
+	for(n = 0; n < num; /*n++*/)
+	{
+		// calc first index[n] = ?
+		for(m = 0; m < num; m++)
+		{
+			// first not used index
+			for(p = 0; p < n; p++)
+			{
+				if(index[p] == m)
+					break;
+			}
+			if(p == n)
+			{
+				index[n] = m;
+				break;
+			}
+		}
+
+		// check a card
+
+		while(0 != card_match_one(pCard+n, pPattern+index[n]))
+		{
+			// NEXT GROUP INDEX
+
+			for(; n >= 0; n--)
+			{
+				// calc next index[n]
+				for(m = index[n] + 1; m < num; m++)
+				{
+					// first not used index
+					for(p = 0; p < n; p++)
+					{
+						if(index[p] == m)
+							break;
+					}
+					if(p == n)
+					{
+						index[n] = m;
+						break;
+					}
+				}
+				if(m < num)
+				{
+					break;
+				}
+			}
+
+			// next group failed ?
+			if(n < 0)
+			{
+				break;
+			}
+			
+		}
+		if(n < 0)
+		{
+			break;
+		}
+
+		n++;
+	}
+	
+	return n == num ? 0 : -1;
+}
+
+
+

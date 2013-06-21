@@ -44,6 +44,7 @@ enum PlayerFlag
 #define MAX_JUDGMENT_CARD  8
 #define MAX_PLAYER_PARAM  10
 
+#define MAX_OUT_CARD   40
 
 
 enum EquipIdx {

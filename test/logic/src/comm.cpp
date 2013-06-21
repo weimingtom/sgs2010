@@ -276,7 +276,7 @@ int to_uint(const char* text, unsigned int* pv)
 int to_float(const char* text, float* pv)
 {
 	char* p;
-	float f = strtod(text, &p);
+	float f = (float)strtod(text, &p);
 
 	while(*p && isspace(C2I(*p))) p++;
 
