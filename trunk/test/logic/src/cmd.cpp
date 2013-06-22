@@ -4,7 +4,13 @@
 #include "card.h"
 #include "hero.h"
 #include "comm.h"
+#include "event.h"
+#include "get.h"
+#include "out.h"
+#include "skill.h"
 
+#define MAX_PARAM_NUM   64
+#define MAX_CMD_LEN     4096
 
 
 // get a world from cmd split with space,return the point to the word first valid char, null if no more any words 
@@ -96,11 +102,11 @@ static char* get_line(char* buf, int size)
 
 static void cmd_help_i(const char* cmd);
 
-static int cmd_help(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_help(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	printf(PROJ_NAME" "VERSION_STR"\n");
 	cmd_help_i(argc > 1 ? argv[1] : NULL);
-	return 0;
+	return R_SUCC;
 }
 
 static void param_error(const char* cmd)
@@ -109,16 +115,16 @@ static void param_error(const char* cmd)
 	cmd_help_i(cmd);
 }
 
-static int cmd_quit(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_quit(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	//exit(0);
 
 	if(pContext->status != Status_None)
 	{
-		longjmp(pContext->__jb__, CMD_RET_EXIT);
+		longjmp(pContext->__jb__, R_EXIT);
 	}
 
-	return CMD_RET_EXIT;
+	return R_EXIT;
 }
 
 
@@ -156,22 +162,22 @@ const PlayerConfig* select_config(int players)
 }
 
 
-static int cmd_start(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 
-	int ret;
+	RESULT  ret;
 	int cfg;
 	const PlayerConfig*  pConfig;
 	if(pContext->status != Status_None)
 	{
 		printf("game has been started.");
-		return CMD_RET_SUCC;
+		return R_E_STATUS;
 	}
 
 	if(argc < 2 || 0 != to_int(argv[1], &cfg))
 	{
 		param_error(argv[0]);
-		return CMD_RET_SUCC;
+		return R_E_PARAM;
 	}
 
 	// get config struct 
@@ -180,55 +186,59 @@ static int cmd_start(const char** argv, int argc, GameContext* pContext)
 	if(pConfig == NULL )
 	{
 		param_error(argv[0]);
-		return CMD_RET_SUCC;
+		return R_E_PARAM;
 	}
 
 	// new game
-	if(0 != init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers))
+	ret = init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+
+	if(ret != R_SUCC)
 	{
 		printf("start init new game failed!");
-		return CMD_RET_SUCC;
+		return ret;
 	}
 
 	// game loop
-	ret = setjmp( pContext->__jb__);
+	ret = (RESULT)setjmp( pContext->__jb__);
 
 	if(ret == 0)
 	{
-		game_continue(pContext);
-		ret = CMD_RET_SUCC;
+		ret = game_loop(pContext, pEvent);
+		//ret = CMD_RET_SUCC;
 	}
 
 	// print game result
 	return ret;
 }
 
-static int cmd_info(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(argc <= 1) // self info
 	{
 		if(pContext->status == Status_None)
 		{
 			printf("not in game!\n");
+			return R_E_STATUS;
 		}
 		else
 		{
-			game_cur_info(pContext);
+			game_cur_info(pContext, pEvent);
 		}
 	}
 	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game global info
 	{
-		printf("current event: No\n");
+		printf("current event: %d\n", pEvent->id);
 	}
 	else if(!strcmp(argv[1], "game") || !strcmp(argv[1], "g")) // game global info
 	{
 		if(pContext->status == Status_None)
 		{
 			printf("not in game!\n");
+			return R_E_STATUS;
 		}
 		else
 		{
-			game_global_info(pContext);
+			game_global_info(pContext, pEvent);
 		}
 	}
 	else if(!strcmp(argv[1], "gamefull") || !strcmp(argv[1], "gf")) // game full info 
@@ -248,7 +258,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		if(argc < 3)
 		{
 			param_error(argv[0]);
-			return CMD_RET_SUCC;
+			return R_E_PARAM;
 		}
 
 		pp = argv[2];
@@ -263,7 +273,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		if(*pp ==0 )
 		{
 			param_error(argv[0]);
-			return CMD_RET_SUCC;
+			return R_E_PARAM;
 		}
 
 
@@ -276,7 +286,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		if(*pp != 0 )
 		{
 			param_error(argv[0]);
-			return CMD_RET_SUCC;
+			return R_E_PARAM;
 		}
 
 		if(cp == '+')
@@ -292,7 +302,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 			n = n % pContext->nPlayerCount;
 		}
 
-		game_other_player_info(pContext, n);
+		game_other_player_info(pContext, pEvent, n);
 	}
 	else if(!strcmp(argv[1], "card") || !strcmp(argv[1], "c"))
 	{
@@ -302,7 +312,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		{
 			for(id = 1; id < CardID_Max; id++)
 			{
-				pCardCfg = get_card_config(id);
+				pCardCfg = get_card_config((CardID)id);
 
 				if(pCardCfg)
 				{
@@ -313,10 +323,11 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		else
 		{
 			id = atoi(argv[2]);
-			pCardCfg = get_card_config(id);
+			pCardCfg = get_card_config((CardID)id);
 			if(pCardCfg == NULL)
 			{
 				printf("no card id  is %d!\n", id);
+				return R_E_PARAM;
 			}
 			else
 			{
@@ -333,7 +344,7 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		{
 			for(id = 1; id < HeroID_Max; id++)
 			{
-				pHero = get_hero_config(id);
+				pHero = get_hero_config((HeroID)id);
 
 				if(pHero)
 				{
@@ -344,10 +355,11 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 		else
 		{
 			id = atoi(argv[2]);
-			pHero = get_hero_config(id);
+			pHero = get_hero_config((HeroID)id);
 			if(pHero == NULL)
 			{
 				printf("no card id  is %d!\n", id);
+				return R_E_PARAM;
 			}
 			else
 			{
@@ -363,95 +375,124 @@ static int cmd_info(const char** argv, int argc, GameContext* pContext)
 	else
 	{
 		param_error(argv[0]);
-		return CMD_RET_SUCC;
+		return R_E_PARAM;
 	}
 
-	return CMD_RET_SUCC;
+	return R_SUCC;
 }
 
-static int cmd_get(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(game_status(pContext) != Status_Round_Get)
 	{
 		printf("not in get status!\n");
-		return CMD_RET_SUCC;
+		return R_E_STATUS;
+	}
+	int num;
+	if(argc>= 2)
+	{
+		if(0 != to_int(argv[1], &num))
+		{
+			num = 1;
+		}
 	}
 
 
-	game_getcard(pContext);
 
-	return CMD_RET_SUCC;
+	return game_getcard(pContext, pEvent, num);
 }
 
-static int cmd_out(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(game_status(pContext) != Status_Round_Out)
 	{
 		printf("not in get status!\n");
-		return CMD_RET_SUCC;
+		return R_E_STATUS;
 	}
 
-	int idx;
+	int idx[MAX_PARAM_NUM];
+	int cnt = 0;
+	int n;
 
-
-	if(argc >= 2 && 0 == to_int(argv[1], &idx))
-	{
-		game_outcard(pContext,idx);
-
-	}
-	else
+	if(argc < 2)
 	{
 		param_error(argv[0]);
+		return R_E_PARAM;
 	}
 
 
-	return CMD_RET_SUCC;
+
+	for(n = 1; n < argc && cnt < MAX_PARAM_NUM; n++)
+	{
+		if(0 != to_int(argv[1], &idx[cnt]))
+		{
+			param_error(argv[0]);
+			return R_E_PARAM;
+		}
+		cnt++;
+	}
+
+	return game_outcard(pContext, pEvent, idx, cnt);
+
 }
 
 
-static int cmd_useskill(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(pContext->status == Status_None)
 	{
 		printf("not in game!\n");
-		return CMD_RET_SUCC;
+		return R_E_STATUS;
 	}
 	int idx;
 
 
 	if(argc >= 2 && 0 == to_int(argv[1], &idx))
 	{
-		game_useskill(pContext, idx);
+		return  game_useskill(pContext, pEvent, idx);
 
 	}
 	else
 	{
 		param_error(argv[0]);
+		return R_E_PARAM;
 	}
 	
-	return CMD_RET_SUCC;
+	return R_SUCC;
 }
 
-static int cmd_cancelskill(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(pContext->status == Status_None)
 	{
 		printf("not in game!\n");
-		return CMD_RET_SUCC;
+		return R_E_STATUS;
 	}
 
-	printf("not in skill using!\n");
 
-	return CMD_RET_SUCC;
+	return game_cancelskill(pContext, pEvent);
+
+	//printf("not in skill using!\n");
+
+	//return CMD_RET_SUCC;
 }
 
 
-static int cmd_pass(const char** argv, int argc, GameContext* pContext)
+static RESULT cmd_pass(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	return CMD_RET_SUCC;
+	if(pContext->status == Status_None)
+	{
+		printf("not in game!\n");
+		return R_E_STATUS;
+	}
+
+
+	return game_pass(pContext, pEvent);
+
+	//return CMD_RET_SUCC;
 }
 
-typedef int (*FunCmd)(const char** argv, int argc, GameContext* pContext);
+typedef RESULT (*FunCmd)(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent);
 
 
 struct tagCmdDispatch
@@ -548,16 +589,16 @@ static void cmd_help_i(const char* cmd)
 }
 
 
-int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funper, void* ud)
+RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* strAlter)
 {
-	char  cmdline[1024];
-	const char*  argv[64];
+	char  cmdline[MAX_CMD_LEN];
+	const char*  argv[MAX_PARAM_NUM];
 	int   argc;
 	char  *next, *w;
 	int   n;
-	int   ret;
+	RESULT   ret;
 
-	while( (alter_text ? printf("%s\n", alter_text) : 0), 
+	while( (strAlter ? printf("%s\n", strAlter) : 0), 
 		get_line(cmdline, sizeof(cmdline)))
 	{
 		next =  cmdline;
@@ -577,19 +618,16 @@ int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funpe
 		}
 		else if(argc > 0)
 		{
-			ret = CMD_RET_DEF;
+			ret = R_DEF;
 
-			if(funper != NULL)
-			{
-				ret = (*funper)(argv, argc, pContext, ud);
+			//if(funper != NULL)
+			//{
+			//	ret = (*funper)(argv, argc, pContext, ud);
+			//	if(ret < 0)
+			//		return ret;
+			//}
 
-
-				if(ret < 0)
-					return ret;
-
-			}
-
-			if(ret == CMD_RET_DEF)
+			if(ret == R_DEF)
 			{
 				for(n= 0; n < CMD_NUM; n++)
 				{
@@ -602,11 +640,20 @@ int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funpe
 				if(n < CMD_NUM)
 				{
 
-					ret = (*s_cmdDispatch[n].func)(argv, argc, pContext);
+					ret = (*s_cmdDispatch[n].func)(argv, argc, pContext, pEvent);
 
-					// return < 0 back to parent caller
-					if(ret < 0)
+					// return follow code back to parent caller
+					switch(ret)
+					{
+					case R_BACK:
+					case R_EXIT:
+					case R_CANCEL:
+					case R_RETRY:
 						return ret;
+					default:
+						// continue loop ...
+						break;
+					}
 				}
 				else
 				{
@@ -615,7 +662,9 @@ int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funpe
 			}
 		}
 	}
-	return CMD_RET_SUCC;
+
+	//  end of input ???
+	return R_EXIT;
 }
 
 

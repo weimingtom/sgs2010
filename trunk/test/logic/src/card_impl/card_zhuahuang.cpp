@@ -1,7 +1,4 @@
-#include "../config.h"
-#include "../hero.h"
-#include "../comm.h"
-#include "../game.h"
+#include "card_impl.h"
 
 
 static YESNO card_zhuahuang_check(GameContext* pGame, GameEventContext* pEvent, int player)

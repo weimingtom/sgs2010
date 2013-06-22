@@ -1,9 +1,9 @@
 #include "config.h"
 #include "card.h"
+#include "card_impl/card_impl.h"
 
 
-
-const char* card_type_str(int type)
+const char* card_type_str(CardType type)
 {
 	switch(type)
 	{
@@ -20,7 +20,7 @@ const char* card_type_str(int type)
 }
 
 
-const char* card_id_str(int id)
+const char* card_id_str(CardID id)
 {
 	switch(id)
 	{
@@ -62,7 +62,7 @@ const char* card_id_str(int id)
 	}
 }
 
-const char* card_color_str(int color)
+const char* card_color_str(CardColor color)
 {
 	switch(color)
 	{
@@ -78,7 +78,7 @@ const char* card_color_str(int color)
 	};
 }
 
-const char* card_value_str(int value)
+const char* card_value_str(CardValue value)
 {
 	switch(value)
 	{
@@ -103,43 +103,10 @@ const char* card_value_str(int value)
 
 
 
-extern const CardConfig* get_card_attack();
-extern const CardConfig* get_card_defend();
-extern const CardConfig* get_card_medicine();
-extern const CardConfig* get_card_lightning();
-extern const CardConfig* get_card_happy();
-extern const CardConfig* get_card_unassailable();
-extern const CardConfig* get_card_otherattack();
-extern const CardConfig* get_card_foison();
-extern const CardConfig* get_card_genwithair();
-extern const CardConfig* get_card_duel();
-extern const CardConfig* get_card_makebrother();
-extern const CardConfig* get_card_aggression();
-extern const CardConfig* get_card_allattack();
-extern const CardConfig* get_card_snitch();
-extern const CardConfig* get_card_kickladder();
-extern const CardConfig* get_card_zhuahuang();
-extern const CardConfig* get_card_dilu();
-extern const CardConfig* get_card_jueying();
-extern const CardConfig* get_card_chitu();
-extern const CardConfig* get_card_zixing();
-extern const CardConfig* get_card_dawan();
-extern const CardConfig* get_card_liannu();
-extern const CardConfig* get_card_swordhanbing();
-extern const CardConfig* get_card_swordqinghong();
-extern const CardConfig* get_card_swordchixiong();
-extern const CardConfig* get_card_axeguanshi();
-extern const CardConfig* get_card_swordqinglong();
-extern const CardConfig* get_card_spearzhangba();
-extern const CardConfig* get_card_halberdfangtian();
-extern const CardConfig* get_card_bowqiling();
-extern const CardConfig* get_card_bagua();
-extern const CardConfig* get_card_sheildrenwang();
 
 
 
-
-const CardConfig* get_card_config(int id)
+const CardConfig* get_card_config(CardID id)
 {
 	switch(id)
 	{
@@ -199,22 +166,23 @@ void card_dump(const Card* pCard)
 }
 
 
-static int card_match_one(const Card* pCard, const CardPattern* pPattern)
+
+static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)
 {
 	if(pPattern->id != CardID_None)
 	{
 		if(pPattern->id < 0)
 		{
-			 // a id type
+			// a id type
 			const CardConfig* pCardConfig = get_card_config(pCard->id);
 			if(pCardConfig == NULL || pCardConfig->type != -pPattern->id)
-				return -1;
+				return R_E_FAIL;
 		}
 		else
 		{
 			// a real id
 			if(pCard->id != pPattern->id)
-				return -1;
+				return R_E_FAIL;
 		}
 	}
 
@@ -227,18 +195,18 @@ static int card_match_one(const Card* pCard, const CardPattern* pPattern)
 		case CardColor_Heart:
 		case CardColor_Diamond:
 			if(pCard->color != pPattern->color)
-				return -1;
+				return R_E_FAIL;
 			break;
 		case CardColor_GeneralBlack:
 			if(pCard->color != CardColor_Spade && pCard->color != CardColor_Club)
-				return -1;
+				return R_E_FAIL;
 			break;
 		case CardColor_GeneralRed:
 			if(pCard->color != CardColor_Heart && pCard->color != CardColor_Diamond)
-				return -1;
+				return R_E_FAIL;
 			break;
 		default:
-			return -1;
+			return R_E_FAIL;
 		}
 
 	}
@@ -247,25 +215,25 @@ static int card_match_one(const Card* pCard, const CardPattern* pPattern)
 	if(pPattern->value_min != CardValue_None)
 	{
 		if(pCard->value < pPattern->value_min)
-			return -1;
+			return R_E_FAIL;
 	}
 	if(pPattern->value_max != CardValue_None)
 	{
 		if(pCard->value > pPattern->value_min)
-			return -1;
+			return R_E_FAIL;
 	}
 
-	return 0;
+	return R_SUCC;
 }
 
-int card_match(const Card* pCard, const CardPattern* pPattern, int num)
+RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
 {
 	int n, m, p;
 	int index [MAX_RCARD_NUM];
 
 	// too many card
 	if(num > MAX_RCARD_NUM)
-		return -1;
+		return R_E_PARAM;
 
 	// fill_array_inc_i(index, num, 0, 1);
 
@@ -322,7 +290,7 @@ int card_match(const Card* pCard, const CardPattern* pPattern, int num)
 			{
 				break;
 			}
-			
+
 		}
 		if(n < 0)
 		{
@@ -331,9 +299,8 @@ int card_match(const Card* pCard, const CardPattern* pPattern, int num)
 
 		n++;
 	}
-	
-	return n == num ? 0 : -1;
-}
 
+	return n == num ? R_SUCC : R_E_FAIL;
+}
 
 

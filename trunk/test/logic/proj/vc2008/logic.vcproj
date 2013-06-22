@@ -208,11 +208,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\event.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\event.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\get.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\get.h"
 				>
 			</File>
 			<File
@@ -228,11 +244,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\out.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\out.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\player.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\player.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\skill.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\skill.h"
 				>
 			</File>
 			<Filter
@@ -267,10 +299,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\card_impl\card_chixiong.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\src\card_impl\card_dawan.cpp"
 					>
 				</File>
@@ -300,6 +328,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\card_impl\card_happy.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\card_impl\card_impl.h"
 					>
 				</File>
 				<File
@@ -380,6 +412,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\hero_impl\hero_guanyu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\hero_impl\hero_impl.h"
 					>
 				</File>
 				<File

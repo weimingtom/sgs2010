@@ -71,7 +71,7 @@ int card_comp_cv(const void* a, const void* b, void*)
 }
 
 
-int init_card_stack(CardStack* pCardStack)
+RESULT init_card_stack(CardStack* pCardStack)
 {
 	int n, id;
 
@@ -85,20 +85,20 @@ int init_card_stack(CardStack* pCardStack)
 			break;
 		while(s_szInitCard[n] != 0)
 		{
-			pCardStack->cards[pCardStack->count].id = id;
-			pCardStack->cards[pCardStack->count].color = s_szInitCard[n++];
-			pCardStack->cards[pCardStack->count].value = s_szInitCard[n++];
-			pCardStack->cards[pCardStack->count].flag = 0;
+			pCardStack->cards[pCardStack->count].id = (CardID)id;
+			pCardStack->cards[pCardStack->count].color = (CardColor)s_szInitCard[n++];
+			pCardStack->cards[pCardStack->count].value = (CardValue)s_szInitCard[n++];
+			pCardStack->cards[pCardStack->count].flag = CardFlag_None;
 			pCardStack->count++;
 		}
 		n++;
 	}
 	//sort_array_t(pCardStack->cards, sizeof(Card), pCardStack->count, card_comp_cv, NULL);
 	//card_stack_dump(pCardStack);
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_random(CardStack* pCardStack)
+RESULT card_stack_random(CardStack* pCardStack)
 {
 	int a;
 	int n;
@@ -106,7 +106,7 @@ int card_stack_random(CardStack* pCardStack)
 	Card  card;
 
 	if(pCardStack->count < 2)
-		return 0;
+		return R_SUCC;
 
 	fill_array_inc_i(ids, pCardStack->count, 0, 1);
 	rand_array_i(ids, pCardStack->count, pCardStack->count * 5);
@@ -127,13 +127,13 @@ int card_stack_random(CardStack* pCardStack)
 	}
 
 
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_clear(CardStack* pCardStack)
+RESULT card_stack_clear(CardStack* pCardStack)
 {
 	pCardStack->count = 0;
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -154,38 +154,38 @@ void card_stack_dump(const CardStack* pCardStack)
 /*
 offset: 0+ -> from stack top index, < 0: from the stack back ,the -1 is last card etc.  
 */
-int card_stack_check(CardStack* pCardStack, int offset, Card* pCard)
+RESULT card_stack_check(CardStack* pCardStack, int offset, Card* pCard)
 {
 	if(offset>=0)
 	{
 		if(offset >= pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 		*pCard = pCardStack->cards[pCardStack->count - offset - 1];
 	}
 	else
 	{
 		if(-offset-1 >= pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 		*pCard = pCardStack->cards[ -offset - 1];
 	}
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_push(CardStack* pCardStack, const Card* pCard)
+RESULT card_stack_push(CardStack* pCardStack, const Card* pCard)
 {
 	if(pCardStack->count >= CARD_STACK_SIZE)
-		return -1;
+		return R_E_FAIL;
 
 	pCardStack->cards[pCardStack->count] = *pCard;
 	pCardStack->count++;
 
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_push_back(CardStack* pCardStack, const Card* pCard)
+RESULT card_stack_push_back(CardStack* pCardStack, const Card* pCard)
 {
 	if(pCardStack->count >= CARD_STACK_SIZE)
-		return -1;
+		return R_E_FAIL;
 
 	if(pCardStack->count > 0)
 	{
@@ -195,26 +195,26 @@ int card_stack_push_back(CardStack* pCardStack, const Card* pCard)
 	pCardStack->cards[0] = *pCard;
 	pCardStack->count++;
 
-	return 0;
+	return R_SUCC;
 }
 
 
-int card_stack_pop(CardStack* pCardStack, Card* pCard)
+RESULT card_stack_pop(CardStack* pCardStack, Card* pCard)
 {
 	if(pCardStack->count == 0)
-		return -1;
+		return R_E_FAIL;
 
 	pCardStack->count--;
 	
 	*pCard = pCardStack->cards[pCardStack->count];
 	
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_pop_back(CardStack* pCardStack, Card* pCard)
+RESULT card_stack_pop_back(CardStack* pCardStack, Card* pCard)
 {
 	if(pCardStack->count == 0)
-		return -1;
+		return R_E_FAIL;
 
 	*pCard = pCardStack->cards[0];
 
@@ -225,18 +225,18 @@ int card_stack_pop_back(CardStack* pCardStack, Card* pCard)
 		memmove(&pCardStack->cards[0], &pCardStack->cards[1], pCardStack->count * sizeof(Card));
 	}
 	
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard)
+RESULT card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard)
 {
 	if(pCardStack->count >= CARD_STACK_SIZE)
-		return -1;
+		return R_E_FAIL;
 
 	if(offset >= 0)
 	{
 		if(offset > pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 
 
 		if(offset > 0)
@@ -250,7 +250,7 @@ int card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard)
 	else
 	{
 		if(-offset - 1 > pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 
 
 		if(-offset-1 < pCardStack->count)
@@ -263,15 +263,15 @@ int card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard)
 		pCardStack->count++;
 	}
 
-	return 0;
+	return R_SUCC;
 }
 
-int card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
+RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
 {
 	if(offset>=0)
 	{
 		if(offset >= pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 		*pCard = pCardStack->cards[pCardStack->count - offset - 1];
 
 		if(offset > 0)
@@ -284,7 +284,7 @@ int card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
 	else
 	{
 		if(-offset-1 >= pCardStack->count)
-			return -1;
+			return R_E_FAIL;
 		*pCard = pCardStack->cards[ -offset - 1];
 
 		if(-offset < pCardStack->count)
@@ -293,7 +293,7 @@ int card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
 		}
 		pCardStack->count--;
 	}
-	return 0;
+	return R_SUCC;
 }
 
 

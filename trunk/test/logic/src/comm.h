@@ -1,6 +1,7 @@
 #ifndef __COMM_H__
 #define __COMM_H__
 
+#include "config.h"
 
 typedef int(*COMPFUN)(const void*,const void*,void*);
 
@@ -30,9 +31,9 @@ int compare_ul(const void* a,const void* b,void*);
 
 
 
-int to_int(const char* text, int* pv);
-int to_uint(const char* text, unsigned int* pv);
-int to_float(const char* text, float* pv);
+RESULT to_int(const char* text, int* pv);
+RESULT to_uint(const char* text, unsigned int* pv);
+RESULT to_float(const char* text, float* pv);
 
 
 #endif /* __COMM_H__ */

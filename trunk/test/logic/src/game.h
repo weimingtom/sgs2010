@@ -7,6 +7,12 @@
 #include "card_stack.h"
 
 
+
+// foward  decalare
+typedef struct tagGameEventContext GameEventContext;
+
+
+
 enum Status
 {
 	Status_None = 0, // not start game yet
@@ -20,9 +26,10 @@ enum Status
 	Status_Round_End,
 };
 
+typedef struct tagGameContext GameContext;
 
 
-typedef struct tagGameContext
+struct tagGameContext
 {
 	int        nPlayerCount;
 	int        nMinsterCount;
@@ -34,9 +41,9 @@ typedef struct tagGameContext
 	int        nRoundNum;
 	int        nRoundPlayer;
 	int        nCurPlayer;
-	int        status;
-	jmp_buf    __jb__;
-} GameContext;
+	Status     status;
+	jmp_buf    __jb__;  // for quit a game directly
+};
 
 
 enum GameResult
@@ -51,113 +58,33 @@ enum GameResult
 };
 
 
-enum GameEvent
-{
-	GameEvent_None = 0,
-	GameEvent_RoundBegin = 1,   // 回合开始时
-	GameEvent_PerRoundJudge,    
-	GameEvent_PostRoundJudge,
-	GameEvent_PerJudgeCard,
-	GameEvent_PostJudgeCard,
-	GameEvent_PerRoundGet,
-	GameEvent_PostRoundGet,
-	GameEvent_PerGetCard,
-	GameEvent_PostGetCard,
-	GameEvent_PerRoundOut,
-	GameEvent_PostRoundOut,
-	GameEvent_PerOutCard,
-	GameEvent_PostOutCard,
-	GameEvent_PerCardCalc,
-	GameEvent_CardCalc,
-	GameEvent_PostCardCalc,
-	GameEvent_PerRoundDiscard,
-	GameEvent_PostRoundDiscard,
-	GameEvent_PerDiscardCard,
-	GameEvent_PostDiscardCard,
-	GameEvent_RoundEnd,
-	GameEvent_PerLostCard,
-	GameEvent_PostLostCard,
-	GameEvent_HandCardEmpty,
-	GameEvent_PerAttack,
-	GameEvent_PostAttack,
-	GameEvent_PerBeAttacked,
-	GameEvent_PostBeAttacked,
-	GameEvent_PerLostLife,
-	GameEvent_PostLostLife,
-	GameEvent_LostOneLife,
-	GameEvent_PerDie,
-	GameEvent_PostDie,
-	GameEvent_PerKill,
-	GameEvent_PostKill,
-	GameEvent_PerCardJudge,    
-	GameEvent_PostCardJudge,
-	GameEvent_PerCardJudgeCalc,    
-	GameEvent_PostCardJudgeCalc,
-	GameEvent_OutCardCheck,
-	GameEvent_PassiveOutCard,
-	GameEvent_SupplyCard,
-};
 
-enum EventResult
-{
-	Result_None = 0,
-	Result_Yes = 1,
-	Result_No  = 2,
-	Result_Cancel = 3,
-};
-
-typedef struct tagGameEventContext GameEventContext;
+#define ROUND_PLAYER(pGame)   (&(pGame)->players[(pGame)->nRoundPlayer])
+#define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
 
 
-struct tagGameEventContext
-{
-	int      id;
-	int      trigger;
-	int      target;
-	GameEventContext* parent_event;
-	int      result;
-	int      block;
-	union {
-		Card     card;
-		OutCard  out;
-		OutCardPattern pattern;
-	};
-};
+
+RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 
 
-#define INIT_EVENT(event, eid, tr, tg, p)   \
-do { \
-	memset((event), 0, sizeof(*event)); \
-	(event)->id = (eid); \
-	(event)->trigger = (tr); \
-	(event)->target = (tg); \
-	(event)->parent_event = (p); \
-	(event)->block = 0; \
-	(event)->result = 0; \
-} while(0)
+
+RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int player);
 
 
-int init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 
-
-int trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
-
-int game_continue(GameContext* pGame);
-int game_cur_info(GameContext* pGame);
-int game_global_info(GameContext* pGame);
-int game_other_player_info(GameContext* pGame, int player);
-
-int game_getcard(GameContext* pGame);
-int game_outcard(GameContext* pGame, int idx);
-int game_useskill(GameContext* pGame, int idx);
-
-
-int game_status(GameContext* pGame);
+Status game_status(GameContext* pGame);
 int get_game_cur_player(GameContext* pGame);
 int get_game_round_player(GameContext* pGame);
 
+int game_next_player(GameContext* pGame, int player);
+int game_prev_player(GameContext* pGame, int player);
+
+
 // 按指定的方式出牌
-int game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text);
+RESULT game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text);
 
 #endif /* __GAME_H__ */
 

@@ -1,24 +1,22 @@
-#include "../config.h"
-#include "../hero.h"
-#include "../comm.h"
-#include "../game.h"
+#include "card_impl.h"
 
 
-static int out_card_check_event(GameContext* pGame, GameEventContext* pParentEvent, int player, int target)
+
+static RESULT out_card_check_event(GameContext* pGame, GameEventContext* pParentEvent, int player, int target)
 {
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_OutCardCheck, player, target, pParentEvent);
 	event.card.id = CardID_Attack;
-	event.result = Result_None;
+	event.result = R_DEF;
 
 	trigger_game_event(pGame, &event);
 
-	if(event.result ==Result_Yes )
-		return 1;
-	else if(event.result ==Result_No)
-		return 0;
+	if(event.result ==R_SUCC )
+		return R_SUCC;
+	else if(event.result ==R_E_FAIL)
+		return R_E_FAIL;
 	// default
-	return pGame->players[player].params[0] == 0;
+	return pGame->players[player].params[0] == 0 ? R_SUCC : R_E_FAIL;
 }
 
 
@@ -50,7 +48,7 @@ static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int
 	return  NO;
 }
 
-static int card_attack_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	// select target
 	while(1)
@@ -59,17 +57,17 @@ static int card_attack_out(GameContext* pGame, GameEventContext* pEvent, int pla
 		
 	}
 	
-	return 0;
+	return R_SUCC;
 }
 
 
 
 
 
-static int card_attack_calc(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_attack_calc(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 
-	return 0;
+	return R_SUCC;
 }
 
 

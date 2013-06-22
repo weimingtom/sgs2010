@@ -2,6 +2,7 @@
 #define __PLAYER_H__
 
 #include "card.h"
+#include "hero.h"
 
 enum PlayerID
 {
@@ -65,18 +66,18 @@ enum PlayerCardWhere{
 
 typedef  struct  tagPlayer
 {
-	int id;
-	int hero;
-	int maxLife;
-	int curLife;
-	char name[MAX_NAME_LEN];
-	int   nHandCardNum;
-	int   nJudgmentCardNum;
-	Card  stHandCards[MAX_HAND_CARD];
-	Card  stEquipCard[EquipIdx_Max];
-	Card  stJudgmentCards[MAX_JUDGMENT_CARD];
-	unsigned long flag;
-	int   params[MAX_PLAYER_PARAM];
+	PlayerID id;
+	HeroID   hero;
+	int      maxLife;
+	int      curLife;
+	char     name[MAX_NAME_LEN];
+	int      nHandCardNum;
+	int      nJudgmentCardNum;
+	Card     stHandCards[MAX_HAND_CARD];
+	Card     stEquipCard[EquipIdx_Max];
+	Card     stJudgmentCards[MAX_JUDGMENT_CARD];
+	PlayerFlag  flag;
+	int      params[MAX_PLAYER_PARAM];
 } Player;
 
 
@@ -86,10 +87,10 @@ typedef  struct  tagPlayer
 #define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
 
 
-int init_player(Player* pPlayer, int id, int hero);
+int init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
-const char* player_id_str(int id);
+const char* player_id_str(PlayerID id);
 
 int player_remove_card(Player* pPlayer, int pos);
 int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
