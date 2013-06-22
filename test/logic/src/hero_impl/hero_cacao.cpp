@@ -1,7 +1,5 @@
-#include "../config.h"
-#include "../hero.h"
-#include "../comm.h"
-#include "../game.h"
+#include "hero_impl.h"
+
 
 
 
@@ -170,8 +168,8 @@ const HeroConfig* get_hero_cacao()
 		"²Ü²Ù",
 		4,
 		YES,
-		HeroSex_Male,
 		HeroGroup_Wei,
+		HeroSex_Male,
 		"",
 		2,
 		{

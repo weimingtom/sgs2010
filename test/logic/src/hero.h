@@ -53,7 +53,7 @@ enum SkillFlag
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 typedef YESNO  (*SKILLCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*SKILLUSEFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*SKILLUSEFUN)(GameContext*, GameEventContext*, int);
 
 typedef struct tagHeroSkill
 {
@@ -69,12 +69,12 @@ typedef struct tagHeroSkill
 
 typedef struct  tagHeroConfig
 {
-	int  id;
-	char name[MAX_NAME_LEN];
-	int  life;
-	YESNO  isMaster;
-	int  group;
-	int  sex;
+	HeroID     id;
+	char       name[MAX_NAME_LEN];
+	int        life;
+	YESNO      isMaster;
+	HeroGroup  group;
+	HeroSex    sex;
 	char desc[MAX_DESC_LEN];
 	int  skillNum;
 	HeroSkill skills[MAX_HERO_SKILL_NUM];
@@ -83,9 +83,9 @@ typedef struct  tagHeroConfig
 
 
 
-const HeroConfig* get_hero_config(int id);
-const char* hero_group_str(int group);
-const char* hero_sex_str(int sex);
+const HeroConfig* get_hero_config(HeroID id);
+const char* hero_group_str(HeroGroup group);
+const char* hero_sex_str(HeroSex sex);
 
 
 #endif /* __HERO_H__ */

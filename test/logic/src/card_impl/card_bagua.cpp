@@ -1,7 +1,4 @@
-#include "../config.h"
-#include "../hero.h"
-#include "../comm.h"
-#include "../game.h"
+#include "card_impl.h"
 
 static YESNO card_bagua_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
@@ -9,9 +6,9 @@ static YESNO card_bagua_check(GameContext* pGame, GameEventContext* pEvent, int 
 }
 
 
-static int card_bagua_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_bagua_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

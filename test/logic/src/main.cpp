@@ -5,6 +5,7 @@
 #include "game.h"
 #include "cmd.h"
 #include "comm.h"
+#include "event.h"
 
 /*
 
@@ -70,6 +71,7 @@ int main(int argc, char** argv)
 	//const PlayerConfig* pConfig;
 
 	GameContext   stGameContext;
+	GameEventContext  stEvent;
 
 	srand((int)time(NULL));
 
@@ -77,7 +79,9 @@ int main(int argc, char** argv)
 
 	ST_ZREO(stGameContext);
 
-	cmd_loop(&stGameContext, NULL, NULL, NULL);
+	INIT_EVENT(&stEvent, GameEvent_None, 0, 0, NULL);
+
+	cmd_loop(&stGameContext, &stEvent, NULL);
 
 	return 0;
 }

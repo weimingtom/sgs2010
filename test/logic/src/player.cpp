@@ -3,7 +3,7 @@
 #include "hero.h"
 #include "comm.h"
 
-int init_player(Player* pPlayer, int id, int hero)
+int init_player(Player* pPlayer, PlayerID id, HeroID hero)
 {
 	const HeroConfig*  pHeroConfig = get_hero_config(hero);
 
@@ -28,7 +28,7 @@ int init_player(Player* pPlayer, int id, int hero)
 	}
 	*/
 
-	memset(pPlayer, 0, sizeof(*pPlayer));
+	ST_ZREO(*pPlayer);
 
 
 	pPlayer->id = id;

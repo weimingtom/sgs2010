@@ -1,6 +1,10 @@
 #ifndef __CARD_H__
 #define __CARD_H__
 
+
+
+#include "config.h"
+
 //card type
 enum CardType
 {
@@ -87,58 +91,47 @@ enum CardValue
 	CardValue_A = 14,
 };
 
+
+
+enum CardFlag
+{
+	CardFlag_None = 0,
+};
+
+
+
+
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*CARDCALCFUN)(GameContext*, GameEventContext*, int);
-typedef int  (*CARDFINIFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*CARDCALCFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*CARDFINIFUN)(GameContext*, GameEventContext*, int);
 
 
 typedef struct tagCardConfig
 {
-	char id;
-	char type;
-	char name[MAX_NAME_LEN];
-	char desc[MAX_DESC_LEN];
+	CardID       id;
+	CardType     type;
+	char         name[MAX_NAME_LEN];
+	char         desc[MAX_DESC_LEN];
 	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
 	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
 	CARDCALCFUN  calc;    // called when card effect is needed to calc     default NULL. no effect
 	CARDCALCFUN  fini;    // called when card calc finished (if card still exist after calc)  default NULL, discard to out card stack
 }CardConfig;
 
+typedef struct tagCard Card;
 
-typedef struct tagCard
+
+struct tagCard
 {
-	union {
-		struct {
-			char id;
-			char color;
-			char value;
-			char flag;
-		};
-		unsigned long ul;
-	};
-}Card;
-
-
-typedef struct tagPosCard
-{
-	Card card;
-	int  where;
-	int  pos;
-}PosCard;
-
-typedef struct tagOutCard OutCard;
-
-#define MAX_RCARD_NUM  5
-
-struct tagOutCard
-{
-	PosCard vcard;    //  use as card (virtaul) 
-	int  nrcard;   //  real card number ,. if 0 vcard is also real card 
-	PosCard rcards[MAX_RCARD_NUM];  // rcard array;
+	CardID    id;
+	CardColor color;
+	CardValue value;
+	CardFlag  flag;
 };
+
 
 
 typedef struct tagCardPattern CardPattern;
@@ -152,28 +145,13 @@ struct tagCardPattern
 };
 
 
-typedef struct tagOutCardPattern OutCardPattern;
 
-struct tagOutCardPattern
-{
-	int num;
-	CardPattern patterns[MAX_RCARD_NUM];
-};
+const char* card_type_str(CardType type);
+const char* card_id_str(CardID id);
+const char* card_color_str(CardColor color);
+const char* card_value_str(CardValue value);
 
-
-
-#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
-#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
-
-
-const char* card_type_str(int type);
-const char* card_id_str(int id);
-const char* card_color_str(int color);
-const char* card_value_str(int value);
-
-const CardConfig* get_card_config(int id);
+const CardConfig* get_card_config(CardID id);
 
 void card_dump(const Card* pCard);
 
@@ -183,8 +161,8 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
 
+RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num);
 
-int card_match(const Card* pCard, const CardPattern* pPattern, int num);
 
 
 #endif /* __CARD_H__ */

@@ -27,11 +27,6 @@
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"
 
-enum YESNO
-{
-	NO = 0,
-	YES = 1,
-};
 
 
 #define  MAX_NAME_LEN    32
@@ -63,6 +58,38 @@ enum YESNO
 #define MAX(a,b)   ((a)>(b)?(a):(b))
 
 #define C2I(c)  ((int)(unsigned char)(c))
+
+
+enum YESNO
+{
+	NO = 0,
+	YES = 1,
+};
+
+enum RESULT
+{
+	R_SUCC  = 0,   // success, and continue loop
+	R_DEF   = 1,   // do default proc and continue loop
+	R_BACK  = 2,   // back to caller ,end cmd loop
+	R_EXIT  = 3,   // exit the game ,end cmd loop
+	R_CANCEL  = 4,   // op cancel, end cmd loop
+	R_ABORT  = 5,   // op abort, end cmd loop
+	R_RETRY  = 6,   // retry it , continue loop
+
+
+	// error code ( <0 )
+	R_E_FAIL  = -1,   // general fail, and continue loop
+	R_E_PARAM = -2,   // error param
+	R_E_MEMORY = -3,  // out of memory
+	R_E_STATUS = -4,  // error status
+	R_E_TIMEOUT = -5, // op timeout
+};
+
+
+#define IS_FAIL(res)  ((res) < 0)
+
+
+
 
 #endif /* __CONFIG_H__ */
 

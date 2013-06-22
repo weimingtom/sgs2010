@@ -1,6 +1,6 @@
 #include "config.h"
 #include "hero.h"
-
+#include "hero_impl/hero_impl.h"
 
 
 const char* hero_group_str(int group)
@@ -27,19 +27,6 @@ const char* hero_sex_str(int sex)
 	return "Invalid";	
 }
 
-
-
-extern const HeroConfig* get_hero_cacao();
-extern const HeroConfig* get_hero_liube();
-extern const HeroConfig* get_hero_sunquan();
-extern const HeroConfig* get_hero_guanyu();
-extern const HeroConfig* get_hero_zhangfei();
-extern const HeroConfig* get_hero_zhaoyu();
-extern const HeroConfig* get_hero_machao();
-extern const HeroConfig* get_hero_xiahoudun();
-extern const HeroConfig* get_hero_zhanliao();
-extern const HeroConfig* get_hero_luxun();
-extern const HeroConfig* get_hero_sunshangxiang();
 
 
 
