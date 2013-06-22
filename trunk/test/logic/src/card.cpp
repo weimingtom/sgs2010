@@ -155,7 +155,8 @@ char* card_str(const Card* pCard, char* buffer, int buflen)
 
 char* card_simple_str(const Card* pCard, char* buffer, int buflen)
 {
-	return "";
+	buffer[0] = 0;
+	return buffer;
 }
 
 
