@@ -10,9 +10,9 @@ static YESNO rende_check(GameContext* pGame, GameEventContext* pEvent, int playe
 	return NO;
 }
 
-static int rende_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT rende_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -21,9 +21,9 @@ static YESNO jijiang_check(GameContext* pGame, GameEventContext* pEvent, int pla
 	return NO;
 }
 
-static int jijiang_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT jijiang_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -34,8 +34,8 @@ const HeroConfig* get_hero_liube()
 		"Αυ±Έ",
 		4,
 		YES,
-		HeroSex_Male,
 		HeroGroup_Shu,
+		HeroSex_Male,
 		"",
 		2,
 		{

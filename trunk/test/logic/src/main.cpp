@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
 	printf(PROJ_NAME" "VERSION_STR"\n");
 
-	ST_ZREO(stGameContext);
+	ST_ZERO(stGameContext);
 
 	INIT_EVENT(&stEvent, GameEvent_None, 0, 0, NULL);
 

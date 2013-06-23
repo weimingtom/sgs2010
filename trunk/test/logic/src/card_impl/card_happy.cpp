@@ -7,9 +7,9 @@ static YESNO card_happy_check(GameContext* pGame, GameEventContext* pEvent, int 
 }
 
 
-static int card_happy_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_happy_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

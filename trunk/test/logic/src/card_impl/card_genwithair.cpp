@@ -7,9 +7,9 @@ static YESNO card_genwithair_check(GameContext* pGame, GameEventContext* pEvent,
 }
 
 
-static int card_genwithair_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_genwithair_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

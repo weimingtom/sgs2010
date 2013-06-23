@@ -9,9 +9,9 @@ static YESNO zhiheng_check(GameContext* pGame, GameEventContext* pEvent, int pla
 	return NO;
 }
 
-static int zhiheng_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT zhiheng_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -20,9 +20,9 @@ static YESNO jiuyuan_check(GameContext* pGame, GameEventContext* pEvent, int pla
 	return NO;
 }
 
-static int jiuyuan_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT jiuyuan_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -33,8 +33,8 @@ const HeroConfig* get_hero_sunquan()
 		"ÀÔ»®",
 		4,
 		YES,
-		HeroSex_Male,
 		HeroGroup_Wu,
+		HeroSex_Male,
 		"",
 		2,
 		{

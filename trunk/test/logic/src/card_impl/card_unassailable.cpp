@@ -7,9 +7,9 @@ static YESNO card_unassailable_check(GameContext* pGame, GameEventContext* pEven
 }
 
 
-static int card_unassailable_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_unassailable_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

@@ -8,9 +8,9 @@ static YESNO card_halberdfangtian_check(GameContext* pGame, GameEventContext* pE
 }
 
 
-static int card_halberdfangtian_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_halberdfangtian_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

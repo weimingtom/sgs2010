@@ -25,6 +25,7 @@ typedef struct tagOutCard OutCard;
 
 struct tagOutCard
 {
+	int     supply;
 	PosCard vcard;    //  use as card (virtaul) 
 	int  nrcard;   //  real card number ,. if 0 vcard is also real card 
 	PosCard rcards[MAX_RCARD_NUM];  // rcard array;
@@ -36,6 +37,7 @@ typedef struct tagOutCardPattern OutCardPattern;
 
 struct tagOutCardPattern
 {
+	int where;
 	int num;
 	CardPattern patterns[MAX_RCARD_NUM];
 };
@@ -48,10 +50,12 @@ struct tagOutCardPattern
 #define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
 
 
-
+// out card command process
 RESULT game_outcard(GameContext* pGame, GameEventContext* pEvent, int* idx, int num);
+// pass command process
 RESULT game_pass(GameContext* pGame, GameEventContext* pEvent);
-
+// 
+RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
 
 
 

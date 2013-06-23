@@ -43,7 +43,7 @@
 #endif
 
 
-#define ST_ZREO(st)   (memset(&st, 0, sizeof(st)))
+#define ST_ZERO(st)   (memset(&st, 0, sizeof(st)))
 
 #ifdef MIN 
 #undef MIN
@@ -66,6 +66,10 @@ enum YESNO
 	YES = 1,
 };
 
+
+#define B2YESNO(b) ((b)?YES:NO)
+
+
 enum RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop
@@ -83,10 +87,15 @@ enum RESULT
 	R_E_MEMORY = -3,  // out of memory
 	R_E_STATUS = -4,  // error status
 	R_E_TIMEOUT = -5, // op timeout
+	R_E_OVERFLOW = -6, // overflow , 
 };
 
 
 #define IS_FAIL(res)  ((res) < 0)
+#define IS_SUCC(res)  ((res) == R_SUCC)
+#define IS_CANCEL(res) ((res) == R_CANCEL)
+#define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
+#define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
 
 
 

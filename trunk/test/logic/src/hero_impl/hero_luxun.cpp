@@ -9,9 +9,9 @@ static YESNO qianxun_check(GameContext* pGame, GameEventContext* pEvent, int pla
 	return NO;
 }
 
-static int qianxun_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT qianxun_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 static YESNO lianying_check(GameContext* pGame, GameEventContext* pEvent, int player)
@@ -19,9 +19,9 @@ static YESNO lianying_check(GameContext* pGame, GameEventContext* pEvent, int pl
 	return NO;
 }
 
-static int lianying_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT lianying_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -33,8 +33,8 @@ const HeroConfig* get_hero_luxun()
 		"½ѷ",
 		3,
 		NO,
-		HeroSex_Male,
 		HeroGroup_Wu,
+		HeroSex_Male,
 		"",
 		2,
 		{

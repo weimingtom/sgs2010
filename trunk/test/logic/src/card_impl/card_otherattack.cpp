@@ -7,9 +7,9 @@ static YESNO card_otherattack_check(GameContext* pGame, GameEventContext* pEvent
 }
 
 
-static int card_otherattack_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_otherattack_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

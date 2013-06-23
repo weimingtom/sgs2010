@@ -9,9 +9,9 @@ static YESNO jieyan_check(GameContext* pGame, GameEventContext* pEvent, int play
 	return NO;
 }
 
-static int jieyan_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT jieyan_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 static YESNO xiaoji_check(GameContext* pGame, GameEventContext* pEvent, int player)
@@ -19,9 +19,9 @@ static YESNO xiaoji_check(GameContext* pGame, GameEventContext* pEvent, int play
 	return NO;
 }
 
-static int xiaoji_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT xiaoji_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -33,8 +33,8 @@ const HeroConfig* get_hero_sunshangxiang()
 		"ÀÔ…–œ„",
 		3,
 		NO,
-		HeroSex_Female,
 		HeroGroup_Wu,
+		HeroSex_Female,
 		"",
 		2,
 		{

@@ -6,9 +6,9 @@ static YESNO card_swordchixiong_check(GameContext* pGame, GameEventContext* pEve
 }
 
 
-static int card_swordchixiong_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_swordchixiong_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

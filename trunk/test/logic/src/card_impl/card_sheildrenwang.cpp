@@ -6,9 +6,9 @@ static YESNO card_sheildrenwang_check(GameContext* pGame, GameEventContext* pEve
 }
 
 
-static int card_sheildrenwang_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_sheildrenwang_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

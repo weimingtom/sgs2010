@@ -8,9 +8,9 @@ static YESNO card_lightning_check(GameContext* pGame, GameEventContext* pEvent, 
 }
 
 
-static int card_lightning_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_lightning_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
