@@ -28,6 +28,18 @@ int get_game_round_player(GameContext* pGame)
 	return pGame->nRoundPlayer;
 }
 
+int get_game_master_player(GameContext* pGame)
+{
+	int n;
+	for(n = 0; n < pGame->nPlayerCount; n++)
+	{
+		if(pGame->players[n].id == PlayerID_Master)
+			return n;
+	}
+	return -1;
+}
+
+
 int game_next_player(GameContext* pGame, int player)
 {
 	// TODO: must think about the player is die
@@ -319,7 +331,6 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	pGame->cardOut.count = 0;
 
 
-	pGame->status = Status_FirstGetCard;
 	pGame->nRoundNum = 0;
 
 	// first get 4 cards per player
@@ -335,20 +346,11 @@ static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
 static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 {
-
-	if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipNextRound))
-		return game_next_round(pGame, pEvent);
-
-	pGame->nCurPlayer = pGame->nRoundPlayer;
-
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, NULL);
+	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, pEvent);
 
 
 	trigger_game_event(pGame, &event);
-
-
-	pGame->status = Status_Round_Judge;
 
 	return R_SUCC;
 }
@@ -361,24 +363,26 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	trigger_game_event(pGame, &event);
 
 	// is ot not skip this round step ?
+	if(event.result == R_CANCEL)
+		return R_SUCC;
 	
-
 	// judge cards
 	Player* pPlayer = ROUND_PLAYER(pGame);
 	Card stCard;
 	const CardConfig* pCardConfig;
 
 
-
 	while(pPlayer->nJudgmentCardNum > 0)
 	{
 		stCard = pPlayer->stJudgmentCards[pPlayer->nJudgmentCardNum-1];
+		pPlayer->nJudgmentCardNum--;
+
 		pCardConfig = get_card_config(stCard.id);
 
 		if(pCardConfig)
 		{
 			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->nRoundPlayer, 0, pEvent);
-			event.card = stCard;
+			event.pCard = &stCard;
 			trigger_game_event(pGame, &event);
 
 			if(event.result != R_CANCEL) // if card calc is cancel .
@@ -386,39 +390,29 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				if(pCardConfig->calc != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->nRoundPlayer, 0, pEvent);
-					event.card = stCard;
-
-					pGame->nCurPlayer = pGame->nRoundPlayer;
+					event.pCard = &stCard;
 					(*pCardConfig->calc)(pGame, &event, pGame->nCurPlayer);
 				}
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->nRoundPlayer, 0, pEvent);
-				event.card = stCard;
+				event.pCard = &stCard;
 				trigger_game_event(pGame, &event);
-
-				stCard = event.card;
 
 			}
 
 			// after calc
-			if(stCard.id == CardID_None)
-			{
-				// card is lost
-				pPlayer->nJudgmentCardNum--;
-			}
-			else
+			if(stCard.id != CardID_None)
 			{
 				if(pCardConfig->fini != NULL)
 				{
-					(*pCardConfig->fini)(pGame, NULL, pGame->nCurPlayer);
+					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->nRoundPlayer, 0, pEvent);
+					event.pCard = &stCard;
+					(*pCardConfig->fini)(pGame, &event, pGame->nCurPlayer);
 				}
 				else
 				{
-					// after calc discard card?
+					// after calc discard card (default fini action)?
 					card_stack_push(&pGame->cardOut, &stCard);
-
-					pPlayer->nJudgmentCardNum--;
-
 				}
 			}
 		}
@@ -431,8 +425,6 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
 
-	pGame->status = Status_Round_Get;
-
 	return R_SUCC;
 }
 
@@ -443,9 +435,11 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
 
-
-
-
+	if(event.result == R_CANCEL)
+	{
+		// skip getcard step
+	}
+	
 
 
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->nRoundPlayer, 0, pEvent);
@@ -490,17 +484,85 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent)
 {
 	// calc next round player
-	pGame->nRoundPlayer = (pGame->nRoundPlayer + 1) & pGame->nPlayerCount;
-	pGame->nRoundNum++;
+	for(;;)
+	{
+		pGame->nRoundPlayer = game_next_player(pGame, pGame->nRoundPlayer);
+		pGame->nRoundNum++;
+
+		if(!PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipNextRound))
+			break;
+
+		// clear flags
+		PLAYER_CLR_ALL_FLAG(ROUND_PLAYER(pGame));
+	}
 
 
 	printf("next round: num [%d], round player is set to: %d, [%s]\n", pGame->nRoundNum, pGame->nRoundPlayer, ROUND_PLAYER(pGame)->name);
 
 	// set status round begin
 	pGame->status = Status_Round_Begin;
+
+	// clear status
+	PLAYER_CLR_ALL_FLAG(ROUND_PLAYER(pGame));
+
 	return R_SUCC;
 }
 
+static RESULT game_next_status(GameContext* pGame, GameEventContext* pEvent)
+{
+	switch(pGame->status)
+	{
+	case Status_NewGame:
+		pGame->status = Status_Round_Begin;
+		pGame->nRoundPlayer = get_game_master_player(pGame);
+		break;
+	case Status_Round_Begin:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+			goto __RoundEnd;
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundJudge))
+			goto __RoundJudge;
+		pGame->status = Status_Round_Judge;
+		break;
+	case Status_Round_Judge:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+			goto __RoundEnd;
+	__RoundJudge:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundGet))
+			goto __RoundGet;
+		pGame->status = Status_Round_Get;
+		break;
+	case Status_Round_Get:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+			goto __RoundEnd;
+	__RoundGet:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundOut))
+			goto __RoundOut;
+		pGame->status = Status_Round_Out;
+		break;
+	case Status_Round_Out:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+			goto __RoundEnd;
+	__RoundOut:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundDiscard))
+			goto __RoundDiscard;
+		pGame->status = Status_Round_Discard;
+		break;
+	case Status_Round_Discard:
+		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+			goto __RoundEnd;
+	__RoundDiscard:
+		pGame->status = Status_Round_End;
+		break;
+	case  Status_Round_End:
+	__RoundEnd:
+		game_next_round(pGame, pEvent);
+		break;
+	default:
+		return R_E_STATUS;
+		break;
+	}
+	return R_SUCC;
+}
 
 static RESULT game_step(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -523,6 +585,7 @@ static RESULT game_step(GameContext* pGame, GameEventContext* pEvent)
 		break;
 	case Status_Round_End:
 		return game_round_end(pGame, pEvent);
+		break;
 	}
 	return R_E_STATUS;
 }
@@ -533,249 +596,125 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 	RESULT ret = R_SUCC;
 	while(ret != R_SUCC)
 	{
-		ret = game_step(pGame, pEvent);
+		ret = game_next_status(pGame, pEvent);
+		if(ret == R_SUCC)
+		{
+			ret = game_step(pGame, pEvent);
+		}
 	}
 	return ret;
 }
 
-/*
-int game_loop(GameContext* pGame)
-{
-	// first get card
-	get_first_hand_card(pGame);
-
-	// begin round
-
-	while(pGame->status != Status_None)
-	{
-		// a round
-		do {
-
-			// round is skip ?
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipNextRound))
-			{
-				PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_SkipNextRound);
-				break;
-			}
-
-			pGame->nCurPlayer = pGame->nRoundPlayer;
-			
-			// (1) begin round
-			game_round_begin(pGame);
-
-			// (2) judge
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
-			{
-				break;
-			}
-
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundJudge))
-			{
-				PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_SkipThisRoundJudge);
-			}
-			else
-			{
-				game_round_judge(pGame);
-			}
-
-			// (3) get card
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
-			{
-				break;
-			}
-
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundGet))
-			{
-				PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_SkipThisRoundGet);
-			}
-			else
-			{
-				game_round_getcard(pGame);
-			}
-
-			// (4) out card
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
-			{
-				break;
-			}
-
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundOut))
-			{
-				PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_SkipThisRoundOut);
-			}
-			else
-			{
-				game_round_outcard(pGame);
-			}
-
-			// (5) discard card
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
-			{
-				break;
-			}
-
-			if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundDiscard))
-			{
-				PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_SkipThisRoundDiscard);
-			}
-			else
-			{
-				game_round_discardcard(pGame);
-			}
-
-			// (6) end round
-			game_round_end(pGame);
-		} while(0);
-
-		PLAYER_CLR_FLAG(ROUND_PLAYER(pGame),PlayerFlag_AllThisSkipFlag);
-
-		NEXT_ROUND(pGame);
-
-	}
-
-	return 0;
-}
-
-*/
 
 
 
-
-static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text, PassiveOut* pPassiveOut)
 {
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, target, pParentEvent);
-	event.out = *pOut;
+	RESULT ret;
 
-	trigger_game_event(pGame, &event);
+
+	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, player, pParentEvent);
+	event.pPassiveOut =  pPassiveOut;
+
+	pGame->nCurPlayer = player;
+
+	ret = cmd_loop(pGame, &event, alter_text);
+
+	if(event.result == R_SUCC)
+	{
+		// 
+	}
 
 	return event.result;
 }
 
-static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+/*
+RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const CardPattern* pattern, OutCard* pOut)
 {
+	char   text[1024];
+	char   temp[128];
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, target, pParentEvent);
-	event.out = *pOut;
+	RESULT ret;
 
-	trigger_game_event(pGame, &event);
+	INIT_EVENT(&event, GameEvent_SupplyCard, trigger, player, pParentEvent);
+	event.pattern.patterns[0] = *pattern;
+	event.pattern.num = 1;
 
-	*pOut = event.out;
+	pGame->nCurPlayer = player;
 
-	return event.result;	
-}
+	snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out req card' or 'cancel'", CUR_PLAYER(pGame)->name, card_pattern_str(pattern, temp, sizeof(temp)));
 
-static RESULT remove_out_card(GameContext* pGame, int supply, OutCard* pOut)
-{
-	int n;
-	char buf[128];
-	if(pOut->nrcard == 0)
+	ret = cmd_loop(pGame, &event, text);
+
+	if(event.result == R_SUCC)
 	{
-		if(0 != player_remove_card(&pGame->players[supply], pOut->vcard.pos))
-		{
-			printf("remove out card [%s]  from player [%d] pos [%d] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)), supply, pOut->vcard.pos);
-			return R_E_FAIL;
-		}
-	}
-	else
-	{
-		for(n = 0; n < pOut->nrcard; n++)
-		{
-			player_remove_card(&pGame->players[supply], pOut->rcards[n].pos);
-			printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), supply, pOut->rcards[n].pos);
-			return R_E_FAIL;
-		}
-	}
-	return R_SUCC;
-}
-
-static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
-{
-	int n;
-	char buf[128];
-	if(pOut->nrcard > 0)
-	{
-		for(n = 0; n < pOut->nrcard; n++)
-		{
-			if(0 != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
-			{
-				printf("add out card [%s] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
-				return R_E_FAIL;
-			}
-		}
-	}
-	else if(pOut->vcard.card.id != CardID_None)
-	{
-		if(0 != card_stack_push(&pGame->cardOut, &pOut->vcard.card))
-		{
-			printf("add out card [%s] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)));
-			return R_E_FAIL;
-		}
-	}
-	return R_SUCC;
-}
-
-static RESULT out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, int supply, OutCard* pOut)
-{
-	if(R_CANCEL == per_out_card(pGame, pParentEvent, trigger, target, pOut))
-		return R_CANCEL;
-
-	remove_out_card(pGame, supply, pOut);
-
-	post_out_card(pGame, pParentEvent, trigger, target, pOut);
-
-	add_out_stack(pGame, pOut);
-
-	return R_SUCC;
-}
-
-
-
-
-
-
-
-/* 
-struct CmdLoopCallback
-{
-	const CardPattern* patterns;
-	int num;
-	int where;
-	int cancel;
-	int ret;
-};
-
-int f_callback(const char** argv, int argc, GameContext* pGame, void* ud)
-{
-	CmdLoopCallback* pu = (CmdLoopCallback*)ud;
-	
-	
-	if(!strcmp(argv[0], "out") || !strcmp(argv[0], "o"))
-	{
-
-		return CMD_RET_BACK;
-	}
-	else if(!strcmp(argv[0], "cancel") || !strcmp(argv[0], "c"))
-	{
-		return CMD_RET_BACK;
+		*pOut = event.out;
 	}
 
-
-	return CMD_RET_DEF;
-}
-
-int game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text)
-{
-	CmdLoopCallback  callback;
-	callback.patterns = patterns;
-	callback.num = num;
-	callback.where = where;
-	callback.cancel = canCancel;
-	callback.ret = 0;
-
-	cmd_loop(pGame, alter_text, f_callback, &callback);
-	
-	return callback.ret;
+	return event.result;
 }
 
 */
+
+
+RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, const char* alter_text, int* pTarget)
+{
+	int n;
+	int t;
+	RESULT  ret;
+	AttackDis   dis;
+	GameEvent   event;
+	const CardConfig* pCardConfig;
+	Player* pPlayer; 
+	Player* pTarget;
+
+	pPlayer = GAME_PLAYER(pGame, player);
+
+	//INIT_EVENT(&event, GameEvent_SelectTarget, player, 0, pParentEvent);
+
+	//ret = cmd_loop(pGame, &event, alter_text);
+
+	if(alter_text)
+		printf("%s:\n", alter_text);
+	else
+		printf("选择一个目标角色:\n");
+	for(n = (self_select == YES) ? 0 : 1; n < pGame->nPlayerCount; n++)
+	{
+		t = (player + n) % pGame->nPlayerCount;
+
+
+		pTarget = GAME_PLAYER(pGame, t);
+
+		printf(" (%d) %s, %s, life: %d/%d, hand cards: %d\n", player_str(pTarget->id), pTarget->name, pTarget->curLife, pTarget->maxLife, pTarget->nHandCardNum);
+
+	}
+	
+	printf("请选择:");
+
+
+
+
+	if(event.result != R_SUCC)
+		return event.result;
+
+	// check dist
+	if(base_dist >= 0)
+	{
+		// calc final dist, if base_distancc is -1, means ignore distance to target
+		dis.base = base_dist;
+		dis.inc = 0;
+
+		INIT_EVENT(&event, GameEvent_CalcAttackDis, player, 0, pParentEvent);
+		event.pAttackDis = &dis;
+
+		// attack weapon attack dist
+		if(CARD_VALID(&))
+		pCardConfig = get_card_config()
+
+	}
+	
+
+	return R_CANCEL;
+}
+

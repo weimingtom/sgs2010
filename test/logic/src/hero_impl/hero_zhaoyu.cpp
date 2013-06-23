@@ -10,9 +10,9 @@ static YESNO longdan_check(GameContext* pGame, GameEventContext* pEvent, int pla
 	return NO;
 }
 
-static int longdan_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT longdan_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -23,8 +23,8 @@ const HeroConfig* get_hero_zhaoyu()
 		"’‘‘∆",
 		3,
 		NO,
-		HeroSex_Male,
 		HeroGroup_Shu,
+		HeroSex_Male,
 		"",
 		1,
 		{

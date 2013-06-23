@@ -76,19 +76,19 @@ enum CardValue
 	CardValue_Unknown = -1,
 	CardValue_None = 0,
 
-	CardValue_2 = 2,
-	CardValue_3 = 3,
-	CardValue_4 = 4,
-	CardValue_5 = 5,
-	CardValue_6 = 6,
-	CardValue_7 = 7,
-	CardValue_8 = 8,
-	CardValue_9 = 9,
-	CardValue_10 = 10,
-	CardValue_J = 11,
-	CardValue_Q = 12,
-	CardValue_K = 13,
-	CardValue_A = 14,
+	CardValue_2 = 1,
+	CardValue_3 = 2,
+	CardValue_4 = 3,
+	CardValue_5 = 4,
+	CardValue_6 = 5,
+	CardValue_7 = 6,
+	CardValue_8 = 7,
+	CardValue_9 = 8,
+	CardValue_10 = 9,
+	CardValue_J = 10,
+	CardValue_Q = 11,
+	CardValue_K = 12,
+	CardValue_A = 13,
 };
 
 
@@ -138,13 +138,14 @@ typedef struct tagCardPattern CardPattern;
 
 struct tagCardPattern
 {
-	char id;
-	char color;
-	char value_min;
-	char value_max;
+	CardID id;
+	CardColor color;
+	CardValue value_min;
+	CardValue value_max;
 };
 
-
+#define RESET_CARD(pCard)   ST_ZERO(*pCard)
+#define CARD_VALID(p)   ((p)->id != CardID_None)
 
 const char* card_type_str(CardType type);
 const char* card_id_str(CardID id);
@@ -155,7 +156,8 @@ const CardConfig* get_card_config(CardID id);
 
 void card_dump(const Card* pCard);
 
-char* card_str(const Card* pCard, char* buffer, int buflen);
+#define card_str(pCard, buffer, buflen) card_str_n((pCard),1,(buffer),(buflen))
+char* card_str_n(const Card* pCard, int num, char* buffer, int buflen);
 
 char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
@@ -163,6 +165,8 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num);
 
+#define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
+char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);
 
 
 #endif /* __CARD_H__ */

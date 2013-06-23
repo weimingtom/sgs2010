@@ -3,7 +3,7 @@
 #include "hero_impl/hero_impl.h"
 
 
-const char* hero_group_str(int group)
+const char* hero_group_str(HeroGroup group)
 {
 	switch(group)
 	{
@@ -16,7 +16,7 @@ const char* hero_group_str(int group)
 	return "Invalid";
 }
 
-const char* hero_sex_str(int sex)
+const char* hero_sex_str(HeroSex sex)
 {
 	switch(sex)
 	{
@@ -30,7 +30,7 @@ const char* hero_sex_str(int sex)
 
 
 
-const HeroConfig* get_hero_config(int id)
+const HeroConfig* get_hero_config(HeroID id)
 {
 	switch(id)
 	{

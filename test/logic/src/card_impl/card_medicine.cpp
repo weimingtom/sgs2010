@@ -16,22 +16,22 @@ static YESNO card_medicine_check(GameContext* pGame, GameEventContext* pEvent, i
 
 
 
-int card_medicine_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_medicine_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	
 	
 
-	return 0;
+	return R_SUCC;
 }
 
 
 
 
 
-int card_medicine_calc(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_medicine_calc(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 
-	return 0;
+	return R_SUCC;
 }
 
 

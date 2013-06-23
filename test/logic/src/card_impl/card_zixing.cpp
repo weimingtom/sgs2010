@@ -8,9 +8,9 @@ static YESNO card_zixing_check(GameContext* pGame, GameEventContext* pEvent, int
 }
 
 
-static int card_zixing_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_zixing_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

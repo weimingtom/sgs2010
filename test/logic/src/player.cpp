@@ -3,20 +3,20 @@
 #include "hero.h"
 #include "comm.h"
 
-int init_player(Player* pPlayer, PlayerID id, HeroID hero)
+RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 {
 	const HeroConfig*  pHeroConfig = get_hero_config(hero);
 
 	if(id < PlayerID_Valid_Min || id > PlayerID_Valid_Max)
 	{
 		printf("init player: invalid player ID %d\n", id);
-		return -1;
+		return R_E_PARAM;
 	}
 
 	if(pHeroConfig == NULL)
 	{
 		printf("init player: invalid hero ID %d\n", hero);
-		return -2;
+		return R_E_FAIL;
 	}
 
 	// is master ?
@@ -24,11 +24,11 @@ int init_player(Player* pPlayer, PlayerID id, HeroID hero)
 	if(id == PlayerID_Master)
 	{
 		if(pHeroConfig->isMaster == 0)
-			return -3;
+			return R_E_PARAM;
 	}
 	*/
 
-	ST_ZREO(*pPlayer);
+	ST_ZERO(*pPlayer);
 
 
 	pPlayer->id = id;
@@ -50,13 +50,13 @@ int init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	printf("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pHeroConfig->name, pPlayer->maxLife);
 
-	return 0;
+	return R_SUCC;
 }
 
 
 
 
-const char* player_id_str(int id)
+const char* player_id_str(PlayerID id)
 {
 	switch(id)
 	{
@@ -71,54 +71,68 @@ const char* player_id_str(int id)
 }
 
 
-
-
-int player_remove_card(Player* pPlayer, int pos)
+YESNO is_player_handfull(Player* player)
 {
-	int where = PLAYER_CARD_WHERE(pos);
-	int index = PLAYER_CARD_INDEX(pos);
+	return B2YESNO(player->nHandCardNum < MAX_HAND_CARD);
+}
 
+
+RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
+{
+	if(is_player_handfull(pPlayer))
+		return R_E_OVERFLOW;
+
+	arrray_insert_t(pPlayer->stHandCards, sizeof(pPlayer->stHandCards[0]), &pPlayer->nHandCardNum, -1, pCard);
+	return R_SUCC;
+}
+
+
+RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
+{
 	switch(where)
 	{
 	case PlayerCard_Hand:
-		if(pos < pPlayer->nHandCardNum)
+		if(0 <= pos && pos < pPlayer->nHandCardNum)
 		{
-			arrray_remove_t(pPlayer->stHandCards, sizeof(pPlayer->stHandCards[0]), &pPlayer->nHandCardNum, index, NULL);
-			return 0;
+			if(pCard != NULL) *pCard = pPlayer->stHandCards[pos];
+			arrray_remove_t(pPlayer->stHandCards, sizeof(pPlayer->stHandCards[0]), &pPlayer->nHandCardNum, pos, NULL);
+			return R_SUCC;
 		}
 
 		break;
 	case PlayerCard_Equip:
-		if(pos < EquipIdx_Max && pPlayer->stEquipCard[index].id != CardID_None)
+		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None)
 		{
-			memset(&pPlayer->stEquipCard[index], 0, sizeof(pPlayer->stEquipCard[index]));
-			return 0;
+			if(pCard != NULL) *pCard = pPlayer->stEquipCard[pos];
+			RESET_CARD(&pPlayer->stEquipCard[pos]);
+			return R_SUCC;
 		}
 		break;
 	case PlayerCard_Judgment:
-		if(pos < pPlayer->nJudgmentCardNum)
+		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
 		{
-			arrray_remove_t(pPlayer->stJudgmentCards, sizeof(pPlayer->stJudgmentCards[0]), &pPlayer->nJudgmentCardNum, index, NULL);
-			return 0;
+			if(pCard != NULL) *pCard = pPlayer->stJudgmentCards[pos];
+			arrray_remove_t(pPlayer->stJudgmentCards, sizeof(pPlayer->stJudgmentCards[0]), &pPlayer->nJudgmentCardNum, pos, NULL);
+			return R_SUCC;
 		}
 		break;
 	}
 
-	return -1;
+	return R_E_PARAM;
 }
 
 
-int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
+RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 {
 	int n;
 	if(idx < 1 )
-		return -1;
+		return R_E_PARAM;
 
 	if(idx <= player->nHandCardNum)
 	{
 		*where = PlayerCard_Hand;
 		*pos = idx - 1;
-		return 0;
+		return R_SUCC;
 	}
 
 	idx -= player->nHandCardNum;
@@ -131,6 +145,7 @@ int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 			{
 				*where = PlayerCard_Equip;
 				*pos = n;
+				return R_SUCC;
 			}
 			idx--;
 		}
@@ -140,10 +155,10 @@ int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 	{
 		*where = PlayerCard_Judgment;
 		*pos = idx - 1;
-		return 0;
+		return R_SUCC;
 	}
 
-	return -1;
+	return R_E_FAIL;
 }
 
 

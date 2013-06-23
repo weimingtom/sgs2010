@@ -7,9 +7,9 @@ static YESNO card_zhuahuang_check(GameContext* pGame, GameEventContext* pEvent, 
 }
 
 
-static int card_zhuahuang_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_zhuahuang_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

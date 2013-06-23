@@ -22,6 +22,7 @@ enum PlayerID
 
 enum PlayerFlag
 {
+	PlayerFlag_None = 0,
 	PlayerFlag_SkipNextRound = 0x1,
 	PlayerFlag_SkipThisRound = 0x2,
 	PlayerFlag_SkipThisRoundJudge = 0x4,
@@ -38,7 +39,7 @@ enum PlayerFlag
 #define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
 #define PLAYER_SET_FLAG(p,f)  ((p)->flag |= f)
 #define PLAYER_CLR_FLAG(p,f)  ((p)->flag &= ~f)
-#define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = 0)
+#define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = PlayerFlag_None)
 
 
 #define MAX_HAND_CARD   20
@@ -87,15 +88,16 @@ typedef  struct  tagPlayer
 #define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
 
 
-int init_player(Player* pPlayer, PlayerID id, HeroID hero);
+RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
 const char* player_id_str(PlayerID id);
 
-int player_remove_card(Player* pPlayer, int pos);
-int player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
+RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
+RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard);
+RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
 
-
+YESNO is_player_handfull(Player* player);
 
 #endif /* __PLAYER_H__ */
 

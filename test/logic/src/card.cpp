@@ -8,7 +8,7 @@ const char* card_type_str(CardType type)
 	switch(type)
 	{
 	case CardType_Unknown: return "未知";
-	case CardType_None: return "无";
+	case CardType_None: return "任意种类";
 	case CardType_Normal: return "普通";
 	case CardType_Strategy: return "锦囊";
 	case CardType_Armor: return "防具";
@@ -24,7 +24,7 @@ const char* card_id_str(CardID id)
 {
 	switch(id)
 	{
-	case CardID_None: return "无";
+	case CardID_None: return "任意名称";
 	case CardID_Attack: return "杀";
 	case CardID_Defend: return "闪";
 	case CardID_Medicine: return "桃";
@@ -67,13 +67,13 @@ const char* card_color_str(CardColor color)
 	switch(color)
 	{
 	case CardColor_Unknown: return "未知";
-	case CardColor_None: return "无"; 
+	case CardColor_None: return "任意花色"; 
 	case CardColor_Spade: return "黑桃";
 	case CardColor_Club: return "梅花";
 	case CardColor_Heart: return "红桃";
 	case CardColor_Diamond : return "方块";
-	case CardColor_GeneralBlack: return "普通黑色";
-	case CardColor_GeneralRed: return "普通红色";
+	case CardColor_GeneralBlack: return "黑色";
+	case CardColor_GeneralRed: return "红色";
 	default: return "Invalid";
 	};
 }
@@ -83,7 +83,7 @@ const char* card_value_str(CardValue value)
 	switch(value)
 	{
 	case CardValue_Unknown: return "未知";
-	case CardValue_None: return "无";
+	case CardValue_None: return "任意点数";
 	case CardValue_2: return "２";
 	case CardValue_3: return "３";
 	case CardValue_4: return "４";
@@ -146,9 +146,14 @@ const CardConfig* get_card_config(CardID id)
 	return NULL;
 }
 
-char* card_str(const Card* pCard, char* buffer, int buflen)
+char* card_str_n(const Card* pCard, int num, char* buffer, int buflen)
 {
-	snprintf(buffer, buflen, "(%s, %s %s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));
+	int n;
+	int len = 0;
+	for(n = 0; n < num; n++)
+	{
+		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));
+	}
 	return buffer;
 }
 
@@ -166,6 +171,43 @@ void card_dump(const Card* pCard)
 	printf("%s", card_str(pCard, buffer, sizeof(buffer)));	
 }
 
+
+char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen)
+{
+	char tmp[128];
+	int  len = 0;
+	int n;
+
+	for(n = 0; n < num; n++)
+	{
+		if(patterns[n].value_min == CardValue_None && patterns[n].value_max == CardValue_None)
+		{
+			sprintf(tmp, "%s", card_value_str(CardValue_None));
+		}
+		else if(patterns[n].value_min == CardValue_None)
+		{
+			sprintf(tmp, "点数不超过%s", card_value_str(patterns[n].value_max));
+		}
+		else if(patterns[n].value_max == CardValue_None)
+		{
+			sprintf(tmp, "点数至少为%s", card_value_str(patterns[n].value_min));
+		}
+		else if(patterns[n].value_min == patterns[n].value_max )
+		{
+			sprintf(tmp, "%s", card_value_str(patterns[n].value_min));
+		}
+		else
+		{
+			sprintf(tmp, "点数在%s和%s之间", card_value_str(patterns[n].value_min),card_value_str(patterns[n].value_max));
+		}
+
+		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", 
+			patterns[n].id >= CardID_None ? card_id_str(patterns[n].id) : card_type_str((CardType)-patterns[n].id), 
+			card_color_str(patterns[n].color), tmp);
+	}
+	return buffer;
+
+}
 
 
 static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)

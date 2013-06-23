@@ -34,6 +34,7 @@ enum GameEvent
 	GameEvent_PerCardCalc,
 	GameEvent_CardCalc,
 	GameEvent_PostCardCalc,
+	GameEvent_FiniCardCalc,
 	GameEvent_PerRoundDiscard,
 	GameEvent_PostRoundDiscard,
 	GameEvent_PerDiscardCard,
@@ -58,21 +59,31 @@ enum GameEvent
 	GameEvent_PostCardJudge,
 	GameEvent_PerCardJudgeCalc,    
 	GameEvent_PostCardJudgeCalc,
+	GameEvent_RoundGetCard,
 	GameEvent_PassiveGetCard,
 	GameEvent_OutCardCheck,
+	GameEvent_RoundOutCard,
 	GameEvent_PassiveOutCard,
 	GameEvent_SupplyCard,
+	GameEvent_CalcAttackDis,
+	GameEvent_SelectTarget,
+	GameEvent_CheckTarget,
 };
 
-/*
-enum EventResult
+
+// for passive out, supply out
+typedef struct tagPassiveOut
 {
-	Result_None = 0,
-	Result_Yes = 1,
-	Result_No  = 2,
-	Result_Cancel = 3,
-};
-*/
+	YESNO          may_cancel;
+	OutCardPattern pattern;
+	OutCard        out; 
+} PassiveOut;
+
+typedef struct tagAttackDis
+{
+	int     base;
+	int     inc;
+}AttackDis;
 
 typedef struct tagGameEventContext GameEventContext;
 
@@ -84,24 +95,25 @@ struct tagGameEventContext
 	int      target;
 	GameEventContext* parent_event;
 	RESULT   result;
-	int		 block;
+	YESNO	 block;
 	union {
-		Card     card;   // for 
-		OutCard  out;             // for out card 
-		OutCardPattern pattern;   // for passive out, supply card, etc...
-		int      num;    // num for get card, discard card. etc
+		Card*       pCard;   // for calc card, judge card ... 
+		int*        pNum;    // num for get card, discard card. etc
+		AttackDis*  pAttackDis; 
+		PassiveOut* pPassiveOut; 
+		OutCard*    pOut;    // real out
 	};
 };
 
 
 #define INIT_EVENT(event, eid, tr, tg, p)   \
 	do { \
-	memset((event), 0, sizeof(*event)); \
+	ST_ZERO(*(event)); \
 	(event)->id = (eid); \
 	(event)->trigger = (tr); \
 	(event)->target = (tg); \
 	(event)->parent_event = (p); \
-	(event)->block = 0; \
+	(event)->block = NO; \
 	(event)->result = R_DEF; \
 } while(0)
 

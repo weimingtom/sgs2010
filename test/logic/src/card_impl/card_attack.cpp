@@ -2,45 +2,20 @@
 
 
 
-static RESULT out_card_check_event(GameContext* pGame, GameEventContext* pParentEvent, int player, int target)
-{
-	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_OutCardCheck, player, target, pParentEvent);
-	event.card.id = CardID_Attack;
-	event.result = R_DEF;
-
-	trigger_game_event(pGame, &event);
-
-	if(event.result ==R_SUCC )
-		return R_SUCC;
-	else if(event.result ==R_E_FAIL)
-		return R_E_FAIL;
-	// default
-	return pGame->players[player].params[0] == 0 ? R_SUCC : R_E_FAIL;
-}
-
 
 static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-
-	if(pEvent == NULL)
+	// reset attack count in round begin
+	if(pEvent->id == GameEvent_RoundBegin)
 	{
-		// my out round 
-		if(pGame->nRoundPlayer == player && out_card_check_event(pGame, pEvent, player, 0))
-			return YES;
+		pGame->players[player].params[0] = 0; 
 	}
-	else
+
+
+	// use in round out 
+	if(pEvent->id == GameEvent_RoundOutCard)
 	{
-
-		// reset attack count in round begin
-		if(pEvent->id == GameEvent_RoundBegin)
-		{
-			pGame->players[player].params[0] = 0; 
-		}
-
-
-		// use in force out 
-		if(pEvent->id == GameEvent_PassiveOutCard && pEvent->card.id == CardID_Attack)
+		if(pGame->players[player].params[0] == 0)
 			return YES;
 	}
 
@@ -50,11 +25,13 @@ static YESNO card_attack_check(GameContext* pGame, GameEventContext* pEvent, int
 
 static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+	RESULT ret;
+	int target;
 	// select target
 	while(1)
 	{
-		printf("select target:\n");
-		
+		ret = game_select_target(pGame, pEvent, player, 1, &target);
+				
 	}
 	
 	return R_SUCC;

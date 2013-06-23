@@ -6,9 +6,9 @@ static YESNO card_spearzhangba_check(GameContext* pGame, GameEventContext* pEven
 }
 
 
-static int card_spearzhangba_out(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT card_spearzhangba_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 

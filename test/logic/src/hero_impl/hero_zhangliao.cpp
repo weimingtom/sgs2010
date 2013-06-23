@@ -10,9 +10,9 @@ static YESNO tuxi_check(GameContext* pGame, GameEventContext* pEvent, int player
 	return NO;
 }
 
-static int tuxi_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT tuxi_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	return R_SUCC;
 }
 
 
@@ -24,8 +24,8 @@ const HeroConfig* get_hero_zhanliao()
 		"уеаи",
 		4,
 		NO,
-		HeroSex_Male,
 		HeroGroup_Wei,
+		HeroSex_Male,
 		"",
 		1,
 		{

@@ -4,20 +4,20 @@
 
 #include "config.h"
 #include "player.h"
+#include "card.h"
 #include "card_stack.h"
 
 
 
 // foward  decalare
 typedef struct tagGameEventContext GameEventContext;
-
+typedef struct tagOutCard  OutCard;
 
 
 enum Status
 {
 	Status_None = 0, // not start game yet
 	Status_NewGame=1, // the first time all player get card
-	Status_FirstGetCard, // the first time all player get card
 	Status_Round_Begin,
 	Status_Round_Judge,
 	Status_Round_Get,
@@ -61,6 +61,7 @@ enum GameResult
 
 #define ROUND_PLAYER(pGame)   (&(pGame)->players[(pGame)->nRoundPlayer])
 #define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
+#define GAME_PLAYER(pGame, pl)   (&(pGame)->players[(pl)])
 
 
 
@@ -78,14 +79,22 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 Status game_status(GameContext* pGame);
 int get_game_cur_player(GameContext* pGame);
 int get_game_round_player(GameContext* pGame);
+int get_game_master_player(GameContext* pGame);
 
 int game_next_player(GameContext* pGame, int player);
 int game_prev_player(GameContext* pGame, int player);
 
 
-// 按指定的方式出牌
-RESULT game_appoint_out(GameContext* pGame, int player, int where, const CardPattern* patterns, int num, int canCancel, const char* alter_text);
+// 当前玩家向指定玩家player请求指定样式的牌
+//RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const CardPattern* pattern, OutCard* pOut);
+
+
+// passive out process
+RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text, PassiveOut* pPassiveOut);
+
+// select target process
+RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, const char* alter_text, int* pTarget);
+
 
 #endif /* __GAME_H__ */
-
 

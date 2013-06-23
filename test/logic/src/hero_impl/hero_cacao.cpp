@@ -3,126 +3,25 @@
 
 
 
-static int supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, int id, OutCard* pOut)
-{
-	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_SupplyCard, trigger, player, pParentEvent);
-	event.card.id = id;
-	event.result = Result_None;
-
-	trigger_game_event(pGame, &event);
-
-	if(event.result == Result_Yes)
-	{
-		*pOut = event.out;
-	}
-
-	return event.result;
-}
-
-
-
-
-
-static int per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
-{
-	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, target, pParentEvent);
-	event.out = *pOut;
-
-	trigger_game_event(pGame, &event);
-
-	return event.result;
-}
-
-static int post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
-{
-	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, target, pParentEvent);
-	event.out = *pOut;
-
-	trigger_game_event(pGame, &event);
-
-	*pOut = event.out;
-
-	return event.result;	
-}
-
-static int remove_out_card(GameContext* pGame, int supply, OutCard* pOut)
-{
-	int n;
-	char buf[128];
-	if(pOut->nrcard == 0)
-	{
-		if(0 != player_remove_card(&pGame->players[supply], pOut->vcard.pos))
-		{
-			printf("remove out card [%s]  from player [%d] pos [%d] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)), supply, pOut->vcard.pos);
-			return -1;
-		}
-	}
-	else
-	{
-		for(n = 0; n < pOut->nrcard; n++)
-		{
-			player_remove_card(&pGame->players[supply], pOut->rcards[n].pos);
-			printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), supply, pOut->rcards[n].pos);
-			return -1;
-		}
-	}
-	return 0;
-}
-
-static int add_out_stack(GameContext* pGame, OutCard* pOut)
-{
-	int n;
-	char buf[128];
-	if(pOut->nrcard > 0)
-	{
-		for(n = 0; n < pOut->nrcard; n++)
-		{
-			if(0 != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
-			{
-				printf("add out card [%s] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
-				return -1;
-			}
-		}
-	}
-	else if(pOut->vcard.card.id != CardID_None)
-	{
-		if(0 != card_stack_push(&pGame->cardOut, &pOut->vcard.card))
-		{
-			printf("add out card [%s] failed ", card_str(&pOut->vcard.card, buf, sizeof(buf)));
-			return -1;
-		}
-	}
-	return 0;
-}
-
-static int out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, int supply, OutCard* pOut)
-{
-	if(Result_Cancel == per_out_card(pGame, pParentEvent, trigger, target, pOut))
-		return -1;
-
-	remove_out_card(pGame, supply, pOut);
-
-	post_out_card(pGame, pParentEvent, trigger, target, pOut);
-
-	add_out_stack(pGame, pOut);
-
-	return 0;
-}
 
 
 static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	if(pEvent && pEvent->id == GameEvent_PostLostLife)
+	// be damaged and target is self and the source of damage is card. 
+	if(pEvent->id == GameEvent_PostLostLife
+		&& pEvent->target == player
+		&& pEvent->card.id != CardID_None
+		&& YES != is_player_handfull(&pGame->players[player]))
 		return YES;
 	return NO;
 }
 
-static int jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	return 0;
+	// damage and
+	
+
+	return R_SUCC;
 }
 
 
@@ -133,31 +32,33 @@ static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int playe
 	return NO;
 }
 
-static int hujia_use(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	int n;
 	int nextplayer;
 	const HeroConfig* pHero;
+	CardPattern   pattern;
 	OutCard   out;
 
 	for(n = 1; n < pGame->nPlayerCount; n++)
 	{
 		nextplayer = (player + 1) % pGame->nPlayerCount;
 
-		pHero = get_hero_config(pGame->players[nextplayer].id);
+		pHero = get_hero_config(pGame->players[nextplayer].hero);
 
 		if(pHero && pHero->group == HeroGroup_Wei)
 		{
-			if(supply_card(pGame, pEvent, player, nextplayer, CardID_Defend, &out) == Result_Yes)
+			INIT_CARDPATTERN_USE_ID(&pattern, CardID_Defend);
+			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pattern, &out) )
 			{
 				// out card instead mine 
-				return out_card(pGame, pEvent, player, pEvent ? pEvent->target : 0, nextplayer, &out);
+				return game_real_outcard(pGame, pEvent, player, pEvent ? pEvent->target : 0, nextplayer, &out);
 				// break;
 			}
 		}
 	}
 
-	return -1;
+	return R_SUCC;
 }
 
 
