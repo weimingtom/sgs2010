@@ -51,11 +51,22 @@ struct tagOutCardPattern
 
 
 // out card command process
-RESULT game_outcard(GameContext* pGame, GameEventContext* pEvent, int* idx, int num);
+RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent, int* idx, int num);
 // pass command process
-RESULT game_pass(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent);
 // 
-RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
+RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int player);
+
+RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
+
+
+// trigger supply from player the card match the  pattern, return through pOut
+RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const OutCardPattern* pattern, const char* alter_text, OutCard* pOut);
+
+// passive out process
+RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const OutCardPattern* pattern, const char* alter_text);
+
+
 
 
 

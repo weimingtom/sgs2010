@@ -114,7 +114,7 @@ static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* p
 }
 
 
-RESULT game_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
+RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 {
 	int n;
 	Card  stCard;
@@ -169,3 +169,7 @@ RESULT game_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 
 
 
+RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
+{
+	return R_SUCC;
+}

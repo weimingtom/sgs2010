@@ -6,10 +6,9 @@
 
 static YESNO paoxiao_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	if(pEvent == NULL)
+	if(pEvent->id == GameEvent_RoundOutCard)
 	{
-		if(pGame->nRoundPlayer == player && pGame->status == Status_Round_Out)
-			return YES;
+		return YES;
 	}
 	return NO;
 }
@@ -22,15 +21,17 @@ static RESULT paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int play
 	//printf("please out a card 'sha' or cancel skill:");
 	RESULT ret;
 
-	CardPattern pattern;
-	INIT_CARDPATTERN_USE_ID(&pattern, CardID_Attack);
+	OutCardPattern pattern;
+	OutCard        out_card;
 
-	ret = game_passive_out(pGame, pEvent, player,  PlayerCard_Hand, &pattern, 1, YES, "please out a card 'sha' or cancel the skill:");
+	pattern.num = 1;
+	INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Attack);
+	pattern.where = PlayerCard_Hand;
 
-	if(ret != R_SUCC)
-		return ret;
+	ret = game_supply_card(pGame, pEvent, player, player, &pattern, "please out a card 'sha' or cancel the skill:", &out_card);
+	CHECK_RET(ret, ret);
 
-	//return game_real_outcard(pGame, pEvent, player, )
+	return game_real_out_card(pGame, pEvent, player, &out_card);
 
 	return R_SUCC;
 }

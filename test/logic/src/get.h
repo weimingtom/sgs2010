@@ -12,10 +12,11 @@ typedef struct tagGameEventContext  GameEventContext;
 
 RESULT game_first_getcard(GameContext* pGame);
 
-RESULT game_getcard(GameContext* pGame, GameEventContext* pEvent, int num);
+RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num);
 
 
 
+RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int num);
 
 
 

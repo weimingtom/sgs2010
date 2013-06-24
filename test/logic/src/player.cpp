@@ -34,11 +34,13 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 	pPlayer->id = id;
 	pPlayer->hero = hero;
 	pPlayer->maxLife = pHeroConfig->life;
+	pPlayer->status = PlayerStatus_Hide;
 
 	// master
 	if(id == PlayerID_Master)
 	{
 		pPlayer->maxLife += 1;
+		pPlayer->status = PlayerStatus_Show;
 	}
 
 	pPlayer->curLife = pPlayer->maxLife;
@@ -60,7 +62,7 @@ const char* player_id_str(PlayerID id)
 {
 	switch(id)
 	{
-	case PlayerID_Unknown: return "未知";
+	case PlayerID_Unknown: return "身份未知";
 	case PlayerID_None: return "无";
 	case PlayerID_Master: return "主公";
 	case PlayerID_Minster: return "忠臣";
