@@ -533,7 +533,7 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		"out/o <card idx> ...\n\tout one or more card.", 
 		NULL},
 	{ "useskill", "u",	cmd_useskill, 
-		"useskill/u <skill idx> ...\n\use a skill.", 
+		"useskill/u <skill idx> ...\n\tuse a skill.", 
 		NULL},
 	{ "cancel", "c",	cmd_cancelskill, 
 		"cancel/c \n\tcancel the skill in using.", 
