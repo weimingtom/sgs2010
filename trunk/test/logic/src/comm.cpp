@@ -244,6 +244,96 @@ int compare_ul(const void* a,const void* b,void*)
 	return 0;
 }
 
+
+char* fgetln(char* buffer, int len, FILE* file)
+{
+	int n,c;
+
+	for(n = 0; n < len-1; n++)
+	{
+		c = getchar();
+		if(c == EOF)
+		{
+			if(n == 0)
+				return NULL;
+			break;
+		}
+		else if(c=='\n')
+		{
+			break;
+		}
+		else
+		{
+			buffer[n] = (char)c;
+		}
+	}
+	buffer[n] = 0;
+
+	return buffer;
+}
+
+char* strtrim(char* buffer)
+{
+	int b;
+	int n = strlen(buffer) - 1;
+
+	while(n >= 0 && isspace(C2I(buffer[n])))
+	{
+		buffer[n] = '\0';
+		n--;
+	}
+
+	if(n < 0)
+		return buffer;
+
+	b = 0;
+	while(buffer[b] != '\0' && isspace(C2I(buffer[b])))
+	{
+		b++;
+	}
+
+	memmove(buffer, buffer+b, n-b+1);
+	buffer[n-b+1] = '\0';
+	return buffer;
+}
+
+
+
+int multi_snprintf(char* buffer, int len, const char* fmt, ...)
+{
+	int n;
+	int flen;
+	const char* sf;
+
+	va_list vl;
+
+	va_start(vl, fmt);
+
+	n = 0;
+	sf = fmt;
+
+	// for avoid the first empty string
+	if(*sf == 0)
+		sf++;
+
+	while(*sf)
+	{
+		n += vsnprintf(buffer + n, len - n, sf,  vl);
+		n += 1;
+		flen = strlen(sf);
+		sf += flen + 1;
+	}
+
+	buffer[n] = 0;
+	n++;
+
+	va_end(vl);
+
+	return n;
+}
+
+
+
 RESULT to_int(const char* text, int* pv)
 {
 	char* p;

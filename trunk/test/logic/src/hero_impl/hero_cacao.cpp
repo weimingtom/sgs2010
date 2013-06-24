@@ -10,7 +10,7 @@ static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int p
 	// be damaged and target is self and the source of damage is card. 
 	if(pEvent->id == GameEvent_PostLostLife
 		&& pEvent->target == player
-		&& pEvent->card.id != CardID_None
+		&& pEvent->pCard->id != CardID_None
 		&& YES != is_player_handfull(&pGame->players[player]))
 		return YES;
 	return NO;
@@ -27,8 +27,17 @@ static RESULT jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int pl
 
 static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	if(pEvent && pEvent->id == GameEvent_PassiveOutCard && pEvent->card.id == CardID_Defend)
-		return YES;
+	int n;
+	if(pEvent && pEvent->id == GameEvent_PerPassiveOutCard)
+	{
+		//for(n = 0; n < pEvent->pPassiveOut->pattern.num; n++)
+		{
+			if(pEvent->pPassiveOut->pattern.num == 1 && pEvent->pPassiveOut->pattern.patterns[n].id == CardID_Defend)
+			{
+				return YES;
+			}
+		}
+	}
 	return NO;
 }
 
@@ -37,8 +46,10 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 	int n;
 	int nextplayer;
 	const HeroConfig* pHero;
-	CardPattern   pattern;
-	OutCard   out;
+	//OutCardPattern   pattern;
+	// OutCard          out;
+
+	// the event must be GameEvent_PerPassiveOutCard
 
 	for(n = 1; n < pGame->nPlayerCount; n++)
 	{
@@ -48,17 +59,19 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 
 		if(pHero && pHero->group == HeroGroup_Wei)
 		{
-			INIT_CARDPATTERN_USE_ID(&pattern, CardID_Defend);
-			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pattern, &out) )
+			//pattern.num = 1;
+			//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
+			//pattern.where = PlayerCard_Hand;
+			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pEvent->pPassiveOut->pattern, NULL, &pEvent->pPassiveOut->out) )
 			{
 				// out card instead mine 
-				return game_real_outcard(pGame, pEvent, player, pEvent ? pEvent->target : 0, nextplayer, &out);
+				return R_SUCC;
 				// break;
 			}
 		}
 	}
 
-	return R_SUCC;
+	return R_E_FAIL;
 }
 
 

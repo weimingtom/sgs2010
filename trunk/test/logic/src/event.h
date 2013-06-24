@@ -29,12 +29,6 @@ enum GameEvent
 	GameEvent_PostGetCard,
 	GameEvent_PerRoundOut,
 	GameEvent_PostRoundOut,
-	GameEvent_PerOutCard,
-	GameEvent_PostOutCard,
-	GameEvent_PerCardCalc,
-	GameEvent_CardCalc,
-	GameEvent_PostCardCalc,
-	GameEvent_FiniCardCalc,
 	GameEvent_PerRoundDiscard,
 	GameEvent_PostRoundDiscard,
 	GameEvent_PerDiscardCard,
@@ -62,8 +56,17 @@ enum GameEvent
 	GameEvent_RoundGetCard,
 	GameEvent_PassiveGetCard,
 	GameEvent_OutCardCheck,
+	GameEvent_OutCard,
 	GameEvent_RoundOutCard,
+	GameEvent_PerOutCard,
+	GameEvent_PostOutCard,
+	GameEvent_PerCardCalc,
+	GameEvent_CardCalc,
+	GameEvent_PostCardCalc,
+	GameEvent_FiniCardCalc,
+	GameEvent_PerPassiveOutCard,
 	GameEvent_PassiveOutCard,
+	GameEvent_PostPassiveOutCard,
 	GameEvent_SupplyCard,
 	GameEvent_CalcAttackDis,
 	GameEvent_SelectTarget,
@@ -74,15 +77,24 @@ enum GameEvent
 // for passive out, supply out
 typedef struct tagPassiveOut
 {
-	YESNO          may_cancel;
+	//YESNO          may_cancel;
 	OutCardPattern pattern;
 	OutCard        out; 
 } PassiveOut;
+
+
+enum AttackDisFlag
+{
+	AttackDisFlag_UseWeapon = 1,
+	AttackDisFlag_UseHorse = 2,
+};
 
 typedef struct tagAttackDis
 {
 	int     base;
 	int     inc;
+	int     dis;
+	int     flag;
 }AttackDis;
 
 typedef struct tagGameEventContext GameEventContext;

@@ -20,6 +20,14 @@ enum PlayerID
 };
 
 
+enum PlayerStatus
+{
+	PlayerStatus_Hide = 0,
+	PlayerStatus_Show = 1,
+	PlayerStatus_Dead = 2,
+};
+
+
 enum PlayerFlag
 {
 	PlayerFlag_None = 0,
@@ -35,11 +43,6 @@ enum PlayerFlag
 	PlayerFlag_AllSkipFlag = PlayerFlag_SkipNextRound|PlayerFlag_AllThisSkipFlag,
 };
 
-
-#define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
-#define PLAYER_SET_FLAG(p,f)  ((p)->flag |= f)
-#define PLAYER_CLR_FLAG(p,f)  ((p)->flag &= ~f)
-#define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = PlayerFlag_None)
 
 
 #define MAX_HAND_CARD   20
@@ -77,6 +80,7 @@ typedef  struct  tagPlayer
 	Card     stHandCards[MAX_HAND_CARD];
 	Card     stEquipCard[EquipIdx_Max];
 	Card     stJudgmentCards[MAX_JUDGMENT_CARD];
+	PlayerStatus   status;
 	PlayerFlag  flag;
 	int      params[MAX_PLAYER_PARAM];
 } Player;
@@ -84,9 +88,29 @@ typedef  struct  tagPlayer
 
 
 
-#define PLAYER_CARD_WHERE(pos)     ((pos>>8) & 0xff)
-#define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
+//#define PLAYER_CARD_WHERE(pos)     ((pos>>8) & 0xff)
+//#define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
 
+#define IS_PLAYER_DEAD(p)   ((p)->status == PlayerStatus_Dead)
+#define IS_PLAYER_SHOW(p)  ((p)->status == PlayerStatus_Show)
+
+#define IS_PLAYER_PERDEAD(p)   ((p)->status != PlayerStatus_Dead && (p)->curLife <= 0)
+
+
+#define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
+#define PLAYER_SET_FLAG(p,f)  ((p)->flag |= f)
+#define PLAYER_CLR_FLAG(p,f)  ((p)->flag &= ~f)
+#define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = PlayerFlag_None)
+
+
+#define PLAYER_WEAPON(p)   (&(p)->stEquipCard[EquipIdx_Weapon])
+#define PLAYER_ARMOR(p)   (&(p)->stEquipCard[EquipIdx_Armor])
+#define PLAYER_HORSEINC(p)   (&(p)->stEquipCard[EquipIdx_HorseInc])
+#define PLAYER_HORSEDEC(p)   (&(p)->stEquipCard[EquipIdx_HorseDec])
+
+#define PLAYER_HANDCARD(p, idx)   (&(p)->stHandCards[idx])
+
+#define PLAYER_JUDGECARD(p, idx)   (&(p)->stJudgmentCards[idx])
 
 RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 

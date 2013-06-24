@@ -10,7 +10,7 @@
 
 
 
-RESULT game_useskill(GameContext* pGame, GameEventContext* pEvent, int idx)
+RESULT game_cmd_useskill(GameContext* pGame, GameEventContext* pEvent, int idx)
 {
 	Player* p = CUR_PLAYER(pGame);
 
@@ -45,7 +45,7 @@ RESULT game_useskill(GameContext* pGame, GameEventContext* pEvent, int idx)
 }
 
 
-RESULT game_cancelskill(GameContext* pGame, GameEventContext* pEvent)
+RESULT game_cmd_cancelskill(GameContext* pGame, GameEventContext* pEvent)
 {
 	return R_CANCEL;
 }

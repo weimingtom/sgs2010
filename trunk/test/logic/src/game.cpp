@@ -43,14 +43,47 @@ int get_game_master_player(GameContext* pGame)
 int game_next_player(GameContext* pGame, int player)
 {
 	// TODO: must think about the player is die
-	return (player + 1) % pGame->nPlayerCount;
+	int  idx = player;
+	do {
+		idx = (idx +  1) % pGame->nPlayerCount;
+	} while(idx != player && IS_PLAYER_DEAD(GAME_PLAYER(pGame, idx)));
+
+	return idx;
 }
 
 int game_prev_player(GameContext* pGame, int player)
 {
 	// TODO: must think about the player is die
-	return (player + pGame->nPlayerCount - 1) % pGame->nPlayerCount;
+	int  idx = player;
+	do {
+		idx = (idx - 1 + pGame->nPlayerCount) % pGame->nPlayerCount;
+	} while(idx != player && IS_PLAYER_DEAD(GAME_PLAYER(pGame, idx)));
+
+	return idx;
 }
+
+
+int game_player_dis(GameContext* pGame, int p1, int p2)
+{
+	// from p1 to p2
+	int dis = 0;
+	int pn = p1;
+	int pp = p1;
+
+	while(pn != p2 && pp != p2)
+	{
+		dis++;
+		do {
+			pn = (pn + 1) % pGame->nPlayerCount;
+		} while(pn != p2 && IS_PLAYER_DEAD(GAME_PLAYER(pGame, pn)));
+		do {
+			pp = (pn - 1 + pGame->nPlayerCount) % pGame->nPlayerCount;
+		} while(pp != p2 && IS_PLAYER_DEAD(GAME_PLAYER(pGame, pp)));
+	}
+
+	return dis;
+}
+
 
 
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
@@ -126,10 +159,11 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 
 	pPlayer = &pGame->players[player];
 
-	printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", player + 1, pGame->nRoundPlayer == player ? "R":"-", pGame->nCurPlayer == player  ? "C":"-",
-		(player - pGame->nCurPlayer + pGame->nPlayerCount) % pGame->nPlayerCount, 
-		(pGame->nCurPlayer - player + pGame->nPlayerCount) % pGame->nPlayerCount, 
-		player_id_str(pPlayer->id), pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
+	printf("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", player + 1,
+		pGame->nRoundPlayer == player ? "R":"-", pGame->nCurPlayer == player  ? "C":"-",
+		game_player_dis(pGame, pGame->nCurPlayer, player),
+		player_id_str( (player == pGame->nCurPlayer || IS_PLAYER_SHOW(pPlayer) ) ? pPlayer->id : PlayerID_Unknown),
+		pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
 
 	// equiped cards
 	printf("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
@@ -170,10 +204,14 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	{
 		p = &pGame->players[k];
 
-		printf("  (%d) %s%s +%d -%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1, pGame->nRoundPlayer == k ? "R":"-", pGame->nCurPlayer == k ? "C":"-",
-			(k - pGame->nCurPlayer + pGame->nPlayerCount) % pGame->nPlayerCount, 
-			(pGame->nCurPlayer - k + pGame->nPlayerCount) % pGame->nPlayerCount, 
-			player_id_str(p->id), p->name, p->curLife, p->maxLife, p->nHandCardNum);
+		if(IS_PLAYER_DEAD(p) )
+			continue;
+
+		printf("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1,
+			pGame->nRoundPlayer == k ? "R":"-", pGame->nCurPlayer == k ? "C":"-",
+			game_player_dis(pGame, pGame->nCurPlayer, k),
+			player_id_str((k == pGame->nCurPlayer || IS_PLAYER_SHOW(p) ) ? p->id : PlayerID_Unknown ),
+			p->name, p->curLife, p->maxLife, p->nHandCardNum);
 
 		// equiped cards
 		printf("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
@@ -453,7 +491,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	
-	pGame->status = Status_Round_Discard;
+	game_round_do_out(pGame, pEvent, pGame->nRoundPlayer);
 	return R_SUCC;
 }
 
@@ -608,113 +646,105 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 
 
 
-RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text, PassiveOut* pPassiveOut)
-{
-	GameEventContext  event;
-	RESULT ret;
 
-
-	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, player, pParentEvent);
-	event.pPassiveOut =  pPassiveOut;
-
-	pGame->nCurPlayer = player;
-
-	ret = cmd_loop(pGame, &event, alter_text);
-
-	if(event.result == R_SUCC)
-	{
-		// 
-	}
-
-	return event.result;
-}
-
-/*
-RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const CardPattern* pattern, OutCard* pOut)
-{
-	char   text[1024];
-	char   temp[128];
-	GameEventContext  event;
-	RESULT ret;
-
-	INIT_EVENT(&event, GameEvent_SupplyCard, trigger, player, pParentEvent);
-	event.pattern.patterns[0] = *pattern;
-	event.pattern.num = 1;
-
-	pGame->nCurPlayer = player;
-
-	snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out req card' or 'cancel'", CUR_PLAYER(pGame)->name, card_pattern_str(pattern, temp, sizeof(temp)));
-
-	ret = cmd_loop(pGame, &event, text);
-
-	if(event.result == R_SUCC)
-	{
-		*pOut = event.out;
-	}
-
-	return event.result;
-}
-
-*/
-
-
-RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, const char* alter_text, int* pTarget)
+RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel,const char* alter_text, int* out_target)
 {
 	int n;
 	int t;
 	RESULT  ret;
 	AttackDis   dis;
-	GameEvent   event;
-	const CardConfig* pCardConfig;
+	GameEventContext  event;
 	Player* pPlayer; 
 	Player* pTarget;
+	int idcnt;
+	int idbegin ;
+	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
+
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
-	//INIT_EVENT(&event, GameEvent_SelectTarget, player, 0, pParentEvent);
+	idbegin = self_select == YES ? 0 : 1;
+	idcnt = 0;
 
-	//ret = cmd_loop(pGame, &event, alter_text);
-
-	if(alter_text)
-		printf("%s:\n", alter_text);
-	else
-		printf("选择一个目标角色:\n");
-	for(n = (self_select == YES) ? 0 : 1; n < pGame->nPlayerCount; n++)
+	for(n = idbegin; n < pGame->nPlayerCount; n++)
 	{
 		t = (player + n) % pGame->nPlayerCount;
+		pTarget = GAME_PLAYER(pGame, t);
+		if(!IS_PLAYER_DEAD(pTarget))
+		{
+			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d\n", 
+				player_id_str( (t == player || IS_PLAYER_SHOW(pTarget) || IS_PLAYER_DEAD(pTarget)) ? pTarget->id : PlayerID_Unknown),
+				pTarget->name, pTarget->curLife, pTarget->maxLife, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->nHandCardNum);
+
+			ST_ZERO(sel_opts[idcnt].input);
+			sel_opts[idcnt].value = idbegin + idcnt;
+			idcnt++;
+		}
+	}
+
+	// 
+	if(may_cancel == YES)
+	{
+		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
+		ST_ZERO(sel_opts[idcnt].input);
+		multi_snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\0%s\0\0", "c", "cancel");
+		sel_opts[idcnt].value =  -100;
+		idcnt++;
+	}
+
+
+	while(1)
+	{
+
+		ret = select_loop(pGame, pParentEvent, sel_opts, idcnt, alter_text ? alter_text : "Select a target role:", &t);
+
+		if(ret != R_SUCC)
+			return ret;
+
+		if(idcnt == -100)
+			return R_CANCEL;
 
 
 		pTarget = GAME_PLAYER(pGame, t);
 
-		printf(" (%d) %s, %s, life: %d/%d, hand cards: %d\n", player_str(pTarget->id), pTarget->name, pTarget->curLife, pTarget->maxLife, pTarget->nHandCardNum);
 
+		// can set target?
+		INIT_EVENT(&event, GameEvent_SelectTarget, player, t, pParentEvent);
+
+		trigger_game_event(pGame, &event);
+
+		if(event.result == R_CANCEL)
+		{
+			// cannot select this player as target
+			printf("The selected role cannot be as a target, please select another!\n");
+			continue;
+		}
+
+		// need check dis ?  check dist 
+		if(base_dist >= 0)
+		{
+			// calc final dist, if base_distancc is -1, means ignore distance to target
+			dis.base = base_dist;   // calc the attack range
+			dis.inc = 0;            // calc the attack range append increase
+			dis.dis = game_player_dis(pGame, player, t);   // calc the player to target's distance
+			dis.flag = 0;
+
+			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, t, pParentEvent);
+			event.pAttackDis = &dis;
+
+			trigger_game_event(pGame, &event);
+
+			if(dis.base + dis.inc < dis.dis)
+			{
+				// Attack range less the distance to taget
+				printf("The selected role is out of your attack range, please select another!\n");
+				continue;
+			}
+		}
+		*out_target = t;
+		return R_SUCC;
 	}
-	
-	printf("请选择:");
 
-
-
-
-	if(event.result != R_SUCC)
-		return event.result;
-
-	// check dist
-	if(base_dist >= 0)
-	{
-		// calc final dist, if base_distancc is -1, means ignore distance to target
-		dis.base = base_dist;
-		dis.inc = 0;
-
-		INIT_EVENT(&event, GameEvent_CalcAttackDis, player, 0, pParentEvent);
-		event.pAttackDis = &dis;
-
-		// attack weapon attack dist
-		if(CARD_VALID(&))
-		pCardConfig = get_card_config()
-
-	}
-	
-
-	return R_CANCEL;
+	return R_E_FAIL;
 }
 

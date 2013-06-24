@@ -28,13 +28,29 @@ static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int 
 	RESULT ret;
 	int target;
 	// select target
-	while(1)
+	ret = game_select_target(pGame, pEvent, player, 1, NO, YES, "you need select a target role for card 'attack':", &target);
+
+	if(ret != R_SUCC)
+		return ret;
+
+	// target passive shan
+
+	OutCardPattern  pattern;
+	ST_ZERO(pattern);
+	pattern.num= 1;
+	INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
+	pattern.where = PlayerCard_Hand;
+
+	ret = game_passive_out(pGame, pEvent, target, player, &pattern, "please out a card 'defend':");
+
+	if(ret != R_SUCC)
 	{
-		ret = game_select_target(pGame, pEvent, player, 1, &target);
-				
+		// lost life
+
 	}
-	
-	return R_SUCC;
+
+
+	return ret;
 }
 
 
@@ -43,6 +59,7 @@ static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int 
 
 static RESULT card_attack_calc(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+
 
 	return R_SUCC;
 }

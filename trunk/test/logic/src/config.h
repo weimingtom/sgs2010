@@ -14,7 +14,10 @@
 #ifdef WIN32
 
 
-#define snprintf _snprintf
+#define snprintf      _snprintf
+#define vsnprintf     _vsnprintf
+#define strcasecmp    _stricmp
+#define strncasecmp   strnicmp
 
 #elif defined(LINUX)
 
@@ -31,7 +34,7 @@
 
 #define  MAX_NAME_LEN    32
 #define  MAX_DESC_LEN    512
-#define  MAX_PLAYER_NUM  10
+#define  MAX_PLAYER_NUM  20
 
 #ifndef COUNT
 #define COUNT(a)  (sizeof(a)/sizeof((a)[0]))

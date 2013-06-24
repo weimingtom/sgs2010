@@ -12,6 +12,7 @@
 // foward  decalare
 typedef struct tagGameEventContext GameEventContext;
 typedef struct tagOutCard  OutCard;
+typedef struct tagPassiveOut PassiveOut;
 
 
 enum Status
@@ -84,16 +85,11 @@ int get_game_master_player(GameContext* pGame);
 int game_next_player(GameContext* pGame, int player);
 int game_prev_player(GameContext* pGame, int player);
 
-
-// 当前玩家向指定玩家player请求指定样式的牌
-//RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const CardPattern* pattern, OutCard* pOut);
-
-
-// passive out process
-RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text, PassiveOut* pPassiveOut);
+int game_player_dis(GameContext* pGame, int p1, int p2);
 
 // select target process
-RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, const char* alter_text, int* pTarget);
+RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel, const char* alter_text, int* out_target);
+
 
 
 #endif /* __GAME_H__ */

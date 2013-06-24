@@ -399,7 +399,7 @@ static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEv
 
 
 
-	return game_getcard(pContext, pEvent, num);
+	return game_cmd_getcard(pContext, pEvent, num);
 }
 
 static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
@@ -432,7 +432,7 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 		cnt++;
 	}
 
-	return game_outcard(pContext, pEvent, idx, cnt);
+	return game_cmd_outcard(pContext, pEvent, idx, cnt);
 
 }
 
@@ -449,7 +449,7 @@ static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, G
 
 	if(argc >= 2 && 0 == to_int(argv[1], &idx))
 	{
-		return  game_useskill(pContext, pEvent, idx);
+		return  game_cmd_useskill(pContext, pEvent, idx);
 
 	}
 	else
@@ -470,7 +470,7 @@ static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext
 	}
 
 
-	return game_cancelskill(pContext, pEvent);
+	return game_cmd_cancelskill(pContext, pEvent);
 
 	//printf("not in skill using!\n");
 
@@ -487,7 +487,7 @@ static RESULT cmd_pass(const char** argv, int argc, GameContext* pContext, GameE
 	}
 
 
-	return game_pass(pContext, pEvent);
+	return game_cmd_pass(pContext, pEvent);
 
 	//return CMD_RET_SUCC;
 }
@@ -645,7 +645,8 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 					// return follow code back to parent caller
 					switch(ret)
 					{
-					case R_BACK:
+					case R_BACK:    // spec return R_BACK means back to caller with success
+						return R_SUCC;
 					case R_EXIT:
 					case R_CANCEL:
 					case R_RETRY:
@@ -669,3 +670,80 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 
 
 
+RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value)
+{
+	int n, len;
+	const char* s;
+	char  buffer[512];
+	int   v;
+
+	while(1)
+	{
+		if(strAlter)
+			printf("%s\n", strAlter);
+
+		for(n = 0; n < optnum; n++)
+		{
+			printf(" (");
+			s = options[n].input;
+			len = strlen(s);
+			if(len == 0)
+				printf("%d", options[n].value);
+			else
+				printf("%s", s);
+			s += len + 1;
+
+			while(*s)
+			{
+				printf("/%s", s);
+				len = strlen(s);
+				s += len + 1;
+			}
+			printf(") %s\n", options[n].text);
+		}
+
+		printf("ÇëÑ¡Ôñ: ");
+
+		fflush(stdin);
+
+		if(NULL == fgetln(buffer, sizeof(buffer), stdin))
+			return R_E_FAIL;
+
+
+		if(R_SUCC == to_int(buffer, &v))
+		{
+			
+			for(n = 0; n < optnum; n++)
+			{
+				if(options[n].input[0] == 0 && v == options[n].value)
+				{
+					*out_value = options[n].value;
+					return R_SUCC;
+				}
+
+			}
+		}
+		else
+		{
+			for(n = 0; n < optnum; n++)
+			{
+				s = options[n].input;
+				if(*s == 0)
+					s++;
+
+				while(*s)
+				{
+					if(!strcasecmp(s, buffer))
+					{
+						*out_value = options[n].value;
+						return R_SUCC;
+					}
+					len = strlen(s);
+					s += len + 1;
+				}
+			}
+		}
+
+	}
+	return R_E_FAIL;
+}
