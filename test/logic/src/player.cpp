@@ -75,7 +75,7 @@ const char* player_id_str(PlayerID id)
 
 YESNO is_player_handfull(Player* player)
 {
-	return B2YESNO(player->nHandCardNum < MAX_HAND_CARD);
+	return B2YESNO(player->nHandCardNum == MAX_HAND_CARD);
 }
 
 

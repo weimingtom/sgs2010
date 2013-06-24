@@ -469,21 +469,24 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 {
+	int num;
 	GameEventContext  event;
+
+	num = 2;  // in get round init to get 2 card 
 	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->nRoundPlayer, 0, pEvent);
+	event.pNum = &num;
 	trigger_game_event(pGame, &event);
 
 	if(event.result == R_CANCEL)
 	{
 		// skip getcard step
+		return R_SUCC;
 	}
 	
-
+	game_round_do_get(pGame, pEvent, pGame->nRoundPlayer, num);
 
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
-
-	pGame->status = Status_Round_Out;
 
 	return R_SUCC;
 }
@@ -491,7 +494,10 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	
-	game_round_do_out(pGame, pEvent, pGame->nRoundPlayer);
+	while (R_SUCC == game_round_do_out(pGame, pEvent, pGame->nRoundPlayer))
+	{
+		// do nothing
+	}
 	return R_SUCC;
 }
 
@@ -502,7 +508,6 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	// wait cmd_loop discard cmd execute
 
 
-	pGame->status = Status_Round_End;
 	return R_SUCC;
 }
 
@@ -514,7 +519,6 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 
 	trigger_game_event(pGame, &event);
 
-	game_next_round(pGame, pEvent);
 	return R_SUCC;
 }
 
@@ -632,7 +636,7 @@ static RESULT game_step(GameContext* pGame, GameEventContext* pEvent)
 RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 {
 	RESULT ret = R_SUCC;
-	while(ret != R_SUCC)
+	while(ret == R_SUCC)
 	{
 		ret = game_next_status(pGame, pEvent);
 		if(ret == R_SUCC)

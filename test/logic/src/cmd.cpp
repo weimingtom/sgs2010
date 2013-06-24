@@ -388,7 +388,7 @@ static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEv
 		printf("not in get status!\n");
 		return R_E_STATUS;
 	}
-	int num;
+	int num = 1;
 	if(argc>= 2)
 	{
 		if(0 != to_int(argv[1], &num))
