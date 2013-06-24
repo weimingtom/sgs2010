@@ -50,7 +50,7 @@ static RESULT game_pop_stack_card(GameContext* pGame, Card* pCard)
 		refresh_card_stack(pGame);
 	}
 
-	if(0 != card_stack_pop(&pGame->cardStack, pCard))
+	if(R_SUCC != card_stack_pop(&pGame->cardStack, pCard))
 	{
 		printf("game_pop_stack_card:  failed! stack size=%d!\n", pGame->cardStack.count);
 		return R_E_FAIL;
@@ -166,10 +166,28 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	return R_E_STATUS;
 }
 
-
-
-
-RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
+RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int player, int num)
 {
+	RESULT ret;
+	GameEventContext  event;
+	char buffer[128];
+	
+	INIT_EVENT(&event, GameEvent_RoundGetCard, player, 0, pEvent);
+	event.pNum = &num;
+
+	pGame->nCurPlayer = player;
+
+	snprintf(buffer, sizeof(buffer), "please get %d card:", num);
+
+	ret = cmd_loop(pGame, &event, buffer);
+
+	return R_SUCC;
+}
+
+
+
+RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int player, int num)
+{
+
 	return R_SUCC;
 }

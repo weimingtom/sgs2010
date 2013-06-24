@@ -150,12 +150,15 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, 0, pEvent);
+	stEvent.pOut = &out_card;
 
 	ret = cmd_loop(pGame, &stEvent, "please out a card, or use a skill:");
 
 	CHECK_RET(ret, ret);
 
-	return game_real_out_card(pGame, pEvent, player, &out_card);
+	game_real_out_card(pGame, pEvent, player, &out_card);
+
+	return R_SUCC;
 }
 
 
@@ -165,7 +168,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	int where;
 	int pos;
 	Card* pCard;
-	GameEventContext  event;
+	//GameEventContext  event;
 
 	if(pEvent->id == GameEvent_RoundOutCard)
 	{
@@ -196,10 +199,10 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check can out?
 		const CardConfig* pCardConfig = get_card_config(pCard->id);
 
-		INIT_EVENT(&event, GameEvent_OutCardCheck, pGame->nCurPlayer, 0, pEvent);
+		//INIT_EVENT(&event, GameEvent_OutCardCheck, pGame->nCurPlayer, 0, pEvent);
 
 		if(pCardConfig == NULL || pCardConfig->check == NULL
-			|| YES != (*pCardConfig->check)(pGame, &event, pGame->nCurPlayer))
+			|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->nCurPlayer))
 		{
 			printf("can not out this card: %s!\n", card_str(pCard, buffer, sizeof(buffer)));
 			return R_E_PARAM;

@@ -25,8 +25,6 @@ enum GameEvent
 	GameEvent_PostJudgeCard,
 	GameEvent_PerRoundGet,
 	GameEvent_PostRoundGet,
-	GameEvent_PerGetCard,
-	GameEvent_PostGetCard,
 	GameEvent_PerRoundOut,
 	GameEvent_PostRoundOut,
 	GameEvent_PerRoundDiscard,
@@ -54,6 +52,8 @@ enum GameEvent
 	GameEvent_PerCardJudgeCalc,    
 	GameEvent_PostCardJudgeCalc,
 	GameEvent_RoundGetCard,
+	GameEvent_PerGetCard,
+	GameEvent_PostGetCard,
 	GameEvent_PassiveGetCard,
 	GameEvent_OutCardCheck,
 	GameEvent_OutCard,
@@ -102,7 +102,7 @@ typedef struct tagGameEventContext GameEventContext;
 
 struct tagGameEventContext
 {
-	int      id;
+	GameEvent      id;
 	int      trigger;
 	int      target;
 	GameEventContext* parent_event;
