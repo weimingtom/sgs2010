@@ -30,6 +30,7 @@ static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int playe
 	int n;
 	if(pEvent && pEvent->id == GameEvent_PerPassiveOutCard)
 	{
+		n = 0;
 		//for(n = 0; n < pEvent->pPassiveOut->pattern.num; n++)
 		{
 			if(pEvent->pPassiveOut->pattern.num == 1 && pEvent->pPassiveOut->pattern.patterns[n].id == CardID_Defend)
