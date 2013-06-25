@@ -84,8 +84,6 @@ const CardConfig* get_card_attack()
 		Target_OtherOneIn1,
 		card_attack_check,
 		card_attack_out,
-		card_attack_calc,
-		NULL,  
 	};
 
 	return &card_attack;

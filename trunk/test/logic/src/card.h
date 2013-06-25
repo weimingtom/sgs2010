@@ -96,6 +96,7 @@ enum CardValue
 enum CardFlag
 {
 	CardFlag_None = 0,
+	CardFlag_PrepareOut = 1,   // the card prepare to out, in prepare event, cannot calc the card effect
 };
 
 
@@ -116,9 +117,6 @@ typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*CARDCALCFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*CARDFINIFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*CARDTARGETFILTERFUN)(GameContext*, GameEventContext*, int);
 
 
 typedef struct tagCardConfig
@@ -130,9 +128,6 @@ typedef struct tagCardConfig
 	TargetType   target;  // target select strategy
 	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
 	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
-	CARDCALCFUN  calc;    // called when card effect is needed to calc     default NULL. no effect
-	CARDCALCFUN  fini;    // called when card calc finished (if card still exist after calc)  default NULL, discard to out card stack
-	CARDTARGETFILTERFUN  filter; // called when select targets
 }CardConfig;
 
 typedef struct tagCard Card;

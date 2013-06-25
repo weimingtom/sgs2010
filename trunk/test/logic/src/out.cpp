@@ -27,47 +27,31 @@ static YESNO out_card_check_event(GameContext* pGame, GameEventContext* pParentE
 	return (*pCardConfig->check)(pGame, &event, player);
 }
 
-static RESULT select_target(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* pOut, int* target)
+static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* pOut)
 {
 	RESULT  ret;
 	const CardConfig* pCardConfig;
-	YESNO self = NO;
-	int dis = -1;
+
+	GameEventContext  stEvent;
+	
 
 	pCardConfig = get_card_config(pOut->vcard.id);
 
 	if(pCardConfig == NULL)
 		return R_E_FAIL;
 
-	switch(pCardConfig->target)
+
+	if(pCardConfig->out)
 	{
-	default:
-	case Target_None:
-	case Target_All:
-	case Target_OtherAll:
-		*target = 0;
-		return R_SUCC;
-	case Target_Self:
-		*target = trigger;
-		return R_SUCC;
-	case Target_OtherOne:
-		break;
-	case Target_OtherOneIn1:
-		dis = 1;
-		break;
-	case Target_AnyOne:
-		self = YES;
-		break;
-	case Target_AnyOneIn1:
-		self = YES;
-		dis = 1;
-		break;
+		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, 0, pParentEvent);
+		stEvent.pOut = pOut;
+
+		ret = (*pCardConfig->out)(pGame, pParentEvent, trigger);
+
+		CHECK_RET(ret, ret);
 	}
 
-
-	ret = game_select_target(pGame, pParentEvent, trigger, dis, self, YES, NULL, target);
-
-	return ret;
+	return R_SUCC;
 }
 
 
@@ -82,12 +66,14 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 	return event.result;
 }
 
-static HRESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+
+static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
 {
+	RESULT   ret;
 	const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
-	INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pEvent);
+	INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
 
 	// out procedure
 	pCardConfig = get_card_config(pOut->vcard.id);
@@ -101,6 +87,7 @@ static HRESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 	return R_SUCC;
 }
 
+
 static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
 {
 	GameEventContext  event;
@@ -112,7 +99,30 @@ static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, 
 	return event.result;	
 }
 
-static RESULT remove_out_card(GameContext* pGame, OutCard* pOut)
+static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pCard)
+{
+	GameEventContext   event;
+	INIT_EVENT(&event, GameEvent_PerLostCard, player, 0, pParentEvent);
+	event.pPosCard = pCard;
+
+	trigger_game_event(pGame, &event);
+
+	return event.result;
+}
+
+static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pCard)
+{
+	GameEventContext   event;
+	INIT_EVENT(&event, GameEvent_PostLostCard, player, 0, pParentEvent);
+	event.pPosCard = pCard;
+	
+	trigger_game_event(pGame, &event);
+	
+	return event.result;
+}
+
+
+static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutCard* pOut)
 {
 	int n;
 	char buf[128];
@@ -122,14 +132,18 @@ static RESULT remove_out_card(GameContext* pGame, OutCard* pOut)
 	{
 		for(n = 0; n < pOut->nrcard; n++)
 		{
-			// todo : perlostcard
 			if(CARD_VALID(&pOut->rcards[n].card))
 			{
-				player_remove_card(pPlayer, pOut->rcards[n].where, pOut->rcards[n].pos, NULL);
+				// todo : perlostcard
+				per_lost_card(pGame, pEvent, pOut->supply, &pOut->rcards[n]);
+				if(R_SUCC != player_remove_card(pPlayer, pOut->rcards[n].where, pOut->rcards[n].pos, NULL))
+				{
+					printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), pOut->supply, pOut->rcards[n].pos);
+					return R_E_FAIL;
+				}
 				// todo : postlostcard
+				per_lost_card(pGame, pEvent, pOut->supply, &pOut->rcards[n]);
 			}
-			printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), pOut->supply, pOut->rcards[n].pos);
-			return R_E_FAIL;
 		}
 	}
 	return R_SUCC;
@@ -143,7 +157,7 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
 	{
 		for(n = 0; n < pOut->nrcard; n++)
 		{
-			if(0 != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
+			if(R_SUCC != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
 			{
 				printf("add out card [%s] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
 				return R_E_FAIL;
@@ -157,24 +171,26 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
 RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut)
 {
 	RESULT ret;
-	int target;
+	//int target;
 	
-	ret = select_target(pGame, pEvent, player, pOut, &target);
-
+	// prepare out card
+	ret = out_card_prepare(pGame, pEvent, player, pOut);
 	CHECK_RET(ret,ret);
 
-	if(R_CANCEL == per_out_card(pGame, pEvent, player, target, pOut))
+
+	if(R_CANCEL == per_out_card(pGame, pEvent, player, pOut->target, pOut))
 		return R_CANCEL;
 
-	ret = remove_out_card(pGame, pOut);
+
+	ret = remove_out_card(pGame, pEvent, pOut);
 
 	CHECK_RET(ret,ret);
 
-	ret = do_out_card(pGame, pEvent, player, target, pOut);
+	ret = do_out_card(pGame, pEvent, player, pOut->target, pOut);
 
 
 	// post out maybe modify out cards 
-	post_out_card(pGame, pEvent, player, stEvent.target, pOut);
+	post_out_card(pGame, pEvent, player, pOut->target, pOut);
 
 	add_out_stack(pGame, pOut);
 
@@ -189,6 +205,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 	OutCard  out_card;
 	GameEventContext  stEvent;
 
+	ST_ZERO(out_card);
 
 	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, 0, pEvent);
 	stEvent.pOut = &out_card;
@@ -249,12 +266,16 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 			return R_E_PARAM;
 		}
 
+		pCard->flag = CardFlag_PrepareOut;
+
 		pEvent->pOut->rcards[0].card = *pCard;
 		pEvent->pOut->rcards[0].where = where;
 		pEvent->pOut->rcards[0].pos = pos;
 		pEvent->pOut->nrcard = 1;
 		pEvent->pOut->vcard = *pCard;
+		pEvent->pOut->trigger = pGame->nCurPlayer;
 		pEvent->pOut->supply = pGame->nCurPlayer;
+
 
 		pEvent->result = R_SUCC;
 		pEvent->block = YES;
@@ -333,7 +354,7 @@ RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int 
 	if(ret != R_SUCC)
 		return ret;
 
-	ret = remove_out_card(pGame, &passive_out.out);
+	ret = remove_out_card(pGame, pParentEvent, &passive_out.out);
 
 	if(ret != R_SUCC)
 		return ret;

@@ -53,6 +53,7 @@ enum GameEvent
 	GameEvent_PassiveGetCard,
 	GameEvent_TargetFilter,
 	GameEvent_OutCardCheck,
+	GameEvent_OutCardPrepare,
 	GameEvent_OutCard,
 	GameEvent_RoundOutCard,
 	GameEvent_PerOutCard,
@@ -114,6 +115,7 @@ struct tagGameEventContext
 		AttackDis*  pAttackDis; 
 		PassiveOut* pPassiveOut; 
 		OutCard*    pOut;    // real out
+		PosCard*    pPosCard;  // lost card
 	};
 };
 
@@ -134,6 +136,7 @@ struct tagGameEventContext
 
 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
+RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
 
 
 

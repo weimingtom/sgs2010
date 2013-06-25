@@ -25,7 +25,9 @@ typedef struct tagOutCard OutCard;
 
 struct tagOutCard
 {
+	int     trigger;
 	int     supply;
+	int     target;
 	Card    vcard;    //  use as card (virtaul) 
 	int     nrcard;   //  real card number ,. if 0 vcard is also real card 
 	PosCard rcards[MAX_RCARD_NUM];  // rcard array;
