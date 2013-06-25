@@ -22,6 +22,7 @@ const CardConfig* get_card_halberdfangtian()
 		CardType_Weapon,
 		"halberdfangtian",
 		"",
+		Target_Self,
 		card_halberdfangtian_check,
 		card_halberdfangtian_out,
 	};

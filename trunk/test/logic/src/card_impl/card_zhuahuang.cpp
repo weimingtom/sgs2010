@@ -21,6 +21,7 @@ const CardConfig* get_card_zhuahuang()
 		CardType_HorseRun,
 		"zhuahuang",
 		"",
+		Target_Self,
 		card_zhuahuang_check,
 		card_zhuahuang_out,
 	};

@@ -20,6 +20,7 @@ const CardConfig* get_card_swordqinglong()
 		CardType_Weapon,
 		"swordqinglong",
 		"",
+		Target_Self,
 		card_swordqinglong_check,
 		card_swordqinglong_out,
 	};

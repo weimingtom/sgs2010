@@ -668,13 +668,21 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 	return R_EXIT;
 }
 
+static const char*  strchr_notnull(const char* str,  char ch)
+{
+	while(*str && *str != ch)
+		str++;
+	return str;
+}
 
 
 RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value)
 {
-	int n, len;
+	int n;
 	const char* s;
-	char  buffer[512];
+	const char* p;
+	char  buffer[1024];
+	int   buflen;
 	int   v;
 
 	while(1)
@@ -684,63 +692,96 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		for(n = 0; n < optnum; n++)
 		{
-			printf(" (");
+			buflen = 0;
+			buffer[0] = 0;
+			buflen += sprintf(buffer + buflen, "(");
 			s = options[n].input;
-			len = strlen(s);
-			if(len == 0)
-				printf("%d", options[n].value);
-			else
-				printf("%s", s);
-			s += len + 1;
-
-			while(*s)
+			
+			if(*s == '\n' || *s == '\0')
 			{
-				printf("/%s", s);
-				len = strlen(s);
-				s += len + 1;
+				buflen += sprintf(buffer + buflen, "%d", options[n].value);
+				if(*s != 0)
+					s++;
 			}
-			printf(") %s\n", options[n].text);
+			else
+			{
+				p = strchr_notnull(s, '\n');
+				strncpy(buffer + buflen, s, p - s);
+				buflen += (p-s);
+
+				if(*p == '\0')
+					s = p;
+				else
+					s = p + 1;
+			}
+
+			while(*s != '\0' && *s != '\n' )
+			{
+				p = strchr_notnull(s, '\n');
+
+				buffer[buflen++] = '/';
+
+				strncpy(buffer + buflen, s, p - s);
+				buflen += (p-s);
+
+				if(*p == 0)
+					break;
+
+				s = p + 1;
+			}
+			buflen += sprintf(buffer + buflen, ") %s", options[n].text);
+			buffer[buflen] = 0;
+
+			printf(" %s\n", buffer);
+
+
 		}
 
-		printf("ÇëÑ¡Ôñ: ");
+		printf("input select: ");
 
 		fflush(stdin);
 
 		if(NULL == fgetln(buffer, sizeof(buffer), stdin))
 			return R_E_FAIL;
 
+		strtrim(buffer);
+		buflen = strlen(buffer);
 
 		if(R_SUCC == to_int(buffer, &v))
 		{
 			
 			for(n = 0; n < optnum; n++)
 			{
-				if(options[n].input[0] == 0 && v == options[n].value)
+				if((options[n].input[0] == '\0' || options[n].input[0] == '\n') && v == options[n].value)
+				{
+					*out_value = options[n].value;
+					return R_SUCC;
+				}
+			}
+		}
+
+		for(n = 0; n < optnum; n++)
+		{
+			s = options[n].input;
+
+			if(*s == '\n')
+				s++;
+
+
+			while(*s != '\0' && *s != '\n')
+			{
+				p = strchr_notnull(s, '\n');
+
+				if(buflen == (p-s) && !strncasecmp(s, buffer, buflen))
 				{
 					*out_value = options[n].value;
 					return R_SUCC;
 				}
 
-			}
-		}
-		else
-		{
-			for(n = 0; n < optnum; n++)
-			{
-				s = options[n].input;
-				if(*s == 0)
-					s++;
+				if(*p == 0)
+					break;
 
-				while(*s)
-				{
-					if(!strcasecmp(s, buffer))
-					{
-						*out_value = options[n].value;
-						return R_SUCC;
-					}
-					len = strlen(s);
-					s += len + 1;
-				}
+				s = p + 1;
 			}
 		}
 

@@ -22,6 +22,7 @@ const CardConfig* get_card_swordqinghong()
 		CardType_Weapon,
 		"swordqinghong",
 		"",
+		Target_Self,
 		card_swordqinghong_check,
 		card_swordqinghong_out,
 	};

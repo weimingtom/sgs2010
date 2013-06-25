@@ -21,6 +21,7 @@ const CardConfig* get_card_genwithair()
 		CardType_Strategy,
 		"genwithair",
 		"",
+		Target_Self,
 		card_genwithair_check,
 		card_genwithair_out,
 	};

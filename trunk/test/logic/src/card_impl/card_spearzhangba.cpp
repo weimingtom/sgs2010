@@ -20,6 +20,7 @@ const CardConfig* get_card_spearzhangba()
 		CardType_Weapon,
 		"spearzhangba",
 		"",
+		Target_Self,
 		card_spearzhangba_check,
 		card_spearzhangba_out,
 	};

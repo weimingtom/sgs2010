@@ -21,6 +21,7 @@ const CardConfig* get_card_happy()
 		CardType_Strategy,
 		"happy",
 		"",
+		Target_OtherOne,
 		card_happy_check,
 		card_happy_out,
 	};

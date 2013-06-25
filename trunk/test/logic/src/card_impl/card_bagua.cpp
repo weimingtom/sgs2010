@@ -20,6 +20,7 @@ const CardConfig* get_card_bagua()
 		CardType_Armor,
 		"bagua",
 		"",
+		Target_Self,
 		card_bagua_check,
 		card_bagua_out,
 	};

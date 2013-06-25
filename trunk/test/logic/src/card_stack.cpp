@@ -39,7 +39,7 @@ static const char s_szInitCard[] =
 	CardID_ZiXing, CardColor_Diamond, CardValue_K, 0,
 	CardID_DaWan, CardColor_Spade, CardValue_K, 0,
 	CardID_LianNu, CardColor_Diamond, CardValue_A, CardColor_Club, CardValue_A, 0,
-	CardID_SwordHanBing, CardColor_Spade, CardValue_2, 0, 
+	//CardID_SwordHanBing, CardColor_Spade, CardValue_2, 0, 
 	CardID_SwordQingHong, CardColor_Spade, CardValue_6, 0, 
 	CardID_SwordChiXiong, CardColor_Spade, CardValue_2, 0, 
 	CardID_AxeGuanShi, CardColor_Diamond, CardValue_5, 0,
@@ -48,7 +48,7 @@ static const char s_szInitCard[] =
 	CardID_HalberdFangTian, CardColor_Diamond, CardValue_Q, 0, 
 	CardID_BowQiLing, CardColor_Heart, CardValue_5, 0,
 	CardID_BaGua, CardColor_Spade, CardValue_2, CardColor_Club, CardValue_2, 0,
-	CardID_SheildRenWang, CardColor_Club, CardValue_2, 0,
+	//CardID_SheildRenWang, CardColor_Club, CardValue_2, 0,
 	0,
 
 };

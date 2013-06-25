@@ -99,6 +99,17 @@ enum CardFlag
 };
 
 
+enum TargetType
+{
+	Target_None,     // not need target
+	Target_Self,     // self
+	Target_OtherOne, // one of other role except me
+	Target_AnyOne,   // any one role include me
+	Target_OtherOneIn1, // one of other role except me in distance 1
+	Target_AnyOneIn1,   // any one role include me in distance 1
+	Target_OtherAll, // all role except me
+	Target_All,      // all role include me
+};
 
 
 typedef struct tagGameContext GameContext;
@@ -107,6 +118,7 @@ typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*CARDCALCFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*CARDFINIFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*CARDTARGETFILTERFUN)(GameContext*, GameEventContext*, int);
 
 
 typedef struct tagCardConfig
@@ -115,10 +127,12 @@ typedef struct tagCardConfig
 	CardType     type;
 	char         name[MAX_NAME_LEN];
 	char         desc[MAX_DESC_LEN];
+	TargetType   target;  // target select strategy
 	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
 	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
 	CARDCALCFUN  calc;    // called when card effect is needed to calc     default NULL. no effect
 	CARDCALCFUN  fini;    // called when card calc finished (if card still exist after calc)  default NULL, discard to out card stack
+	CARDTARGETFILTERFUN  filter; // called when select targets
 }CardConfig;
 
 typedef struct tagCard Card;

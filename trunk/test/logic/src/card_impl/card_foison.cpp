@@ -22,6 +22,7 @@ const CardConfig* get_card_foison()
 		CardType_Strategy,
 		"foison",
 		"",
+		Target_All,
 		card_foison_check,
 		card_foison_out,
 	};

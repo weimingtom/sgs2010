@@ -20,6 +20,7 @@ const CardConfig* get_card_liannu()
 		CardType_Weapon,
 		"liannu",
 		"",
+		Target_Self,
 		card_liannu_check,
 		card_liannu_out,
 	};

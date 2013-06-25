@@ -20,6 +20,7 @@ const CardConfig* get_card_axeguanshi()
 		CardType_Weapon,
 		"axeguanshi",
 		"",
+		Target_Self,
 		card_axeguanshi_check,
 		card_axeguanshi_out,
 	};

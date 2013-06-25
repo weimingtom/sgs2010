@@ -318,7 +318,7 @@ int multi_snprintf(char* buffer, int len, const char* fmt, ...)
 
 	while(*sf)
 	{
-		n += vsnprintf(buffer + n, len - n, sf,  vl);
+		n += vsnprintf(buffer + n, len - n - 2, sf,  vl);
 		n += 1;
 		flen = strlen(sf);
 		sf += flen + 1;

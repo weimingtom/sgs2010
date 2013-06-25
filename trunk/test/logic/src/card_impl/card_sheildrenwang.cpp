@@ -21,6 +21,7 @@ const CardConfig* get_card_sheildrenwang()
 		CardType_Armor,
 		"sheildrenwang",
 		"",
+		Target_Self,
 		card_sheildrenwang_check,
 		card_sheildrenwang_out,
 	};

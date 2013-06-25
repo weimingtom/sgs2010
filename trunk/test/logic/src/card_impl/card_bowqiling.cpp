@@ -24,6 +24,7 @@ const CardConfig* get_card_bowqiling()
 		CardType_Weapon,
 		"bowqiling",
 		"",
+		Target_Self,
 		card_bowqiling_check,
 		card_bowqiling_out,
 	};

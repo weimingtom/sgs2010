@@ -21,6 +21,7 @@ const CardConfig* get_card_jueying()
 		CardType_HorseRun,
 		"jueying",
 		"",
+		Target_Self,
 		card_jueying_check,
 		card_jueying_out,
 	};

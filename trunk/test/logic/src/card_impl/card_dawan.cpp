@@ -20,6 +20,7 @@ const CardConfig* get_card_dawan()
 		CardType_HorseChase,
 		"dawan",
 		"",
+		Target_Self,
 		card_dawan_check,
 		card_dawan_out,
 	};

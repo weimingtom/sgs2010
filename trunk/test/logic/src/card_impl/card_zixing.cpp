@@ -22,6 +22,7 @@ const CardConfig* get_card_zixing()
 		CardType_HorseChase,
 		"zixing",
 		"",
+		Target_Self,
 		card_zixing_check,
 		card_zixing_out,
 	};

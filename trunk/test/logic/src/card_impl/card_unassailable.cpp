@@ -21,6 +21,7 @@ const CardConfig* get_card_unassailable()
 		CardType_Strategy,
 		"unassailable",
 		"",
+		Target_None,
 		card_unassailable_check,
 		card_unassailable_out,
 	};

@@ -21,6 +21,7 @@ const CardConfig* get_card_otherattack()
 		CardType_Strategy,
 		"otherattack",
 		"",
+		Target_OtherOne,
 		card_otherattack_check,
 		card_otherattack_out,
 	};
