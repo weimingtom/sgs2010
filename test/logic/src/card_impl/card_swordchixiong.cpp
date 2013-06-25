@@ -20,6 +20,7 @@ const CardConfig* get_card_swordchixiong()
 		CardType_Weapon,
 		"swordchixiong",
 		"",
+		Target_Self,
 		card_swordchixiong_check,
 		card_swordchixiong_out,
 	};

@@ -21,6 +21,7 @@ const CardConfig* get_card_snitch()
 		CardType_Strategy,
 		"snitch",
 		"",
+		Target_OtherOneIn1,
 		card_snitch_check,
 		card_snitch_out,
 	};

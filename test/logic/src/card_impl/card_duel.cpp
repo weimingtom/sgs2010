@@ -20,6 +20,7 @@ const CardConfig* get_card_duel()
 		CardType_Strategy,
 		"Duel",
 		"",
+		Target_OtherOne,
 		card_duel_check,
 		card_duel_out,
 	};

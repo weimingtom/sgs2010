@@ -57,6 +57,7 @@ const CardConfig* get_card_medicine()
 		"\n2、当有角色处于濒死状态时，你可以对该角色使用【桃】，防止该角色的死亡。"
 		"\n★例如，一名角色的剩余体力为2点，此时受到【闪电】造成的3点伤害，此时该角色处于濒死状态，该角色或其他任何人合计需使用2张【桃】才能救回（2-3+2=1）。"
 		"\n★出牌阶段，若你没有损失体力，你不可以对自己使用【桃】。",
+		Target_Self,
 		card_medicine_check,
 		card_medicine_out,
 		card_medicine_calc,

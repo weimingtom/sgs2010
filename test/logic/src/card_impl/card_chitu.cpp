@@ -21,6 +21,7 @@ const CardConfig* get_card_chitu()
 		CardType_HorseChase,
 		"chitu",
 		"",
+		Target_Self,
 		card_chitu_check,
 		card_chitu_out,
 	};

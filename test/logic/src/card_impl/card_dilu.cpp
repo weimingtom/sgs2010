@@ -21,6 +21,7 @@ const CardConfig* get_card_dilu()
 		CardType_HorseRun,
 		"dilu",
 		"",
+		Target_Self,
 		card_dilu_check,
 		card_dilu_out,
 	};

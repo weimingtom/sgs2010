@@ -664,6 +664,8 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	int idbegin ;
 	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
 
+	ST_ZERO(sel_opts);
+
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
@@ -676,12 +678,12 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 		pTarget = GAME_PLAYER(pGame, t);
 		if(!IS_PLAYER_DEAD(pTarget))
 		{
-			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d\n", 
+			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d", 
 				player_id_str( (t == player || IS_PLAYER_SHOW(pTarget) || IS_PLAYER_DEAD(pTarget)) ? pTarget->id : PlayerID_Unknown),
 				pTarget->name, pTarget->curLife, pTarget->maxLife, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->nHandCardNum);
 
-			ST_ZERO(sel_opts[idcnt].input);
-			sel_opts[idcnt].value = idbegin + idcnt;
+			snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%d", idbegin + idcnt);
+			sel_opts[idcnt].value = t;
 			idcnt++;
 		}
 	}
@@ -690,8 +692,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	if(may_cancel == YES)
 	{
 		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
-		ST_ZERO(sel_opts[idcnt].input);
-		multi_snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\0%s\0\0", "c", "cancel");
+		multi_snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
 		sel_opts[idcnt].value =  -100;
 		idcnt++;
 	}

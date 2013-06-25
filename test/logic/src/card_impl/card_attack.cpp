@@ -81,6 +81,7 @@ const CardConfig* get_card_attack()
 		"你的出牌阶段，对除你外，你攻击范围内的一名角色使用，效果是对该角色造成1点伤害。"
 		"\n★游戏开始时你的攻击范围是1	。"
 		"\n★每个出牌阶段你只能使用一张【杀】。",
+		Target_OtherOneIn1,
 		card_attack_check,
 		card_attack_out,
 		card_attack_calc,

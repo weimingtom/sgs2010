@@ -21,6 +21,7 @@ const CardConfig* get_card_makebrother()
 		CardType_Strategy,
 		"makebrother",
 		"",
+		Target_All,
 		card_makebrother_check,
 		card_makebrother_out,
 	};

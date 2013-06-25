@@ -22,6 +22,7 @@ const CardConfig* get_card_lightning()
 		CardType_Strategy,
 		"lightning",
 		"",
+		Target_Self,
 		card_lightning_check,
 		card_lightning_out,
 	};

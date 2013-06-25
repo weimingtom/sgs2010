@@ -17,7 +17,7 @@
 #define snprintf      _snprintf
 #define vsnprintf     _vsnprintf
 #define strcasecmp    _stricmp
-#define strncasecmp   strnicmp
+#define strncasecmp   _strnicmp
 
 #elif defined(LINUX)
 

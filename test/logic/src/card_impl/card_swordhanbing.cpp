@@ -20,6 +20,7 @@ const CardConfig* get_card_swordhanbing()
 		CardType_Weapon,
 		"swordhanbing",
 		"",
+		Target_Self,
 		card_swordhanbing_check,
 		card_swordhanbing_out,
 	};

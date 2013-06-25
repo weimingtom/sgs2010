@@ -21,6 +21,7 @@ const CardConfig* get_card_kickladder()
 		CardType_Strategy,
 		"kickladder",
 		"",
+		Target_OtherOne,
 		card_kickladder_check,
 		card_kickladder_out,
 	};
