@@ -60,8 +60,6 @@ const CardConfig* get_card_medicine()
 		Target_Self,
 		card_medicine_check,
 		card_medicine_out,
-		card_medicine_calc,
-		NULL,
 	};
 
 	return &card_medicine;

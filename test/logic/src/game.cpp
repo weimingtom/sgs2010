@@ -425,11 +425,11 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 			if(event.result != R_CANCEL) // if card calc is cancel .
 			{
-				if(pCardConfig->calc != NULL)
+				if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->nRoundPlayer, 0, pEvent);
 					event.pCard = &stCard;
-					(*pCardConfig->calc)(pGame, &event, pGame->nCurPlayer);
+					(*pCardConfig->out)(pGame, &event, pGame->nCurPlayer);
 				}
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->nRoundPlayer, 0, pEvent);
@@ -441,11 +441,11 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 			// after calc
 			if(stCard.id != CardID_None)
 			{
-				if(pCardConfig->fini != NULL)
+				if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->nRoundPlayer, 0, pEvent);
 					event.pCard = &stCard;
-					(*pCardConfig->fini)(pGame, &event, pGame->nCurPlayer);
+					(*pCardConfig->out)(pGame, &event, pGame->nCurPlayer);
 				}
 				else
 				{

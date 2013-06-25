@@ -14,8 +14,6 @@ const CardConfig* get_card_defend()
 		Target_None,
 		NULL,
 		NULL,
-		NULL,
-		NULL,
 	};
 
 	return &card_defend;
