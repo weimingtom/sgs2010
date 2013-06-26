@@ -461,6 +461,13 @@ static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, G
 	return R_SUCC;
 }
 
+
+static RESULT cmd_useweapon(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	// no need param
+	return R_SUCC;
+}
+
 static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	if(pContext->status == Status_None)
@@ -534,6 +541,9 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		NULL},
 	{ "useskill", "u",	cmd_useskill, 
 		"useskill/u <skill idx> ...\n\tuse a skill.", 
+		NULL},
+	{ "usesweapon", "w",	cmd_useweapon, 
+		"usesweapon/w ...\n\tuse the weapon card - some weapon can active in out card round - as a skill.", 
 		NULL},
 	{ "cancel", "c",	cmd_cancelskill, 
 		"cancel/c \n\tcancel the skill in using.", 
