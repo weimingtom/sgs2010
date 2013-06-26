@@ -8,7 +8,7 @@
 #include "player.h"
 #include "card.h"
 #include "hero.h"
-
+#include "cmd.h"
 
 
 
@@ -21,7 +21,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 
 	for(n = 0; n < pGame->nPlayerCount; n++)
 	{
-		if(!IS_PLAYER_DEAD(GAME_PLAYER(m)))
+		if(!IS_PLAYER_DEAD(GAME_PLAYER(pGame, m)))
 		{
 			trigger_player_event(pGame, pEvent, m);
 			if(pEvent->block == YES)
@@ -61,13 +61,17 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 			{
 				ret = (*pSkill->check)(pGame, pEvent, player);
 
+				if(ret == YES && pSkill->flag & SkillFlag_Passive)
+				{
+					(*pSkill->use)(pGame, pEvent, player);
+				}
+				if(ret == YES)
+					may_skills++;
+
 				if(pEvent->block == YES)
 				{
 					return R_SUCC;
 				}
-
-				if(ret == YES)
-					may_skills++;
 			}
 		}
 	}
@@ -79,7 +83,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 		pCardConfig = get_card_config(pPlayer->stHandCards[n].id);
 		if(pCardConfig && pCardConfig->check)
 		{
-			ret = (*pCardConfig->check)(pGame, pEvent, player, PlayerCard_Hand, &pPlayer->stHandCards[n]);
+			ret = (*pCardConfig->check)(pGame, pEvent, player);
 
 			if(ret == YES)
 				may_cards++;
@@ -88,8 +92,19 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 
 	// check player equip card
-	// ...
 
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&pPlayer->stEquipCard[n]))
+		{
+			pCardConfig = get_card_config(pPlayer->stEquipCard[n].id);
+			if(pCardConfig && pCardConfig->check)
+			{
+				// for this event to calc the equip effect
+				(*pCardConfig->out)(pGame, pEvent, player);
+			}
+		}
+	}
 
 	if(may_skills > 0 || may_cards > 0)
 	{

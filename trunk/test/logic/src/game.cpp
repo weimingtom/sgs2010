@@ -647,7 +647,66 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 	return ret;
 }
 
+RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc)
+{
+	//RESULT ret;
+	GameEventContext   event;
+	Player* pPlayer;
+	
+	// event perlost life
+	INIT_EVENT(&event, life_inc < 0 ? GameEvent_PerLostLife: GameEvent_PerAddLife, player, 0, pParentEvent);
+	event.pNum = &life_inc;
 
+	trigger_game_event(pGame, &event);
+
+	if(event.result == R_CANCEL || life_inc == 0)
+		return R_CANCEL;
+
+	pPlayer = GAME_PLAYER(pGame, player);
+
+	pPlayer->curLife += life_inc;
+
+	if(pPlayer->curLife > pPlayer->maxLife)
+		pPlayer->curLife = pPlayer->maxLife;
+	else if(pPlayer->curLife <= 0)
+	{
+		// event perdead ?
+		INIT_EVENT(&event, GameEvent_PerDead, player, 0, pParentEvent);
+		trigger_game_event(pGame, &event);
+
+		// event dead
+
+		if(pPlayer->curLife <= 0)
+		{
+			INIT_EVENT(&event, GameEvent_Dead, player, 0, pParentEvent);
+			trigger_game_event(pGame, &event);
+		}
+	}
+
+	INIT_EVENT(&event, life_inc < 0 ? GameEvent_PostLostLife: GameEvent_PostAddLife, player, 0, pParentEvent);
+	event.pNum = &life_inc;
+
+	trigger_game_event(pGame, &event);
+
+	return R_SUCC;
+}
+
+
+RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos)
+{
+	return R_SUCC;
+}
+
+RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard)
+{
+	Player* pPlayer = GAME_PLAYER(pGame, player);
+
+	if(CARD_VALID(&pPlayer->stEquipCard[pos]))
+	{
+		
+	}
+	return R_SUCC;
+}
 
 
 
@@ -737,7 +796,11 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, t, pParentEvent);
 			event.pAttackDis = &dis;
 
-			trigger_game_event(pGame, &event);
+			// calc the skill and equip effect to target distance or attack range
+			// attacker effect
+			trigger_player_event(pGame, &event, player);
+			// target effect
+			trigger_player_event(pGame, &event, t);
 
 			if(dis.base + dis.inc < dis.dis)
 			{

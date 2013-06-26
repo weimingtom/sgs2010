@@ -123,6 +123,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
 
 YESNO is_player_handfull(Player* player);
 
+
 #endif /* __PLAYER_H__ */
 
 

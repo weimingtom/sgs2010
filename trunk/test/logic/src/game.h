@@ -87,6 +87,11 @@ int game_prev_player(GameContext* pGame, int player);
 
 int game_player_dis(GameContext* pGame, int p1, int p2);
 
+RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos);
+
+RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard);
+RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc);
+
 // select target process
 RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel, const char* alter_text, int* out_target);
 

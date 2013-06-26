@@ -36,10 +36,12 @@ enum GameEvent
 	GameEvent_PostAttack,
 	GameEvent_PerBeAttacked,
 	GameEvent_PostBeAttacked,
+	GameEvent_PerAddLife,
+	GameEvent_PostAddLife,
 	GameEvent_PerLostLife,
 	GameEvent_PostLostLife,
-	GameEvent_PerDie,
-	GameEvent_PostDie,
+	GameEvent_PerDead,
+	GameEvent_Dead,
 	GameEvent_PerKill,
 	GameEvent_UseSkill,
 	GameEvent_PostKill,
@@ -51,8 +53,6 @@ enum GameEvent
 	GameEvent_PerGetCard,
 	GameEvent_PostGetCard,
 	GameEvent_PassiveGetCard,
-	GameEvent_TargetFilter,
-	GameEvent_OutCardCheck,
 	GameEvent_OutCardPrepare,
 	GameEvent_OutCard,
 	GameEvent_RoundOutCard,
@@ -84,6 +84,7 @@ typedef struct tagPassiveOut
 } PassiveOut;
 
 
+
 enum AttackDisFlag
 {
 	AttackDisFlag_UseWeapon = 1,
@@ -110,12 +111,12 @@ struct tagGameEventContext
 	RESULT   result;
 	YESNO	 block;
 	union {
-		Card*       pCard;   // for calc card, judge card ... 
-		int*        pNum;    // num for get card, discard card. etc
+		Card*       pCard;       // for calc card, judge card ... 
+		int*        pNum;        // num for get card, discard card. etc
 		AttackDis*  pAttackDis; 
 		PassiveOut* pPassiveOut; 
-		OutCard*    pOut;    // real out
-		PosCard*    pPosCard;  // lost card
+		OutCard*    pOut;       // real out
+		//CardList*   pCardList;  // lost card,
 	};
 };
 
