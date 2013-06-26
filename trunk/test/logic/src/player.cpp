@@ -103,7 +103,7 @@ RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
 
 		break;
 	case PlayerCard_Equip:
-		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None)
+		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
 		{
 			if(pCard != NULL) *pCard = pPlayer->stEquipCard[pos];
 			RESET_CARD(&pPlayer->stEquipCard[pos]);

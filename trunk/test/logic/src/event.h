@@ -99,7 +99,18 @@ typedef struct tagAttackDis
 	int     flag;
 }AttackDis;
 
+typedef struct tagPosCard
+{
+	Card card;
+	int  where;
+	int  pos;
+}PosCard;
+
+
+
 typedef struct tagGameEventContext GameEventContext;
+
+
 
 
 struct tagGameEventContext
@@ -116,7 +127,7 @@ struct tagGameEventContext
 		AttackDis*  pAttackDis; 
 		PassiveOut* pPassiveOut; 
 		OutCard*    pOut;       // real out
-		//CardList*   pCardList;  // lost card,
+		PosCard*   pPosCard;  // lost card,
 	};
 };
 

@@ -14,13 +14,13 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 	// in out card 
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->nrcard == 1 && pEvent->pOut->rcards[0].card.id == CardID_AxeGuanShi)
+		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_AxeGuanShi)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->pOut->rcards[0].card))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->pOut->list.cards[0]))
 			{
-				pEvent->pOut->nrcard = 0;
-				ST_ZERO(pEvent->pOut->rcards[0].card);
+				pEvent->pOut->list.num = 0;
+				ST_ZERO(pEvent->pOut->list.cards[0]);
 			}
 			return R_SUCC;
 		}
@@ -39,12 +39,14 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 			&& pEvent->parent_event->pOut->vcard.id == CardID_Attack
 			&& pEvent->parent_event->trigger == player)
 		{
-			// 
-
-			// cancel the effect of the passive out "Defend'
-			pEvent->result = R_CANCEL;
-			pEvent->block = YES;
-			return R_SUCC;
+			// role can dicide to active the deffect of the card
+			// if(select_yesno("active the card effect?") == YES)
+			{
+				// cancel the effect of the passive out "Defend'
+				pEvent->result = R_CANCEL;
+				pEvent->block = YES;
+				return R_SUCC;
+			}
 		}
 	}
 	return R_DEF;
@@ -57,7 +59,7 @@ const CardConfig* get_card_axeguanshi()
 	static CardConfig card_axeguanshi = {
 		CardID_AxeGuanShi,
 		CardType_Weapon,
-		"axeguanshi",
+		"¹áÊ¯¸«",
 		"",
 		Target_Self,
 		card_axeguanshi_check,

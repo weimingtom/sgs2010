@@ -694,6 +694,17 @@ RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, 
 
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos)
 {
+	Player* pPlayer = GAME_PLAYER(pGame, player);
+	PosCard  stCard;
+	
+	if(R_SUCC == player_remove_card(pPlayer, where, pos, &stCard.card))
+	{
+		stCard.card.flag = CardFlag_None;
+		stCard.where = where;
+		stCard.pos = pos;
+
+		card_stack_push(&pGame->cardOut, &stCard.card);
+	}
 	return R_SUCC;
 }
 
@@ -703,8 +714,12 @@ RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent
 
 	if(CARD_VALID(&pPlayer->stEquipCard[pos]))
 	{
-		
+		game_player_discard_card(pGame, pParentEvent, player, PlayerCard_Equip, pos);
 	}
+
+	pPlayer->stEquipCard[pos] = *pCard;
+	pPlayer->stEquipCard[pos].flag = CardFlag_None;
+
 	return R_SUCC;
 }
 

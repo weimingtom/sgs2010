@@ -11,14 +11,6 @@ typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
 
-/*
-typedef struct tagPosCard
-{
-	Card card;
-	int  where;
-	int  pos;
-}PosCard;
-*/
 
 
 #define MAX_CARD_LIST_NUM  20

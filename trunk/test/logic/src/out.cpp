@@ -83,22 +83,22 @@ static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, 
 	return event.result;	
 }
 
-static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, Card* pCard)
+static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pPosCard)
 {
 	GameEventContext   event;
 	INIT_EVENT(&event, GameEvent_PerLostCard, player, 0, pParentEvent);
-	event.pCard = pCard;
+	event.pPosCard = pPosCard;
 
 	trigger_game_event(pGame, &event);
 
 	return event.result;
 }
 
-static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, Card* pCard)
+static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pPosCard)
 {
 	GameEventContext   event;
 	INIT_EVENT(&event, GameEvent_PostLostCard, player, 0, pParentEvent);
-	event.pCard = pCard;
+	event.pPosCard = pPosCard;
 	
 	trigger_game_event(pGame, &event);
 	
@@ -109,21 +109,41 @@ static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent,
 static RESULT match_out_card_list(Player* pPlayer, CardList* pList)
 {
 	int    n, m, k;
-	char  check[MAX_CARD_LIST_NUM];
+	char   check[MAX_CARD_LIST_NUM];
+	Card*  pCard;
+	CardFlag  f;
 
 	ST_ZERO(check);
 	k = 0;
 
 	// check hand
-	for(n = 0; n < pPlayer->nHandCardNum; n++)
+	for(n = pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
 	{
-		if(pPlayer->stHandCards[n].flag == CardFlag_PrepareOut)
+		if(n < pPlayer->nHandCardNum)
+		{
+			pCard = &pPlayer->stHandCards[n];
+			f = CardFlag_FromHand;
+		}
+		else if(n < pPlayer->nHandCardNum + EquipIdx_Max)
+		{
+			pCard = &pPlayer->stEquipCard[n-pPlayer->nHandCardNum];
+			//if(!CARD_VALID(pCard))
+			//	continue;
+			f = CardFlag_FromEquip;
+		}
+		else /*if(n < pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum) */
+		{
+			pCard = &pPlayer->stJudgmentCards[n - pPlayer->nHandCardNum - EquipIdx_Max];
+			f = CardFlag_FromJudge;
+		}
+
+		if(CARD_VALID(pCard) && pCard->flag == CardFlag_PrepareOut)
 		{
 			for(m = 0; m < pList->num; m++)
 			{
-				if(check[m] == 0 && pList->cards[m].flag == CardFlag_FromHand)
+				if(check[m] == 0 && pList->cards[m].flag == f)
 				{
-					if(CARD_EQUAL(&pPlayer->stHandCards[n], &pList->cards[m]))
+					if(CARD_EQUAL(pCard, &pList->cards[m]))
 					{
 						check[m] = 1;
 						k++;
@@ -134,43 +154,6 @@ static RESULT match_out_card_list(Player* pPlayer, CardList* pList)
 		}
 	}
 
-	for(n = 0; n < EquipIdx_Max; n++)
-	{
-		if(CARD_VALID(&pPlayer->stEquipCard[n]) && pPlayer->stEquipCard[n].flag == CardFlag_PrepareOut)
-		{
-			for(m = 0; m < pList->num; m++)
-			{
-				if(check[m] == 0 && pList->cards[m].flag == CardFlag_FromEquip)
-				{
-					if(CARD_EQUAL(&pPlayer->stHandCards[n], &pList->cards[m]))
-					{
-						check[m] = 1;
-						k++;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	for(n = 0; n < pPlayer->nHandCardNum; n++)
-	{
-		if(pPlayer->stHandCards[n].flag == CardFlag_PrepareOut)
-		{
-			for(m = 0; m < pList->num; m++)
-			{
-				if(check[m] == 0 && pList->cards[m].flag == CardFlag_FromHand)
-				{
-					if(CARD_EQUAL(&pPlayer->stHandCards[n], &pOut->list.cards[m]))
-					{
-						check[m] = 1;
-						k++;
-						break;
-					}
-				}
-			}
-		}
-	}
 
 	if(k == pList->num)
 		return R_SUCC;
@@ -183,6 +166,8 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 	int n;
 	char buf[128];
 	char buf2[512];
+	PosCard   stCard;
+	CardFlag  f;
 	Player* pPlayer = GAME_PLAYER(pGame, pOut->supply);
 	
 	if(pOut->list.num > 0)
@@ -192,35 +177,60 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 			return R_E_FAIL;
 
 		// log
-		if(pOut->list.num == 1 && CARD_EQUAL(&pOut->list.cards[0].colo, &pOut->vcard))
+		if(pOut->list.num == 1 && CARD_EQUAL(&pOut->list.cards[0], &pOut->vcard))
 		{
-			printf("player [%s] out a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, card_str(&pOut->rcards[0].card, buf, sizeof(buf)));
+			printf("player [%s] out a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, card_str(&pOut->list.cards[0], buf, sizeof(buf)));
 		}
 		else
 		{
-			for(n = 0; n < pOut->nrcard; n++)
+			buf2[0] = 0;
+			for(n = 0; n < pOut->list.num; n++)
 			{
-				buf2[0] = 0;
-				strcat(buf2, card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
+				strcat(buf2, card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 			}
 
 			printf("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
-		for(n = 0; n < pOut->list.num; n++)
+		for(n = pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
 		{
-			if(CARD_VALID(&pOut->list.cards[n]))
+			if(n < pPlayer->nHandCardNum)
+			{
+				stCard.card = pPlayer->stHandCards[n];
+				stCard.where = PlayerCard_Hand;
+				stCard.pos = n;
+				f = CardFlag_FromHand;
+			}
+			else if(n < pPlayer->nHandCardNum + EquipIdx_Max)
+			{
+				stCard.card = pPlayer->stEquipCard[n-pPlayer->nHandCardNum];
+				stCard.where = PlayerCard_Equip;
+				stCard.pos = n-pPlayer->nHandCardNum;
+				//if(!CARD_VALID(pCard))
+				//	continue;
+				f = CardFlag_FromEquip;
+			}
+			else /*if(n < pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum) */
+			{
+				stCard.card = pPlayer->stJudgmentCards[n - pPlayer->nHandCardNum - EquipIdx_Max];
+				stCard.where = PlayerCard_Judgment;
+				stCard.pos = n - pPlayer->nHandCardNum - EquipIdx_Max;
+				f = CardFlag_FromJudge;
+			}
+			
+			if(CARD_VALID(&stCard.card) && stCard.card.flag == CardFlag_PrepareOut)
 			{
 				// todo : perlostcard
-				per_lost_card(pGame, pEvent, pOut->supply, &pOut->rcards[n]);
-				if(R_SUCC != player_remove_card(pPlayer, pOut->rcards[n].where, pOut->rcards[n].pos, NULL))
+				per_lost_card(pGame, pEvent, pOut->supply, &stCard);
+				if(R_SUCC != player_remove_card(pPlayer, stCard.where, stCard.pos, NULL))
 				{
-					printf("remove out card [%s] from player [%d] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)), pOut->supply, pOut->rcards[n].pos);
+					// after check , fail is impossible
+					printf("remove out card [%s] from player [%d] failed ", card_str(&stCard.card, buf, sizeof(buf)), pOut->supply);
 					return R_E_FAIL;
 				}
 				// todo : postlostcard
-				per_lost_card(pGame, pEvent, pOut->supply, &pOut->rcards[n]);
+				per_lost_card(pGame, pEvent, pOut->supply, &stCard);
 			}
 		}
 	}
@@ -231,17 +241,20 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
 {
 	int n;
 	char buf[128];
-	if(pOut->nrcard > 0)
+	if(pOut->list.num > 0)
 	{
-		for(n = 0; n < pOut->nrcard; n++)
+		for(n = 0; n < pOut->list.num; n++)
 		{
-			if(R_SUCC != card_stack_push(&pGame->cardOut, &pOut->rcards[n].card))
+			pOut->list.cards[n].flag = CardFlag_None;
+			if(R_SUCC != card_stack_push(&pGame->cardOut, &pOut->list.cards[n]))
 			{
-				printf("add out card [%s] failed ", card_str(&pOut->rcards[n].card, buf, sizeof(buf)));
+				printf("add out card [%s] failed ", card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 				return R_E_FAIL;
 			}
+			ST_ZERO(pOut->list.cards[n]);
 		}
 	}
+	pOut->list.num = 0;
 
 	return R_SUCC;
 }
@@ -348,10 +361,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		pCard->flag = CardFlag_PrepareOut;
 
-		pEvent->pOut->rcards[0].card = *pCard;
-		pEvent->pOut->rcards[0].where = where;
-		pEvent->pOut->rcards[0].pos = pos;
-		pEvent->pOut->nrcard = 1;
+		pEvent->pOut->list.cards[0] = *pCard;
+		pEvent->pOut->list.cards[0].flag = CardFlag_FromHand;
+		pEvent->pOut->list.num = 1;
 		pEvent->pOut->vcard = *pCard;
 		pEvent->pOut->trigger = pGame->nCurPlayer;
 		pEvent->pOut->supply = pGame->nCurPlayer;
