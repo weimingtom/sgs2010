@@ -3,6 +3,9 @@
 
 static YESNO card_dilu_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+	// in out card round , can equip this card
+	if(pEvent->id == GameEvent_RoundOutCard)
+		return YES;
 	return NO;
 }
 

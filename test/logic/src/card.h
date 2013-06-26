@@ -97,6 +97,9 @@ enum CardFlag
 {
 	CardFlag_None = 0,
 	CardFlag_PrepareOut = 1,   // the card prepare to out, in prepare event, cannot calc the card effect
+	CardFlag_FromHand = 2,
+	CardFlag_FromEquip = 3,
+	CardFlag_FromJudge = 4,
 };
 
 
@@ -113,9 +116,11 @@ enum TargetType
 };
 
 
+typedef struct tagCard Card;
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
-typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
+
+typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int /* , int, int, Card* */);
 typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 
 
@@ -155,6 +160,12 @@ struct tagCardPattern
 
 #define RESET_CARD(pCard)   ST_ZERO(*pCard)
 #define CARD_VALID(p)   ((p)->id != CardID_None)
+
+#define CARD_EQUAL(p1, p2)    ( CARD_EQUAL_ID((p1), (p2))  && CARD_EQUAL_COLOR((p1), (p2)) && CARD_EQUAL_VALUE((p1), (p2)) )
+#define CARD_EQUAL_ID(p1, p2)   ((p1)->id == (p2)->id)
+#define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
+#define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
+
 
 const char* card_type_str(CardType type);
 const char* card_id_str(CardID id);

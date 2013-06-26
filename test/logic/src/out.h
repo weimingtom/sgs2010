@@ -11,26 +11,39 @@ typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
 
-
+/*
 typedef struct tagPosCard
 {
 	Card card;
 	int  where;
 	int  pos;
 }PosCard;
+*/
+
+
+#define MAX_CARD_LIST_NUM  20
+
+typedef struct tagCardList CardList;
+
+struct tagCardList
+{
+	int    num;
+	Card   cards[MAX_CARD_LIST_NUM];
+};
+
 
 typedef struct tagOutCard OutCard;
 
-#define MAX_RCARD_NUM  5
 
 struct tagOutCard
 {
-	int     trigger;
-	int     supply;
-	int     target;
-	Card    vcard;    //  use as card (virtaul) 
-	int     nrcard;   //  real card number ,. if 0 vcard is also real card 
-	PosCard rcards[MAX_RCARD_NUM];  // rcard array;
+	int      trigger;
+	int      supply;
+	int      target;
+	Card     vcard;    //  use as card (virtaul) 
+	CardList list;
+	//int     nrcard;   //  real card number ,. if 0 vcard is also real card 
+	//Card    rcards[MAX_RCARD_NUM];  // rcard array;
 };
 
 
@@ -41,7 +54,7 @@ struct tagOutCardPattern
 {
 	int where;
 	int num;
-	CardPattern patterns[MAX_RCARD_NUM];
+	CardPattern patterns[MAX_CARD_LIST_NUM];
 };
 
 

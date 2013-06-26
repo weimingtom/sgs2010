@@ -272,10 +272,10 @@ static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)
 RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
 {
 	int n, m, p;
-	int index [MAX_RCARD_NUM];
+	int index [MAX_CARD_LIST_NUM];
 
 	// too many card
-	if(num > MAX_RCARD_NUM)
+	if(num > MAX_CARD_LIST_NUM)
 		return R_E_PARAM;
 
 	// fill_array_inc_i(index, num, 0, 1);

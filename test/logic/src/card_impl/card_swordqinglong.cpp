@@ -2,6 +2,9 @@
 
 static YESNO card_swordqinglong_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+	// in out card round , can equip this card
+	if(pEvent->id == GameEvent_RoundOutCard)
+		return YES;
 	return NO;
 }
 
