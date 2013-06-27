@@ -46,7 +46,7 @@ static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int 
 		INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
 		pattern.where = PlayerCard_Hand;
 
-		ret = game_passive_out(pGame, pEvent, pEvent->target, player, &pattern, "please out a card 'defend':");
+		ret = game_passive_out(pGame, pEvent, pEvent->target, player, &pattern, "please out a card 'defend' or pass:");
 
 		if(ret != R_SUCC)
 		{

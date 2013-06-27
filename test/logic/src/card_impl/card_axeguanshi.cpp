@@ -40,7 +40,7 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 			&& pEvent->parent_event->trigger == player)
 		{
 			// role can dicide to active the deffect of the card
-			// if(select_yesno("active the card effect?") == YES)
+			if(game_select_yesno(pGame, pEvent, player, "active the card '¹áÊ¯¸«' effect?") == YES)
 			{
 				// cancel the effect of the passive out "Defend'
 				pEvent->result = R_CANCEL;
@@ -49,7 +49,7 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 			}
 		}
 	}
-	return R_DEF;
+	return R_SUCC;
 }
 
 

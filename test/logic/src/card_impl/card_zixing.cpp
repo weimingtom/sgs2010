@@ -26,7 +26,15 @@ static RESULT card_zixing_out(GameContext* pGame, GameEventContext* pEvent, int 
 			return R_SUCC;
 		}
 	}
-	return R_DEF;
+	if(pEvent->id == GameEvent_CalcAttackDis)
+	{
+		// when role attack other, the dis from other is -1
+		if(player == pEvent->trigger)
+		{
+			pEvent->pAttackDis->dis -= 1;
+		}
+	}
+	return R_SUCC;
 }
 
 

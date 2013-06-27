@@ -28,7 +28,13 @@ static RESULT card_bowqiling_out(GameContext* pGame, GameEventContext* pEvent, i
 			return R_SUCC;
 		}
 	}
-	return R_DEF;
+	else if(pEvent->id == GameEvent_CalcAttackDis)
+	{
+		// equip effect to set base attack range
+		pEvent->pAttackDis->base = 3;
+		return R_SUCC;
+	}
+	return R_SUCC;
 }
 
 

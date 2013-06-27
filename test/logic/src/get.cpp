@@ -175,7 +175,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, 0, pEvent);
 	event.pNum = &num;
 
-	pGame->nCurPlayer = player;
+	set_game_cur_player(pGame, player);
 
 	snprintf(buffer, sizeof(buffer), "please get %d card:", num);
 

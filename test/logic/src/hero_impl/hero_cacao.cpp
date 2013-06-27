@@ -33,7 +33,7 @@ static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int playe
 		n = 0;
 		//for(n = 0; n < pEvent->pPassiveOut->pattern.num; n++)
 		{
-			if(pEvent->pPassiveOut->pattern.num == 1 && pEvent->pPassiveOut->pattern.patterns[n].id == CardID_Defend)
+			if(pEvent->pPatternOut->pattern.num == 1 && pEvent->pPatternOut->pattern.patterns[n].id == CardID_Defend)
 			{
 				return YES;
 			}
@@ -63,7 +63,7 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 			//pattern.num = 1;
 			//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
 			//pattern.where = PlayerCard_Hand;
-			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pEvent->pPassiveOut->pattern, NULL, &pEvent->pPassiveOut->out) )
+			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pEvent->pPatternOut->pattern, NULL, &pEvent->pPatternOut->out) )
 			{
 				// out card instead mine 
 				return R_SUCC;
