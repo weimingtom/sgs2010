@@ -47,8 +47,6 @@ enum GameEvent
 	GameEvent_PostKill,
 	GameEvent_PerCardJudge,
 	GameEvent_PostCardJudge,
-	GameEvent_PerCardJudgeCalc,
-	GameEvent_PostCardJudgeCalc,
 	GameEvent_RoundGetCard,
 	GameEvent_PerGetCard,
 	GameEvent_PostGetCard,
@@ -71,7 +69,11 @@ enum GameEvent
 	GameEvent_SupplyCard,
 	GameEvent_CalcAttackDis,
 	GameEvent_SelectTarget,
-	GameEvent_CheckTarget,
+	GameEvent_PerDecideCard,
+	GameEvent_PerDecideCardCalc,
+	GameEvent_PostDecideCard,
+
+
 };
 
 

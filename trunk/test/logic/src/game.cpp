@@ -394,6 +394,60 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 }
 
 
+
+
+// discard all card stack cards to out stack
+static void discard_stack_card(GameContext* pGame)
+{
+	Card  card;
+	while(pGame->cardStack.count > 0)
+	{
+		card_stack_pop(&pGame->cardStack, &card);
+		card_stack_push(&pGame->cardOut, &card);
+	}
+}
+
+static void refresh_card_stack(GameContext* pGame)
+{
+	while(pGame->cardStack.count > 0)
+	{
+		discard_stack_card(pGame);
+	}
+
+	pGame->cardStack = pGame->cardOut;
+	card_stack_clear(&pGame->cardOut);
+
+	card_stack_random(&pGame->cardStack);
+
+	printf("card stack refresh: count=%d\n", pGame->cardStack.count);
+}
+
+
+
+
+// player get card
+RESULT game_pop_stack_card(GameContext* pGame, Card* pCard)
+{
+	if(card_stack_empty(&pGame->cardStack) )
+	{
+		// reflush card stack
+		refresh_card_stack(pGame);
+	}
+
+	if(R_SUCC != card_stack_pop(&pGame->cardStack, pCard))
+	{
+		printf("game_pop_stack_card:  failed! stack size=%d!\n", pGame->cardStack.count);
+		return R_E_FAIL;
+	}
+
+	//printf("player [%d] [%s] get a card, hand card count [%d].\n", pGame->nCurPlayer, pPlayer->name, pPlayer->nHandCardNum);
+
+	return R_SUCC;
+}
+
+
+
+
 static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
 static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
@@ -718,6 +772,11 @@ RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, 
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
+	if(life_inc < 0)
+		printf("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -life_inc, pPlayer->curLife, pPlayer->maxLife);
+	else
+		printf("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, life_inc, pPlayer->curLife, pPlayer->maxLife);
+
 	pPlayer->curLife += life_inc;
 
 	if(pPlayer->curLife > pPlayer->maxLife)
@@ -884,9 +943,11 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 
 			// calc the skill and equip effect to target distance or attack range
 			// target effect
-			trigger_player_event(pGame, &event, t);
+			//trigger_player_event(pGame, &event, t);
 			// attacker effect
-			trigger_player_event(pGame, &event, player);
+			//trigger_player_event(pGame, &event, player);
+
+			trigger_game_event(pGame, &event);
 
 			if(dis.base + dis.inc < dis.dis)
 			{
@@ -924,4 +985,48 @@ YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int 
 
 	return NO;
 }
+
+YESNO game_decide_card(GameContext* pGame, GameEventContext* pParentEvent,int player, const CardPattern* pPattern)
+{
+	GameEventContext  event;
+	RESULT ret;
+	Card   stCard;
+
+	// GameEvent_PerDecideCard
+	INIT_EVENT(&event, GameEvent_PerDecideCard, player, 0, pParentEvent);
+
+	trigger_game_event(pGame, &event);
+
+	if(event.result == R_CANCEL)
+		return NO;
+
+	if(event.result == R_SKIP)
+		return YES;
+
+	ret = game_pop_stack_card(pGame, &stCard);
+
+	CHECK_RET(ret, NO);
+
+
+	// GameEvent_PerDecideCardCalc 
+	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, 0, pParentEvent);
+	event.pCard = &stCard;
+	trigger_game_event(pGame, &event);
+
+	ret = card_match(&stCard, pPattern, 1);
+
+	// GameEvent_PostDecideCard
+	INIT_EVENT(&event, GameEvent_PostDecideCard, player, 0, pParentEvent);
+	event.pCard = &stCard;
+	trigger_game_event(pGame, &event);
+
+
+	if(CARD_VALID(&stCard))
+	{
+		card_stack_push(&pGame->cardOut, &stCard);
+	}
+
+	return NO;
+}
+
 
