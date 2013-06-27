@@ -25,6 +25,14 @@ static RESULT card_chitu_out(GameContext* pGame, GameEventContext* pEvent, int p
 			return R_SUCC;
 		}
 	}
+	if(pEvent->id == GameEvent_CalcAttackDis)
+	{
+		// when role attack other, the dis from other is -1
+		if(player == pEvent->trigger)
+		{
+			pEvent->pAttackDis->dis -= 1;
+		}
+	}
 	return R_DEF;
 }
 

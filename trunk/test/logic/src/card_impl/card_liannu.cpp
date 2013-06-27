@@ -2,6 +2,8 @@
 
 static YESNO card_liannu_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+	if(pEvent->id == GameEvent_RoundOutCard)
+		return YES;
 	return NO;
 }
 
@@ -21,7 +23,19 @@ static RESULT card_liannu_out(GameContext* pGame, GameEventContext* pEvent, int 
 			return R_SUCC;
 		}
 	}
-	return R_DEF;
+	else if(pEvent->id == GameEvent_CalcAttackDis)
+	{
+		// equip effect to set base attack range
+		pEvent->pAttackDis->base = 1;
+		return R_SUCC;
+	}
+	else if(pEvent->id == GameEvent_RoundOutCard)
+	{
+		// you can use any 'Attack' in round out
+		
+	}
+
+	return R_SUCC;
 }
 
 

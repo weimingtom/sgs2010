@@ -24,7 +24,7 @@ static RESULT card_bagua_out(GameContext* pGame, GameEventContext* pEvent, int p
 			return R_SUCC;
 		}
 	}
-	return R_DEF;
+	return R_SUCC;
 }
 
 

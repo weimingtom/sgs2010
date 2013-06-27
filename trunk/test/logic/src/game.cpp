@@ -62,6 +62,20 @@ int game_prev_player(GameContext* pGame, int player)
 	return idx;
 }
 
+RESULT set_game_cur_player(GameContext* pGame, int player)
+{
+	if(player < 0 || player >= pGame->nPlayerCount)
+		return R_E_PARAM;
+
+	if(player != pGame->nCurPlayer)
+	{
+		pGame->nCurPlayer = player;
+		printf("the current player is set to [%s]\n", CUR_PLAYER(pGame)->name);
+	}
+
+	return R_SUCC;
+}
+
 
 int game_player_dis(GameContext* pGame, int p1, int p2)
 {
@@ -302,14 +316,14 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	pGame->status = Status_NewGame;
 	pGame->nRoundNum = 0;
 	pGame->nRoundPlayer = 0;
-	pGame->nCurPlayer = 0;
+	pGame->nCurPlayer = -1;
 
 
 	for(n = 0; n < pGame->nPlayerCount; ++n)
 	{
 		if(pids[n] == PlayerID_Master)
 		{
-			pGame->nCurPlayer = n;
+			set_game_cur_player(pGame, n);
 			pGame->nRoundPlayer = n;
 			break;
 		}
@@ -384,6 +398,8 @@ static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
 static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 {
+	printf("the round [%d] is start, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, pEvent);
 
@@ -395,6 +411,7 @@ static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
+	printf("enter the round [%d]  judgment phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->nRoundPlayer, 0, pEvent);
@@ -472,6 +489,9 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	int num;
 	GameEventContext  event;
 
+	printf("enter the round [%d]  get card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+
+
 	num = 2;  // in get round init to get 2 card 
 	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->nRoundPlayer, 0, pEvent);
 	event.pNum = &num;
@@ -493,20 +513,49 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 {
-	
+	GameEventContext  event;
+
+	printf("enter the round [%d]  out card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+
+	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->nRoundPlayer, 0, pEvent);
+	trigger_game_event(pGame, &event);
+
+	if(event.result == R_CANCEL)
+	{
+		// skip getcard step
+		return R_SUCC;
+	}
+
 	while (R_SUCC == game_round_do_out(pGame, pEvent, pGame->nRoundPlayer))
 	{
 		// do nothing
 	}
+
+	INIT_EVENT(&event, GameEvent_PostRoundOut, pGame->nRoundPlayer, 0, pEvent);
+	trigger_game_event(pGame, &event);
+
 	return R_SUCC;
 }
 
 static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEvent)
 {
+	GameEventContext  event;
+
+	printf("enter the round [%d]  discard card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+
 	// trigger round discard event
+	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->nRoundPlayer, 0, pEvent);
+	trigger_game_event(pGame, &event);
+
+	if(event.result == R_CANCEL)
+	{
+		// skip getcard step
+		return R_SUCC;
+	}
 
 	// wait cmd_loop discard cmd execute
-
+	INIT_EVENT(&event, GameEvent_PostRoundDiscard, pGame->nRoundPlayer, 0, pEvent);
+	trigger_game_event(pGame, &event);
 
 	return R_SUCC;
 }
@@ -515,7 +564,11 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 {
 	// trigger round end event
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, pEvent);
+
+	printf("the round [%d] is finish, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+
+
+	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->nRoundPlayer, 0, pEvent);
 
 	trigger_game_event(pGame, &event);
 
@@ -557,6 +610,7 @@ static RESULT game_next_status(GameContext* pGame, GameEventContext* pEvent)
 	case Status_NewGame:
 		pGame->status = Status_Round_Begin;
 		pGame->nRoundPlayer = get_game_master_player(pGame);
+		pGame->nRoundNum = 1;
 		break;
 	case Status_Round_Begin:
 		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
@@ -694,14 +748,21 @@ RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, 
 
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos)
 {
-	Player* pPlayer = GAME_PLAYER(pGame, player);
 	PosCard  stCard;
+	char buf[128];
+	Player* pPlayer = GAME_PLAYER(pGame, player);
+
+	// event: per lost card 
 	
 	if(R_SUCC == player_remove_card(pPlayer, where, pos, &stCard.card))
 	{
 		stCard.card.flag = CardFlag_None;
 		stCard.where = where;
 		stCard.pos = pos;
+
+		printf("[%s] discard a card %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
+
+		// event: post lost card
 
 		card_stack_push(&pGame->cardOut, &stCard.card);
 	}
@@ -710,15 +771,23 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard)
 {
+	char buf[128];
 	Player* pPlayer = GAME_PLAYER(pGame, player);
+
+	// add event per equip card
 
 	if(CARD_VALID(&pPlayer->stEquipCard[pos]))
 	{
 		game_player_discard_card(pGame, pParentEvent, player, PlayerCard_Equip, pos);
 	}
 
+
+	printf("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(pos), card_str(pCard, buf, sizeof(buf)));
+
 	pPlayer->stEquipCard[pos] = *pCard;
 	pPlayer->stEquipCard[pos].flag = CardFlag_None;
+
+	// add event post equip card
 
 	return R_SUCC;
 }
@@ -739,6 +808,8 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
 
 	ST_ZERO(sel_opts);
+
+	set_game_cur_player(pGame,player );
 
 
 	pPlayer = GAME_PLAYER(pGame, player);
@@ -766,7 +837,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	if(may_cancel == YES)
 	{
 		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
-		multi_snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
+		snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
 		sel_opts[idcnt].value =  -100;
 		idcnt++;
 	}
@@ -812,10 +883,10 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			event.pAttackDis = &dis;
 
 			// calc the skill and equip effect to target distance or attack range
-			// attacker effect
-			trigger_player_event(pGame, &event, player);
 			// target effect
 			trigger_player_event(pGame, &event, t);
+			// attacker effect
+			trigger_player_event(pGame, &event, player);
 
 			if(dis.base + dis.inc < dis.dis)
 			{
@@ -829,5 +900,28 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	}
 
 	return R_E_FAIL;
+}
+
+YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text)
+{
+	int result;
+	SelOption   sel_opts[2];
+	ST_ZERO(sel_opts);
+
+	set_game_cur_player(pGame,player );
+
+
+	snprintf(sel_opts[0].text, sizeof(sel_opts[0].text),"[ Yes ]");
+	snprintf(sel_opts[0].input, sizeof(sel_opts[0].input), "y\nyes");
+	sel_opts[0].value =  YES;
+
+	snprintf(sel_opts[1].text, sizeof(sel_opts[0].text),"[ No  ]");
+	snprintf(sel_opts[1].input, sizeof(sel_opts[0].input), "n\nno");
+	sel_opts[1].value =  NO;
+
+	if(select_loop(pGame, pParentEvent, sel_opts, 2, alter_text, &result) == R_SUCC)
+		return (YESNO) result;
+
+	return NO;
 }
 

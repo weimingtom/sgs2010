@@ -72,6 +72,18 @@ const char* player_id_str(PlayerID id)
 	}
 }
 
+const char* equip_idx_str(int idx)
+{
+	switch(idx)
+	{
+	case EquipIdx_Weapon: return "武器";
+	case EquipIdx_Armor: return "防具";
+	case EquipIdx_HorseInc: return "马(+1)";
+	case EquipIdx_HorseDec: return "马(-1)";
+	}
+	return "装备";
+}
+
 
 YESNO is_player_handfull(Player* player)
 {
@@ -86,6 +98,71 @@ RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
 
 	arrray_insert_t(pPlayer->stHandCards, sizeof(pPlayer->stHandCards[0]), &pPlayer->nHandCardNum, -1, pCard);
 	return R_SUCC;
+}
+
+RESULT set_player_card_flag(Player* pPlayer,  int where, int pos, CardFlag flag)
+{
+	switch(where)
+	{
+	case PlayerCard_Hand:
+		if(0 <= pos && pos < pPlayer->nHandCardNum)
+		{
+			pPlayer->stHandCards[pos].flag = flag;
+			return R_SUCC;
+		}
+		break;
+	case PlayerCard_Equip:
+		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
+		{
+			pPlayer->stEquipCard[pos].flag = flag;
+			return R_SUCC;
+		}
+		break;
+	case PlayerCard_Judgment:
+		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
+		{
+			pPlayer->stJudgmentCards[pos].flag = flag;
+			return R_SUCC;
+		}
+		break;
+	}
+
+	return R_E_PARAM;
+}
+
+
+RESULT get_player_card(Player* pPlayer, int where, int pos, Card* pCard)
+{
+	switch(where)
+	{
+	case PlayerCard_Hand:
+		if(0 <= pos && pos < pPlayer->nHandCardNum)
+		{
+			*pCard = pPlayer->stHandCards[pos];
+			pCard->flag = CardFlag_FromHand;
+			return R_SUCC;
+		}
+		break;
+	case PlayerCard_Equip:
+		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
+		{
+			*pCard = pPlayer->stEquipCard[pos];
+			pCard->flag = CardFlag_FromEquip;
+			return R_SUCC;
+		}
+		break;
+	case PlayerCard_Judgment:
+		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
+		{
+			*pCard = pPlayer->stJudgmentCards[pos];
+			pCard->flag = CardFlag_FromJudge;
+			return R_SUCC;
+		}
+		break;
+	}
+
+	return R_E_PARAM;
+
 }
 
 
@@ -141,7 +218,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
-		if(player->stEquipCard[n].id != CardID_None)
+		if(CARD_VALID(&player->stEquipCard[n]))
 		{
 			if(idx == 1)
 			{

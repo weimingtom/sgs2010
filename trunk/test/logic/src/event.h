@@ -76,12 +76,12 @@ enum GameEvent
 
 
 // for passive out, supply out
-typedef struct tagPassiveOut
+typedef struct tagPatternOut
 {
 	//YESNO          may_cancel;
 	OutCardPattern pattern;
 	OutCard        out; 
-} PassiveOut;
+} PatternOut;
 
 
 
@@ -125,8 +125,8 @@ struct tagGameEventContext
 		Card*       pCard;       // for calc card, judge card ... 
 		int*        pNum;        // num for get card, discard card. etc
 		AttackDis*  pAttackDis; 
-		PassiveOut* pPassiveOut; 
-		OutCard*    pOut;       // real out
+		PatternOut* pPatternOut; // for passive out, supply card etc..
+ 		OutCard*    pOut;       // real out,  per/post out
 		PosCard*   pPosCard;  // lost card,
 	};
 };

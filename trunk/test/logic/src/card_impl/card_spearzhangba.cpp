@@ -24,7 +24,7 @@ static RESULT card_spearzhangba_out(GameContext* pGame, GameEventContext* pEvent
 			return R_SUCC;
 		}
 	}
-	return R_DEF;
+	return R_SUCC;
 }
 
 

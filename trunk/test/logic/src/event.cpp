@@ -98,7 +98,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 		if(CARD_VALID(&pPlayer->stEquipCard[n]))
 		{
 			pCardConfig = get_card_config(pPlayer->stEquipCard[n].id);
-			if(pCardConfig && pCardConfig->check)
+			if(pCardConfig && pCardConfig->out)
 			{
 				// for this event to calc the equip effect
 				(*pCardConfig->out)(pGame, pEvent, player);
@@ -108,6 +108,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	if(may_skills > 0 || may_cards > 0)
 	{
+		set_game_cur_player(pGame, player);
 		cmd_loop(pGame, pEvent, "please use skill or out card:");
 	}
 
