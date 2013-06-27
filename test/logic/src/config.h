@@ -82,6 +82,7 @@ enum RESULT
 	R_CANCEL  = 4,   // op cancel, end cmd loop
 	R_ABORT  = 5,   // op abort, end cmd loop
 	R_RETRY  = 6,   // retry it , continue loop
+	R_SKIP   = 7,   // skip the loop , and as success
 
 
 	// error code ( <0 )

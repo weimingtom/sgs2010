@@ -3,10 +3,18 @@
 
 static YESNO card_medicine_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-
+	Player* pPlayer; 
 	// in out round , you can use to self
-	if(pGame->status == Status_Round_Out && pGame->nRoundPlayer == player)
+	if(pEvent->id == GameEvent_RoundOutCard && pGame->nRoundPlayer == player )
+	{
+		pPlayer = (GAME_PLAYER(pGame, player));
+		if(pPlayer->curLife < pPlayer->maxLife)
+			return YES;
+	}
+	else if(pEvent->id == GameEvent_PerDead)
+	{
 		return YES;
+	}
 
 	// in other way medicine only out in passive
 
@@ -18,8 +26,16 @@ static YESNO card_medicine_check(GameContext* pGame, GameEventContext* pEvent, i
 
 static RESULT card_medicine_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	
-	
+		
+	if(pEvent->id == GameEvent_RoundOutCard)
+	{
+		game_player_add_life(pGame, pEvent, player, 1);
+	}
+	else if(pEvent->id == GameEvent_PerDead)
+	{
+		game_player_add_life(pGame, pEvent, pEvent->trigger, 1);
+	}
+
 
 	return R_SUCC;
 }

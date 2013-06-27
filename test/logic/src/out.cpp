@@ -570,6 +570,11 @@ RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int 
 	if(ret == R_CANCEL)
 		return R_CANCEL;
 
+	// be success directly
+	if(ret == R_SKIP)
+		return R_SUCC;
+
+
 	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, target, pParentEvent);
 	event.pPatternOut = &pattern_out;
 

@@ -24,6 +24,8 @@ static RESULT card_bagua_out(GameContext* pGame, GameEventContext* pEvent, int p
 			return R_SUCC;
 		}
 	}
+	//else if(pEvent->id == GameEvent_PassiveOutCard && pEvent->pPatternOut->pattern)
+
 	return R_SUCC;
 }
 
