@@ -19,12 +19,20 @@
 #define strcasecmp    _stricmp
 #define strncasecmp   _strnicmp
 
-#elif defined(LINUX)
+#elif defined(linux) || defined (__linux__)
+
+#ifndef LINUX
+#define LINUX
+#endif
 
 #include <unistd.h>
 #include <iconv.h>
 
 #define OUTPUT_UTF8   1 // output message use utf-8 encoding
+
+#else
+
+#error "unknow platform!"
 
 #endif
 

@@ -388,6 +388,8 @@ int message_printf(const char* fmt, ...)
 	iconv_t  conv;
 	size_t   ulen;
 	size_t   ol;
+	char*    inbuf;
+	char*    outbuf;
 #endif
 	va_list vl;
 	size_t sz;
@@ -398,14 +400,16 @@ int message_printf(const char* fmt, ...)
 
 #ifdef OUTPUT_UTF8
 	conv = iconv_open("UTF-8", "GBK");
-	if(conv == INVALID_ICONV)
+	if(conv == (iconv_t)-1)
 	{
 		strcpy(utf8, text);
 	}
 	else
 	{
+		inbuf = text;
+		outbuf = utf8;
 		ulen = sizeof(utf8);
-		ol = iconv(conv, &text, &sz, &utf8, &ulen);
+		ol = iconv(conv, &inbuf, &sz, &outbuf, &ulen);
 		if(ol == (size_t)-1)
 		{
 			strcpy(utf8, text);
@@ -415,9 +419,9 @@ int message_printf(const char* fmt, ...)
 			sz = sizeof(utf8) - 1;
 		utf8[sz] = 0;
 	}
-	puts(utf8);
+	printf("%s", utf8);
 #else
-	puts(text);
+	printf("%s", text);
 #endif
 	va_end(vl);
 
