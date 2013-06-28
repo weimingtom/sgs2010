@@ -72,7 +72,7 @@ RESULT set_game_cur_player(GameContext* pGame, int player)
 	if(player != pGame->nCurPlayer)
 	{
 		pGame->nCurPlayer = player;
-		printf("the current player is set to [%s]\n", CUR_PLAYER(pGame)->name);
+		MSG_OUT("the current player is set to [%s]\n", CUR_PLAYER(pGame)->name);
 	}
 
 	return R_SUCC;
@@ -115,7 +115,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 	if(minsters < 1 || spies < 1 || mutineers < 1 || minsters + spies + mutineers + 1 > MAX_PLAYER_NUM)
 	{
-		printf("error player config num!\n");
+		MSG_OUT("error player config num!\n");
 		return R_E_PARAM;
 	}
 	
@@ -145,7 +145,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 	if(hcnt == 0 || hmcnt == 0)
 	{
-		printf("not any valid hero config.\n");
+		MSG_OUT("not any valid hero config.\n");
 		return R_E_FAIL;
 	}
 
@@ -157,7 +157,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	pGame->nSpyCount = spies;
 	pGame->nMutineerCount = mutineers;
 	
-	printf("new game: %d players - [%d master + %d minster + %d spy + %d mutineer]\n", pGame->nPlayerCount, 1, pGame->nMinsterCount, pGame->nSpyCount, pGame->nMutineerCount);
+	MSG_OUT("new game: %d players - [%d master + %d minster + %d spy + %d mutineer]\n", pGame->nPlayerCount, 1, pGame->nMinsterCount, pGame->nSpyCount, pGame->nMutineerCount);
 
 	// init players
 	c = 0;
@@ -202,14 +202,14 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 		while(1)
 		{
-			printf("current player [%d], identification is %s, select hero:\n", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
+			MSG_OUT("current player [%d], identification is %s, select hero:\n", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
 			for(c = 0; c < hscnt; c++)
 			{
 				pHero = get_hero_config((HeroID)hids[c]);
-				printf("  (%d) %s, %slife %d;\n", c + 1, pHero->name, pHero->isMaster ? "MASTER, ":"", pHero->life);
+				MSG_OUT("  (%d) %s, %slife %d;\n", c + 1, pHero->name, pHero->isMaster ? "MASTER, ":"", pHero->life);
 			}
 
-			printf("please select (%d-%d): ", 1, hscnt);
+			MSG_OUT("please select (%d-%d): ", 1, hscnt);
 			fflush(stdin);
 			if(1 == scanf("%d", &c) && c >= 1 && c <= hscnt)
 			{
@@ -260,7 +260,7 @@ static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
 static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 {
-	printf("the round [%d] is start, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("the round [%d] is start, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->nRoundPlayer, 0, pEvent);
@@ -275,7 +275,7 @@ static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
-	printf("enter the round [%d]  judgment phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("enter the round [%d]  judgment phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->nRoundPlayer, 0, pEvent);
@@ -337,7 +337,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		}
 		else
 		{
-			printf("card config [%d] not found!\n", stCard.id);
+			MSG_OUT("card config [%d] not found!\n", stCard.id);
 		}
 		
 		game_flush_discard_cur(pGame);
@@ -355,7 +355,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	int num;
 	GameEventContext  event;
 
-	printf("enter the round [%d]  get card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("enter the round [%d]  get card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 
 	num = 2;  // in get round init to get 2 card 
@@ -389,7 +389,7 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	GameEventContext  event;
 
-	printf("enter the round [%d]  out card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("enter the round [%d]  out card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
@@ -418,7 +418,7 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 {
 	GameEventContext  event;
 
-	printf("enter the round [%d]  discard card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("enter the round [%d]  discard card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 	// trigger round discard event
 	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->nRoundPlayer, 0, pEvent);
@@ -449,7 +449,7 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 	// trigger round end event
 	GameEventContext  event;
 
-	printf("the round [%d] is finish, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("the round [%d] is finish, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 
 	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->nRoundPlayer, 0, pEvent);
@@ -477,7 +477,7 @@ static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 
-	printf("next round: num [%d], round player is set to: %d, [%s]\n", pGame->nRoundNum, pGame->nRoundPlayer, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("next round: num [%d], round player is set to: %d, [%s]\n", pGame->nRoundNum, pGame->nRoundPlayer, ROUND_PLAYER(pGame)->name);
 
 	// set status round begin
 	pGame->status = Status_Round_Begin;

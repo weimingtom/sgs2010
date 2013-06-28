@@ -18,20 +18,20 @@ RESULT game_cmd_useskill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	if(pHero == NULL)
 	{
-		printf("skill (%d) not exist!\n", idx );
+		MSG_OUT("skill (%d) not exist!\n", idx );
 		return R_E_PARAM;
 	}
 
 	if(idx < 1 || idx > pHero->skillNum)
 	{
-		printf("invalid skill (%d) !\n", idx );
+		MSG_OUT("invalid skill (%d) !\n", idx );
 		return R_E_PARAM;
 	}
 
 
 	if(pHero->skills[idx-1].check == NULL || (*pHero->skills[idx-1].check)(pGame, NULL, pGame->nCurPlayer) != YES)
 	{
-		printf("cannot use skill '%s'!\n", pHero->skills[idx-1].name );
+		MSG_OUT("cannot use skill '%s'!\n", pHero->skills[idx-1].name );
 		return R_E_STATUS;
 	}
 

@@ -5,6 +5,7 @@
 #include "event.h"
 #include "cmd.h"
 #include "select.h"
+#include "comm.h"
 
 
 
@@ -82,7 +83,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 		if(event.result == R_CANCEL)
 		{
 			// cannot select this player as target
-			printf("The selected role cannot be as a target, please select another!\n");
+			MSG_OUT("The selected role cannot be as a target, please select another!\n");
 			continue;
 		}
 
@@ -109,7 +110,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			if(dis.base + dis.inc < dis.dis)
 			{
 				// Attack range less the distance to taget
-				printf("The selected role is out of your attack range, please select another!\n");
+				MSG_OUT("The selected role is out of your attack range, please select another!\n");
 				continue;
 			}
 		}

@@ -44,6 +44,10 @@ RESULT to_uint(const char* text, unsigned int* pv);
 RESULT to_float(const char* text, float* pv);
 
 
+int message_printf(const char* fmt, ...);
+
+#define MSG_OUT   message_printf
+
 #endif /* __COMM_H__ */
 
 

@@ -21,6 +21,10 @@
 
 #elif defined(LINUX)
 
+#include <unistd.h>
+#include <iconv.h>
+
+#define OUTPUT_UTF8   1 // output message use utf-8 encoding
 
 #endif
 

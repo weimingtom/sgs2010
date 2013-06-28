@@ -5,6 +5,7 @@
 #include "equip.h"
 #include "card.h"
 #include "player.h"
+#include "comm.h"
 
 
 
@@ -21,7 +22,7 @@ RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent
 	}
 
 
-	printf("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(pos), card_str(pCard, buf, sizeof(buf)));
+	MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(pos), card_str(pCard, buf, sizeof(buf)));
 
 	pPlayer->stEquipCard[pos] = *pCard;
 	pPlayer->stEquipCard[pos].flag = CardFlag_None;

@@ -35,15 +35,15 @@ static const PlayerConfig* select_config()
 
 	while(1)
 	{
-		printf("Please input players config: \n");
+		MSG_OUT("Please input players config: \n");
 
 		for(n = 0; n < CONFIG_SIZE; n++)
 		{
 			pConfig = &s_configs[n];
-			printf("  (%d) Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n", n+1, 
+			MSG_OUT("  (%d) Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n", n+1, 
 				pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
 		}
-		printf("$ ");
+		MSG_OUT("$ ");
 
 		n = -1;
 		scanf("%d", &n);
@@ -54,7 +54,7 @@ static const PlayerConfig* select_config()
 			break;
 		}
 
-		printf("error input select! \n");
+		MSG_OUT("error input select! \n");
 
 		fflush(stdin);
 	}
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
 	srand((int)time(NULL));
 
-	printf(PROJ_NAME" "VERSION_STR"\n");
+	MSG_OUT(PROJ_NAME" "VERSION_STR"\n");
 
 	ST_ZERO(stGameContext);
 

@@ -379,3 +379,48 @@ RESULT to_float(const char* text, float* pv)
 }
 
 
+
+int message_printf(const char* fmt, ...)
+{
+	char text[4096];
+#ifdef OUTPUT_UTF8
+	char utf8[4096*2];
+	iconv_t  conv;
+	size_t   ulen;
+	size_t   ol;
+#endif
+	va_list vl;
+	size_t sz;
+	
+	va_start(vl, fmt);
+
+	sz = vsnprintf(text, sizeof(text), fmt, vl);
+
+#ifdef OUTPUT_UTF8
+	conv = iconv_open("UTF-8", "GBK");
+	if(conv == INVALID_ICONV)
+	{
+		strcpy(utf8, text);
+	}
+	else
+	{
+		ulen = sizeof(utf8);
+		ol = iconv(conv, &text, &sz, &utf8, &ulen);
+		if(ol == (size_t)-1)
+		{
+			strcpy(utf8, text);
+		}
+		sz = sizeof(utf8) - ulen;
+		if(sz >= sizeof(utf8))
+			sz = sizeof(utf8) - 1;
+		utf8[sz] = 0;
+	}
+	puts(utf8);
+#else
+	puts(text);
+#endif
+	va_end(vl);
+
+	return (int)sz;
+}
+
