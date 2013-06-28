@@ -28,7 +28,7 @@ static RESULT jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int pl
 static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	int n;
-	if(pEvent && pEvent->id == GameEvent_PerPassiveOutCard)
+	if(pEvent->id == GameEvent_PerPassiveOutCard && pEvent->trigger == player)
 	{
 		n = 0;
 		//for(n = 0; n < pEvent->pPassiveOut->pattern.num; n++)
