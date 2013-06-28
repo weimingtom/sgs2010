@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /Gi- /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FD /GZ /c
 # SUBTRACT CPP /Fr /YX /Yc /Yu
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
 # ADD RSC /l 0x804 /d "_DEBUG"
@@ -313,6 +313,30 @@ SOURCE=..\..\src\config.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\decide.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\decide.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\discard.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\discard.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\equip.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\equip.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\event.cpp
 # End Source File
 # Begin Source File
@@ -345,6 +369,30 @@ SOURCE=..\..\src\hero.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\info.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\info.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\judge.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\judge.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\life.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\life.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\main.cpp
 # End Source File
 # Begin Source File
@@ -365,11 +413,27 @@ SOURCE=..\..\src\player.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\select.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\select.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\skill.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\skill.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\stack.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\stack.h
 # End Source File
 # End Group
 # Begin Group "include"
