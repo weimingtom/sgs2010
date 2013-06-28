@@ -5,6 +5,7 @@
 #include "card.h"
 #include "discard.h"
 #include "stack.h"
+#include "comm.h"
 
 
 RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard)
@@ -78,7 +79,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		stCard.where = where;
 		stCard.pos = pos;
 
-		printf("[%s] discard a card %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
+		MSG_OUT("[%s] discard a card %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
 
 		// event: post lost card
 

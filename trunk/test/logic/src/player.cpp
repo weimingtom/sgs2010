@@ -9,13 +9,13 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	if(id < PlayerID_Valid_Min || id > PlayerID_Valid_Max)
 	{
-		printf("init player: invalid player ID %d\n", id);
+		MSG_OUT("init player: invalid player ID %d\n", id);
 		return R_E_PARAM;
 	}
 
 	if(pHeroConfig == NULL)
 	{
-		printf("init player: invalid hero ID %d\n", hero);
+		MSG_OUT("init player: invalid hero ID %d\n", hero);
 		return R_E_FAIL;
 	}
 
@@ -50,7 +50,7 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 	pPlayer->nHandCardNum = 0;
 	pPlayer->nJudgmentCardNum = 0;
 
-	printf("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pHeroConfig->name, pPlayer->maxLife);
+	MSG_OUT("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pHeroConfig->name, pPlayer->maxLife);
 
 	return R_SUCC;
 }

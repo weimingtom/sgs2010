@@ -3,7 +3,7 @@
 #include "card.h"
 #include "stack.h"
 #include "card_stack.h"
-
+#include "comm.h"
 
 
 
@@ -31,7 +31,7 @@ static void refresh_card_stack(GameContext* pGame)
 
 	card_stack_random(&pGame->stGetCardStack);
 
-	printf("card stack refresh: count=%d\n", pGame->stGetCardStack.count);
+	MSG_OUT("card stack refresh: count=%d\n", pGame->stGetCardStack.count);
 }
 
 
@@ -47,11 +47,11 @@ RESULT game_pop_stack_card(GameContext* pGame, Card* pCard)
 
 	if(R_SUCC != card_stack_pop(&pGame->stGetCardStack, pCard))
 	{
-		printf("game_pop_stack_card:  failed! stack size=%d!\n", pGame->stGetCardStack.count);
+		MSG_OUT("game_pop_stack_card:  failed! stack size=%d!\n", pGame->stGetCardStack.count);
 		return R_E_FAIL;
 	}
 
-	//printf("player [%d] [%s] get a card, hand card count [%d].\n", pGame->nCurPlayer, pPlayer->name, pPlayer->nHandCardNum);
+	//MSG_OUT("player [%d] [%s] get a card, hand card count [%d].\n", pGame->nCurPlayer, pPlayer->name, pPlayer->nHandCardNum);
 
 	return R_SUCC;
 }

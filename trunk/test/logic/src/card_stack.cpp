@@ -143,11 +143,11 @@ void card_stack_dump(const CardStack* pCardStack)
 	int n;
 	const Card* pCard;
 	char  buffer[128];
-	printf("card stack dump: count = %d\n", pCardStack->count);
+	MSG_OUT("card stack dump: count = %d\n", pCardStack->count);
 	for(n = 0; n < pCardStack->count; n++)
 	{
 		pCard = &pCardStack->cards[pCardStack->count - n - 1];
-		printf(" [%d][%d] %s\n", n, n - pCardStack->count, card_str(pCard, buffer, sizeof(buffer)));
+		MSG_OUT(" [%d][%d] %s\n", n, n - pCardStack->count, card_str(pCard, buffer, sizeof(buffer)));
 	}
 }
 

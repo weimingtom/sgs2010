@@ -18,7 +18,7 @@ static RESULT paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int play
 	//reset attack count in this round
 	//pGame->players[player].params[0] = 0;
 	
-	//printf("please out a card 'sha' or cancel skill:");
+	//MSG_OUT("please out a card 'sha' or cancel skill:");
 	RESULT ret;
 
 	OutCardPattern pattern;

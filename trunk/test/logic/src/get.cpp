@@ -18,7 +18,7 @@ RESULT game_first_getcard(GameContext* pGame)
 	RESULT  ret;
 	Card stCard;
 
-	printf("the first time each player get 4 cards.\n");
+	MSG_OUT("the first time each player get 4 cards.\n");
 
 	player = get_game_master_player(pGame);
 
@@ -74,7 +74,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 
 		if(*pEvent->pNum != num)
 		{
-			printf("get card num error! must be %d\n", *pEvent->pNum);
+			MSG_OUT("get card num error! must be %d\n", *pEvent->pNum);
 			return R_E_PARAM;
 		}
 

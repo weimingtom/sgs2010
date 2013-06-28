@@ -179,7 +179,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 		// log
 		if(pOut->list.num == 1 && CARD_EQUAL(&pOut->list.cards[0], &pOut->vcard))
 		{
-			printf("player [%s] out a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, card_str(&pOut->list.cards[0], buf, sizeof(buf)));
+			MSG_OUT("player [%s] out a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, card_str(&pOut->list.cards[0], buf, sizeof(buf)));
 		}
 		else
 		{
@@ -189,7 +189,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				strcat(buf2, card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 			}
 
-			printf("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, pOut->list.num, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
+			MSG_OUT("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, pOut->list.num, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
@@ -226,7 +226,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				if(R_SUCC != player_remove_card(pPlayer, stCard.where, stCard.pos, NULL))
 				{
 					// after check , fail is impossible
-					printf("remove out card [%s] from player [%d] failed ", card_str(&stCard.card, buf, sizeof(buf)), pOut->supply);
+					MSG_OUT("remove out card [%s] from player [%d] failed ", card_str(&stCard.card, buf, sizeof(buf)), pOut->supply);
 					return R_E_FAIL;
 				}
 				// todo : postlostcard
@@ -248,7 +248,7 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
 			pOut->list.cards[n].flag = CardFlag_None;
 			if(R_SUCC != game_add_discard_cur(pGame, &pOut->list.cards[n]))
 			{
-				printf("add out card [%s] failed ", card_str(&pOut->list.cards[n], buf, sizeof(buf)));
+				MSG_OUT("add out card [%s] failed ", card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 				return R_E_FAIL;
 			}
 			ST_ZERO(pOut->list.cards[n]);
@@ -337,7 +337,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// must out one card
 		if(num != 1)
 		{
-			printf("only can out one card!\n");
+			MSG_OUT("only can out one card!\n");
 			return R_E_PARAM;
 		}
 
@@ -345,13 +345,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[0], &where[0], &pos[0]))
 		{
-			printf("input card idx [%d] is error!\n", idx[0]);
+			MSG_OUT("input card idx [%d] is error!\n", idx[0]);
 			return R_E_PARAM;
 		}
 
 		if(where[0] != PlayerCard_Hand)
 		{
-			printf("only can out hand card!\n");
+			MSG_OUT("only can out hand card!\n");
 			return R_E_PARAM;
 		}
 		
@@ -366,7 +366,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		if(pCardConfig == NULL || pCardConfig->check == NULL
 			|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->nCurPlayer))
 		{
-			printf("can not out this card: %s!\n", card_str(&stCard[0], buffer, sizeof(buffer)));
+			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0], buffer, sizeof(buffer)));
 			return R_E_PARAM;
 		}
 
@@ -390,7 +390,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 		if(num != pEvent->pPatternOut->pattern.num)
 		{
-			printf("out card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
+			MSG_OUT("out card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -399,13 +399,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		{
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &where[n], &pos[n]))
 			{
-				printf("input card idx [%d] is error!\n", idx[n]);
+				MSG_OUT("input card idx [%d] is error!\n", idx[n]);
 				return R_E_PARAM;
 			}
 
 			if((where[n] & pEvent->pPatternOut->pattern.where) == 0)
 			{
-				printf("card idx [%d] is invalid place!\n", idx[n]);
+				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
 				return R_E_PARAM;
 			}
 			// must success
@@ -415,7 +415,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// match pattern ?
 		if(R_SUCC != card_match(stCard, pEvent->pPatternOut->pattern.patterns, num))
 		{
-			printf("out card is not match pattern!\n");
+			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;
 		}
 		
@@ -448,7 +448,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 		if(num != pEvent->pPatternOut->pattern.num)
 		{
-			printf("supply card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
+			MSG_OUT("supply card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -457,13 +457,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		{
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &where[n], &pos[n]))
 			{
-				printf("input card idx [%d] is error!\n", idx[n]);
+				MSG_OUT("input card idx [%d] is error!\n", idx[n]);
 				return R_E_PARAM;
 			}
 
 			if((where[n] & pEvent->pPatternOut->pattern.where) == 0)
 			{
-				printf("card idx [%d] is invalid place!\n", idx[n]);
+				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
 				return R_E_PARAM;
 			}
 			// must success
@@ -473,7 +473,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// match pattern ?
 		if(R_SUCC != card_match(stCard, pEvent->pPatternOut->pattern.patterns, num))
 		{
-			printf("out card is not match pattern!\n");
+			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;
 		}
 

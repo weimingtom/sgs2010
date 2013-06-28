@@ -3,6 +3,7 @@
 #include "event.h"
 #include "player.h"
 #include "life.h"
+#include "comm.h"
 
 
 
@@ -25,9 +26,9 @@ RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, 
 	pPlayer = GAME_PLAYER(pGame, player);
 
 	if(life_inc < 0)
-		printf("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -life_inc, pPlayer->curLife, pPlayer->maxLife);
+		MSG_OUT("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -life_inc, pPlayer->curLife, pPlayer->maxLife);
 	else
-		printf("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, life_inc, pPlayer->curLife, pPlayer->maxLife);
+		MSG_OUT("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, life_inc, pPlayer->curLife, pPlayer->maxLife);
 
 	pPlayer->curLife += life_inc;
 

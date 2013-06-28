@@ -1,5 +1,6 @@
 #include "config.h"
 #include "card.h"
+#include "comm.h"
 #include "card_impl/card_impl.h"
 
 
@@ -169,7 +170,7 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen)
 void card_dump(const Card* pCard)
 {
 	char buffer[128];
-	printf("%s", card_str(pCard, buffer, sizeof(buffer)));	
+	MSG_OUT("%s", card_str(pCard, buffer, sizeof(buffer)));	
 }
 
 
