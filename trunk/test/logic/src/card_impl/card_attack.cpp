@@ -66,17 +66,6 @@ static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int 
 
 
 
-static RESULT card_attack_calc(GameContext* pGame, GameEventContext* pEvent, int player)
-{
-
-
-	return R_SUCC;
-}
-
-
-
-
-
 
 
 

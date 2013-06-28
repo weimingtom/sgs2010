@@ -45,6 +45,7 @@ const HeroConfig* get_hero_config(HeroID id)
 	case HeroID_ZhangLiao: return get_hero_zhanliao();
 	case HeroID_LuXun: return get_hero_luxun();
 	case HeroID_SunShangXiang: return get_hero_sunshangxiang();
+	default: return NULL;
 	}
 	return NULL;
 }

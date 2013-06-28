@@ -44,11 +44,6 @@ static RESULT card_medicine_out(GameContext* pGame, GameEventContext* pEvent, in
 
 
 
-static RESULT card_medicine_calc(GameContext* pGame, GameEventContext* pEvent, int player)
-{
-
-	return R_SUCC;
-}
 
 
 

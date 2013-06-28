@@ -619,7 +619,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 		memset(argv, 0, sizeof(argv));
 		while( NULL != (w = get_word(next, &next) ) )
 		{
-			if(argc < COUNT(argv))
+			if(argc < (int)COUNT(argv))
 			{
 				argv[argc++] = w;
 			}

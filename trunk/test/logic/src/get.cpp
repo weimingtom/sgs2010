@@ -130,6 +130,8 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	ret = cmd_loop(pGame, &event, buffer);
 
+	(void)ret;
+
 	return R_SUCC;
 }
 

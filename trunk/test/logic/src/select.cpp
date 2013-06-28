@@ -28,6 +28,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 
 
 	pPlayer = GAME_PLAYER(pGame, player);
+	(void)pPlayer;
 
 	idbegin = self_select == YES ? 0 : 1;
 	idcnt = 0;

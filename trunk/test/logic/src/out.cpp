@@ -167,7 +167,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 	char buf[128];
 	char buf2[512];
 	PosCard   stCard;
-	CardFlag  f;
+	//CardFlag  f;
 	Player* pPlayer = GAME_PLAYER(pGame, pOut->supply);
 	
 	if(pOut->list.num > 0)
@@ -189,7 +189,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				strcat(buf2, card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 			}
 
-			printf("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
+			printf("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, pOut->list.num, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
@@ -200,7 +200,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				stCard.card = pPlayer->stHandCards[n];
 				stCard.where = PlayerCard_Hand;
 				stCard.pos = n;
-				f = CardFlag_FromHand;
+				//f = CardFlag_FromHand;
 			}
 			else if(n < pPlayer->nHandCardNum + EquipIdx_Max)
 			{
@@ -209,14 +209,14 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				stCard.pos = n-pPlayer->nHandCardNum;
 				//if(!CARD_VALID(pCard))
 				//	continue;
-				f = CardFlag_FromEquip;
+				//f = CardFlag_FromEquip;
 			}
 			else /*if(n < pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum) */
 			{
 				stCard.card = pPlayer->stJudgmentCards[n - pPlayer->nHandCardNum - EquipIdx_Max];
 				stCard.where = PlayerCard_Judgment;
 				stCard.pos = n - pPlayer->nHandCardNum - EquipIdx_Max;
-				f = CardFlag_FromJudge;
+				//f = CardFlag_FromJudge;
 			}
 			
 			if(CARD_VALID(&stCard.card) && stCard.card.flag == CardFlag_PrepareOut)
@@ -230,7 +230,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 					return R_E_FAIL;
 				}
 				// todo : postlostcard
-				per_lost_card(pGame, pEvent, pOut->supply, &stCard);
+				post_lost_card(pGame, pEvent, pOut->supply, &stCard);
 			}
 		}
 	}
@@ -630,6 +630,7 @@ RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int 
 	}
 
 	ret = cmd_loop(pGame, &event, text);
+	(void)ret;
 
 	CHECK_RET(event.result, event.result);
 
