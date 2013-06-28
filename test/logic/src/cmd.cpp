@@ -8,6 +8,9 @@
 #include "get.h"
 #include "out.h"
 #include "skill.h"
+#include "info.h"
+#include "discard.h"
+
 
 #define MAX_PARAM_NUM   64
 #define MAX_CMD_LEN     4096

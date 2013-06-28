@@ -8,7 +8,7 @@
 #include "card.h"
 #include "get.h"
 #include "cmd.h"
-
+#include "stack.h"
 
 
 // the new game first step , all player get 4 cards
