@@ -8,7 +8,7 @@
 #include "card.h"
 //#include "hero.h"
 #include "player.h"
-
+#include "discard.h"
 
 
 static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* pOut)
@@ -246,7 +246,7 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
 		for(n = 0; n < pOut->list.num; n++)
 		{
 			pOut->list.cards[n].flag = CardFlag_None;
-			if(R_SUCC != card_stack_push(&pGame->cardOut, &pOut->list.cards[n]))
+			if(R_SUCC != game_add_discard_cur(pGame, &pOut->list.cards[n]))
 			{
 				printf("add out card [%s] failed ", card_str(&pOut->list.cards[n], buf, sizeof(buf)));
 				return R_E_FAIL;
@@ -534,7 +534,7 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pPatternOut)
 {
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PerOutCard, player, target, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerPassiveOutCard, player, target, pParentEvent);
 	event.pPatternOut = pPatternOut;
 
 	trigger_game_event(pGame, &event);
@@ -545,7 +545,7 @@ static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParent
 static RESULT post_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pPatternOut)
 {
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PostOutCard, player, target, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PostPassiveOutCard, player, target, pParentEvent);
 	event.pPatternOut = pPatternOut;
 
 	trigger_game_event(pGame, &event);

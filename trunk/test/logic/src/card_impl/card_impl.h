@@ -8,6 +8,12 @@
 #include "../event.h"
 #include "../hero.h"
 #include "../player.h"
+#include "../select.h"
+#include "../equip.h"
+#include "../decide.h"
+#include "../discard.h"
+#include "../life.h"
+#include "../get.h"
 
 
 

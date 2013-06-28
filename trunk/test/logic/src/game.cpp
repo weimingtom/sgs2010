@@ -5,6 +5,8 @@
 #include "cmd.h"
 #include "event.h"
 #include "get.h"
+#include "stack.h"
+#include "discard.h"
 
 
 //#define NEXT_ROUND(pGame)   ((pGame)->nRoundPlayer = game_next_player((pGame), (pGame)->nRoundPlayer))
@@ -98,153 +100,6 @@ int game_player_dis(GameContext* pGame, int p1, int p2)
 	return dis;
 }
 
-
-
-RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
-{
-	int n;
-	char buf[128];
-	Player* p;
-	const HeroConfig*  pHero;
-	int  idx = 1;
-
-	if(game_status(pGame) == Status_None)
-	{
-		printf("not in game!\n");
-		return R_E_STATUS;
-	}
-
-	p = CUR_PLAYER(pGame);
-	// base info
-	printf("Current Player: %d, %s, %s, life: %d/%d\n", pGame->nCurPlayer, player_id_str(p->id), p->name, p->curLife, p->maxLife);
-	// hand cards
-	printf("Hand cards (%d):\n",  p->nHandCardNum);
-	for(n = 0; n < p->nHandCardNum; n++)
-	{
-		//if(n > 0 && n % 4 == 0) printf("\n           ");
-		printf("  (%d) %s;\n", idx++, card_str(&p->stHandCards[n], buf, sizeof(buf)));
-	}
-
-	// equiped cards
-	if(p->stEquipCard[EquipIdx_Weapon].id != CardID_None)
-		printf("Weapon    : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_Armor].id != CardID_None)
-		printf("Armor     : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_HorseInc].id != CardID_None)
-		printf("Horse(+1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_HorseDec].id != CardID_None)
-		printf("Horse(-1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf)) );
-
-	// judgment cards
-	printf("Judgment cards (%d):\n",  p->nJudgmentCardNum);
-	for(n = 0; n < p->nJudgmentCardNum; n++)
-	{
-		//if(n > 0 && n % 4 == 0) printf("\n           ");
-		printf("  (%d) %s;\n", idx++, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
-	}
-
-	// skills
-
-	pHero = get_hero_config(p->hero);
-
-	if(pHero && pHero->skillNum > 0)
-	{
-		printf("Hero Skills:\n");
-		for(n = 0; n < pHero->skillNum; n++)
-		{
-			printf(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
-		}
-	}
-
-	return R_SUCC;
-}
-
-RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int player)
-{
-	int n;
-	char buf[128];
-	Player* pPlayer;
-
-	if(game_status(pGame) == Status_None)
-	{
-		printf("not in game!\n");
-		return R_E_STATUS;
-	}
-
-	pPlayer = &pGame->players[player];
-
-	printf("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", player + 1,
-		pGame->nRoundPlayer == player ? "R":"-", pGame->nCurPlayer == player  ? "C":"-",
-		game_player_dis(pGame, pGame->nCurPlayer, player),
-		player_id_str( (player == pGame->nCurPlayer || IS_PLAYER_SHOW(pPlayer) ) ? pPlayer->id : PlayerID_Unknown),
-		pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
-
-	// equiped cards
-	printf("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-	printf("    Armor : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-	printf("    Horse(+1) : %s\n", card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-	printf("    Horse(-1) : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
-
-	// judgment cards
-	printf("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
-	for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
-	{
-		//if(n > 0 && n % 4 == 0) printf("\n           ");
-		printf("      (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
-	}
-	return R_SUCC;
-}
-
-
-RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
-{
-	int n, k;
-	char buf[128];
-	Player* p;
-
-
-	if(game_status(pGame) == Status_None)
-	{
-		printf("not in game!\n");
-		return R_E_STATUS;
-	}
-
-
-	printf("game global info: \n");
-
-	printf("(*) %d players (%d+%d+%d+%d): \n", pGame->nPlayerCount, 1, pGame->nMinsterCount, pGame->nSpyCount, pGame->nMutineerCount);
-
-	for(k = 0; k < pGame->nPlayerCount; k++)
-	{
-		p = &pGame->players[k];
-
-		if(IS_PLAYER_DEAD(p) )
-			continue;
-
-		printf("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1,
-			pGame->nRoundPlayer == k ? "R":"-", pGame->nCurPlayer == k ? "C":"-",
-			game_player_dis(pGame, pGame->nCurPlayer, k),
-			player_id_str((k == pGame->nCurPlayer || IS_PLAYER_SHOW(p) ) ? p->id : PlayerID_Unknown ),
-			p->name, p->curLife, p->maxLife, p->nHandCardNum);
-
-		// equiped cards
-		printf("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-		printf("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-		printf("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-		printf("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
-
-		// judgment cards
-		printf("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
-		for(n = 0; n < p->nJudgmentCardNum; n++)
-		{
-			//if(n > 0 && n % 4 == 0) printf("\n           ");
-			printf("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
-		}
-	}
-	printf("(*) stack cards: %d\n", pGame->cardStack.count);
-	printf("(*) out   cards: %d\n", pGame->cardOut.count);
-	return R_SUCC;
-}
 
 
 RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers)
@@ -376,11 +231,13 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 	// init card stack
 
-	init_card_stack(&pGame->cardStack);
-	card_stack_random(&pGame->cardStack);
+	init_card_stack(&pGame->stGetCardStack);
+	card_stack_random(&pGame->stGetCardStack);
 
 	// clear out cards;
-	pGame->cardOut.count = 0;
+	pGame->stDiscardCardStack.count = 0;
+	ST_ZERO(pGame->stCurDiscardCards);
+	pGame->nCurDiscardCardNum = 0;
 
 
 	pGame->nRoundNum = 0;
@@ -396,55 +253,6 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 
 
-// discard all card stack cards to out stack
-static void discard_stack_card(GameContext* pGame)
-{
-	Card  card;
-	while(pGame->cardStack.count > 0)
-	{
-		card_stack_pop(&pGame->cardStack, &card);
-		card_stack_push(&pGame->cardOut, &card);
-	}
-}
-
-static void refresh_card_stack(GameContext* pGame)
-{
-	while(pGame->cardStack.count > 0)
-	{
-		discard_stack_card(pGame);
-	}
-
-	pGame->cardStack = pGame->cardOut;
-	card_stack_clear(&pGame->cardOut);
-
-	card_stack_random(&pGame->cardStack);
-
-	printf("card stack refresh: count=%d\n", pGame->cardStack.count);
-}
-
-
-
-
-// player get card
-RESULT game_pop_stack_card(GameContext* pGame, Card* pCard)
-{
-	if(card_stack_empty(&pGame->cardStack) )
-	{
-		// reflush card stack
-		refresh_card_stack(pGame);
-	}
-
-	if(R_SUCC != card_stack_pop(&pGame->cardStack, pCard))
-	{
-		printf("game_pop_stack_card:  failed! stack size=%d!\n", pGame->cardStack.count);
-		return R_E_FAIL;
-	}
-
-	//printf("player [%d] [%s] get a card, hand card count [%d].\n", pGame->nCurPlayer, pPlayer->name, pPlayer->nHandCardNum);
-
-	return R_SUCC;
-}
-
 
 
 
@@ -459,6 +267,8 @@ static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 
 
 	trigger_game_event(pGame, &event);
+
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -521,7 +331,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				else
 				{
 					// after calc discard card (default fini action)?
-					card_stack_push(&pGame->cardOut, &stCard);
+					game_add_discard_cur(pGame, &stCard);
 				}
 			}
 		}
@@ -529,6 +339,8 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		{
 			printf("card config [%d] not found!\n", stCard.id,  pGame->nRoundPlayer);
 		}
+		
+		game_flush_discard_cur(pGame);
 	}
 
 	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->nRoundPlayer, 0, pEvent);
@@ -551,6 +363,9 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	event.pNum = &num;
 	trigger_game_event(pGame, &event);
 
+	game_flush_discard_cur(pGame);
+
+
 	if(event.result == R_CANCEL)
 	{
 		// skip getcard step
@@ -559,8 +374,13 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	
 	game_round_do_get(pGame, pEvent, pGame->nRoundPlayer, num);
 
+	game_flush_discard_cur(pGame);
+
+
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
+
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -573,6 +393,7 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 
 	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	if(event.result == R_CANCEL)
 	{
@@ -583,10 +404,12 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 	while (R_SUCC == game_round_do_out(pGame, pEvent, pGame->nRoundPlayer))
 	{
 		// do nothing
+		game_flush_discard_cur(pGame);
 	}
 
 	INIT_EVENT(&event, GameEvent_PostRoundOut, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -600,6 +423,7 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	// trigger round discard event
 	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	if(event.result == R_CANCEL)
 	{
@@ -607,9 +431,15 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 		return R_SUCC;
 	}
 
+	// discard loop
+	// game_round_do_discard(pGame, pEvent, player);
+	game_flush_discard_cur(pGame);
+
+
 	// wait cmd_loop discard cmd execute
 	INIT_EVENT(&event, GameEvent_PostRoundDiscard, pGame->nRoundPlayer, 0, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -625,6 +455,7 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->nRoundPlayer, 0, pEvent);
 
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -754,279 +585,3 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 	}
 	return ret;
 }
-
-RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc)
-{
-	//RESULT ret;
-	GameEventContext   event;
-	Player* pPlayer;
-	
-	// event perlost life
-	INIT_EVENT(&event, life_inc < 0 ? GameEvent_PerLostLife: GameEvent_PerAddLife, player, 0, pParentEvent);
-	event.pNum = &life_inc;
-
-	trigger_game_event(pGame, &event);
-
-	if(event.result == R_CANCEL || life_inc == 0)
-		return R_CANCEL;
-
-	pPlayer = GAME_PLAYER(pGame, player);
-
-	if(life_inc < 0)
-		printf("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -life_inc, pPlayer->curLife, pPlayer->maxLife);
-	else
-		printf("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, life_inc, pPlayer->curLife, pPlayer->maxLife);
-
-	pPlayer->curLife += life_inc;
-
-	if(pPlayer->curLife > pPlayer->maxLife)
-		pPlayer->curLife = pPlayer->maxLife;
-	else if(pPlayer->curLife <= 0)
-	{
-		// event perdead ?
-		INIT_EVENT(&event, GameEvent_PerDead, player, 0, pParentEvent);
-		trigger_game_event(pGame, &event);
-
-		// event dead
-
-		if(pPlayer->curLife <= 0)
-		{
-			INIT_EVENT(&event, GameEvent_Dead, player, 0, pParentEvent);
-			trigger_game_event(pGame, &event);
-		}
-	}
-
-	INIT_EVENT(&event, life_inc < 0 ? GameEvent_PostLostLife: GameEvent_PostAddLife, player, 0, pParentEvent);
-	event.pNum = &life_inc;
-
-	trigger_game_event(pGame, &event);
-
-	return R_SUCC;
-}
-
-
-RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos)
-{
-	PosCard  stCard;
-	char buf[128];
-	Player* pPlayer = GAME_PLAYER(pGame, player);
-
-	// event: per lost card 
-	
-	if(R_SUCC == player_remove_card(pPlayer, where, pos, &stCard.card))
-	{
-		stCard.card.flag = CardFlag_None;
-		stCard.where = where;
-		stCard.pos = pos;
-
-		printf("[%s] discard a card %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
-
-		// event: post lost card
-
-		card_stack_push(&pGame->cardOut, &stCard.card);
-	}
-	return R_SUCC;
-}
-
-RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard)
-{
-	char buf[128];
-	Player* pPlayer = GAME_PLAYER(pGame, player);
-
-	// add event per equip card
-
-	if(CARD_VALID(&pPlayer->stEquipCard[pos]))
-	{
-		game_player_discard_card(pGame, pParentEvent, player, PlayerCard_Equip, pos);
-	}
-
-
-	printf("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(pos), card_str(pCard, buf, sizeof(buf)));
-
-	pPlayer->stEquipCard[pos] = *pCard;
-	pPlayer->stEquipCard[pos].flag = CardFlag_None;
-
-	// add event post equip card
-
-	return R_SUCC;
-}
-
-
-
-RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel,const char* alter_text, int* out_target)
-{
-	int n;
-	int t;
-	RESULT  ret;
-	AttackDis   dis;
-	GameEventContext  event;
-	Player* pPlayer; 
-	Player* pTarget;
-	int idcnt;
-	int idbegin ;
-	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
-
-	ST_ZERO(sel_opts);
-
-	set_game_cur_player(pGame,player );
-
-
-	pPlayer = GAME_PLAYER(pGame, player);
-
-	idbegin = self_select == YES ? 0 : 1;
-	idcnt = 0;
-
-	for(n = idbegin; n < pGame->nPlayerCount; n++)
-	{
-		t = (player + n) % pGame->nPlayerCount;
-		pTarget = GAME_PLAYER(pGame, t);
-		if(!IS_PLAYER_DEAD(pTarget))
-		{
-			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d", 
-				player_id_str( (t == player || IS_PLAYER_SHOW(pTarget) || IS_PLAYER_DEAD(pTarget)) ? pTarget->id : PlayerID_Unknown),
-				pTarget->name, pTarget->curLife, pTarget->maxLife, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->nHandCardNum);
-
-			snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%d", idbegin + idcnt);
-			sel_opts[idcnt].value = t;
-			idcnt++;
-		}
-	}
-
-	// 
-	if(may_cancel == YES)
-	{
-		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
-		snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
-		sel_opts[idcnt].value =  -100;
-		idcnt++;
-	}
-
-
-	while(1)
-	{
-
-		ret = select_loop(pGame, pParentEvent, sel_opts, idcnt, alter_text ? alter_text : "Select a target role:", &t);
-
-		if(ret != R_SUCC)
-			return ret;
-
-		if(idcnt == -100)
-			return R_CANCEL;
-
-
-		pTarget = GAME_PLAYER(pGame, t);
-
-
-		// can set target?
-		INIT_EVENT(&event, GameEvent_SelectTarget, player, t, pParentEvent);
-
-		trigger_game_event(pGame, &event);
-
-		if(event.result == R_CANCEL)
-		{
-			// cannot select this player as target
-			printf("The selected role cannot be as a target, please select another!\n");
-			continue;
-		}
-
-		// need check dis ?  check dist 
-		if(base_dist >= 0)
-		{
-			// calc final dist, if base_distancc is -1, means ignore distance to target
-			dis.base = base_dist;   // calc the attack range
-			dis.inc = 0;            // calc the attack range append increase
-			dis.dis = game_player_dis(pGame, player, t);   // calc the player to target's distance
-			dis.flag = 0;
-
-			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, t, pParentEvent);
-			event.pAttackDis = &dis;
-
-			// calc the skill and equip effect to target distance or attack range
-			// target effect
-			//trigger_player_event(pGame, &event, t);
-			// attacker effect
-			//trigger_player_event(pGame, &event, player);
-
-			trigger_game_event(pGame, &event);
-
-			if(dis.base + dis.inc < dis.dis)
-			{
-				// Attack range less the distance to taget
-				printf("The selected role is out of your attack range, please select another!\n");
-				continue;
-			}
-		}
-		*out_target = t;
-		return R_SUCC;
-	}
-
-	return R_E_FAIL;
-}
-
-YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text)
-{
-	int result;
-	SelOption   sel_opts[2];
-	ST_ZERO(sel_opts);
-
-	set_game_cur_player(pGame,player );
-
-
-	snprintf(sel_opts[0].text, sizeof(sel_opts[0].text),"[ Yes ]");
-	snprintf(sel_opts[0].input, sizeof(sel_opts[0].input), "y\nyes");
-	sel_opts[0].value =  YES;
-
-	snprintf(sel_opts[1].text, sizeof(sel_opts[0].text),"[ No  ]");
-	snprintf(sel_opts[1].input, sizeof(sel_opts[0].input), "n\nno");
-	sel_opts[1].value =  NO;
-
-	if(select_loop(pGame, pParentEvent, sel_opts, 2, alter_text, &result) == R_SUCC)
-		return (YESNO) result;
-
-	return NO;
-}
-
-YESNO game_decide_card(GameContext* pGame, GameEventContext* pParentEvent,int player, const CardPattern* pPattern)
-{
-	GameEventContext  event;
-	RESULT ret;
-	Card   stCard;
-
-	// GameEvent_PerDecideCard
-	INIT_EVENT(&event, GameEvent_PerDecideCard, player, 0, pParentEvent);
-
-	trigger_game_event(pGame, &event);
-
-	if(event.result == R_CANCEL)
-		return NO;
-
-	if(event.result == R_SKIP)
-		return YES;
-
-	ret = game_pop_stack_card(pGame, &stCard);
-
-	CHECK_RET(ret, NO);
-
-
-	// GameEvent_PerDecideCardCalc 
-	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, 0, pParentEvent);
-	event.pCard = &stCard;
-	trigger_game_event(pGame, &event);
-
-	ret = card_match(&stCard, pPattern, 1);
-
-	// GameEvent_PostDecideCard
-	INIT_EVENT(&event, GameEvent_PostDecideCard, player, 0, pParentEvent);
-	event.pCard = &stCard;
-	trigger_game_event(pGame, &event);
-
-
-	if(CARD_VALID(&stCard))
-	{
-		card_stack_push(&pGame->cardOut, &stCard);
-	}
-
-	return NO;
-}
-
-

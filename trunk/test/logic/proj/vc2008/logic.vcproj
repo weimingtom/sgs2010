@@ -208,6 +208,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\decide.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\decide.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\discard.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\discard.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\equip.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\equip.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\event.cpp"
 				>
 			</File>
@@ -240,6 +264,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\info.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\info.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\judge.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\judge.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\life.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\life.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\main.cpp"
 				>
 			</File>
@@ -260,11 +308,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\select.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\select.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\skill.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\skill.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\stack.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\stack.h"
 				>
 			</File>
 			<Filter

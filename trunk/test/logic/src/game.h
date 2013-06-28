@@ -7,12 +7,12 @@
 #include "card.h"
 #include "card_stack.h"
 
-
+#define MAX_CUR_DISCARD_NUM     32
 
 // foward  decalare
 typedef struct tagGameEventContext GameEventContext;
 typedef struct tagOutCard  OutCard;
-typedef struct tagPassiveOut PassiveOut;
+typedef struct tagPatternOut PatternOut;
 
 
 enum Status
@@ -37,8 +37,10 @@ struct tagGameContext
 	int        nSpyCount;
 	int        nMutineerCount;
 	Player     players[MAX_PLAYER_NUM];
-	CardStack  cardStack;
-	CardStack  cardOut;
+	CardStack  stGetCardStack;              // card stack for get card from
+	CardStack  stDiscardCardStack;          // card stack for discard card to
+	int        nCurDiscardCardNum;          // the current out discard card number
+	Card       stCurDiscardCards[MAX_CUR_DISCARD_NUM];           // ...
 	int        nRoundNum;
 	int        nRoundPlayer;
 	int        nCurPlayer;
@@ -65,17 +67,12 @@ enum GameResult
 #define GAME_PLAYER(pGame, pl)   (&(pGame)->players[(pl)])
 
 
+// game process base funs
 
 RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
-
-
-
 RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
-RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent);
-RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent);
-RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int player);
 
-
+// get game base status
 
 Status game_status(GameContext* pGame);
 int get_game_cur_player(GameContext* pGame);
@@ -87,22 +84,17 @@ int game_prev_player(GameContext* pGame, int player);
 
 RESULT set_game_cur_player(GameContext* pGame, int player);
 
+/// calc player distance to other
+
 int game_player_dis(GameContext* pGame, int p1, int p2);
 
-RESULT game_pop_stack_card(GameContext* pGame, Card* pCard);
 
 
-RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos);
-
-RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard);
-RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc);
-
-// select target process
-RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel, const char* alter_text, int* out_target);
-YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text);
 
 
-YESNO game_decide_card(GameContext* pGame, GameEventContext* pParentEvent, int player, const CardPattern* pPattern);
+
+
+
 
 
 #endif /* __GAME_H__ */
