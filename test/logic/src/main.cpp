@@ -67,7 +67,7 @@ static const PlayerConfig* select_config()
 
 int main(int argc, char** argv)
 {
-	int players = 0;
+	//int players = 0;
 	//const PlayerConfig* pConfig;
 
 	GameContext   stGameContext;

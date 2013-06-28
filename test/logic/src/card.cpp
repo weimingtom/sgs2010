@@ -142,6 +142,7 @@ const CardConfig* get_card_config(CardID id)
 	case CardID_BowQiLing: return get_card_bowqiling();
 	case CardID_BaGua: return get_card_bagua();
 	case CardID_SheildRenWang: return get_card_sheildrenwang();
+	default: return NULL;
 	}
 	return NULL;
 }

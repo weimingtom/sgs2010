@@ -337,7 +337,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		}
 		else
 		{
-			printf("card config [%d] not found!\n", stCard.id,  pGame->nRoundPlayer);
+			printf("card config [%d] not found!\n", stCard.id);
 		}
 		
 		game_flush_discard_cur(pGame);
@@ -567,6 +567,7 @@ static RESULT game_step(GameContext* pGame, GameEventContext* pEvent)
 	case Status_Round_End:
 		return game_round_end(pGame, pEvent);
 		break;
+	default: break;
 	}
 	return R_E_STATUS;
 }
