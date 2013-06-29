@@ -93,7 +93,7 @@ int game_player_dis(GameContext* pGame, int p1, int p2)
 			pn = (pn + 1) % pGame->nPlayerCount;
 		} while(pn != p2 && IS_PLAYER_DEAD(GAME_PLAYER(pGame, pn)));
 		do {
-			pp = (pn - 1 + pGame->nPlayerCount) % pGame->nPlayerCount;
+			pp = (pp - 1 + pGame->nPlayerCount) % pGame->nPlayerCount;
 		} while(pp != p2 && IS_PLAYER_DEAD(GAME_PLAYER(pGame, pp)));
 	}
 
