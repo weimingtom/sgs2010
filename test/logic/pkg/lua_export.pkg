@@ -1,0 +1,4 @@
+$cfile "../src/config.h"
+$cfile "../src/event.h"
+$cfile "../src/game.h"
+
