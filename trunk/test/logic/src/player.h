@@ -4,6 +4,14 @@
 #include "card.h"
 #include "hero.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+	
+	
+
 enum PlayerID
 {
 	PlayerID_Unknown = -1,
@@ -132,6 +140,11 @@ RESULT player_add_judge_card(Player* pPlayer, Card* pCard);
 RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
 
 YESNO is_player_handfull(Player* player);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* __PLAYER_H__ */

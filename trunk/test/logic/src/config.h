@@ -27,6 +27,8 @@
 
 #include <unistd.h>
 #include <iconv.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #define OUTPUT_UTF8   1 // output message use utf-8 encoding
 
@@ -37,11 +39,21 @@
 #endif
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"
 
+
+#define  X_REALLOC(p, sz)   realloc((p), (sz))
+#define  X_ALLOC(sz)        X_REALLOC(NULL, sz)
+#define  X_FREE(p)          X_REALLOC((p), 0)
+	
+#define  X_TALLOC(st)        (st*)X_ALLOC(sizeof(st))
+#define  X_TNALLOC(st, n)        (st*)X_ALLOC(sizeof(st) * (n))
 
 
 #define  MAX_NAME_LEN    32
@@ -74,17 +86,18 @@
 
 #define C2I(c)  ((int)(unsigned char)(c))
 
-
+// tolua_begin
 enum YESNO
 {
 	NO = 0,
 	YES = 1,
 };
-
+// tolua_end
 
 #define B2YESNO(b) ((b)?YES:NO)
 
 
+// tolua_begin
 enum RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop
@@ -105,6 +118,7 @@ enum RESULT
 	R_E_TIMEOUT = -5, // op timeout
 	R_E_OVERFLOW = -6, // overflow , 
 };
+// tolua_end
 
 
 #define IS_FAIL(res)  ((res) < 0)
@@ -113,6 +127,9 @@ enum RESULT
 #define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
 #define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

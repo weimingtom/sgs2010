@@ -6,6 +6,9 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 
@@ -17,6 +20,9 @@ RESULT game_cmd_useskill(GameContext* pGame, GameEventContext* pEvent, int idx);
 
 RESULT game_cmd_cancelskill(GameContext* pGame, GameEventContext* pEvent);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SKILL_H__ */
 

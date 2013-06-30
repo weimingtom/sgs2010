@@ -4,6 +4,9 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum HeroID
 {
@@ -87,6 +90,9 @@ const HeroConfig* get_hero_config(HeroID id);
 const char* hero_group_str(HeroGroup group);
 const char* hero_sex_str(HeroSex sex);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __HERO_H__ */
 

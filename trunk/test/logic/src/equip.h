@@ -3,6 +3,11 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct tagCard        Card;
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
@@ -12,6 +17,9 @@ RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent
 
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __EQUIP_H__ */
 

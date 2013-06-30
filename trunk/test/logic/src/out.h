@@ -6,6 +6,12 @@
 #include "config.h"
 #include "card.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+	
+	
 
 typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
@@ -74,6 +80,9 @@ RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int 
 RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const OutCardPattern* pattern, const char* alter_text);
 
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

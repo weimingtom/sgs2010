@@ -15,7 +15,7 @@
 
 
 
-Status game_status(GameContext* pGame)
+Status get_game_status(GameContext* pGame)
 {
 	return pGame->status;
 }

@@ -1,12 +1,22 @@
 #ifndef __CMD_H__
 #define __CMD_H__
 
-#include "game.h"
+#include "config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+typedef struct tagGameContext  GameContext;
+typedef struct tagGameEventContext  GameEventContext;
+
 
 #define MAX_SEL_OPTION_LEN       256
 #define MAX_SEL_INPUT_LEN        128
 
 typedef struct tagSelOption SelOption;
+
 
 struct tagSelOption
 {
@@ -27,6 +37,10 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 
 RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CMD_H__ */
 

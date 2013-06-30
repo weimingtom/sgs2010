@@ -5,6 +5,9 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
@@ -19,6 +22,9 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int player, int num);
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __GET_H__ */
 

@@ -4,6 +4,11 @@
 #include "card.h"
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #define CARD_STACK_SIZE    108
 
 typedef struct tagCardStack
@@ -33,6 +38,9 @@ RESULT card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard);
 RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard);
 
 
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif 

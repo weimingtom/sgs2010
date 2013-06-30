@@ -7,7 +7,17 @@
 #include "card.h"
 #include "card_stack.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+// tolua_begin
+
 #define MAX_CUR_DISCARD_NUM     32
+
+// tolua_end
 
 // foward  decalare
 typedef struct tagGameEventContext GameEventContext;
@@ -15,6 +25,7 @@ typedef struct tagOutCard  OutCard;
 typedef struct tagPatternOut PatternOut;
 
 
+// tolua_begin
 enum Status
 {
 	Status_None = 0, // not start game yet
@@ -26,6 +37,8 @@ enum Status
 	Status_Round_Discard,
 	Status_Round_End,
 };
+
+// tolua_end
 
 typedef struct tagGameContext GameContext;
 
@@ -48,7 +61,7 @@ struct tagGameContext
 	jmp_buf    __jb__;  // for quit a game directly
 };
 
-
+// tolua_begin
 enum GameResult
 {
 	GameResult_Invalid = -1,
@@ -60,7 +73,7 @@ enum GameResult
 	GameResult_SpyWin = 5,
 };
 
-
+// tolua_end
 
 #define ROUND_PLAYER(pGame)   (&(pGame)->players[(pGame)->nRoundPlayer])
 #define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
@@ -72,9 +85,8 @@ enum GameResult
 RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
 
-// get game base status
 
-Status game_status(GameContext* pGame);
+// get game base status
 int get_game_cur_player(GameContext* pGame);
 int get_game_round_player(GameContext* pGame);
 int get_game_master_player(GameContext* pGame);
@@ -89,9 +101,20 @@ RESULT set_game_cur_player(GameContext* pGame, int player);
 int game_player_dis(GameContext* pGame, int p1, int p2);
 
 
+// tolua_begin
+
+Status get_game_status(GameContext* pGame);
 
 
 
+// tolua_end
+
+
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 

@@ -3,6 +3,11 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct tagCard        Card;
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
@@ -23,6 +28,9 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 // discard card
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __DISCARD_H__ */
 
