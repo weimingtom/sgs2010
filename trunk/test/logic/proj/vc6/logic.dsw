@@ -3,7 +3,43 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "LuaStaticLib"="..\..\..\..\3p\lua-5.1\vcproject\LuaStaticLib.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "logic"=.\logic.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "tolualib"="..\..\..\..\3p\tolua++-1.0.93\win32\vc6\tolualib.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "toluapp"="..\..\..\..\3p\tolua++-1.0.93\win32\vc6\toluapp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
