@@ -3,6 +3,11 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
@@ -13,6 +18,9 @@ YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int 
 
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SELECT_H__ */
 

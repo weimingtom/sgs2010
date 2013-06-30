@@ -11,6 +11,62 @@
 #include "cmd.h"
 
 
+// begin lua interface implements
+
+GameEvent get_event_id(GameEventContext* pEvent)
+{
+	return pEvent->id;
+}
+
+int get_event_trigger(GameEventContext* pEvent)
+{
+	return pEvent->trigger;
+}
+
+int get_event_target(GameEventContext* pEvent)
+{
+	return pEvent->target;
+}
+
+GameEventContext*  get_parent_event(GameEventContext* pEvent)
+{
+	return pEvent->parent_event;
+}
+
+RESULT get_event_result(GameEventContext* pEvent)
+{
+	return pEvent->result;
+}
+
+
+void set_event_result(GameEventContext* pEvent, RESULT result)
+{
+	pEvent->result = result;
+}
+
+YESNO  get_event_block(GameEventContext* pEvent)
+{
+	return pEvent->block;
+}
+
+void  set_event_block(GameEventContext* pEvent, YESNO  yesno)
+{
+	pEvent->block = yesno;
+}
+
+
+Card* get_event_card(GameEventContext* pEvent)
+{
+	return pEvent->pCard;
+}
+
+void set_event_card(GameEventContext* pEvent, Card* pCard)
+{
+	*pEvent->pCard = *pCard;
+}
+
+
+// end lua interface implements
 
 
 

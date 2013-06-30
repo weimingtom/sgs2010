@@ -8,12 +8,17 @@
 #include "card.h"
 #include "out.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // foward declare
 
 typedef struct tagGameContext GameContext;
 
 
-
+// tolua_begin
 enum GameEvent
 {
 	GameEvent_None = 0,     // no
@@ -73,9 +78,10 @@ enum GameEvent
 	GameEvent_PerDecideCardCalc,
 	GameEvent_PostDecideCard,
 
-
 };
 
+
+// tolua_end
 
 // for passive out, supply out
 typedef struct tagPatternOut
@@ -152,8 +158,28 @@ struct tagGameEventContext
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
 
+// tolua_begin
+
+GameEvent get_event_id(GameEventContext* pEvent);
+int get_event_trigger(GameEventContext* pEvent);
+int get_event_target(GameEventContext* pEvent);
+GameEventContext*  get_parent_event(GameEventContext* pEvent);
+RESULT get_event_result(GameEventContext* pEvent);
+void set_event_result(GameEventContext* pEvent, RESULT result);
+YESNO  get_event_block(GameEventContext* pEvent);
+void  set_event_block(GameEventContext* pEvent, YESNO  yesno);
+
+Card* get_event_card(GameEventContext* pEvent);
+void set_event_card(GameEventContext* pEvent, Card* pCard);
+
+// ...
+
+// tolua_end
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __EVENT_H__ */
 

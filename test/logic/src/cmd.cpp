@@ -386,7 +386,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 
 static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(game_status(pContext) != Status_Round_Get)
+	if(get_game_status(pContext) != Status_Round_Get)
 	{
 		MSG_OUT("not in get status!\n");
 		return R_E_STATUS;
@@ -407,7 +407,7 @@ static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEv
 
 static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(game_status(pContext) != Status_Round_Out)
+	if(get_game_status(pContext) != Status_Round_Out)
 	{
 		MSG_OUT("not in get status!\n");
 		return R_E_STATUS;

@@ -3,6 +3,11 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef int(*COMPFUN)(const void*,const void*,void*);
 
 void fill_array_inc_i(int* array, int size, int first, int inc);
@@ -47,6 +52,11 @@ RESULT to_float(const char* text, float* pv);
 int message_printf(const char* fmt, ...);
 
 #define MSG_OUT   message_printf
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __COMM_H__ */
 

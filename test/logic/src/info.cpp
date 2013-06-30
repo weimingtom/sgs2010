@@ -12,7 +12,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	const HeroConfig*  pHero;
 	int  idx = 1;
 
-	if(game_status(pGame) == Status_None)
+	if(get_game_status(pGame) == Status_None)
 	{
 		MSG_OUT("not in game!\n");
 		return R_E_STATUS;
@@ -69,7 +69,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 	char buf[128];
 	Player* pPlayer;
 
-	if(game_status(pGame) == Status_None)
+	if(get_game_status(pGame) == Status_None)
 	{
 		MSG_OUT("not in game!\n");
 		return R_E_STATUS;
@@ -107,7 +107,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	Player* p;
 
 
-	if(game_status(pGame) == Status_None)
+	if(get_game_status(pGame) == Status_None)
 	{
 		MSG_OUT("not in game!\n");
 		return R_E_STATUS;

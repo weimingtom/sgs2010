@@ -5,6 +5,11 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 //card type
 enum CardType
 {
@@ -189,6 +194,11 @@ RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num);
 
 #define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* __CARD_H__ */
