@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="&quot;..\..\..\..\3p\lua-5.1\include&quot;;&quot;..\..\..\..\3p\tolua++-1.0.93\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,8 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libluastatic5.1d.lib libtoluappd.lib"
 				OutputFile="$(OutDir)\$(ProjectName)_d.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\3p\lua-5.1\lib&quot;;&quot;..\..\..\..\3p\tolua++-1.0.93\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -115,7 +118,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="&quot;..\..\..\..\3p\lua-5.1\include&quot;;&quot;..\..\..\..\3p\tolua++-1.0.93\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -133,7 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libluastatic5.1.lib libtoluapp.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\3p\lua-5.1\lib&quot;;&quot;..\..\..\..\3p\tolua++-1.0.93\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -305,6 +311,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\player.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\script.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\script.h"
 				>
 			</File>
 			<File
@@ -531,6 +545,42 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="pkg"
+			>
+			<File
+				RelativePath="..\..\pkg\lua_export.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkg\lua_export.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pkg\lua_export.pkg"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluappd.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
+						AdditionalDependencies="..\..\src\*.h"
+						Outputs="..\..\pkg\lua_export.cpp;..\..\pkg\lua_export.h;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluapp.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
+						AdditionalDependencies="..\..\src\*.h"
+						Outputs="..\..\pkg\lua_export.cpp;..\..\pkg\lua_export.h;"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
