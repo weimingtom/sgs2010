@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toluapp", "toluapp.vcproj", "{6C88E3BA-7BAF-40A9-A47D-E0A86192B98F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtoluapp", "libtoluapp.vcproj", "{CD48797D-C3BC-4CFC-9239-9B9AF51DDB73}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C88E3BA-7BAF-40A9-A47D-E0A86192B98F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6C88E3BA-7BAF-40A9-A47D-E0A86192B98F}.Debug|Win32.Build.0 = Debug|Win32
+		{6C88E3BA-7BAF-40A9-A47D-E0A86192B98F}.Release|Win32.ActiveCfg = Release|Win32
+		{6C88E3BA-7BAF-40A9-A47D-E0A86192B98F}.Release|Win32.Build.0 = Release|Win32
+		{CD48797D-C3BC-4CFC-9239-9B9AF51DDB73}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD48797D-C3BC-4CFC-9239-9B9AF51DDB73}.Debug|Win32.Build.0 = Debug|Win32
+		{CD48797D-C3BC-4CFC-9239-9B9AF51DDB73}.Release|Win32.ActiveCfg = Release|Win32
+		{CD48797D-C3BC-4CFC-9239-9B9AF51DDB73}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
