@@ -382,10 +382,6 @@
 				RelativePath="..\src\lzio.h"
 				>
 			</File>
-			<File
-				RelativePath="..\src\print.c"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="include"

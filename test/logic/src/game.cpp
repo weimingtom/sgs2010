@@ -586,3 +586,10 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 	}
 	return ret;
 }
+
+
+RESULT gam_main(GameContext* pGame, GameEventContext* pEvent)
+{
+	//return script_call_c(pGame->script, game_loop, pGame, pEvent, 0);
+}
+

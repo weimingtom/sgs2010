@@ -28,6 +28,11 @@ struct tagScriptHandle
 };
 
 
+struct tagScriptObjectHandle
+{
+	int ref;
+};
+
 
 script_t script_create()
 {
