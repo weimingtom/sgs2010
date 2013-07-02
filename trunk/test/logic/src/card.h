@@ -11,7 +11,7 @@ extern "C" {
 
 
 //card type
-enum CardType
+typedef enum _CardType
 {
 	CardType_Unknown = -1,
 	CardType_None = 0,
@@ -21,10 +21,10 @@ enum CardType
 	CardType_Weapon = 4,      // used when attack a target
 	CardType_HorseChase = 5,  // attack the target distance add 1 unit.
 	CardType_HorseRun = 6,    // be attacked the attacker distance dec 1 unit.
-};
+}CardType;
 
 // card identification
-enum CardID
+typedef enum _CardID
 {
 	CardID_None = 0,
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
@@ -60,10 +60,10 @@ enum CardID
 	CardID_BaGua,
 	CardID_SheildRenWang,
 	CardID_Max,
-};
+}CardID;
 
 // card color
-enum CardColor
+typedef enum _CardColor
 {
 	CardColor_Unknown = -1,      // unknown color 
 	CardColor_None = 0,          // no color 
@@ -73,10 +73,10 @@ enum CardColor
 	CardColor_Diamond = 4,
 	CardColor_GeneralBlack = 5,   // general color black. spade or club
 	CardColor_GeneralRed = 6,     // general color red Heart or Diamond
-};
+}CardColor;
 
 // card value
-enum CardValue
+typedef enum _CardValue
 {
 	CardValue_Unknown = -1,
 	CardValue_None = 0,
@@ -94,11 +94,11 @@ enum CardValue
 	CardValue_Q = 11,
 	CardValue_K = 12,
 	CardValue_A = 13,
-};
+}CardValue;
 
 
 
-enum CardFlag
+typedef enum _CardFlag
 {
 	CardFlag_None = 0,
 	CardFlag_PrepareOut = 1,   // the card prepare to out, in prepare event, cannot calc the card effect
@@ -107,10 +107,10 @@ enum CardFlag
 	CardFlag_FromHand = 11,
 	CardFlag_FromEquip = 12,
 	CardFlag_FromJudge = 13,
-};
+} CardFlag;
 
 
-enum TargetType
+typedef enum _TargetType
 {
 	Target_None,     // not need target
 	Target_Self,     // self
@@ -120,7 +120,7 @@ enum TargetType
 	Target_AnyOneIn1,   // any one role include me in distance 1
 	Target_OtherAll, // all role except me
 	Target_All,      // all role include me
-};
+}TargetType;
 
 
 typedef struct tagCard Card;

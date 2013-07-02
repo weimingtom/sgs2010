@@ -26,7 +26,7 @@ typedef struct tagPatternOut PatternOut;
 
 
 // tolua_begin
-enum Status
+typedef enum _Status
 {
 	Status_None = 0, // not start game yet
 	Status_NewGame=1, // the first time all player get card
@@ -36,7 +36,7 @@ enum Status
 	Status_Round_Out,
 	Status_Round_Discard,
 	Status_Round_End,
-};
+}Status;
 
 // tolua_end
 
@@ -62,7 +62,7 @@ struct tagGameContext
 };
 
 // tolua_begin
-enum GameResult
+typedef enum _GameResult
 {
 	GameResult_Invalid = -1,
 	GameResult_InPlaying = 0,
@@ -71,7 +71,7 @@ enum GameResult
 	GameResult_MasterWin = 3,
 	GameResult_MutineerWin = 4,
 	GameResult_SpyWin = 5,
-};
+}GameResult;
 
 // tolua_end
 

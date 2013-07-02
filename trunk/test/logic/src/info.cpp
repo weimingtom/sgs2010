@@ -4,6 +4,23 @@
 #include "comm.h"
 
 
+static const char* game_status_str(Status s)
+{
+	switch(s)
+	{
+	case Status_None: return  "不在游戏中";
+	case Status_NewGame: return  "开始新游戏";
+	case Status_Round_Begin: return  "回合开始阶段";
+	case Status_Round_Judge: return  "判定阶段";
+	case Status_Round_Get: return  "摸牌阶段";
+	case Status_Round_Out: return  "出牌阶段";
+	case Status_Round_Discard: return  "弃牌阶段";
+	case Status_Round_End: return  "回合结束阶段";
+	default: return "";
+	}
+}
+
+
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n;
@@ -19,6 +36,8 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 	p = CUR_PLAYER(pGame);
+	// round info
+	MSG_OUT("Round [%d] Playe [%s], Phase [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 	// base info
 	MSG_OUT("Current Player: %d, %s, %s, life: %d/%d\n", pGame->nCurPlayer, player_id_str(p->id), p->name, p->curLife, p->maxLife);
 	// hand cards
@@ -30,13 +49,13 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 	// equiped cards
-	if(p->stEquipCard[EquipIdx_Weapon].id != CardID_None)
+	if(CARD_VALID(&p->stEquipCard[EquipIdx_Weapon]))
 		MSG_OUT("Weapon    : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_Armor].id != CardID_None)
+	if(CARD_VALID(&p->stEquipCard[EquipIdx_Armor]))
 		MSG_OUT("Armor     : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_HorseInc].id != CardID_None)
+	if(CARD_VALID(&p->stEquipCard[EquipIdx_HorseInc]))
 		MSG_OUT("Horse(+1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf)) );
-	if(p->stEquipCard[EquipIdx_HorseDec].id != CardID_None)
+	if(CARD_VALID(&p->stEquipCard[EquipIdx_HorseDec]))
 		MSG_OUT("Horse(-1) : (%d) %s\n", idx++, card_str(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf)) );
 
 	// judgment cards
@@ -84,17 +103,21 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 		pPlayer->name, pPlayer->curLife, pPlayer->maxLife, pPlayer->nHandCardNum);
 
 	// equiped cards
-	MSG_OUT("    Weapon : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-	MSG_OUT("    Armor : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-	MSG_OUT("    Horse(+1) : %s\n", card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-	MSG_OUT("    Horse(-1) : %s\n",  card_str_def(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+	if(CARD_VALID(&pPlayer->stEquipCard[EquipIdx_Weapon]))
+		MSG_OUT("    Weapon : %s\n",  card_str(&pPlayer->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf)) );
+	if(CARD_VALID(&pPlayer->stEquipCard[EquipIdx_Armor]))
+		MSG_OUT("    Armor : %s\n",  card_str(&pPlayer->stEquipCard[EquipIdx_Armor], buf, sizeof(buf)) );
+	if(CARD_VALID(&pPlayer->stEquipCard[EquipIdx_HorseInc]))
+		MSG_OUT("    Horse(+1) : %s\n", card_str(&pPlayer->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf)) );
+	if(CARD_VALID(&pPlayer->stEquipCard[EquipIdx_HorseDec]))
+		MSG_OUT("    Horse(-1) : %s\n",  card_str(&pPlayer->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf)) );
 
 	// judgment cards
-	MSG_OUT("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
+	//MSG_OUT("    Judgment cards (%d):\n",  pPlayer->nJudgmentCardNum);
 	for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
 	{
 		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-		MSG_OUT("      (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
+		MSG_OUT("    Judgment cards: (%d) %s;\n", n+1, card_str(&pPlayer->stJudgmentCards[n], buf, sizeof(buf)));
 	}
 	return R_SUCC;
 }
@@ -114,8 +137,10 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 
-	MSG_OUT("game global info: \n");
+	// round info
+	MSG_OUT("Round [%d] Playe [%s], Phase [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 
+	// all players
 	MSG_OUT("(*) %d players (%d+%d+%d+%d): \n", pGame->nPlayerCount, 1, pGame->nMinsterCount, pGame->nSpyCount, pGame->nMutineerCount);
 
 	for(k = 0; k < pGame->nPlayerCount; k++)
@@ -148,6 +173,9 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("(*) stack   cards: %d\n", pGame->stGetCardStack.count);
 	MSG_OUT("(*) discard cards: %d\n", pGame->stDiscardCardStack.count);
 	MSG_OUT("(*) cur dis cards: %d\n", pGame->nCurDiscardCardNum);
+
+	// [RoleName] Out Cards: [(card str) (card str)] from [RoleName] As (card str)
+	// [RoleName] Passive Out: [(card str) (card str)] from [RoleName] As (card str) 
 	return R_SUCC;
 }
 

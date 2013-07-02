@@ -25,12 +25,12 @@ RESULT game_player_add_life(GameContext* pGame, GameEventContext* pParentEvent, 
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
+	pPlayer->curLife += life_inc;
+
 	if(life_inc < 0)
 		MSG_OUT("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -life_inc, pPlayer->curLife, pPlayer->maxLife);
 	else
 		MSG_OUT("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, life_inc, pPlayer->curLife, pPlayer->maxLife);
-
-	pPlayer->curLife += life_inc;
 
 	if(pPlayer->curLife > pPlayer->maxLife)
 		pPlayer->curLife = pPlayer->maxLife;
