@@ -50,7 +50,7 @@ extern "C" {
 
 #define  X_REALLOC(p, sz)   realloc((p), (sz))
 #define  X_ALLOC(sz)        X_REALLOC(NULL, sz)
-#define  X_FREE(p)          X_REALLOC((p), 0)
+#define  X_FREE(p)          (void)free((p))
 	
 #define  X_TALLOC(st)        (st*)X_ALLOC(sizeof(st))
 #define  X_TNALLOC(st, n)        (st*)X_ALLOC(sizeof(st) * (n))
@@ -87,18 +87,18 @@ extern "C" {
 #define C2I(c)  ((int)(unsigned char)(c))
 
 // tolua_begin
-enum YESNO
+typedef enum _YESNO
 {
 	NO = 0,
 	YES = 1,
-};
+} YESNO;
 // tolua_end
 
 #define B2YESNO(b) ((b)?YES:NO)
 
 
 // tolua_begin
-enum RESULT
+typedef enum _RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop
 	R_DEF   = 1,   // do default proc and continue loop
@@ -117,7 +117,7 @@ enum RESULT
 	R_E_STATUS = -4,  // error status
 	R_E_TIMEOUT = -5, // op timeout
 	R_E_OVERFLOW = -6, // overflow , 
-};
+} RESULT;
 // tolua_end
 
 

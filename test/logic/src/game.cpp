@@ -253,12 +253,11 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 
 
+extern "C" {
 
+static  RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
-
-static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
-
-static RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
+static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 {
 	MSG_OUT("the round [%d] is start, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
@@ -572,6 +571,9 @@ static RESULT game_step(GameContext* pGame, GameEventContext* pEvent)
 	return R_E_STATUS;
 }
 
+
+}
+
 // 
 RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -588,8 +590,14 @@ RESULT game_loop(GameContext* pGame, GameEventContext* pEvent)
 }
 
 
-RESULT gam_main(GameContext* pGame, GameEventContext* pEvent)
+extern "C" {
+
+RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 {
 	//return script_call_c(pGame->script, game_loop, pGame, pEvent, 0);
+return R_SUCC;
+}
+
+
 }
 

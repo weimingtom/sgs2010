@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-enum HeroID
+typedef enum _HeroID
 {
 	HeroID_None = 0,
 	HeroID_CaoCao = 1,
@@ -27,31 +27,31 @@ enum HeroID
 
 	HeroID_Max,
 
-};
+}HeroID;
 
 
-enum HeroSex
+typedef enum _HeroSex
 {
 	HeroSex_None = 0,
 	HeroSex_Male = 1,
 	HeroSex_Female = 2,
-};
+}HeroSex;
 
-enum HeroGroup
+typedef enum _HeroGroup
 {
 	HeroGroup_None = 0,
 	HeroGroup_Wei,
 	HeroGroup_Shu,
 	HeroGroup_Wu,
 	HeroGroup_People,
-};
+}HeroGroup;
 
-enum SkillFlag
+typedef enum _SkillFlag
 {
 	SkillFlag_None = 0,    
 	SkillFlag_Passive = 1, // 锁定技
 	SkillFlag_Master = 2,  // 主公技
-};
+}SkillFlag;
 
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;

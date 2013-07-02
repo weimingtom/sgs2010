@@ -1,4 +1,4 @@
-// hero_impl.h
+/* hero_impl.h */
 
 
 #ifndef __HERO_IMPL_H__
@@ -13,6 +13,9 @@
 #include "../player.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 
@@ -31,6 +34,9 @@ extern const HeroConfig* get_hero_sunshangxiang();
 
 
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

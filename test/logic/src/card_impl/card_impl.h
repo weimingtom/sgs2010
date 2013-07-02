@@ -16,6 +16,9 @@
 #include "../get.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 extern const CardConfig* get_card_attack();
@@ -51,6 +54,9 @@ extern const CardConfig* get_card_bowqiling();
 extern const CardConfig* get_card_bagua();
 extern const CardConfig* get_card_sheildrenwang();
 
+#ifdef __cplusplus
+}
+#endif
 
 
 
