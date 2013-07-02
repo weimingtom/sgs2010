@@ -49,6 +49,8 @@ RESULT to_uint(const char* text, unsigned int* pv);
 RESULT to_float(const char* text, float* pv);
 
 
+void log_text(const char* fmt, ...);
+
 int message_printf(const char* fmt, ...);
 
 #define MSG_OUT   message_printf
