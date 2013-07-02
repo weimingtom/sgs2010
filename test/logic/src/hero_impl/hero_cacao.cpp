@@ -52,9 +52,11 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 
 	// the event must be GameEvent_PerPassiveOutCard
 
+	nextplayer = player;
+
 	for(n = 1; n < pGame->nPlayerCount; n++)
 	{
-		nextplayer = (player + 1) % pGame->nPlayerCount;
+		nextplayer = (nextplayer + 1) % pGame->nPlayerCount;
 
 		pHero = get_hero_config(pGame->players[nextplayer].hero);
 

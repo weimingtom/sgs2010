@@ -71,14 +71,14 @@ static char* get_word(char* cmd, char** next)
 }
 
 
-static char* get_line(char* buf, int size)
+static char* get_line(const char* prompt, char* buf, int size)
 {
 	int n,c;
 
 
 	fflush(stdin);
 
-	MSG_OUT("$ ");
+	MSG_OUT("%s", prompt);
 
 	for(n = 0; n < size-1; n++)
 	{
@@ -604,6 +604,7 @@ static void cmd_help_i(const char* cmd)
 
 RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* strAlter)
 {
+	char  prompt[MAX_NAME_LEN + 10];
 	char  cmdline[MAX_CMD_LEN];
 	const char*  argv[MAX_PARAM_NUM];
 	int   argc;
@@ -611,8 +612,17 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 	int   n;
 	RESULT   ret;
 
+	if(get_game_status(pContext) == Status_None)
+	{
+		snprintf(prompt, sizeof(prompt), "[SGS2010] $ ");
+	}
+	else
+	{
+		snprintf(prompt, sizeof(prompt), "[%s] $ ", CUR_PLAYER(pContext)->name);
+	}
+
 	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0), 
-		get_line(cmdline, sizeof(cmdline)))
+		get_line(prompt, cmdline, sizeof(cmdline)))
 	{
 		next =  cmdline;
 		argc = 0;
@@ -750,7 +760,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		MSG_OUT("input select: ");
+		MSG_OUT("[input select] : ");
 
 		fflush(stdin);
 

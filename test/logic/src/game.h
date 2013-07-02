@@ -85,6 +85,8 @@ typedef enum _GameResult
 RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
 RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
 
+RESULT game_save(GameContext* pGame, const char* file_name);
+RESULT game_load(GameContext* pGame, const char* file_name);
 
 // get game base status
 int get_game_cur_player(GameContext* pGame);

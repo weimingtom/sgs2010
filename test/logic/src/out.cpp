@@ -629,7 +629,7 @@ RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int 
 		alter_text = text;
 	}
 
-	ret = cmd_loop(pGame, &event, text);
+	ret = cmd_loop(pGame, &event, alter_text);
 	(void)ret;
 
 	CHECK_RET(event.result, event.result);
