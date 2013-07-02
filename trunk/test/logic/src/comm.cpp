@@ -378,6 +378,10 @@ RESULT to_float(const char* text, float* pv)
 
 }
 
+void log_text(const char* fmt, ...)
+{
+
+}
 
 
 int message_printf(const char* fmt, ...)

@@ -111,6 +111,9 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	int hmcnt;
 	int hscnt;
 	const HeroConfig* pHero;
+	char        title[512];
+	SelOption   sel_opts[5];
+	int         sel_n;
 
 
 	if(minsters < 1 || spies < 1 || mutineers < 1 || minsters + spies + mutineers + 1 > MAX_PLAYER_NUM)
@@ -200,21 +203,27 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 			hscnt = MIN(3, hcnt);
 		}
 
-		while(1)
+		//while(1)
 		{
-			MSG_OUT("current player [%d], identification is %s, select hero:\n", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
+			snprintf(title, sizeof(title), "current player [%d], identification is %s, select hero:\n", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
+			sel_n = 0;
+			ST_ZERO(sel_opts);
 			for(c = 0; c < hscnt; c++)
 			{
 				pHero = get_hero_config((HeroID)hids[c]);
-				MSG_OUT("  (%d) %s, %slife %d;\n", c + 1, pHero->name, pHero->isMaster ? "MASTER, ":"", pHero->life);
+				snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %smax life %d", pHero->name, pHero->isMaster ? "[Ö÷¹«], ":"", pHero->life);
+				sel_opts[sel_n].value = c+1;
+				sel_n++;
 			}
 
-			MSG_OUT("please select (%d-%d): ", 1, hscnt);
-			fflush(stdin);
-			if(1 == scanf("%d", &c) && c >= 1 && c <= hscnt)
-			{
-				break;
-			}
+			//MSG_OUT("please select (%d-%d): ", 1, hscnt);
+			//fflush(stdin);
+			//if(1 == scanf("%d", &c) && c >= 1 && c <= hscnt)
+			//{
+			//	break;
+			//}
+			if(R_SUCC != select_loop(pGame, NULL, sel_opts, sel_n, title, &c))
+				return R_E_FAIL;
 
 		}
 		init_player(&pGame->players[pGame->nCurPlayer], (PlayerID)pids[pGame->nCurPlayer], (HeroID)hids[c-1]);
