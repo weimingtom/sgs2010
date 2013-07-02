@@ -604,9 +604,29 @@ extern "C" {
 RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 {
 	//return script_call_c(pGame->script, game_loop, pGame, pEvent, 0);
-return R_SUCC;
+	return R_SUCC;
 }
 
 
 }
+
+
+
+
+RESULT game_save(GameContext* pGame, const char* file_name)
+{
+	FILE* file;
+
+	return R_SUCC;
+}
+
+
+RESULT game_load(GameContext* pGame, const char* file_name)
+{
+	FILE* file;
+
+	return R_SUCC;
+}
+
+
 
