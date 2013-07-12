@@ -413,7 +413,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(stCard, pEvent->pPatternOut->pattern.patterns, num))
+		if(R_SUCC != card_match(stCard, num, pEvent->pPatternOut->pattern.patterns, pEvent->pPatternOut->pattern.num))
 		{
 			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;
@@ -471,7 +471,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(stCard, pEvent->pPatternOut->pattern.patterns, num))
+		if(R_SUCC != card_match(stCard, num, pEvent->pPatternOut->pattern.patterns, pEvent->pPatternOut->pattern.num))
 		{
 			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;

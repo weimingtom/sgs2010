@@ -205,7 +205,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 		//while(1)
 		{
-			snprintf(title, sizeof(title), "current player [%d], identification is %s, select hero:\n", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
+			snprintf(title, sizeof(title), "current player [%d], identification is %s, select hero:", pGame->nCurPlayer, player_id_str((PlayerID)pids[pGame->nCurPlayer]));
 			sel_n = 0;
 			ST_ZERO(sel_opts);
 			for(c = 0; c < hscnt; c++)
@@ -608,14 +608,168 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 }
 
 
+
+}
+
+
+#define TAB_N(n)   ("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+(((n)<16)?(16-(n)):0))
+
+static int fprintf_tab(FILE* pf, int tabs, const char* fmt, ...) __ATTR_FMT__(printf,3,4);
+
+static int fprintf_tab(FILE* pf, int tabs, const char* fmt, ...) 
+{
+	int n;
+	va_list vl;
+	while(tabs-->0) { fputc('\t', pf); }
+	va_start(vl, fmt);
+	n = vfprintf(pf, fmt, vl); 
+	va_end(vl);
+	return n + tabs;
+}
+
+static void game_save_card(Card* pCard, FILE* file, int tabs)
+{
+	fprintf_tab(file, tabs, "id = %d,\n", pCard->id);
+	fprintf_tab(file, tabs, "color = %d,\n", pCard->color);
+	fprintf_tab(file, tabs, "value = %d,\n", pCard->value);
+	fprintf_tab(file, tabs, "flag = %d,\n", pCard->flag);
+
+}
+
+
+static void game_save_cardstack(CardStack* pCardStack, FILE* file, int tabs)
+{
+	int n;
+	fprintf_tab(file, tabs, "count = %d,\n", pCardStack->count);
+
+	fprintf_tab(file, tabs, "cards = {\n");
+	for(n = 0; n < pCardStack->count; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+		game_save_card(&pCardStack->cards[n], file, tabs+2);
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+	fprintf_tab(file, tabs, "},\n");
 }
 
 
 
+static void game_save_player(Player* pPlayer, FILE* file, int tabs)
+{
+	int n;
+	fprintf_tab(file, tabs, "id = %d,\n", pPlayer->id);
+	fprintf_tab(file, tabs, "hero = %d,\n", pPlayer->hero);
+	fprintf_tab(file, tabs, "maxLife = %d,\n", pPlayer->maxLife);
+	fprintf_tab(file, tabs, "curLife = %d,\n", pPlayer->curLife);
+	fprintf_tab(file, tabs, "name = \'%s\',\n", pPlayer->name);
+	fprintf_tab(file, tabs, "nHandCardNum = %d,\n", pPlayer->nHandCardNum);
+	fprintf_tab(file, tabs, "nJudgmentCardNum = %d,\n", pPlayer->nJudgmentCardNum);
 
+	fprintf_tab(file, tabs, "stHandCards = {\n");
+	for(n = 0; n < pPlayer->nHandCardNum; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+		game_save_card(&pPlayer->stHandCards[n], file, tabs+2);
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+	fprintf_tab(file, tabs, "},\n");
+
+
+	fprintf_tab(file, tabs, "stEquipCard = {\n");
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+		game_save_card(&pPlayer->stEquipCard[n], file, tabs+2);
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "stJudgmentCards = {\n");
+	for(n = 0; n < pPlayer->nJudgmentCardNum; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+		game_save_card(&pPlayer->stJudgmentCards[n], file, tabs+2);
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "status = %d,\n", pPlayer->status);
+	fprintf_tab(file, tabs, "flag = %d,\n", pPlayer->flag);
+
+	fprintf_tab(file, tabs, "params = {\n");
+	for(n = 0; n < MAX_PLAYER_PARAM; n++)
+	{
+		fprintf_tab(file, tabs+1, "%d,\n", pPlayer->params[n]);
+	}
+	fprintf_tab(file, tabs, "},\n");
+}
+
+
+// save game context to file
 RESULT game_save(GameContext* pGame, const char* file_name)
 {
+	int n;
+	int tabs;
 	FILE* file;
+
+	file = fopen(file_name, "wb");
+
+	if(file == NULL)
+	{
+		MSG_OUT("open file \"%s\" failed: (%d) %s\n", file_name, errno, strerror(errno));
+		return R_E_FAIL;
+	}
+
+	tabs = 1;
+
+	fprintf_tab(file, 0, "{\n");
+	fprintf_tab(file, tabs, "nPlayerCount = %d,\n", pGame->nPlayerCount);
+	fprintf_tab(file, tabs, "nMinsterCount = %d,\n", pGame->nMinsterCount);
+	fprintf_tab(file, tabs, "nSpyCount = %d,\n", pGame->nSpyCount);
+	fprintf_tab(file ,tabs, "nMutineerCount = %d,\n", pGame->nMutineerCount);
+	fprintf_tab(file, tabs, "players = {\n");
+
+	for(n = 0; n < pGame->nPlayerCount; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+
+		game_save_player(&pGame->players[n], file, tabs+2);
+		
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "stGetCardStack = {\n");
+	game_save_cardstack(&pGame->stGetCardStack, file, tabs+1);
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "stDiscardCardStack = {\n");
+	game_save_cardstack(&pGame->stDiscardCardStack, file,  tabs+1);
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "nCurDiscardCardNum = %d,\n", pGame->nCurDiscardCardNum);
+
+	fprintf_tab(file, tabs, "stCurDiscardCards = {\n");
+	for(n = 0; n < pGame->nCurDiscardCardNum; n++)
+	{
+		fprintf_tab(file, tabs+1, "{\n");
+
+		game_save_card(&pGame->stCurDiscardCards[n], file, tabs+2);
+
+		fprintf_tab(file, tabs+1, "},\n");
+	}
+	fprintf_tab(file, tabs, "},\n");
+
+	fprintf_tab(file, tabs, "nRoundNum = %d,\n", pGame->nRoundNum);
+	fprintf_tab(file, tabs, "nRoundPlayer = %d,\n", pGame->nRoundPlayer);
+	fprintf_tab(file, tabs, "nCurPlayer = %d,\n", pGame->nCurPlayer);
+	fprintf_tab(file, tabs, "status = %d,\n", pGame->status);
+
+
+	fprintf_tab(file, 0, "},\n");
+
+	fclose(file);
 
 	return R_SUCC;
 }
@@ -625,6 +779,16 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 {
 	FILE* file;
 
+	file = fopen(file_name, "rb");
+
+	if(file == NULL)
+	{
+		MSG_OUT("open file \"%s\" failed: (%d) %s\n", file_name, errno, strerror(errno));
+		return R_E_FAIL;
+	}
+
+
+	fclose(file);
 	return R_SUCC;
 }
 

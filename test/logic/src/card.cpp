@@ -271,22 +271,25 @@ static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)
 	return R_SUCC;
 }
 
-RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
+RESULT card_match(const Card* pCard,  int nCardNum, const CardPattern* pPattern, int nPatternNum)
 {
 	int n, m, p;
 	int index [MAX_CARD_LIST_NUM];
 
 	// too many card
-	if(num > MAX_CARD_LIST_NUM)
+	if(nPatternNum > MAX_CARD_LIST_NUM)
 		return R_E_PARAM;
+
+	if(nCardNum > nPatternNum)
+		return R_E_FAIL;
 
 	// fill_array_inc_i(index, num, 0, 1);
 
 
-	for(n = 0; n < num; /*n++*/)
+	for(n = 0; n < nCardNum; /*n++*/)
 	{
-		// calc first index[n] = ?
-		for(m = 0; m < num; m++)
+		// Calc. first index[n] = ?
+		for(m = 0; m < nPatternNum; m++)
 		{
 			// first not used index
 			for(p = 0; p < n; p++)
@@ -310,7 +313,7 @@ RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
 			for(; n >= 0; n--)
 			{
 				// calc next index[n]
-				for(m = index[n] + 1; m < num; m++)
+				for(m = index[n] + 1; m < nPatternNum; m++)
 				{
 					// first not used index
 					for(p = 0; p < n; p++)
@@ -324,7 +327,7 @@ RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
 						break;
 					}
 				}
-				if(m < num)
+				if(m < nPatternNum)
 				{
 					break;
 				}
@@ -345,7 +348,7 @@ RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num)
 		n++;
 	}
 
-	return n == num ? R_SUCC : R_E_FAIL;
+	return n == nCardNum ? R_SUCC : R_E_FAIL;
 }
 
 

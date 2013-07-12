@@ -73,8 +73,8 @@ static char* get_word(char* cmd, char** next)
 
 static char* get_line(const char* prompt, char* buf, int size)
 {
+#ifdef WIN32
 	int n,c;
-
 
 	fflush(stdin);
 
@@ -99,6 +99,21 @@ static char* get_line(const char* prompt, char* buf, int size)
 		}
 	}
 	buf[n] = 0;
+
+#elif defined(LINUX)
+	char*   sl;
+
+	MSG_OUT("%s", prompt);
+
+	sl = readline(NULL);
+
+	add_history(sl);
+
+	strncpy(buf, sl, size);
+#endif
+
+	log_text(buf);
+
 	return buf;
 }
 
@@ -502,6 +517,63 @@ static RESULT cmd_pass(const char** argv, int argc, GameContext* pContext, GameE
 	//return CMD_RET_SUCC;
 }
 
+
+static RESULT cmd_save(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	if(pContext->status == Status_None)
+	{
+		MSG_OUT("not in game!\n");
+		return R_E_STATUS;
+	}
+
+	if(argc != 2)
+	{
+		param_error(argv[0]);
+		return R_E_PARAM;
+	}
+
+
+	return game_save(pContext, argv[1]);
+
+	return R_E_FAIL;
+}
+
+static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	RESULT ret;
+	if(pContext->status != Status_None)
+	{
+		MSG_OUT("already in game!\n");
+		return R_E_STATUS;
+	}
+
+	if(argc != 2)
+	{
+		param_error(argv[0]);
+		return R_E_PARAM;
+	}
+	
+	ret = game_load(pContext, argv[1]);
+	
+	if(R_SUCC != ret)
+	{
+		return ret;
+	}
+
+	// game loop
+	ret = (RESULT)setjmp( pContext->__jb__);
+
+	if(ret == 0)
+	{
+		ret = game_loop(pContext, pEvent);
+		//ret = CMD_RET_SUCC;
+	}
+
+	// print game result
+	return ret;
+}
+
+
 typedef RESULT (*FunCmd)(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent);
 
 
@@ -553,6 +625,12 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		NULL},
 	{ "pass", "p", cmd_pass,
 		"pass/p\n\tno out card, so pass this round.", 
+		NULL},
+	{ "save", NULL, cmd_save,
+		"save <file_name>\n\tsave current game context to file.", 
+		NULL},
+	{ "load", NULL, cmd_load,
+		"load <file_name>\n\tload current game context from file.", 
 		NULL},
 };
 
