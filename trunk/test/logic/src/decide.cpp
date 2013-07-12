@@ -35,7 +35,7 @@ YESNO game_decide_card(GameContext* pGame, GameEventContext* pParentEvent,int pl
 	event.pCard = &stCard;
 	trigger_game_event(pGame, &event);
 
-	ret = card_match(&stCard, pPattern, 1);
+	ret = card_match(&stCard, 1, pPattern, 1);
 
 	// GameEvent_PostDecideCard
 	INIT_EVENT(&event, GameEvent_PostDecideCard, player, 0, pParentEvent);

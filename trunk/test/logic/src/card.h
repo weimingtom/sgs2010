@@ -190,7 +190,7 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
 
-RESULT card_match(const Card* pCard, const CardPattern* pPattern, int num);
+RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
 
 #define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);

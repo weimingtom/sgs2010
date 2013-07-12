@@ -10,6 +10,7 @@
 #include <malloc.h>
 #include <stdarg.h>
 #include <setjmp.h>
+#include <errno.h>
 
 #ifdef WIN32
 
@@ -18,6 +19,8 @@
 #define vsnprintf     _vsnprintf
 #define strcasecmp    _stricmp
 #define strncasecmp   _strnicmp
+
+#define __ATTR_FMT__(f,m,n)
 
 #elif defined(linux) || defined (__linux__)
 
@@ -31,6 +34,10 @@
 #include <readline/history.h>
 
 #define OUTPUT_UTF8   1 // output message use utf-8 encoding
+
+
+#define __ATTR_FMT__(f,m,n)   __attribute__((format(f,m,n)));
+
 
 #else
 
