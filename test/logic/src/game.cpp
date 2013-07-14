@@ -7,6 +7,7 @@
 #include "get.h"
 #include "stack.h"
 #include "discard.h"
+#include "../pkg/lua_export.h"
 
 
 //#define NEXT_ROUND(pGame)   ((pGame)->nRoundPlayer = game_next_player((pGame), (pGame)->nRoundPlayer))
@@ -612,10 +613,58 @@ static int lua_game_main(lua_State* L)
 	return 1;
 }
 
+#define REPLACE_CHAR(str, chfrom, chto)  do { while(*(str)) { if(*(str) == (chfrom) ) { *(str) = (chto); } str++; } } while(0)
+
+char* get_app_path(char*  buf, int buflen)
+{
+	char*  last_sls;
+#ifdef WIN32
+	GetModuleFileName(NULL, buf, buflen);
+#elif defined(LINUX)
+	readlink("/proc/self/exe", buf, buflen);
+#endif
+	last_sls = buf;
+	REPLACE_CHAR(last_sls, '\\', '/');
+
+	last_sls = strrchr(buf, '/');
+	if(last_sls) 
+		*last_sls = '\0';
+
+	return buf;
+}
+
+RESULT game_main_prepare(lua_State* L)
+{
+	int   state;
+	char  base_path[MAX_PATH];
+
+	// load lua base libraries
+	luaL_openlibs(L);
+	// load game core libraries
+	tolua_game_open(L);
+	
+	// load lua files
+	lua_pushstring(L, get_app_path(base_path, sizeof(base_path)));
+	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
+	lua_getglobal(L, "import");
+	lua_pushstring(L, "./script/main.lua");
+	state = lua_pcall(L, 1, 0, 0);
+	if(state != 0)
+	{
+		MSG_OUT("%s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+		return R_ABORT;
+	}
+	
+	lua_pushnil(L);
+	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
+
+	return R_SUCC;
+}
 
 RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 {
-	int state;
+	int     state;
 	RESULT  ret;
 	lua_State* L;
 
@@ -624,41 +673,53 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 	if(L == NULL)
 	{
 		MSG_OUT("Create lua script engine for game logic failed!\n");
-		return R_E_FAIL;
+		return R_ABORT;
 	}
 
-	pGame->L = L;
+	do{
 
-	lua_pushcfunction(L, lua_game_main);
-	lua_pushlightuserdata(L, pGame);
-	lua_pushlightuserdata(L, pEvent);
+		ret = game_main_prepare(L);
+		if(ret != R_SUCC)
+		{
+			ret = R_ABORT;
+			break;
+		}
 
-	state = lua_pcall(L, 2, 1, 0);
 
-	if(state != 0)
-	{
-		MSG_OUT("%s\n", lua_tostring(L, -1));
-		ret = R_ABORT;
-	}
-	else
-	{
+		pGame->L = L;
+
+		lua_pushcfunction(L, lua_game_main);
+		lua_pushlightuserdata(L, pGame);
+		lua_pushlightuserdata(L, pEvent);
+
+		state = lua_pcall(L, 2, 1, 0);
+
+		if(state != 0)
+		{
+			MSG_OUT("%s\n", lua_tostring(L, -1));
+			lua_pop(L, 1);
+			ret = R_ABORT;
+			break;
+		}
+
+
 		ret = (RESULT)lua_tointeger(L, -1);
+
+		lua_pop(L, 1);
 	}
-
-	lua_pop(L, 1);
-
-
-// 	ret = (RESULT)setjmp(pGame->__jb__);
-// 	if(ret== 0)
-// 	{
-// 		ret = game_loop(pGame, pEvent);
-// 	}
+	while(0);
 
 	pGame->L = NULL;
 
 	memset(pGame, 0, sizeof(*pGame));
 
 	lua_close(L);
+
+	// 	ret = (RESULT)setjmp(pGame->__jb__);
+	// 	if(ret== 0)
+	// 	{
+	// 		ret = game_loop(pGame, pEvent);
+	// 	}
 
 	return ret;
 }
@@ -1092,5 +1153,100 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	return R_SUCC;
 }
 
+
+static int file_name_cmp(lua_State* L)
+{
+	int ret;
+	const char*  f1 = luaL_optstring(L, 1, "");
+	const char*  f2 = luaL_optstring(L, 2, "");
+	ret = stricmp(f1, f2);
+	lua_pushnumber(L, ret);
+	return 1;
+}
+
+void game_import_file(lua_State* L, const char* pattern)
+{
+	struct _finddata_t  fdata;
+	long fid;
+	const char* path;
+	int  n;
+
+	lua_getfield(L, LUA_REGISTRYINDEX, "__import_path");
+
+	if(lua_isnil(L, -1))
+	{
+		luaL_error(L, "import call only while importing lua files");
+		return;
+	}
+
+	path = lua_tostring(L, -1);
+
+
+
+	path = pattern;
+	
+	fid = _findfirst(path, &fdata);
+
+	if(fid == -1)
+	{
+		luaL_error(L, "(%d) %s", errno, strerror(errno));
+		return;
+	}
+
+	lua_newtable(L);   // ... [t]
+	n = 1;	
+
+	do {
+		MSG_OUT("%s\n", fdata.name);
+		lua_pushnumber(L, n);   // ... [t] [n]
+		lua_pushstring(L, fdata.name);   // ... [t] [n] [fdata.name]
+		lua_rawset(L, -3);      // ... [t]
+		n++;
+	} while(0 == _findnext(fid, &fdata));
+
+	_findclose(fid);	
+
+	//call table.sort
+	lua_getglobal(L, "table");   // ... [t] [table]
+	lua_getfield(L, -1, "sort"); // ... [t] [table] [table.sort]
+	lua_pushvalue(L, -3);       
+	lua_pushcfunction(L, file_name_cmp);   // ... [t] [table] [table.sort] [t] [file_name_cmp]
+	lua_call(L, 2, 0);         // ... [t] [table] 
+
+	lua_pop(L, 1);   // ... [t]
+
+	for(n = 1; ; n ++)
+	{
+		lua_pushnumber(L, n);   // ... [t] [n]
+		lua_rawget(L, -2);      // ... [t] [n] [t[n]]
+		if(lua_isnil(L, -1))
+		{
+			lua_pop(L, 1);
+			break;
+		}
+		MSG_OUT("importing [%d] [%s] ...", n, lua_tostring(L, -1));
+
+		// is imported?
+		
+
+		// is in importing?
+
+		
+		// add to impirting table
+		if(0 != luaL_dofile(L, lua_tostring(L, -1)))
+		{
+			luaL_error(L, "%s", lua_tostring(L, -1));
+		}
+		// remove from importing table
+
+		// add to imported table;
+
+		lua_pop(L, 1);
+	}
+
+	// ... [t]
+
+	lua_pop(L, 1);
+}
 
 
