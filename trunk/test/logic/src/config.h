@@ -14,6 +14,7 @@
 
 #ifdef WIN32
 
+// windows specify definitions
 
 #define snprintf      _snprintf
 #define vsnprintf     _vsnprintf
@@ -28,6 +29,7 @@
 #define LINUX
 #endif
 
+// linux specified headers
 #include <unistd.h>
 #include <iconv.h>
 #include <readline/readline.h>
@@ -44,6 +46,25 @@
 #error "unknow platform!"
 
 #endif
+
+// lua headers
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+	
+	
+#ifdef __cplusplus
+};
+#endif
+
+
+// tolua headers
+#include <tolua++.h>
 
 
 #ifdef __cplusplus

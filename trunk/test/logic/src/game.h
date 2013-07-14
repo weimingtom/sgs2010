@@ -58,7 +58,8 @@ struct tagGameContext
 	int        nRoundPlayer;
 	int        nCurPlayer;
 	Status     status;
-	jmp_buf    __jb__;  // for quit a game directly
+	//jmp_buf    __jb__;  // for quit a game directly
+	lua_State  *L;      // for run card/hero logic in lua engine
 };
 
 // tolua_begin
@@ -83,7 +84,8 @@ typedef enum _GameResult
 // game process base funs
 
 RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
-RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
+//RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_main(GameContext* pGame, GameEventContext* pEvent);
 
 RESULT game_save(GameContext* pGame, const char* file_name);
 RESULT game_load(GameContext* pGame, const char* file_name);

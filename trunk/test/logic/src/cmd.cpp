@@ -139,7 +139,8 @@ static RESULT cmd_quit(const char** argv, int argc, GameContext* pContext, GameE
 
 	if(pContext->status != Status_None)
 	{
-		longjmp(pContext->__jb__, R_EXIT);
+		//longjmp(pContext->__jb__, R_EXIT);
+		luaL_error(pContext->L, "User Quit");
 	}
 
 	return R_EXIT;
@@ -216,17 +217,8 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 		return ret;
 	}
 
-	// game loop
-	ret = (RESULT)setjmp( pContext->__jb__);
-
-	if(ret == 0)
-	{
-		ret = game_loop(pContext, pEvent);
-		//ret = CMD_RET_SUCC;
-	}
-
-	// print game result
-	return ret;
+	// game main
+	return game_main(pContext, pEvent);
 }
 
 static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
@@ -560,17 +552,8 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 		return ret;
 	}
 
-	// game loop
-	ret = (RESULT)setjmp( pContext->__jb__);
-
-	if(ret == 0)
-	{
-		ret = game_loop(pContext, pEvent);
-		//ret = CMD_RET_SUCC;
-	}
-
-	// print game result
-	return ret;
+	// game main
+	return game_main(pContext, pEvent);
 }
 
 
