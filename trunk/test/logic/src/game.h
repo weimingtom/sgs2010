@@ -114,6 +114,9 @@ Status get_game_status(GameContext* pGame);
 // tolua_end
 
 
+// for lua replace dofile...
+// export as import(path)
+void game_import_file(lua_State* L, const char* pattern);
 
 
 #ifdef __cplusplus
