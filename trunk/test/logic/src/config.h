@@ -18,6 +18,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <direct.h>
 
 // windows specify definitions
 
@@ -25,6 +26,9 @@
 #define vsnprintf     _vsnprintf
 #define strcasecmp    _stricmp
 #define strncasecmp   _strnicmp
+#define chdir         _chdir
+#define getcwd        _getcwd
+
 
 #define __ATTR_FMT__(f,m,n)
 

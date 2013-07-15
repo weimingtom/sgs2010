@@ -613,18 +613,19 @@ static int lua_game_main(lua_State* L)
 	return 1;
 }
 
-#define REPLACE_CHAR(str, chfrom, chto)  do { while(*(str)) { if(*(str) == (chfrom) ) { *(str) = (chto); } str++; } } while(0)
+#define REPLACE_CHAR(str, chfrom, chto)  do { char* p = (str); while(*p) { if(*p == (chfrom) ) { *p = (chto); } p++; } } while(0)
+#define REGULAR_PATH(str)  REPLACE_CHAR((str),'\\', '/')
+#define WIN_PATH(str)  REPLACE_CHAR((str),'/', '\\')
 
-char* get_app_path(char*  buf, int buflen)
+
+char* get_path_name(const char* file_path, char* buf, int buflen)
 {
 	char*  last_sls;
-#ifdef WIN32
-	GetModuleFileName(NULL, buf, buflen);
-#elif defined(LINUX)
-	readlink("/proc/self/exe", buf, buflen);
-#endif
-	last_sls = buf;
-	REPLACE_CHAR(last_sls, '\\', '/');
+
+	if(file_path != buf)
+	{
+		strncpy(buf, file_path, buflen);
+	}
 
 	last_sls = strrchr(buf, '/');
 	if(last_sls) 
@@ -633,10 +634,50 @@ char* get_app_path(char*  buf, int buflen)
 	return buf;
 }
 
+
+char* get_app_path(char*  buf, int buflen)
+{
+#ifdef WIN32
+	GetModuleFileName(NULL, buf, buflen);
+#elif defined(LINUX)
+	readlink("/proc/self/exe", buf, buflen);
+#endif
+	REGULAR_PATH(buf);
+
+
+	return get_path_name(buf, buf, buflen);
+}
+
+char* get_cur_path(char*  buf, int buflen)
+{
+	if(NULL == getcwd(buf, buflen))
+		return NULL;
+
+	REGULAR_PATH(buf);
+
+	return buf;
+}
+
+int set_cur_path(const char* path)
+{
+#ifdef WIN32
+	char  win_path[MAX_PATH];
+	strncpy(win_path, path, sizeof(win_path));
+	WIN_PATH(win_path);
+	path = win_path;
+#endif
+	return chdir(path);
+}
+
+
 RESULT game_main_prepare(lua_State* L)
 {
 	int   state;
 	char  base_path[MAX_PATH];
+
+	get_app_path(base_path, sizeof(base_path));
+
+	set_cur_path(base_path);
 
 	// load lua base libraries
 	luaL_openlibs(L);
@@ -644,7 +685,7 @@ RESULT game_main_prepare(lua_State* L)
 	tolua_game_open(L);
 	
 	// load lua files
-	lua_pushstring(L, get_app_path(base_path, sizeof(base_path)));
+	lua_pushstring(L, base_path);
 	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
 	lua_getglobal(L, "import");
 	lua_pushstring(L, "./script/main.lua");
@@ -677,6 +718,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 	do{
+
 
 		ret = game_main_prepare(L);
 		if(ret != R_SUCC)
@@ -824,12 +866,17 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	int n;
 	int tabs;
 	FILE* file;
+	char  base[MAX_PATH];
+	char  path[MAX_PATH];
 
-	file = fopen(file_name, "wb");
+
+	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+
+	file = fopen(path, "wb");
 
 	if(file == NULL)
 	{
-		MSG_OUT("open file \"%s\" failed: (%d) %s\n", file_name, errno, strerror(errno));
+		MSG_OUT("open file \"%s\" error: (%d) %s\n", path, errno, strerror(errno));
 		return R_E_FAIL;
 	}
 
@@ -1019,14 +1066,20 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	int state;
 	lua_State* L;
 	int n;
+	char  base[MAX_PATH];
+	char  path[MAX_PATH];
+
+
+	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+
 
 	//FILE* file;
 
-	//file = fopen(file_name, "rb");
+	//file = fopen(path, "rb");
 
 	//if(file == NULL)
 	//{
-	//	MSG_OUT("open file \"%s\" failed: (%d) %s\n", file_name, errno, strerror(errno));
+	//	MSG_OUT("open file \"%s\" error: (%d) %s\n", path, errno, strerror(errno));
 	//	return R_E_FAIL;
 	//}
 
@@ -1042,7 +1095,7 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 
 	do{
 
-		state = luaL_dofile(L, file_name);
+		state = luaL_dofile(L, path);
 
 		if(state != 0)
 		{
@@ -1150,7 +1203,7 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	lua_close(L);
 
 	//fclose(file);
-	return R_SUCC;
+	return ret;
 }
 
 
@@ -1159,37 +1212,71 @@ static int file_name_cmp(lua_State* L)
 	int ret;
 	const char*  f1 = luaL_optstring(L, 1, "");
 	const char*  f2 = luaL_optstring(L, 2, "");
-	ret = stricmp(f1, f2);
-	lua_pushnumber(L, ret);
+	ret = strcasecmp(f1, f2);
+	//MSG_OUT("file_name_cmp ('%s','%s') = %d\n", f1, f2, ret);
+	lua_pushboolean(L, ret < 0);
 	return 1;
 }
 
 void game_import_file(lua_State* L, const char* pattern)
 {
 	struct _finddata_t  fdata;
-	long fid;
-	const char* path;
+	long  fid;
+	const char* last_path;
+	char  rel_path[MAX_PATH];
+	char* base_name;
+	char  cwd_path[MAX_PATH];
+	char  cur_path[MAX_PATH];
+	char  full_path[MAX_PATH];
 	int  n;
 
 	lua_getfield(L, LUA_REGISTRYINDEX, "__import_path");
 
 	if(lua_isnil(L, -1))
 	{
-		luaL_error(L, "import call only while importing lua files");
+		lua_pushstring(L, "import call only while importing lua files");
+		lua_error(L);
 		return;
 	}
 
-	path = lua_tostring(L, -1);
+	last_path = lua_tostring(L, -1);
+
+	get_cur_path(cwd_path, sizeof(cwd_path));
+
+	strncpy(rel_path, pattern, sizeof(rel_path));
+	REGULAR_PATH(rel_path);
+
+	base_name = strrchr(rel_path, '/');
+
+	if(base_name != NULL)
+	{
+		*base_name = '\0';
+		base_name++;
+
+		if(0 != set_cur_path(rel_path))
+		{
+			lua_pushfstring(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
+			lua_error(L);
+			return;
+		}
+	}
+	else
+	{
+		base_name = rel_path;
+	}
+
+	get_cur_path(cur_path, sizeof(cur_path));
 
 
-
-	path = pattern;
+	//path = pattern;
 	
-	fid = _findfirst(path, &fdata);
+	fid = _findfirst(base_name, &fdata);
 
 	if(fid == -1)
 	{
-		luaL_error(L, "(%d) %s", errno, strerror(errno));
+		set_cur_path(cwd_path);
+		lua_pushfstring(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
+		lua_error(L);
 		return;
 	}
 
@@ -1197,56 +1284,129 @@ void game_import_file(lua_State* L, const char* pattern)
 	n = 1;	
 
 	do {
-		MSG_OUT("%s\n", fdata.name);
+		//MSG_OUT("%s\n", fdata.name);
 		lua_pushnumber(L, n);   // ... [t] [n]
 		lua_pushstring(L, fdata.name);   // ... [t] [n] [fdata.name]
 		lua_rawset(L, -3);      // ... [t]
 		n++;
 	} while(0 == _findnext(fid, &fdata));
 
-	_findclose(fid);	
+	_findclose(fid);
 
 	//call table.sort
 	lua_getglobal(L, "table");   // ... [t] [table]
 	lua_getfield(L, -1, "sort"); // ... [t] [table] [table.sort]
 	lua_pushvalue(L, -3);       
 	lua_pushcfunction(L, file_name_cmp);   // ... [t] [table] [table.sort] [t] [file_name_cmp]
-	lua_call(L, 2, 0);         // ... [t] [table] 
+	if(0 != lua_pcall(L, 2, 0, 0))  // ... [t] [table] 
+	{
+		set_cur_path(cwd_path);
+		lua_error(L);
+		return;
+	}
 
 	lua_pop(L, 1);   // ... [t]
 
 	for(n = 1; ; n ++)
 	{
 		lua_pushnumber(L, n);   // ... [t] [n]
-		lua_rawget(L, -2);      // ... [t] [n] [t[n]]
+		lua_rawget(L, -2);      // ... [t] [t[n]]
 		if(lua_isnil(L, -1))
 		{
-			lua_pop(L, 1);
+			lua_pop(L, 1);     // ... [t]
 			break;
 		}
-		MSG_OUT("importing [%d] [%s] ...", n, lua_tostring(L, -1));
+
+
+		snprintf(full_path, sizeof(full_path), "%s/%s", cur_path, lua_tostring(L, -1));
+
+		lua_pop(L, 1);     // ... [t]
 
 		// is imported?
-		
+		lua_getfield(L, LUA_REGISTRYINDEX, "__imported_table");   // ... [t] [__imported_table]
+		if(lua_isnil(L, -1)) 
+		{
+			lua_pop(L, 1);
+			lua_newtable(L);
+			lua_pushvalue(L, -1);
+			lua_setfield(L, LUA_REGISTRYINDEX, "__imported_table");
+		}
+
+		lua_getfield(L, -1, full_path); // ... [t] [__imported_table]  [__imported_table[full_path]]
+
+		if(!lua_isnil(L, -1))
+		{
+			lua_pop(L, 2);
+			// imported already
+			continue;
+		}
+
+		lua_pop(L, 2);  // ... [t]
 
 		// is in importing?
 
+		lua_getfield(L, LUA_REGISTRYINDEX, "__importing_table");  // ... [t] [__importing_table]
+		if(lua_isnil(L, -1)) 
+		{
+			lua_pop(L, 1);
+			lua_newtable(L);
+			lua_pushvalue(L, -1);
+			lua_setfield(L, LUA_REGISTRYINDEX, "__importing_table");
+		}
+
+		lua_getfield(L, -1, full_path);  // ... [t] [__importing_table] [__importing_table[full_path]] 
+
+		if(!lua_isnil(L, -1))
+		{
+			// is in importing
+			lua_pop(L, 2);
+			lua_pushfstring(L, "import file \"%s\" is circular dependency.", full_path);
+			set_cur_path(cwd_path);
+			lua_error(L);
+		}
+
+		lua_pop(L, 1);  // ... [t] 
 		
 		// add to impirting table
-		if(0 != luaL_dofile(L, lua_tostring(L, -1)))
+		lua_pushstring(L, full_path);
+		lua_pushnumber(L, 1);
+		lua_settable(L, -3);  // ... [t] [__importing_table]
+
+		lua_pop(L, 1);  // ... [t] 
+
+		MSG_OUT("importing (%d) \"%s\" ...\n", n, full_path);
+
+		if(0 != luaL_dofile(L, full_path))
 		{
-			luaL_error(L, "%s", lua_tostring(L, -1));
+			set_cur_path(cwd_path);
+			lua_error(L);
+			return;
 		}
 		// remove from importing table
+		lua_getfield(L, LUA_REGISTRYINDEX, "__importing_table");  // ... [t] [__importing_table]
+		lua_pushstring(L, full_path);
+		lua_pushnil(L);
+		lua_settable(L, -3);  // ... [t] [__importing_table]
+		
+		lua_pop(L, 1);  // ... [t] 
 
 		// add to imported table;
+		lua_getfield(L, LUA_REGISTRYINDEX, "__imported_table");  // ... [t] [__importing_table]
+		lua_pushstring(L, full_path);
+		lua_pushnumber(L, 1);
+		lua_settable(L, -3);  // ... [t] [__importing_table]
 
-		lua_pop(L, 1);
+		lua_pop(L, 1);  // ... [t] 
+
 	}
 
 	// ... [t]
 
 	lua_pop(L, 1);
+
+	// [__import_path]
+	lua_pop(L, 1);
+	set_cur_path(cwd_path);
 }
 
 
