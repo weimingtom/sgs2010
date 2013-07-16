@@ -383,52 +383,58 @@ void log_text(const char* fmt, ...)
 
 }
 
+#ifdef OUTPUT_UTF8
+char* to_utf8(const char*  str, char* buffer, int len)
+{
+	iconv_t  conv;
+	size_t   ulen;
+	size_t   ol;
+	size_t   sz;
+	char*    inbuf;
+	char*    outbuf;
+
+	conv = iconv_open("UTF-8", "GBK");
+	if(conv == (iconv_t)-1)
+	{
+		strncpy(buffer, str, len);
+	}
+	else
+	{
+		inbuf = (char*)str;
+		outbuf = buffer;
+		ulen = len;
+		ol = iconv(conv, &inbuf, &sz, &outbuf, &ulen);
+		if(ol == (size_t)-1)
+		{
+			strncpy(buffer, str, len);
+		}
+		sz = len - ulen;
+		if(sz >= len)
+			sz = len - 1;
+		buffer[sz] = 0;
+	}
+
+	return buffer;
+}
+#endif
+
 
 int message_printf(const char* fmt, ...)
 {
 	char text[4096];
-#ifdef OUTPUT_UTF8
 	char utf8[4096*2];
-	iconv_t  conv;
-	size_t   ulen;
-	size_t   ol;
-	char*    inbuf;
-	char*    outbuf;
-#endif
+
+
 	va_list vl;
 	size_t sz;
 	
 	va_start(vl, fmt);
-
 	sz = vsnprintf(text, sizeof(text), fmt, vl);
-
-#ifdef OUTPUT_UTF8
-	conv = iconv_open("UTF-8", "GBK");
-	if(conv == (iconv_t)-1)
-	{
-		strcpy(utf8, text);
-	}
-	else
-	{
-		inbuf = text;
-		outbuf = utf8;
-		ulen = sizeof(utf8);
-		ol = iconv(conv, &inbuf, &sz, &outbuf, &ulen);
-		if(ol == (size_t)-1)
-		{
-			strcpy(utf8, text);
-		}
-		sz = sizeof(utf8) - ulen;
-		if(sz >= sizeof(utf8))
-			sz = sizeof(utf8) - 1;
-		utf8[sz] = 0;
-	}
-	printf("%s", utf8);
-#else
-	printf("%s", text);
-#endif
 	va_end(vl);
 
-	return (int)sz;
+	A2UTF8(text, utf8, sizeof(utf8));
+
+	return printf("%s", utf8);
+
 }
 
