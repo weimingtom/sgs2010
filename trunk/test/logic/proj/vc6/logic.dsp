@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  tolualib.lib  LuaStaticLib.lib /nologo /subsystem:console /machine:I386 /libpath:"../../../../3p/tolua++-1.0.93/lib" /libpath:"../../../../3p/lua-5.1/lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib tolualib.lib LuaStaticLib.lib /nologo /subsystem:console /machine:I386 /libpath:"../../../../3p/tolua++-1.0.93/lib" /libpath:"../../../../3p/lua-5.1/lib"
 
 !ELSEIF  "$(CFG)" == "logic - Win32 Debug"
 
@@ -76,7 +76,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  tolualibd.lib  LuaStaticLibd.lib /nologo /subsystem:console /debug /machine:I386 /out:"..\..\bin/logic_d.exe" /pdbtype:sept /libpath:"../../../../3p/tolua++-1.0.93/lib" /libpath:"../../../../3p/lua-5.1/lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib tolualibd.lib LuaStaticLibd.lib /nologo /subsystem:console /debug /machine:I386 /out:"..\..\bin/logic_d.exe" /pdbtype:sept /libpath:"../../../../3p/tolua++-1.0.93/lib" /libpath:"../../../../3p/lua-5.1/lib"
 
 !ENDIF 
 
@@ -402,6 +402,14 @@ SOURCE=..\..\src\out.cpp
 # Begin Source File
 
 SOURCE=..\..\src\out.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\platform.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\platform.h
 # End Source File
 # Begin Source File
 
