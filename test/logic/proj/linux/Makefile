@@ -3,7 +3,7 @@
 CC=gcc
 CFLAGS=-g -Wall -O2 -fPIC 
 INCL=-I. -I../include -I../../../../3p/lua-5.1/include -I../../../../3p/tolua++-1.0.93/include
-LIBS=-L../../../../3p/lua-5.1/lib -L../../../../3p/tolua++-1.0.93/lib -ltolua++ -llua  -ldl -lm -lstdc++
+LIBS=-L../../../../3p/lua-5.1/lib -L../../../../3p/tolua++-1.0.93/lib -ltolua++ -llua -lreadline -lhistory -lncurses -ldl -lm -lstdc++
 
 TOLUA=../../../3p/tolua++-1.0.93/bin/tolua++
 
@@ -39,10 +39,10 @@ $(OUT): $(OBJS)
 	@echo done.
 
 $(OBJS):%.obj:%.cpp
-	@echo compiling $@ ...
+	@echo compiling $< ...
 	@$(CC) -c -o $@  $< $(CFLAGS) $(INCL) -MT $@ -MF `echo $@ | sed -e 's,\.obj$$,.dep,'` -MD -MP
 
-../../pkg/lua_export.cpp ../../pkg/lua_export.h: ../../pkg/lua_export.pkg
+../../pkg/lua_export.h ../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg
 	@echo tolua gen $@ ...
 	@cd $(PKG_DIR) && $(TOLUA) -o lua_export.cpp -H lua_export.h -n game lua_export.pkg && cd -
 
