@@ -14,47 +14,7 @@
 
 #include <io.h>
 
-#ifdef WIN32
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <direct.h>
-
-// windows specify definitions
-
-#define snprintf      _snprintf
-#define vsnprintf     _vsnprintf
-#define strcasecmp    _stricmp
-#define strncasecmp   _strnicmp
-#define chdir         _chdir
-#define getcwd        _getcwd
-
-
-#define __ATTR_FMT__(f,m,n)
-
-#elif defined(linux) || defined (__linux__)
-
-#ifndef LINUX
-#define LINUX
-#endif
-
-// linux specified headers
-#include <unistd.h>
-#include <iconv.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-
-#define OUTPUT_UTF8   1 // output message use utf-8 encoding
-
-
-#define __ATTR_FMT__(f,m,n)   __attribute__((format(f,m,n)));
-
-
-#else
-
-#error "unknow platform!"
-
-#endif
 
 // lua headers
 
@@ -76,6 +36,11 @@ extern "C" {
 #include <tolua++.h>
 
 
+// platform functions defined
+#include "platform.h"
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,6 +48,11 @@ extern "C" {
 
 #define PROJ_NAME    "SGS. Test Logic"
 #define VERSION_STR  "v0.1.0"
+
+
+#ifndef MAX_PATH
+#define MAX_PATH    1024
+#endif
 
 
 #define  X_REALLOC(p, sz)   realloc((p), (sz))

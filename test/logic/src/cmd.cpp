@@ -147,18 +147,8 @@ static RESULT cmd_quit(const char** argv, int argc, GameContext* pContext, GameE
 }
 
 
-// player number configs
-typedef struct tagPlayerConfig
-{
-	int players;
-	int masters;
-	int minsters;
-	int spies;
-	int mutineers;
-}PlayerConfig;
 
-
-static const PlayerConfig s_configs [] = {
+static const NewGameConfig s_configs [] = {
 	{ 6, 1, 1, 1, 3 },
 	{ 7, 1, 2, 1, 3 },
 	{ 8, 1, 2, 1, 4 },
@@ -167,7 +157,7 @@ static const PlayerConfig s_configs [] = {
 #define CONFIG_SIZE    (int)(COUNT(s_configs))
 
 
-const PlayerConfig* select_config(int players)
+const NewGameConfig* select_config(int players)
 {
 	int n;
 	for(n = 0; n < CONFIG_SIZE; n++)
@@ -184,9 +174,11 @@ const PlayerConfig* select_config(int players)
 static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 
-	RESULT  ret;
+	//RESULT  ret;
 	int cfg;
-	const PlayerConfig*  pConfig;
+	const NewGameConfig*  pConfig;
+	GameEventContext    event;
+
 	if(pContext->status != Status_None)
 	{
 		MSG_OUT("game has been started.");
@@ -209,16 +201,20 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 	}
 
 	// new game
-	ret = init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+	INIT_EVENT(&event, GameEvent_NewGame, 0, 0, pEvent);
+	event.pNewGameConfig = pConfig;
 
-	if(ret != R_SUCC)
-	{
-		MSG_OUT("start init new game failed!");
-		return ret;
-	}
+
+	//ret = init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+
+	//if(ret != R_SUCC)
+	//{
+	//	MSG_OUT("start init new game failed!");
+	//	return ret;
+	//}
 
 	// game main
-	return game_main(pContext, pEvent);
+	return game_main(pContext, &event);
 }
 
 static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
@@ -532,7 +528,8 @@ static RESULT cmd_save(const char** argv, int argc, GameContext* pContext, GameE
 
 static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	RESULT ret;
+	GameEventContext    event;
+	//RESULT ret;
 	if(pContext->status != Status_None)
 	{
 		MSG_OUT("already in game!\n");
@@ -545,15 +542,20 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 		return R_E_PARAM;
 	}
 	
-	ret = game_load(pContext, argv[1]);
+	// load game
+
+	INIT_EVENT(&event, GameEvent_LoadGame, 0,0, pEvent);
+	event.szFileName = argv[1];
+
+	//ret = game_load(pContext, argv[1]);
 	
-	if(R_SUCC != ret)
-	{
-		return ret;
-	}
+	//if(R_SUCC != ret)
+	//{
+	//	return ret;
+	//}
 
 	// game main
-	return game_main(pContext, pEvent);
+	return game_main(pContext, &event);
 }
 
 

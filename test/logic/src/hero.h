@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+// tolua_begin
+
 typedef enum _HeroID
 {
 	HeroID_None = 0,
@@ -52,6 +54,10 @@ typedef enum _SkillFlag
 	SkillFlag_Passive = 1, // 锁定技
 	SkillFlag_Master = 2,  // 主公技
 }SkillFlag;
+
+
+// tolua_end
+
 
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;

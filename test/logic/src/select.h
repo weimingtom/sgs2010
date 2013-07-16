@@ -12,11 +12,13 @@ typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
 
+// tolua_begin
+
 // select target process
 RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel, const char* alter_text, int* out_target);
 YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text);
 
-
+// tolua_end
 
 #ifdef __cplusplus
 }

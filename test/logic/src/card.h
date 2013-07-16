@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+// tolua_begin
 
 //card type
 typedef enum _CardType
@@ -122,6 +123,7 @@ typedef enum _TargetType
 	Target_All,      // all role include me
 }TargetType;
 
+// tolua_end
 
 typedef struct tagCard Card;
 typedef struct tagGameContext GameContext;
@@ -142,9 +144,9 @@ typedef struct tagCardConfig
 	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
 }CardConfig;
 
+
+
 typedef struct tagCard Card;
-
-
 struct tagCard
 {
 	CardID    id;
@@ -156,8 +158,7 @@ struct tagCard
 
 
 typedef struct tagCardPattern CardPattern;
-
-struct tagCardPattern
+struct tagCardPattern 
 {
 	CardID id;
 	CardColor color;
@@ -190,10 +191,15 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
 
-RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
 
 #define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);
+
+// tolua_begin
+
+RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
+
+// tolua_end
 
 
 #ifdef __cplusplus

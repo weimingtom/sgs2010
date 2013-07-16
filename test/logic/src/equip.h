@@ -13,8 +13,12 @@ typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
 
+// tolua_begin
+
 RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard);
 
+
+// tolua_end
 
 
 #ifdef __cplusplus

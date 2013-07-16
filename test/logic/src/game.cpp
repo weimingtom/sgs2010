@@ -153,8 +153,8 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 		return R_E_FAIL;
 	}
 
-
-	memset(pGame, 0, sizeof(*pGame));
+	// 这里不能清空。因为这Game->L已经赋值，外面已经清除
+	//memset(pGame, 0, sizeof(*pGame));
 
 	pGame->nPlayerCount = minsters + spies + mutineers + 1;
 	pGame->nMinsterCount = minsters;
@@ -723,12 +723,35 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		ret = game_main_prepare(L);
 		if(ret != R_SUCC)
 		{
-			ret = R_ABORT;
+			//ret = R_ABORT;
 			break;
 		}
 
+		memset(pGame, 0, sizeof(*pGame));
+
 
 		pGame->L = L;
+
+
+		switch(pEvent->id)
+		{
+		case GameEvent_NewGame:
+			ret = init_game_context(pGame, pEvent->pNewGameConfig->minsters, pEvent->pNewGameConfig->spies, pEvent->pNewGameConfig->mutineers);
+			break;
+		case GameEvent_LoadGame:
+			ret = game_load(pGame, pEvent->szFileName);
+			break;
+		default:
+			ret = R_E_PARAM;
+			break;
+		}
+
+		if(ret != R_SUCC)
+		{
+			//ret = R_ABORT;
+			break;
+		}
+
 
 		lua_pushcfunction(L, lua_game_main);
 		lua_pushlightuserdata(L, pGame);
@@ -738,7 +761,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 
 		if(state != 0)
 		{
-			MSG_OUT("%s\n", lua_tostring(L, -1));
+			MSG_OUT("Game Abort: %s\n", lua_tostring(L, -1));
 			lua_pop(L, 1);
 			ret = R_ABORT;
 			break;
@@ -752,8 +775,9 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 	while(0);
 
 	pGame->L = NULL;
+	pGame->status = Status_None;
 
-	memset(pGame, 0, sizeof(*pGame));
+	//memset(pGame, 0, sizeof(*pGame));
 
 	lua_close(L);
 
@@ -933,55 +957,50 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 }
 
 
-#define LOAD_FIELD(p,field,L,fn)  \
+#define LOAD_FIELD(p,field,L,fn)  do{ \
 	lua_getfield(L, -1, #field); \
 	(p)->field = fn(L, -1); \
-	lua_pop(L, 1);
+	lua_pop(L, 1); \
+} while(0)
 
-#define LOAD_STRING(p,field,L)  \
+#define LOAD_STRING(p,field,L)  do{ \
 	lua_getfield(L, -1, #field); \
 	strncpy((p)->field, lua_tostring(L, -1), sizeof((p)->field)); \
-	lua_pop(L, 1);
+	lua_pop(L, 1); \
+} while(0)
 
 
-RESULT game_load_card(Card* pCard, lua_State* L)
+void game_load_card(lua_State* L, Card* pCard)
 {
 	LOAD_FIELD(pCard, id, L, (CardID)lua_tointeger);
 	LOAD_FIELD(pCard, color, L, (CardColor)lua_tointeger);
 	LOAD_FIELD(pCard, value, L, (CardValue)lua_tointeger);
 	LOAD_FIELD(pCard, flag, L, (CardFlag)lua_tointeger);
-	return R_SUCC;
 }
 
-RESULT game_load_cardstack(CardStack* pCardStack, lua_State* L)
+void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 {
 	int n;
 	LOAD_FIELD(pCardStack, count, L, lua_tointeger);
 
 	if(pCardStack->count > CARD_STACK_SIZE)
 	{
-		MSG_OUT("error card stack count!\n");
-		return R_E_FAIL;
+		luaL_error(L, "error card stack count!");
 	}
 
-	lua_getfield(L, -1, "cards");
+	lua_getfield(L, -1, "cards"); // ... [cardstack] [cardstack.cards]
 	for(n = 0; n < pCardStack->count; n++)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		
-		if(R_SUCC != game_load_card(&pCardStack->cards[n], L))
-			return R_E_FAIL;
-
+		game_load_card(L, &pCardStack->cards[n]);
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
-
-	return R_SUCC;
 }
 
 
-RESULT game_load_player(Player* pPlayer, lua_State* L)
+void game_load_player(lua_State* L, Player* pPlayer)
 {
 	int n;
 
@@ -995,25 +1014,19 @@ RESULT game_load_player(Player* pPlayer, lua_State* L)
 
 	if(pPlayer->nHandCardNum > MAX_HAND_CARD)
 	{
-		MSG_OUT("error player hand card count!\n");
-		return R_E_FAIL;
+		luaL_error(L, "error player hand card count!");
 	}
 	if(pPlayer->nJudgmentCardNum > MAX_JUDGMENT_CARD)
 	{
-		MSG_OUT("error player judgment card count!\n");
-		return R_E_FAIL;
+		luaL_error(L, "error player judgment card count!");
 	}
-
 
 	lua_getfield(L, -1, "stHandCards");
 	for(n = 0; n < pPlayer->nHandCardNum; n++)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		
-		if(R_SUCC != game_load_card(&pPlayer->stHandCards[n], L))
-			return R_E_FAIL;
-		
+		game_load_card(L, &pPlayer->stHandCards[n]);		
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -1023,10 +1036,7 @@ RESULT game_load_player(Player* pPlayer, lua_State* L)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		
-		if(R_SUCC != game_load_card(&pPlayer->stEquipCard[n], L))
-			return R_E_FAIL;
-		
+		game_load_card(L, &pPlayer->stEquipCard[n]);
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -1036,10 +1046,7 @@ RESULT game_load_player(Player* pPlayer, lua_State* L)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		
-		if(R_SUCC != game_load_card(&pPlayer->stJudgmentCards[n], L))
-			return R_E_FAIL;
-		
+		game_load_card(L, &pPlayer->stJudgmentCards[n]);		
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -1056,64 +1063,47 @@ RESULT game_load_player(Player* pPlayer, lua_State* L)
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
-
-	return R_SUCC;
 }
 
-RESULT game_load(GameContext* pGame, const char* file_name)
+static int lua_game_load(lua_State* L)
 {
-	RESULT   ret;
-	int state;
-	lua_State* L;
+	int top;
 	int n;
-	char  base[MAX_PATH];
-	char  path[MAX_PATH];
+	GameContext* pGame;
+	const char* file_name;
+
+	pGame = (GameContext*)lua_touserdata(L, 1);
+	file_name = luaL_checkstring(L, 2);
 
 
-	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+	//ret = R_SUCC;
 
+	top = lua_gettop(L);
 
-	//FILE* file;
+	// do {
+		lua_newtable(L);  // [t]
 
-	//file = fopen(path, "rb");
-
-	//if(file == NULL)
-	//{
-	//	MSG_OUT("open file \"%s\" error: (%d) %s\n", path, errno, strerror(errno));
-	//	return R_E_FAIL;
-	//}
-
-	L = lua_open();
-
-	if(L == NULL)
-	{
-		MSG_OUT("create LUA engine failed: out of memory\n");	
-		return R_E_MEMORY;
-	}
-
-	ret = R_SUCC;
-
-	do{
-
-		state = luaL_dofile(L, path);
-
-		if(state != 0)
+		if(0 != luaL_loadfile(L, file_name))   // [t] [f]
 		{
-			MSG_OUT("%s\n", lua_tostring(L, -1));
-			ret = R_E_FAIL;
-			break;
+			luaL_error(L, "%s", lua_tostring(L, -1));
 		}
 
+		lua_pushvalue(L, -2);   // [t] [f] [t]
+		lua_setfenv(L, -2);     // [t] [f]
 
-		lua_getglobal(L,  "game");
+		lua_call(L, 0, 0);
+
+		//stack:  [t] 
+		
+
+		lua_getfield(L, -1, "game"); // [t] [t.game]
 		if(!lua_istable(L, -1))
 		{
-			MSG_OUT("global define 'game' is not found!\n");
-			ret = R_E_FAIL;
-			break;
+			luaL_error(L, "global define 'game' is not found!");
 		}
-
-		memset(pGame, 0, sizeof(*pGame));
+		
+		// do not clear game, because the game is already inited with L
+		//memset(pGame, 0, sizeof(*pGame));
 
 		// start load...
 		LOAD_FIELD(pGame, nPlayerCount, L, lua_tointeger);
@@ -1123,13 +1113,11 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 
 		if(pGame->nPlayerCount > MAX_PLAYER_NUM)
 		{
-			MSG_OUT("error player count!\n");
-			ret = R_E_FAIL;
-			break;
+			luaL_error(L, "error player count!");
 		}
 	
 		// players
-		lua_getfield(L, -1, "players");
+		lua_getfield(L, -1, "players"); // [t] [t.game] [t.game.players] 
 
 		//if(!lua_istable(L, -1))
 		//{
@@ -1141,69 +1129,84 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 		for(n = 0; n < pGame->nPlayerCount; n++)
 		{
 			lua_pushnumber(L, n+1);
-			lua_gettable(L, -2);
-			if(R_SUCC != (ret = game_load_player(&pGame->players[n], L)))
-			{
-				break;
-			}
-			lua_pop(L, 1);
+			lua_gettable(L, -2);   // [t] [t.game] [t.game.players] [t.game.players[n+1]]
+			game_load_player(L, &pGame->players[n]);
+			lua_pop(L, 1);     // [t] [t.game] [t.game.players] 
 		}
-		if(ret != R_SUCC)
-			break;
 
-		lua_pop(L, 1);
+		lua_pop(L, 1);  // [t] [t.game]
 
 		// get stack
-		lua_getfield(L, -1, "stGetCardStack");
-		if(R_SUCC != (ret = game_load_cardstack(&pGame->stGetCardStack, L)))
-		{
-			break;
-		}
-		lua_pop(L, 1);
+		lua_getfield(L, -1, "stGetCardStack"); // [t] [t.game] [t.game.stGetCardStack]
+		game_load_cardstack(L, &pGame->stGetCardStack);
+		lua_pop(L, 1); // [t] [t.game]
+
 		// get stack
-		lua_getfield(L, -1, "stDiscardCardStack");
-		game_load_cardstack(&pGame->stDiscardCardStack, L);
-		lua_pop(L, 1);
+		lua_getfield(L, -1, "stDiscardCardStack"); // [t] [t.game] [t.game.stDiscardCardStack]
+		game_load_cardstack(L, &pGame->stDiscardCardStack);
+		lua_pop(L, 1);  // [t] [t.game]
 
 		LOAD_FIELD(pGame, nCurDiscardCardNum, L, lua_tointeger);
 		if(pGame->nCurDiscardCardNum > MAX_CUR_DISCARD_NUM)
 		{
-			MSG_OUT("error nCurDiscardCardNum!\n");
-			ret = R_E_FAIL;
-			break;
+			luaL_error(L, "error nCurDiscardCardNum!");
 		}
 
-		lua_getfield(L, -1, "stCurDiscardCards");
+		lua_getfield(L, -1, "stCurDiscardCards");  // [t] [t.game] [t.game.stCurDiscardCards]
 		for(n = 0; n < pGame->nCurDiscardCardNum; n++)
 		{
 			lua_pushnumber(L, n+1);
-			lua_gettable(L, -2);
-			if(R_SUCC != (ret = game_load_card(&pGame->stCurDiscardCards[n], L)))
-			{
-				break;
-			}
-			lua_pop(L, 1);
+			lua_gettable(L, -2);   // [t] [t.game] [t.game.stCurDiscardCards] [t.game.stCurDiscardCards[n+1]]
+			game_load_card(L, &pGame->stCurDiscardCards[n]);
+			lua_pop(L, 1);    // [t] [t.game] [t.game.stCurDiscardCards]
 		}
-		if(ret != R_SUCC)
-			break;
-
-		lua_pop(L, 1);
+		lua_pop(L, 1);    // [t] [t.game] 
 
 		LOAD_FIELD(pGame, nRoundNum, L, lua_tointeger);
 		LOAD_FIELD(pGame, nRoundPlayer, L, lua_tointeger);
 		LOAD_FIELD(pGame, nCurPlayer, L, lua_tointeger);
 		LOAD_FIELD(pGame, status, L, (Status)lua_tointeger);
 
+		lua_pop(L, 1);   // [t]  
+
+		lua_pop(L, 1);   
+	//} while(0);
+
+	lua_settop(L, top);
+
+	return 0;
+}
+
+RESULT game_load(GameContext* pGame, const char* file_name)
+{
+	int state;
+	lua_State* L;
+	char  base[MAX_PATH];
+	char  path[MAX_PATH];
+
+
+	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+
+	L = pGame->L;
+
+	if(L == NULL)
+		return R_E_PARAM;
+
+	
+	lua_pushcfunction(L, lua_game_load);
+	lua_pushlightuserdata(L, pGame);
+	lua_pushstring(L, path);
+
+	state = lua_pcall(L, 2, 0, 0);
+
+	if(state != 0)
+	{
+		MSG_OUT("load game from \"%s\" failed: \n%s\n", path, lua_tostring(L, -1));
 		lua_pop(L, 1);
-
-		ret = R_SUCC;
-		break;
-	} while(0);
-
-	lua_close(L);
-
-	//fclose(file);
-	return ret;
+		return R_E_FAIL;
+	}
+	
+	return R_SUCC;
 }
 
 
