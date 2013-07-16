@@ -90,6 +90,13 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_save(GameContext* pGame, const char* file_name);
 RESULT game_load(GameContext* pGame, const char* file_name);
 
+
+RESULT set_game_cur_player(GameContext* pGame, int player);
+
+
+// tolua_begin
+//{{
+
 // get game base status
 int get_game_cur_player(GameContext* pGame);
 int get_game_round_player(GameContext* pGame);
@@ -98,19 +105,14 @@ int get_game_master_player(GameContext* pGame);
 int game_next_player(GameContext* pGame, int player);
 int game_prev_player(GameContext* pGame, int player);
 
-RESULT set_game_cur_player(GameContext* pGame, int player);
+Status get_game_status(GameContext* pGame);
 
 /// calc player distance to other
 
 int game_player_dis(GameContext* pGame, int p1, int p2);
 
 
-// tolua_begin
-
-Status get_game_status(GameContext* pGame);
-
-
-
+//}}
 // tolua_end
 
 

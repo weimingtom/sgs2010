@@ -50,8 +50,9 @@ typedef struct tagOutCardPattern OutCardPattern;
 
 struct tagOutCardPattern
 {
-	int where;
-	int num;
+	int         where;    // limited where the card is comes from 
+	YESNO       fixed;    // limited the card is fixed or can use hero skill/weapon skill/armor skill to generate 
+	int         num;      // pattern count
 	CardPattern patterns[MAX_CARD_LIST_NUM];
 };
 
@@ -73,12 +74,17 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
 
 
+// tolua_begin
+
 // trigger supply from player the card match the  pattern, return through pOut
 RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const OutCardPattern* pattern, const char* alter_text, OutCard* pOut);
 
 // passive out process
 RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const OutCardPattern* pattern, const char* alter_text);
 
+
+
+// tolua_end
 
 #ifdef __cplusplus
 }

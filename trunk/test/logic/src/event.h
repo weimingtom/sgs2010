@@ -23,6 +23,7 @@ enum GameEvent
 {
 	GameEvent_None = 0,     // no
 	GameEvent_NewGame = 1,  // 开始新游戏
+	GameEvent_LoadGame,     // 加载保存的进度
 	GameEvent_RoundBegin,   // 回合开始时
 	GameEvent_PerRoundJudge,    
 	GameEvent_PostRoundJudge,
@@ -83,6 +84,18 @@ enum GameEvent
 
 // tolua_end
 
+
+// for create a new game
+
+typedef struct tagNewGameConfig
+{
+	int players;
+	int masters;
+	int minsters;
+	int spies;
+	int mutineers;
+}NewGameConfig;
+
 // for passive out, supply out
 typedef struct tagPatternOut
 {
@@ -130,12 +143,14 @@ struct tagGameEventContext
 	RESULT   result;
 	YESNO	 block;
 	union {
+		const NewGameConfig* pNewGameConfig;
+		const char* szFileName;
 		Card*       pCard;       // for calc card, judge card ... 
 		int*        pNum;        // num for get card, discard card. etc
 		AttackDis*  pAttackDis; 
 		PatternOut* pPatternOut; // for passive out, supply card etc..
  		OutCard*    pOut;       // real out,  per/post out
-		PosCard*   pPosCard;  // lost card,
+		PosCard*    pPosCard;  // lost card,
 	};
 };
 
@@ -170,7 +185,15 @@ YESNO  get_event_block(GameEventContext* pEvent);
 void  set_event_block(GameEventContext* pEvent, YESNO  yesno);
 
 Card* get_event_card(GameEventContext* pEvent);
-void set_event_card(GameEventContext* pEvent, Card* pCard);
+void set_card_id(Card* pCard, CardID id);
+void set_card_color(Card* pCard, CardColor cl);
+void set_card_value(Card* pCard, CardValue val);
+void set_card_flag(Card* pCard, CardFlag flag);
+
+OutCard* get_event_out(GameEventContext* pEvent);
+void  set_event_out(GameEventContext* pEvent, OutCard* pOut);
+void set_out_target(OutCard* pOut, int target);
+
 
 // ...
 

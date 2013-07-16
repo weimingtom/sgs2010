@@ -10,7 +10,7 @@ extern "C" {
 #endif
 	
 	
-	
+// tolua_begin
 
 enum PlayerID
 {
@@ -75,6 +75,9 @@ enum PlayerCardWhere{
 	PlayerCard_Equip = 2,
 	PlayerCard_Judgment = 4,
 };
+
+
+// tolua_end
 
 typedef  struct  tagPlayer
 {
