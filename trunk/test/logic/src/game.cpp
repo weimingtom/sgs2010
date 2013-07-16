@@ -1223,8 +1223,15 @@ static int file_name_cmp(lua_State* L)
 
 void game_import_file(lua_State* L, const char* pattern)
 {
+#ifdef WIN32
 	struct _finddata_t  fdata;
 	long  fid;
+#elif defined(LINUX)
+	DIR* pDir;
+	struct dirent *pDirent;
+	struct stat f_st; 
+#endif
+
 	const char* last_path;
 	char  rel_path[MAX_PATH];
 	char* base_name;
@@ -1273,9 +1280,15 @@ void game_import_file(lua_State* L, const char* pattern)
 
 	//path = pattern;
 	
+#ifdef WIN32
 	fid = _findfirst(base_name, &fdata);
 
 	if(fid == -1)
+#elif defined(LINUX)
+	pDir = opendir(cur_path);
+
+	if(pDir == NULL)
+#endif
 	{
 		set_cur_path(cwd_path);
 		lua_pushfstring(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
@@ -1286,15 +1299,46 @@ void game_import_file(lua_State* L, const char* pattern)
 	lua_newtable(L);   // ... [t]
 	n = 1;	
 
+#ifdef WIN32
 	do {
-		//MSG_OUT("%s\n", fdata.name);
-		lua_pushnumber(L, n);   // ... [t] [n]
-		lua_pushstring(L, fdata.name);   // ... [t] [n] [fdata.name]
-		lua_rawset(L, -3);      // ... [t]
-		n++;
+		// skip the sub directories
+		if(0 == (fdata.attrib & _A_SUBDIR))
+		{
+			//MSG_OUT("%s\n", fdata.name);
+			lua_pushnumber(L, n);   // ... [t] [n]
+			lua_pushstring(L, fdata.name);   // ... [t] [n] [fdata.name]
+			lua_rawset(L, -3);      // ... [t]
+			n++;
+		}
 	} while(0 == _findnext(fid, &fdata));
-
 	_findclose(fid);
+#elif defined(LINUX)
+	while((pDirent = readdir(pDir)) != NULL)
+	{
+		// skip '.' and '..'
+		if (strcmp(pDirent->d_name, ".") == 0 || strcmp(pDirent->d_name, "..") == 0)  
+		{  
+			continue;  
+		}
+		// skip the sub directories
+		snprintf(full_path, sizeof(full_path), "%s/%s", cur_path, pDirent->d_name);
+		if(0 == stat(full_path, &f_st) && S_ISDIR(f_st.st_mode))
+		{
+			continue;
+		}
+		
+		//match the pattern ?
+		if(0 == fnmatch(base_name, pDirent->d_name, FNM_PATHNAME))
+		{
+			//MSG_OUT("%s\n", fdata.name);
+			lua_pushnumber(L, n);   // ... [t] [n]
+			lua_pushstring(L, pDirent->d_name);   // ... [t] [n] [fdata.name]
+			lua_rawset(L, -3);      // ... [t]
+			n++;
+		}
+	}
+	closedir(pDir);
+#endif
 
 	//call table.sort
 	lua_getglobal(L, "table");   // ... [t] [table]

@@ -76,7 +76,7 @@ static char* get_line(const char* prompt, char* buf, int size)
 #ifdef WIN32
 	int n,c;
 
-	fflush(stdin);
+	//fflush(stdin);
 
 	MSG_OUT("%s", prompt);
 
@@ -101,15 +101,21 @@ static char* get_line(const char* prompt, char* buf, int size)
 	buf[n] = 0;
 
 #elif defined(LINUX)
+	char    utf8[1024];
 	char*   sl;
 
-	MSG_OUT("%s", prompt);
+	log_text(prompt);
 
-	sl = readline(NULL);
+	A2UTF8( prompt, utf8, sizeof(utf8));
+
+	sl = readline(utf8);
 
 	add_history(sl);
 
 	strncpy(buf, sl, size);
+
+	free(sl);
+
 #endif
 
 	log_text(buf);
@@ -823,11 +829,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		MSG_OUT("[input select] : ");
-
-		fflush(stdin);
-
-		if(NULL == fgetln(buffer, sizeof(buffer), stdin))
+		if(NULL == get_line("[input select] : ", buffer, sizeof(buffer)))
 			return R_E_FAIL;
 
 		strtrim(buffer);

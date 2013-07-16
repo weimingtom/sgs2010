@@ -40,9 +40,9 @@ reg_card {
 	
 		-- other ways : NO
 		return  NO;
-	end
+	end,
 	
-	out= function(game, event, player)
+	out = function(game, event, player)
 		local ret;
 		local target = -1;
 		local eid = get_event_id(event);
@@ -55,25 +55,23 @@ reg_card {
 		elseif(eid == GameEvent_OutCard) then
 			set_player_param(game, player, 0, get_player_param(game, player, 0) + 1);
 			-- target passive shan
-			OutCardPattern  pattern;
-			ST_ZERO(pattern);
-			pattern.num= 1;
-			INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
-			pattern.where = PlayerCard_Hand;
+			local pattern = {
+				where = PlayerWhere_Hand,
+				fixed = 0,
+				num = 1,
+				{ id = CardID_Defend },
+			};
 	
-			ret = game_passive_out(pGame, pEvent, pEvent->target, player, &pattern, "please out a card 'defend' or pass:");
+			ret = game_passive_out(game, event, get_event_target(event), player, pattern, "please out a card 'defend' or pass:");
 	
-			if(ret != R_SUCC)
-			{
-				// lost life
-				game_player_add_life(pGame, pEvent,pEvent->target, -1);
-	
-			}
+			if(ret ~= R_SUCC) then
+				-- lost life
+				game_player_add_life(game, event,get_event_target(event), -1);
+			end
 	
 			return R_SUCC;
-		}
-	
-	
+		end
+
 		return R_DEF;	
-	end
+	end,
 };

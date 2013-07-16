@@ -15,6 +15,7 @@ extern "C" {
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <direct.h>
+#include <io.h>
 
 
 // windows specify definitions
@@ -39,9 +40,14 @@ extern "C" {
 
 // linux specified headers
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <fnmatch.h>
 #include <iconv.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
 
 #define OUTPUT_UTF8   1 // output message use utf-8 encoding
 
