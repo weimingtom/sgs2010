@@ -7,9 +7,9 @@
 
 
 local ss = {
-	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
-	'{shan}h2;{shan}h3;{shan}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
-	'{tao}c2;{tao}c3;{tao}c4;{tao}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
+	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
+	'{shan}h2;{shan}h3;{shan}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
+	'{tao}c2;{tao}c3;{tao}c4;{tao}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
 };
 
 
@@ -46,10 +46,17 @@ local function card_val_from_ch(ch)
 end
 
 function init_card_stack(stack)
+	--message("init_card_stack", stack);
 	stack_clear(stack);
-	for s in ipairs(ss) do
-		for sid,color,val in string.gfind(s, '{(.-)}([shcd])([0-9JQKA]);') do
-			stack_add_card(get_card_id_by_sid(sid), card_color_from_ch(color), card_val_from_ch(val));
+	for s,v in ipairs(ss) do
+		--message(v);
+		for cs in string.gfind(v, '([^;]+)') do
+			local po,_ ,sid,color, val = string.find(cs, '^{(%w+)}([shdc])([0-9JQKA]+)$');
+			if( not po) then
+				error('invalid card define string \''..cs..'\' is found');
+			end
+			--message(sid,color,val);
+			stack_add_card(stack, get_card_id_by_sid(sid), card_color_from_ch(color), card_val_from_ch(val));
 		end
 	end
 end

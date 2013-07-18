@@ -380,7 +380,37 @@ RESULT to_float(const char* text, float* pv)
 
 void log_text(const char* fmt, ...)
 {
-	//FILE* f = fopen("")
+	static char path [MAX_PATH];
+	static int  init = 0;
+	static int  sz;
+	FILE* f;
+	va_list vl;
+
+	if(init == 0)
+	{
+		time_t  t = time(NULL);
+		get_app_path(path, sizeof(path));
+		sz = strlen(path);
+		sz+=snprintf(path+sz, sizeof(path)-sz, "/log");
+		mkdir(path);
+		struct tm*  lt = localtime(&t);
+		sz+=snprintf(path+sz, sizeof(path)-sz, "/logic_%04d%02d%02d_%02d%02d%02d.log", 
+			lt->tm_year+1900,lt->tm_mon+1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+		init = 1;
+
+		log_text("=========================== LOG START  ======================\n%s", ctime(&t));
+	}
+
+	f = fopen(path, "a+");
+
+	if(f)
+	{
+		va_start(vl, fmt);
+		vfprintf(f, fmt, vl);
+		va_end(vl);
+
+		fclose(f);
+	}
 }
 
 #ifdef OUTPUT_UTF8

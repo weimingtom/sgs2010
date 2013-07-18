@@ -33,7 +33,7 @@ static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int playe
 		n = 0;
 		for(n = 0; n < pEvent->pPatternOut->pattern.num; n++)
 		{
-			if(pEvent->pPatternOut->pattern.patterns[n].id == CardID_Defend)
+			if(pEvent->pPatternOut->pattern.patterns[n].id == card_sid2id("shan"))
 			{
 				return YES;
 			}

@@ -10,6 +10,7 @@
 #include "skill.h"
 #include "info.h"
 #include "discard.h"
+#include "script.h"
 
 
 #define MAX_PARAM_NUM   64
@@ -119,7 +120,7 @@ static char* get_line(const char* prompt, char* buf, int size)
 
 #endif
 
-	log_text(buf);
+	log_text("%s\n", buf);
 
 	return buf;
 }
@@ -147,7 +148,7 @@ static RESULT cmd_quit(const char** argv, int argc, GameContext* pContext, GameE
 	if(pContext->status != Status_None)
 	{
 		//longjmp(pContext->__jb__, R_EXIT);
-		luaL_error(pContext->L, "User Quit");
+		luaL_error(get_game_script(), "User Quit");
 	}
 
 	return R_EXIT;
@@ -258,9 +259,31 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	{
 
 	}
-	else if(!strcmp(argv[1], "out") || !strcmp(argv[1], "o")) // list out cards
+	else if(!strcmp(argv[1], "stack") || !strcmp(argv[1], "s")) // list out cards
 	{
+		if(pContext->status == Status_None)
+		{
+			MSG_OUT("not in game!\n");
+			return R_E_STATUS;
+		}
+		else
+		{
+			int n;
+			char  buffer[128];
+			Card* pCard;
+			MSG_OUT("Game Current Discard Stack:\n");
+			for(n = 0; n < pContext->nCurDiscardCardNum; n++)
+			{
+				pCard = &pContext->stCurDiscardCards[n];
+				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
+			}
 
+			MSG_OUT("Game Discard Stack:\n");		
+			card_stack_dump(&pContext->stDiscardCardStack);
+
+			MSG_OUT("Game Get Stack:\n");		
+			card_stack_dump(&pContext->stGetCardStack);
+		}
 	}
 	else if(!strcmp(argv[1], "player") || !strcmp(argv[1], "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
 	{
@@ -327,7 +350,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		char  desc[1024];
 		if(argc < 3)
 		{
-			maxid = card_maxid(pContext);
+			maxid = card_maxid();
 			for(id = 1; id <= maxid; id++)
 			{
 				//pCardCfg = get_card_config((CardID)id);
@@ -337,13 +360,13 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
 				//}
 
-				MSG_OUT("(%d) {%s}, %s, %s\n", id, card_sid(pContext, (CardID)id, sid, sizeof(sid)),
-					card_name(pContext, (CardID)id, name, sizeof(name)), card_type_str(card_type(pContext, (CardID)id)));
+				MSG_OUT("(%d) {%s}, %s, %s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
+					card_name((CardID)id, name, sizeof(name)), card_type_str(card_type((CardID)id)));
 			}
 		}
 		else
 		{
-			id = card_sid2id(pContext, argv[2]);
+			id = card_sid2id(argv[2]);
 			
 			//pCardCfg = get_card_config((CardID)id);
 			//if(pCardCfg == NULL)
@@ -354,9 +377,9 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			}
 			else
 			{
-				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, card_sid(pContext, (CardID)id, sid, sizeof(sid)),
-					card_name(pContext, (CardID)id, name, sizeof(name)), card_type_str(card_type(pContext, (CardID)id)), 
-					card_desc(pContext, (CardID)id, desc, sizeof(desc)));
+				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
+					card_name((CardID)id, name, sizeof(name)), card_type_str(card_type((CardID)id)), 
+					card_desc((CardID)id, desc, sizeof(desc)));
 			}
 		}				
 	}
@@ -431,7 +454,7 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 {
 	if(get_game_status(pContext) != Status_Round_Out)
 	{
-		MSG_OUT("not in get status!\n");
+		MSG_OUT("not in out status!\n");
 		return R_E_STATUS;
 	}
 
@@ -578,6 +601,17 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 }
 
 
+static RESULT cmd_reload(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	if(pContext->status != Status_None)
+	{
+		MSG_OUT("cannot reload script in playing game!\n");
+		return R_E_STATUS;
+	}
+
+	return reload_game_script();
+}
+
 typedef RESULT (*FunCmd)(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent);
 
 
@@ -609,6 +643,7 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		"info/i game/g\n\t show the game current global info\n"
 		"info/i event/e\n\t show the game current event info\n"
 		"info/i player/p <+n|-n|n>\n\t show the other player info\n"
+		"info/i stack/s\n\t show the game stacks\n"
 		"info/i card/c <name>\n\t show card info by name\n"
 		"info/i hero/h <name>\n\t show hero info by name", 
 		NULL},
@@ -635,6 +670,9 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		NULL},
 	{ "load", NULL, cmd_load,
 		"load <file_name>\n\tload current game context from file.", 
+		NULL},
+	{ "reload", "r", cmd_reload,
+		"reload \n\treload script files.", 
 		NULL},
 };
 

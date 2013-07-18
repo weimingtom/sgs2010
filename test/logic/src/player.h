@@ -168,8 +168,8 @@ YESNO is_player_show(Player* pPlayer);
 YESNO is_player_perdead(Player* pPlayer);
 YESNO is_player_handfull(Player* player);
 
-int get_player_parem(Player* pPlayer, int index);
-void set_player_parem(Player* pPlayer, int index, int val);
+int get_player_param(Player* pPlayer, int index);
+void set_player_param(Player* pPlayer, int index, int val);
 
 
 

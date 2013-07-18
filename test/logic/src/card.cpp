@@ -1,6 +1,7 @@
 #include "config.h"
 #include "card.h"
 #include "comm.h"
+#include "script.h"
 #include "card_impl/card_impl.h"
 
 
@@ -20,7 +21,7 @@ const char* card_type_str(CardType type)
 	}
 }
 
-
+/*
 const char* card_id_str(CardID id)
 {
 	switch(id)
@@ -62,6 +63,8 @@ const char* card_id_str(CardID id)
 	default: return "Invalid";
 	}
 }
+*/
+
 
 const char* card_color_str(CardColor color)
 {
@@ -106,7 +109,7 @@ const char* card_value_str(CardValue value)
 
 
 
-
+/*
 const CardConfig* get_card_config(CardID id)
 {
 	switch(id)
@@ -147,14 +150,17 @@ const CardConfig* get_card_config(CardID id)
 	}
 	return NULL;
 }
+*/
+
 
 char* card_str_n(const Card* pCard, int num, char* buffer, int buflen)
 {
 	int n;
 	int len = 0;
+	char  name[128];
 	for(n = 0; n < num; n++)
 	{
-		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_id_str(pCard->id), card_color_str(pCard->color), card_value_str(pCard->value));
+		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard->id, name, sizeof(name)), card_color_str(pCard->color), card_value_str(pCard->value));
 	}
 	return buffer;
 }
@@ -176,6 +182,7 @@ void card_dump(const Card* pCard)
 
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen)
 {
+	char name[128];
 	char tmp[128];
 	int  len = 0;
 	int n;
@@ -204,7 +211,7 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 		}
 
 		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", 
-			patterns[n].id >= CardID_None ? card_id_str(patterns[n].id) : card_type_str((CardType)-patterns[n].id), 
+			patterns[n].id >= CardID_None ? card_name(patterns[n].id, name, sizeof(name)) : card_type_str((CardType)-patterns[n].id), 
 			card_color_str(patterns[n].color), tmp);
 	}
 	return buffer;
@@ -219,8 +226,10 @@ static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)
 		if(pPattern->id < 0)
 		{
 			// a id type
-			const CardConfig* pCardConfig = get_card_config(pCard->id);
-			if(pCardConfig == NULL || pCardConfig->type != -pPattern->id)
+			// const CardConfig* pCardConfig = get_card_config(pCard->id);
+			//if(pCardConfig == NULL || pCardConfig->type != -pPattern->id)
+			//	return R_E_FAIL;
+			if(card_type(pCard->id) != -pPattern->id)
 				return R_E_FAIL;
 		}
 		else
@@ -354,10 +363,10 @@ RESULT card_match(const Card* pCard,  int nCardNum, const CardPattern* pPattern,
 
 
 
-CardID  card_maxid(GameContext* pGame)
+CardID  card_maxid()
 {
 	CardID id = CardID_None;
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_maxid");
 	lua_call(L, 0, 1);
 	if(lua_isnumber(L, -1))
@@ -369,10 +378,10 @@ CardID  card_maxid(GameContext* pGame)
 }
 
 
-CardID  card_sid2id(GameContext* pGame, const char* sid)
+CardID  card_sid2id(const char* sid)
 {
 	CardID id = CardID_None;
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_id_by_sid");
 	lua_pushstring(L, sid);
 	lua_call(L, 1, 1);
@@ -384,10 +393,10 @@ CardID  card_sid2id(GameContext* pGame, const char* sid)
 	return id;
 }
 
-CardType card_type(GameContext* pGame, CardID  id)
+CardType card_type(CardID  id)
 {
 	CardType  t  =  CardType_Unknown;
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_type");
 	lua_pushnumber(L, id);	
 	lua_call(L, 1, 1);
@@ -399,9 +408,9 @@ CardType card_type(GameContext* pGame, CardID  id)
 	return t;
 }
 
-char* card_sid(GameContext* pGame, CardID  id, char* buf, int buflen)
+char* card_sid(CardID  id, char* buf, int buflen)
 {
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_sid");
 	lua_pushnumber(L, id);	
 	lua_call(L, 1, 1);
@@ -417,10 +426,9 @@ char* card_sid(GameContext* pGame, CardID  id, char* buf, int buflen)
 	return buf;
 }
 
-char* card_name(GameContext* pGame, CardID  id, char* buf, int buflen)
+char* card_name(CardID  id, char* buf, int buflen)
 {
-
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_name");
 	lua_pushnumber(L, id);	
 	lua_call(L, 1, 1);
@@ -436,9 +444,9 @@ char* card_name(GameContext* pGame, CardID  id, char* buf, int buflen)
 	return buf;
 }
 
-char* card_desc(GameContext* pGame, CardID  id, char* buf, int buflen)
+char* card_desc(CardID  id, char* buf, int buflen)
 {
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "get_card_desc");
 	lua_pushnumber(L, id);	
 	lua_call(L, 1, 1);
@@ -455,10 +463,10 @@ char* card_desc(GameContext* pGame, CardID  id, char* buf, int buflen)
 
 }
 
-RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player)
+YESNO  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	RESULT ret = R_DEF;
-	lua_State* L = pGame->L;
+	YESNO ret = NO;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "call_card_check");	
 	tolua_pushnumber(L, id);
 	tolua_pushusertype(L, pGame, "GameContext");
@@ -467,7 +475,7 @@ RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent
 	lua_call(L, 4, 1);
 	if(lua_isnumber(L, -1))
 	{
-		ret = (RESULT)lua_tointeger(L, -1);
+		ret = (YESNO)lua_tointeger(L, -1);
 	}
 	lua_pop(L, 1);
 	return ret;
@@ -477,7 +485,7 @@ RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent
 RESULT  card_out_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	RESULT ret = R_DEF;
-	lua_State* L = pGame->L;
+	lua_State* L = get_game_script();
 	lua_getglobal(L, "call_card_out");	
 	tolua_pushnumber(L, id);
 	tolua_pushusertype(L, pGame, "GameContext");

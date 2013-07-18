@@ -59,7 +59,7 @@ struct tagGameContext
 	int        nCurPlayer;
 	Status     status;
 	//jmp_buf    __jb__;  // for quit a game directly
-	lua_State  *L;      // for run card/hero logic in lua engine
+	//lua_State  *L;      // for run card/hero logic in lua engine
 };
 
 // tolua_begin
@@ -119,9 +119,6 @@ Player* get_game_player(GameContext* pGame, int player);
 // tolua_end
 
 
-// for lua replace dofile...
-// export as import(path)
-void game_import_file(lua_State* L, const char* pattern);
 
 
 #ifdef __cplusplus

@@ -14,23 +14,24 @@
 static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* pOut)
 {
 	RESULT  ret;
-	const CardConfig* pCardConfig;
+	//const CardConfig* pCardConfig;
 
 	GameEventContext  stEvent;
 	
 
-	pCardConfig = get_card_config(pOut->vcard.id);
+	//pCardConfig = get_card_config(pOut->vcard.id);
 
-	if(pCardConfig == NULL)
-		return R_E_FAIL;
+	//if(pCardConfig == NULL)
+	//	return R_E_FAIL;
 
 
-	if(pCardConfig->out)
+	//if(pCardConfig->out)
 	{
 		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, 0, pParentEvent);
 		stEvent.pOut = pOut;
 
-		ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
+		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
+		ret = card_out_call(pOut->vcard.id, pGame, &stEvent, trigger);
 
 		CHECK_RET(ret, ret);
 	}
@@ -54,17 +55,18 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
 {
 	RESULT   ret;
-	const CardConfig* pCardConfig;
+	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
 	INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
 	stEvent.pOut = pOut;
 
 	// out procedure
-	pCardConfig = get_card_config(pOut->vcard.id);
-	if(pCardConfig != NULL && pCardConfig->out != NULL)
+	//pCardConfig = get_card_config(pOut->vcard.id);
+	//if(pCardConfig != NULL && pCardConfig->out != NULL)
 	{
-		ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
+		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
+		ret = card_out_call(pOut->vcard.id, pGame, &stEvent, trigger);
 		CHECK_RET(ret, ret);
 
 	}
@@ -360,11 +362,12 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		get_player_card(pPlayer, where[0], pos[0], &stCard[0]);
 
 		// check can out?
-		const CardConfig* pCardConfig = get_card_config(stCard[0].id);
+		// const CardConfig* pCardConfig = get_card_config(stCard[0].id);
 
 
-		if(pCardConfig == NULL || pCardConfig->check == NULL
-			|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->nCurPlayer))
+		//if(pCardConfig == NULL || pCardConfig->check == NULL
+		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->nCurPlayer))
+		if(YES != card_check_call(stCard[0].id, pGame, pEvent, pGame->nCurPlayer))
 		{
 			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0], buffer, sizeof(buffer)));
 			return R_E_PARAM;
@@ -550,7 +553,7 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 //        <val> : one of '2 - 10, J, Q, K, A' , can use [from-to] format, if it is empty, means any value.
 //             
 //
-static RESULT  load_pattern(GameContext* pGame, OutCardPattern* pPattern, const char* szPattern)
+static RESULT  load_pattern(OutCardPattern* pPattern, const char* szPattern)
 {
 	//RESULT       ret;
 	const char*  p;
@@ -600,6 +603,7 @@ static RESULT  load_pattern(GameContext* pGame, OutCardPattern* pPattern, const 
 		// <{sid}>
 		if(*p == '{')
 		{
+			p++;
 			// get {sid}
 			tln = 0;
 			while(*p && *p != '}')
@@ -621,14 +625,16 @@ static RESULT  load_pattern(GameContext* pGame, OutCardPattern* pPattern, const 
 				return R_E_FAIL;
 			}
 
+			p++;
+
 			if(0 == strcmp(tmp, "none"))
 			{
 				pcp->id = CardID_None;
 			}
 			else
 			{
-				pcp->id = card_sid2id(pGame, tmp);
-				if(pcp->id == (CardID)-1)
+				pcp->id = card_sid2id(tmp);
+				if(pcp->id == (CardID_None))
 				{
 					// invalid card sid
 					return R_E_FAIL;
@@ -765,7 +771,7 @@ RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int 
 	RESULT ret;
 
 	ST_ZERO(pattern_out);
-	if(R_SUCC != load_pattern(pGame, &pattern_out.pattern, pattern))
+	if(R_SUCC != load_pattern(&pattern_out.pattern, pattern))
 	{
 		MSG_OUT("error OudCardPattern \"%s\"\n", pattern);
 		return R_E_FAIL;
@@ -824,7 +830,7 @@ RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int 
 	INIT_EVENT(&event, GameEvent_SupplyCard, trigger, player, pParentEvent);
 
 	ST_ZERO(pattern_out);
-	if(R_SUCC != load_pattern(pGame, &pattern_out.pattern, pattern))
+	if(R_SUCC != load_pattern(&pattern_out.pattern, pattern))
 	{
 		MSG_OUT("error OudCardPattern \"%s\"\n", pattern);
 		return R_E_FAIL;

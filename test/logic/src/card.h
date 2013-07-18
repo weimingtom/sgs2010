@@ -28,6 +28,7 @@ typedef enum _CardType
 typedef enum _CardID
 {
 	CardID_None = 0,
+	/*
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
 	CardID_Defend,   // SHAN - a normal defend card, counteract the effect of the SHA card
 	CardID_Medicine, // TAO - a normal medicine card, the target restore one life when used to.
@@ -61,6 +62,7 @@ typedef enum _CardID
 	CardID_BaGua,
 	CardID_SheildRenWang,
 	CardID_Max,
+	*/
 }CardID;
 
 // card color
@@ -176,11 +178,11 @@ struct tagCardPattern
 
 
 const char* card_type_str(CardType type);
-const char* card_id_str(CardID id);
+//const char* card_id_str(CardID id);
 const char* card_color_str(CardColor color);
 const char* card_value_str(CardValue value);
 
-const CardConfig* get_card_config(CardID id);
+// const CardConfig* get_card_config(CardID id);
 
 void card_dump(const Card* pCard);
 
@@ -203,13 +205,13 @@ RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, 
 
 
 // wrapper from lua to c
-CardID  card_maxid(GameContext* pGame);
-CardID  card_sid2id(GameContext* pGame, const char* sid);
-CardType card_type(GameContext* pGame, CardID  id);
-char* card_sid(GameContext* pGame, CardID  id, char* buf, int buflen);
-char* card_name(GameContext* pGame, CardID  id, char* buf, int buflen);
-char* card_desc(GameContext* pGame, CardID  id, char* buf, int buflen);
-RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
+CardID  card_maxid();
+CardID  card_sid2id(const char* sid);
+CardType card_type(CardID  id);
+char* card_sid(CardID  id, char* buf, int buflen);
+char* card_name(CardID  id, char* buf, int buflen);
+char* card_desc(CardID  id, char* buf, int buflen);
+YESNO  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 RESULT  card_out_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 
 
