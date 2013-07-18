@@ -185,10 +185,6 @@ YESNO  get_event_block(GameEventContext* pEvent);
 void  set_event_block(GameEventContext* pEvent, YESNO  yesno);
 
 Card* get_event_card(GameEventContext* pEvent);
-void set_card_id(Card* pCard, CardID id);
-void set_card_color(Card* pCard, CardColor cl);
-void set_card_value(Card* pCard, CardValue val);
-void set_card_flag(Card* pCard, CardFlag flag);
 
 OutCard* get_event_out(GameEventContext* pEvent);
 void  set_event_out(GameEventContext* pEvent, OutCard* pOut);

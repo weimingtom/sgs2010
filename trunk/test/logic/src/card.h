@@ -201,6 +201,12 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 
 RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
 
+
+void set_card_id(Card* pCard, CardID id);
+void set_card_color(Card* pCard, CardColor cl);
+void set_card_value(Card* pCard, CardValue val);
+void set_card_flag(Card* pCard, CardFlag flag);
+
 // tolua_end
 
 

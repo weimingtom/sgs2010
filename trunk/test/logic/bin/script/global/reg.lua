@@ -140,6 +140,11 @@ function get_card_id_by_sid(sid)
 	return card_index[sid] or 0;
 end
 
+
+function card_sid2name(sid)
+	return get_card_name(get_card_id_by_sid(sid));
+end
+
 function call_card_check(id, game, event, player)
 	local cfg = card_list[id];
 	if(cfg == nil or cfg.check == nil) then
