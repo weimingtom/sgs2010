@@ -77,10 +77,10 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 // tolua_begin
 
 // trigger supply from player the card match the  pattern, return through pOut
-RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const OutCardPattern* pattern, const char* alter_text, OutCard* pOut);
+RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern, const char* alter_text, OutCard* pOut);
 
 // passive out process
-RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const OutCardPattern* pattern, const char* alter_text);
+RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const char* pattern, const char* alter_text);
 
 
 

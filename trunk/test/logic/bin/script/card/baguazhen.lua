@@ -17,10 +17,10 @@ reg_card {
 	name = '八卦阵',
 	desc = [==[防具效果：每当你需要使用（或打出）一张【闪】时，你可以进行一次判定：若结果为红色，则视为你使用（或打出）了一张【闪】；若为黑色，则你仍可从手牌里使用（或打出）。
 
-★由八卦使用或打出的【闪】，并非从你的手牌中使用或打出。]==]
+★由八卦使用或打出的【闪】，并非从你的手牌中使用或打出。]==],
 
 	check = function(cfg, game, event, player)
-		if( get_event_id(event) == GameEvent_OutCard) then
+		if( get_event_id(event) == GameEvent_OutCard  and get_game_round_player(game)==player) then
 			return YES;
 		end
 		return NO;
@@ -28,10 +28,7 @@ reg_card {
 	
 	out = function(cfg, game, event, player)
 		if ( get_event_id(event) == GameEvent_OutCard ) then
-			if(R_SUCC == game_player_equip_card(game, event, player, EquipIdx_Armor, get_event_out(event))) then
-				-- equip success
-			end
-			return R_SUCC;
+			return game_player_equip_card(game, event, player, EquipIdx_Armor, get_event_out(event));
 		end
 		return R_SUCC;
 	end,

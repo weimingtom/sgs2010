@@ -36,3 +36,41 @@
 --]]
 
 
+reg_card {
+	sid = "tao",
+	name="桃",
+	type=CardType_Normal,
+	desc=[==[桃能在两种情况下使用：
+一、在你的出牌阶段，你可以使用它来回复你的1点体力。
+二、当有角色处于濒死状态时，你可以对该角色使用【桃】，防止该角色的死亡。]==],
+
+
+	check = function(cfg, game, event, player)
+		local eid = get_event_id(event);
+
+		-- use in round out restore my life
+		if(eid == GameEvent_RoundOutCard and get_game_round_player(game)==player) then
+			local p = get_game_player(game, player);
+			if(get_player_curlife(p) < get_player_maxlife(p) ) then
+				 return YES;
+			end
+		end
+	
+		-- other ways : NO
+		return  NO;
+	end,
+	
+	out = function(cfg, game, event, player)
+		local ret;
+		local target = -1;
+		local eid = get_event_id(event);
+	
+		if(eid == GameEvent_RoundOutCard) then
+			game_player_add_life(game, event, player, 1);
+		elseif(eid == GameEvent_PerDead) then
+			game_player_add_life(game, event, get_event_trigger(event), 1);
+		end
+	
+		return R_SUCC;	
+	end,
+};

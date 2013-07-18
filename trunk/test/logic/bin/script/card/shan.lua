@@ -9,3 +9,14 @@
 
 --]]
 
+reg_card {
+	sid = "shan",
+	name="闪",
+	type=CardType_Normal,
+	desc=[[当你受到【杀】的攻击时，你可以使用一张【闪】来抵消【杀】的效果。
+
+★闪通常情况下只能在回合外使用或打出。]],
+	check = nil,
+	
+	out = nil,
+};

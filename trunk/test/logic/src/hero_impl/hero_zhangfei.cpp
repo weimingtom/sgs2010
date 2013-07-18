@@ -21,14 +21,14 @@ static RESULT paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int play
 	//MSG_OUT("please out a card 'sha' or cancel skill:");
 	RESULT ret;
 
-	OutCardPattern pattern;
+	//OutCardPattern pattern;
 	OutCard        out_card;
 
-	pattern.num = 1;
-	INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Attack);
-	pattern.where = PlayerCard_Hand;
+	//pattern.num = 1;
+	//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Attack);
+	//pattern.where = PlayerCard_Hand;
 
-	ret = game_supply_card(pGame, pEvent, player, player, &pattern, "please out a card 'sha' or cancel the skill:", &out_card);
+	ret = game_supply_card(pGame, pEvent, player, player, "h:{attack}", "please out a card 'attack' or cancel the skill:", &out_card);
 	CHECK_RET(ret, ret);
 
 	return game_real_out_card(pGame, pEvent, player, &out_card);

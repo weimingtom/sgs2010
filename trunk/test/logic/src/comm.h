@@ -48,7 +48,6 @@ RESULT to_int(const char* text, int* pv);
 RESULT to_uint(const char* text, unsigned int* pv);
 RESULT to_float(const char* text, float* pv);
 
-char* to_utf8(const char*  str, char* buffer, int len);
 
 void log_text(const char* fmt, ...);
 
@@ -57,6 +56,7 @@ int message_printf(const char* fmt, ...);
 #define MSG_OUT   message_printf
 
 #ifdef OUTPUT_UTF8 
+char* to_utf8(const char*  str, char* buffer, int len);
 #define  A2UTF8(s,b,l)   to_utf8((s),(b),(l))
 #else
 #define  A2UTF8(s,b,l)   strncpy((b),(s),(l))

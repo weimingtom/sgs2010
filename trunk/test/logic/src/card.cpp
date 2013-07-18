@@ -352,3 +352,145 @@ RESULT card_match(const Card* pCard,  int nCardNum, const CardPattern* pPattern,
 }
 
 
+
+
+CardID  card_maxid(GameContext* pGame)
+{
+	CardID id = CardID_None;
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_maxid");
+	lua_call(L, 0, 1);
+	if(lua_isnumber(L, -1))
+	{
+		id = (CardID)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return id;
+}
+
+
+CardID  card_sid2id(GameContext* pGame, const char* sid)
+{
+	CardID id = CardID_None;
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_id_by_sid");
+	lua_pushstring(L, sid);
+	lua_call(L, 1, 1);
+	if(lua_isnumber(L, -1))
+	{
+		id = (CardID)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return id;
+}
+
+CardType card_type(GameContext* pGame, CardID  id)
+{
+	CardType  t  =  CardType_Unknown;
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_type");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	if(lua_isnumber(L, -1))
+	{
+		t = (CardType)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return t;
+}
+
+char* card_sid(GameContext* pGame, CardID  id, char* buf, int buflen)
+{
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_sid");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	if(lua_isstring(L, -1))
+	{
+		strncpy(buf, lua_tostring(L, -1), buflen);
+	}
+	else
+	{
+		buf[0] = 0;
+	}
+	lua_pop(L, 1);
+	return buf;
+}
+
+char* card_name(GameContext* pGame, CardID  id, char* buf, int buflen)
+{
+
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_name");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	if(lua_isstring(L, -1))
+	{
+		strncpy(buf, lua_tostring(L, -1), buflen);
+	}
+	else
+	{
+		buf[0] = 0;
+	}
+	lua_pop(L, 1);
+	return buf;
+}
+
+char* card_desc(GameContext* pGame, CardID  id, char* buf, int buflen)
+{
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "get_card_desc");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	if(lua_isstring(L, -1))
+	{
+		strncpy(buf, lua_tostring(L, -1), buflen);
+	}
+	else
+	{
+		buf[0] = 0;
+	}
+	lua_pop(L, 1);
+	return buf;
+
+}
+
+RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player)
+{
+	RESULT ret = R_DEF;
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "call_card_check");	
+	tolua_pushnumber(L, id);
+	tolua_pushusertype(L, pGame, "GameContext");
+	tolua_pushusertype(L, pEvent, "GameEventContext");
+	tolua_pushnumber(L, player);
+	lua_call(L, 4, 1);
+	if(lua_isnumber(L, -1))
+	{
+		ret = (RESULT)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return ret;
+}
+
+
+RESULT  card_out_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player)
+{
+	RESULT ret = R_DEF;
+	lua_State* L = pGame->L;
+	lua_getglobal(L, "call_card_out");	
+	tolua_pushnumber(L, id);
+	tolua_pushusertype(L, pGame, "GameContext");
+	tolua_pushusertype(L, pEvent, "GameEventContext");
+	tolua_pushnumber(L, player);
+	lua_call(L, 4, 1);
+	if(lua_isnumber(L, -1))
+	{
+		ret = (RESULT)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return ret;
+}
+
+
+

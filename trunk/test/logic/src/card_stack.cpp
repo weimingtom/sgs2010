@@ -297,3 +297,22 @@ RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
 }
 
 
+void stack_clear(CardStack* pCardStack)
+{
+	card_stack_clear(pCardStack);
+}
+
+void stack_add_card(CardStack* pCardStack, CardID id, CardColor color, CardValue val)
+{
+	Card  card;
+	card.id = id;
+	card.color = color;
+	card.value = val;
+	card.flag = CardFlag_None;
+
+	card_stack_push(pCardStack, &card);
+}
+
+
+
+

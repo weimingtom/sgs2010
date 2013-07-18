@@ -37,6 +37,13 @@ RESULT card_stack_pop_back(CardStack* pCardStack, Card* pCard);
 RESULT card_stack_insert(CardStack* pCardStack, int offset, const Card* pCard);
 RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard);
 
+// tolua_begin
+
+void stack_clear(CardStack* pCardStack);
+void stack_add_card(CardStack* pCardStack, CardID id, CardColor color, CardValue val);
+
+// tolua_end
+
 
 #ifdef __cplusplus
 }

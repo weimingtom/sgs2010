@@ -530,6 +530,209 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 	return R_SUCC;
 }
 
+// pattern:  <flags>:<card pattern 1>;<card pattern 2>;...
+// flags: one or more follow chars -
+//         h : hand card is enable
+//         e : equip card is enable
+//         j : judgement card is enable
+//         f : fixed mode, need real card, skill for gen card is disabled
+// card  pattern: <{sid}><color><val>
+//         each <...> can be [<from>-<to>] or [<p1><p2><p3>] ...
+//        <{sid}> : the card sid name. can be empty, that means any sid is valid, equal to {none}
+//        <color> : one of char - can be empty, that means any color
+//             s  : spade
+//             h  : heart
+//             d  : diamond
+//             c  : club
+//             b  : black (spade or club)
+//             r  : red (heart or diamond)
+//             n  : none (any color)
+//        <val> : one of '2 - 10, J, Q, K, A' , can use [from-to] format, if it is empty, means any value.
+//             
+//
+static RESULT  load_pattern(GameContext* pGame, OutCardPattern* pPattern, const char* szPattern)
+{
+	//RESULT       ret;
+	const char*  p;
+	int          sp;
+	char         tmp[256];
+	int          tln;
+	CardPattern* pcp;
+
+	ST_ZERO(*pPattern);
+
+	p = szPattern;
+	
+	// parse <flags>
+
+	while(*p && *p != ':')
+	{
+		switch(*p)
+		{
+		case 'h' : pPattern->where |= PlayerCard_Hand; break;
+		case 'e' : pPattern->where |= PlayerCard_Equip; break;
+		case 'j' : pPattern->where |= PlayerCard_Judgment; break;
+		case 'f' : pPattern->fixed = YES; break;
+		default: return R_E_FAIL;  // invalid flsg char.
+		}
+		p++;
+	}
+
+	// :
+	if(*p != ':')
+	{
+		// expected ':' splitter flags and card patterns
+		return R_E_FAIL;
+	}
+	p++;
+
+	pPattern->num = 0;
+
+
+	// <card pattern n>; ...
+	while(*p)
+	{
+		pcp = &pPattern->patterns[pPattern->num];
+		pPattern->num++;
+
+		sp = 0;
+
+		// <{sid}>
+		if(*p == '{')
+		{
+			// get {sid}
+			tln = 0;
+			while(*p && *p != '}')
+			{
+				if(tln > sizeof(tmp) - 1)
+				{
+					// too long sid string
+					return R_E_FAIL;
+				}
+				tmp[tln] = *p;
+				tln++;
+				p++;
+			}
+			tmp[tln] = 0;
+
+			if(*p != '}')
+			{
+				// expected '}' for end of sid
+				return R_E_FAIL;
+			}
+
+			if(0 == strcmp(tmp, "none"))
+			{
+				pcp->id = CardID_None;
+			}
+			else
+			{
+				pcp->id = card_sid2id(pGame, tmp);
+				if(pcp->id == (CardID)-1)
+				{
+					// invalid card sid
+					return R_E_FAIL;
+				}
+			}
+		}
+
+		switch(*p)
+		{
+		case 's': pcp->color = CardColor_Spade; break;
+		case 'h': pcp->color = CardColor_Heart; break;
+		case 'd': pcp->color = CardColor_Diamond; break;
+		case 'c': pcp->color = CardColor_Club; break;
+		case 'b': pcp->color = CardColor_GeneralBlack; break;
+		case 'r': pcp->color = CardColor_GeneralRed; break;
+		case 'n': pcp->color = CardColor_None; break;
+		default:  goto  __v_parse;
+		}
+		p++;
+
+__v_parse:
+		switch(*p)
+		{
+		case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+			pcp->value_min = (CardValue)(CardValue_2 + (*p - '2'));
+			break;
+		case '1':
+			if(*(p+1) == '0')
+			{
+				p++;
+				pcp->value_min = CardValue_10;
+			}
+			else
+			{
+				// expected '0' for card value 10
+				return R_E_FAIL;
+			}
+			break;
+		case 'J': pcp->value_min = CardValue_J; break;
+		case 'Q': pcp->value_min = CardValue_J; break;
+		case 'K': pcp->value_min = CardValue_J; break;
+		case 'A': pcp->value_min = CardValue_J; break;
+		case 'N': pcp->value_min = CardValue_None; break;
+		default: goto __fini_parse;
+		}
+		p++;
+
+		if(*p == '-')
+		{
+			p++;
+
+			switch(*p)
+			{
+			case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+				pcp->value_max = (CardValue)(CardValue_2 + (*p - '2'));
+				break;
+			case '1':
+				if(*(p+1) == '0')
+				{
+					p++;
+					pcp->value_max = CardValue_10;
+				}
+				else
+				{
+					// expected '0' for card value 10
+					return R_E_FAIL;
+				}
+				break;
+			case 'J': pcp->value_max = CardValue_J; break;
+			case 'Q': pcp->value_max = CardValue_J; break;
+			case 'K': pcp->value_max = CardValue_J; break;
+			case 'A': pcp->value_max = CardValue_J; break;
+			case 'N': pcp->value_max = CardValue_None; break;
+			default: return R_E_FAIL;
+			}
+			p++;
+
+		}
+		else
+		{
+			pcp->value_max = pcp->value_min;
+		}
+
+__fini_parse:
+
+		if(*p == ';')
+			p++;
+		else if(*p != '\0')
+		{
+			// expected ';' or end of pattern
+			return R_E_FAIL;
+		}
+	}
+
+
+	if(pPattern->num == 0)
+	{
+		// expected at least one card pattern
+		return R_E_FAIL;
+	}
+
+	return R_SUCC;
+}
+
 
 static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pPatternOut)
 {
@@ -555,14 +758,18 @@ static RESULT post_passive_out_card(GameContext* pGame, GameEventContext* pParen
 }
 
 
-RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, const OutCardPattern* pattern, const char* alter_text)
+RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, const char* pattern, const char* alter_text)
 {
 	PatternOut   pattern_out;
 	GameEventContext  event;
 	RESULT ret;
 
 	ST_ZERO(pattern_out);
-	pattern_out.pattern = *pattern;
+	if(R_SUCC != load_pattern(pGame, &pattern_out.pattern, pattern))
+	{
+		MSG_OUT("error OudCardPattern \"%s\"\n", pattern);
+		return R_E_FAIL;
+	}
 
 
 	ret = per_passive_out_card(pGame, pParentEvent, player, target, &pattern_out);
@@ -605,7 +812,7 @@ RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int 
 }
 
 
-RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const OutCardPattern* pattern,const char* alter_text, OutCard* pOut)
+RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern,const char* alter_text, OutCard* pOut)
 {
 	char   text[1024];
 	char   temp[128];
@@ -617,15 +824,20 @@ RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int 
 	INIT_EVENT(&event, GameEvent_SupplyCard, trigger, player, pParentEvent);
 
 	ST_ZERO(pattern_out);
-	pattern_out.pattern = *pattern;
+	if(R_SUCC != load_pattern(pGame, &pattern_out.pattern, pattern))
+	{
+		MSG_OUT("error OudCardPattern \"%s\"\n", pattern);
+		return R_E_FAIL;
+	}
+
 	event.pPatternOut = &pattern_out;
 
 	set_game_cur_player(pGame, player);
 
 	if(alter_text == NULL)
 	{
-		snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out req card' or 'cancel'", 
-			CUR_PLAYER(pGame)->name, card_pattern_str_n(pattern->patterns, pattern->num, temp, sizeof(temp)));
+		snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out specified card' or 'cancel'", 
+			CUR_PLAYER(pGame)->name, card_pattern_str_n(pattern_out.pattern.patterns, pattern_out.pattern.num, temp, sizeof(temp)));
 		alter_text = text;
 	}
 
