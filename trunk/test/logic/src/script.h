@@ -12,6 +12,7 @@ lua_State* get_game_script();
 void  close_game_script();
 RESULT  reload_game_script();
 
+lua_State* get_ai_script();
 
 #ifdef __cplusplus
 };

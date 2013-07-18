@@ -85,6 +85,7 @@ int luaex_import_file(lua_State* L )
 	}
 
 	last_path = lua_tostring(L, -1);
+	(void)last_path;
 
 	get_cur_path(cwd_path, sizeof(cwd_path));
 
@@ -401,3 +402,7 @@ RESULT  reload_game_script()
 }
 
 
+lua_State* get_ai_script()
+{
+	return g_ai_L;
+}
