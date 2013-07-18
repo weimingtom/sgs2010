@@ -60,25 +60,6 @@ Card* get_event_card(GameEventContext* pEvent)
 	return pEvent->pCard;
 }
 
-void set_card_id(Card* pCard, CardID id)
-{
-
-}
-
-void set_card_color(Card* pCard, CardColor cl)
-{
-
-}
-
-void set_card_value(Card* pCard, CardValue val)
-{
-
-}
-
-void set_card_flag(Card* pCard, CardFlag flag)
-{
-
-}
 
 OutCard* get_event_out(GameEventContext* pEvent)
 {
@@ -87,12 +68,12 @@ OutCard* get_event_out(GameEventContext* pEvent)
 
 void  set_event_out(GameEventContext* pEvent, OutCard* pOut)
 {
-
+	pEvent->pOut = pOut;
 }
 
 void set_out_target(OutCard* pOut, int target)
 {
-
+	pOut->target = target;
 }
 
 // end lua interface implements
