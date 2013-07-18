@@ -17,11 +17,11 @@ PKG_DIR=../../pkg
 OUT=$(OUT_DIR)/logic
 
 
-SRC=$(shell find $(SRC_DIR) -name '*.cpp' -type f)
-SRC+=$(shell find $(SRC_DIR/card_impl) -name '*.cpp' -type f)
-SRC+=$(shell find $(SRC_DIR/hero_impl) -name '*.cpp' -type f)
+SRC=$(shell ls $(SRC_DIR)/*.cpp)
+#SRC+=$(shell ls $(SRC_DIR)/card_impl/*.cpp)
+SRC+=$(shell ls $(SRC_DIR)/hero_impl/*.cpp)
 
-PKG=$(shell find $(PKG_DIR) -name '*.pkg' -type f)
+PKG=$(shell ls $(PKG_DIR)/*.pkg)
 
 SRC+= $(PKG:.pkg=.cpp)
 
