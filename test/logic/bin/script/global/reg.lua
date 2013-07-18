@@ -126,6 +126,10 @@ function get_card_desc(id)
 end
 
 function get_card_sid(id)
+	if(id == CardID_None) then
+		return 'none';
+	end
+	
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then

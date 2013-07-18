@@ -306,7 +306,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\platform.c"
+				RelativePath="..\..\src\platform.cpp"
 				>
 			</File>
 			<File

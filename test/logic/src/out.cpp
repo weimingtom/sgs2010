@@ -29,6 +29,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	{
 		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, 0, pParentEvent);
 		stEvent.pOut = pOut;
+		pOut->target = -1;  // for require fill the target
 
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = card_out_call(pOut->vcard.id, pGame, &stEvent, trigger);

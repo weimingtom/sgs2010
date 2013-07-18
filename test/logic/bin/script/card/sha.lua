@@ -65,7 +65,7 @@ reg_card {
 			-- target passive shan
 	
 			ret = game_passive_out(game, event, get_event_target(event), player, "h:{shan}", 
-				"请出一张【"..get_card_name(get_card_id_by_sid('shan')).."】:");
+				"请出一张【"..card_sid2name('shan').."】:");
 	
 			if(ret ~= R_SUCC) then
 				-- lost life

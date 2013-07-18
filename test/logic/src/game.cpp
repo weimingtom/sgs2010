@@ -744,12 +744,84 @@ static int fprintf_tab(FILE* pf, int tabs, const char* fmt, ...)
 	return n + tabs;
 }
 
+
+static const char* game_status_id_str(Status s)
+{
+	switch(s)
+	{
+	case Status_None: return  "Status_None";
+	case Status_NewGame: return  "Status_NewGame";
+	case Status_Round_Begin: return  "Status_Round_Begin";
+	case Status_Round_Judge: return  "Status_Round_Judge";
+	case Status_Round_Get: return  "Status_Round_Get";
+	case Status_Round_Out: return  "Status_Round_Out";
+	case Status_Round_Discard: return  "Status_Round_Discard";
+	case Status_Round_End: return  "Status_Round_End";
+	default: return "-1";
+	}
+}
+
+const char* player_id_id_str(PlayerID id)
+{
+	switch(id)
+	{
+	case PlayerID_Unknown: return "PlayerID_Unknown";
+	case PlayerID_None: return "PlayerID_None";
+	case PlayerID_Master: return "PlayerID_Master";
+	case PlayerID_Minster: return "PlayerID_Minster";
+	case PlayerID_Spy: return "PlayerID_Spy";
+	case PlayerID_Mutineer: return "PlayerID_Mutineer";
+	default: return "PlayerID_Unknown";
+	}
+}
+
+const char* card_color_id_str(CardColor color)
+{
+	switch(color)
+	{
+	case CardColor_Unknown: return "CardColor_Unknown";
+	case CardColor_None: return "CardColor_None"; 
+	case CardColor_Spade: return "CardColor_Spade";
+	case CardColor_Club: return "CardColor_Club";
+	case CardColor_Heart: return "CardColor_Heart";
+	case CardColor_Diamond : return "CardColor_Diamond";
+	case CardColor_GeneralBlack: return "CardColor_GeneralBlack";
+	case CardColor_GeneralRed: return "CardColor_GeneralRed";
+	default: return "CardColor_Unknown";
+	};
+}
+
+const char* card_value_id_str(CardValue value)
+{
+	switch(value)
+	{
+	case CardValue_Unknown: return "CardValue_Unknown";
+	case CardValue_None: return "CardValue_None";
+	case CardValue_2: return "CardValue_2";
+	case CardValue_3: return "CardValue_3";
+	case CardValue_4: return "CardValue_4";
+	case CardValue_5: return "CardValue_5";
+	case CardValue_6: return "CardValue_6";
+	case CardValue_7: return "CardValue_7";
+	case CardValue_8: return "CardValue_8";
+	case CardValue_9: return "CardValue_9";
+	case CardValue_10: return "CardValue_10";
+	case CardValue_J: return "CardValue_J";
+	case CardValue_Q: return "CardValue_Q";
+	case CardValue_K: return "CardValue_K";
+	case CardValue_A: return "CardValue_A";
+	default: return "CardValue_Unknown";
+	}
+}
+
+
 static void game_save_card(Card* pCard, FILE* file, int tabs)
 {
-	fprintf_tab(file, 0, "id = %2d, ", pCard->id);
-	fprintf_tab(file, 0, "color = %2d, ", pCard->color);
-	fprintf_tab(file, 0, "value = %2d, ", pCard->value);
-	fprintf_tab(file, 0, "flag = 0x%08x, ", pCard->flag);
+	char  temp[128];
+	fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
+	fprintf_tab(file, 0, "color = %s, ", card_color_id_str(pCard->color));
+	fprintf_tab(file, 0, "value = %s, ", card_value_id_str(pCard->value));
+	fprintf_tab(file, 0, "flag = 0x%x, ", pCard->flag);
 
 }
 
@@ -774,7 +846,7 @@ static void game_save_cardstack(CardStack* pCardStack, FILE* file, int tabs)
 static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 {
 	int n;
-	fprintf_tab(file, tabs, "id = %d,\n", pPlayer->id);
+	fprintf_tab(file, tabs, "id = %s,\n", player_id_id_str(pPlayer->id));
 	fprintf_tab(file, tabs, "hero = %d,\n", pPlayer->hero);
 	fprintf_tab(file, tabs, "maxLife = %d,\n", pPlayer->maxLife);
 	fprintf_tab(file, tabs, "curLife = %d,\n", pPlayer->curLife);
@@ -810,7 +882,7 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	}
 	fprintf_tab(file, tabs, "},\n");
 
-	fprintf_tab(file, tabs, "status = %d,\n", pPlayer->status);
+	fprintf_tab(file, tabs, "status = %d,\n", (pPlayer->status));
 	fprintf_tab(file, tabs, "flag = %d,\n", pPlayer->flag);
 
 	fprintf_tab(file, tabs, "params = {");
@@ -884,8 +956,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	fprintf_tab(file, tabs, "nRoundNum = %d,\n", pGame->nRoundNum);
 	fprintf_tab(file, tabs, "nRoundPlayer = %d,\n", pGame->nRoundPlayer);
 	fprintf_tab(file, tabs, "nCurPlayer = %d,\n", pGame->nCurPlayer);
-	fprintf_tab(file, tabs, "status = %d,\n", pGame->status);
-
+	fprintf_tab(file, tabs, "status = %s,\n", game_status_id_str(pGame->status));
 
 	fprintf_tab(file, 0, "};\n");
 
@@ -895,9 +966,26 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 }
 
 
-#define LOAD_FIELD(p,field,L,fn)  do{ \
+
+#define LOAD_INT(p,field,L)  do{ \
 	lua_getfield(L, -1, #field); \
-	(p)->field = fn(L, -1); \
+	if(lua_isnoneornil(L, -1)) {\
+		luaL_error(L, "attemp to get field \"%s\", a nil value!", #field);\
+	} else if(!lua_isnumber(L, -1)){ \
+		luaL_error(L, "attemp to get field \"%s\", not a number!", #field);\
+	} \
+	(p)->field = lua_tointeger(L, -1); \
+	lua_pop(L, 1); \
+} while(0)
+
+#define LOAD_INT_CAST(p,field,L,t)  do{ \
+	lua_getfield(L, -1, #field); \
+	if(lua_isnoneornil(L, -1)) {\
+		luaL_error(L, "attemp to get field \"%s\", a nil value!", #field);\
+	} else if(!lua_isnumber(L, -1)){ \
+		luaL_error(L, "attemp to get field \"%s\", not a number!", #field);\
+	} \
+	(p)->field = (t)lua_tointeger(L, -1); \
 	lua_pop(L, 1); \
 } while(0)
 
@@ -910,16 +998,19 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 
 void game_load_card(lua_State* L, Card* pCard)
 {
-	LOAD_FIELD(pCard, id, L, (CardID)lua_tointeger);
-	LOAD_FIELD(pCard, color, L, (CardColor)lua_tointeger);
-	LOAD_FIELD(pCard, value, L, (CardValue)lua_tointeger);
-	LOAD_FIELD(pCard, flag, L, (CardFlag)lua_tointeger);
+	//LOAD_INT_CAST(pCard, id, L, CardID);
+	lua_getfield(L, -1, "sid");
+	pCard->id = card_sid2id(lua_tostring(L, -1));
+	lua_pop(L, 1);
+	LOAD_INT_CAST(pCard, color, L, CardColor);
+	LOAD_INT_CAST(pCard, value, L, CardValue);
+	LOAD_INT_CAST(pCard, flag, L, CardFlag);
 }
 
 void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 {
 	int n;
-	LOAD_FIELD(pCardStack, count, L, lua_tointeger);
+	LOAD_INT(pCardStack, count, L);
 
 	if(pCardStack->count > CARD_STACK_SIZE)
 	{
@@ -942,13 +1033,13 @@ void game_load_player(lua_State* L, Player* pPlayer)
 {
 	int n;
 
-	LOAD_FIELD(pPlayer, id, L, (PlayerID)lua_tointeger);
-	LOAD_FIELD(pPlayer, hero, L, (HeroID)lua_tointeger);
-	LOAD_FIELD(pPlayer, maxLife, L, lua_tointeger);
-	LOAD_FIELD(pPlayer, curLife, L, lua_tointeger);
+	LOAD_INT_CAST(pPlayer, id, L, PlayerID);
+	LOAD_INT_CAST(pPlayer, hero, L, HeroID);
+	LOAD_INT(pPlayer, maxLife, L);
+	LOAD_INT(pPlayer, curLife, L);
 	LOAD_STRING(pPlayer, name, L);
-	LOAD_FIELD(pPlayer, nHandCardNum, L, lua_tointeger);
-	LOAD_FIELD(pPlayer, nJudgmentCardNum, L, lua_tointeger);
+	LOAD_INT(pPlayer, nHandCardNum, L);
+	LOAD_INT(pPlayer, nJudgmentCardNum, L);
 
 	if(pPlayer->nHandCardNum > MAX_HAND_CARD)
 	{
@@ -989,8 +1080,8 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	}
 	lua_pop(L, 1);
 
-	LOAD_FIELD(pPlayer, status, L, (PlayerStatus)lua_tointeger);
-	LOAD_FIELD(pPlayer, flag, L, (PlayerFlag)lua_tointeger);
+	LOAD_INT_CAST(pPlayer, status, L, PlayerStatus);
+	LOAD_INT_CAST(pPlayer, flag, L, PlayerFlag);
 
 	lua_getfield(L, -1, "params");
 	for(n = 0; n < MAX_PLAYER_PARAM; n++)
@@ -1044,10 +1135,10 @@ static int lua_game_load(lua_State* L)
 		//memset(pGame, 0, sizeof(*pGame));
 
 		// start load...
-		LOAD_FIELD(pGame, nPlayerCount, L, lua_tointeger);
-		LOAD_FIELD(pGame, nMinsterCount, L, lua_tointeger);
-		LOAD_FIELD(pGame, nSpyCount, L, lua_tointeger);
-		LOAD_FIELD(pGame, nMutineerCount, L, lua_tointeger);
+		LOAD_INT(pGame, nPlayerCount, L);
+		LOAD_INT(pGame, nMinsterCount, L);
+		LOAD_INT(pGame, nSpyCount, L);
+		LOAD_INT(pGame, nMutineerCount, L);
 
 		if(pGame->nPlayerCount > MAX_PLAYER_NUM)
 		{
@@ -1084,7 +1175,7 @@ static int lua_game_load(lua_State* L)
 		game_load_cardstack(L, &pGame->stDiscardCardStack);
 		lua_pop(L, 1);  // [t] [t.game]
 
-		LOAD_FIELD(pGame, nCurDiscardCardNum, L, lua_tointeger);
+		LOAD_INT(pGame, nCurDiscardCardNum, L);
 		if(pGame->nCurDiscardCardNum > MAX_CUR_DISCARD_NUM)
 		{
 			luaL_error(L, "error nCurDiscardCardNum!");
@@ -1100,10 +1191,10 @@ static int lua_game_load(lua_State* L)
 		}
 		lua_pop(L, 1);    // [t] [t.game] 
 
-		LOAD_FIELD(pGame, nRoundNum, L, lua_tointeger);
-		LOAD_FIELD(pGame, nRoundPlayer, L, lua_tointeger);
-		LOAD_FIELD(pGame, nCurPlayer, L, lua_tointeger);
-		LOAD_FIELD(pGame, status, L, (Status)lua_tointeger);
+		LOAD_INT(pGame, nRoundNum, L);
+		LOAD_INT(pGame, nRoundPlayer, L);
+		LOAD_INT(pGame, nCurPlayer, L);
+		LOAD_INT_CAST(pGame, status, L, Status);
 
 		lua_pop(L, 1);   // [t]  
 
