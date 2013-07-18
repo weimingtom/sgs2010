@@ -380,7 +380,7 @@ RESULT to_float(const char* text, float* pv)
 
 void log_text(const char* fmt, ...)
 {
-	
+	//FILE* f = fopen("")
 }
 
 #ifdef OUTPUT_UTF8
@@ -401,6 +401,7 @@ char* to_utf8(const char*  str, char* buffer, int len)
 	else
 	{
 		inbuf = (char*)str;
+		sz = strlen(str);
 		outbuf = buffer;
 		ulen = len;
 		ol = iconv(conv, &inbuf, &sz, &outbuf, &ulen);
@@ -409,9 +410,10 @@ char* to_utf8(const char*  str, char* buffer, int len)
 			strncpy(buffer, str, len);
 		}
 		sz = len - ulen;
-		if(sz >= len)
+		if((int)sz >= len)
 			sz = len - 1;
 		buffer[sz] = 0;
+		iconv_close(conv);
 	}
 
 	return buffer;
