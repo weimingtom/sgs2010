@@ -40,7 +40,7 @@ local ch2val = {
 	['K'] = CardValue_K,
 	['A'] = CardValue_A,
 };
-	
+
 local function card_val_from_ch(ch)
 	return ch2val[ch] or CardValue_None;
 end
@@ -48,7 +48,7 @@ end
 function init_card_stack(stack)
 	stack_clear(stack);
 	for s in ipairs(ss) do
-		for sid,color,val in gfind(s, '{(.-)}([shcd])([0-9JQKA]);') do
+		for sid,color,val in string.gfind(s, '{(.-)}([shcd])([0-9JQKA]);') do
 			stack_add_card(get_card_id_by_sid(sid), card_color_from_ch(color), card_val_from_ch(val));
 		end
 	end

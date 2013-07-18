@@ -604,7 +604,7 @@ static RESULT  load_pattern(GameContext* pGame, OutCardPattern* pPattern, const 
 			tln = 0;
 			while(*p && *p != '}')
 			{
-				if(tln > sizeof(tmp) - 1)
+				if(tln > (int)sizeof(tmp) - 1)
 				{
 					// too long sid string
 					return R_E_FAIL;

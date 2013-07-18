@@ -13,12 +13,42 @@ local card_index = {};
 local hero_list = {};
 local hero_index = {};
 
+local chk_card_type = {
+	[CardType_Normal] = 1,
+	[CardType_Strategy] = 1,
+	[CardType_Armor] = 1,
+	[CardType_Weapon] = 1,
+	[CardType_HorseChase] = 1,
+	[CardType_HorseRun] = 1,
+};
+
+local chk_hero_sex = {
+	[HeroSex_Male] = 1,
+	[HeroSex_Female] = 1,
+};
+
+local chk_hero_group = {
+	[HeroGroup_Wei] = 1,
+	[HeroGroup_Shu] = 1,
+	[HeroGroup_Wu]= 1,
+	[HeroGroup_People] = 1,
+};
+
 
 
 function reg_card(cfg)
-	if(cfg.sid == nil) then
-		error('invalid card sid');
+	if(cfg.sid == nil or cfg.sid == '') then
+		error('reg_card(): invalid card sid');
 	end
+
+	if(cfg.name == nil or cfg.name == '') then
+		error('reg_card('..cfg.sid..'): invalid card name');
+	end
+
+	if(cfg.type == nil or chk_card_type[cfg.type] ~= 1) then
+		error('reg_card('..cfg.sid..'): invalid card type');
+	end
+
 	
 	if(card_index[cfg.sid] ~= nil) then
 		error('register duplicated card sid\''..cfg.sid..'\'. ')

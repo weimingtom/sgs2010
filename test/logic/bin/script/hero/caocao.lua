@@ -25,6 +25,8 @@ WEI001¡¡KayaK
 
 --]]
 
+import "../global/reg.lua";
+
 
 reg_hero({
 	sid = "caocao",

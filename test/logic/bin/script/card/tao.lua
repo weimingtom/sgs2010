@@ -35,6 +35,8 @@
 
 --]]
 
+import "../global/reg.lua";
+
 
 reg_card {
 	sid = "tao",
