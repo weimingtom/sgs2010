@@ -202,6 +202,18 @@ RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, 
 // tolua_end
 
 
+// wrapper from lua to c
+CardID  card_maxid(GameContext* pGame);
+CardID  card_sid2id(GameContext* pGame, const char* sid);
+CardType card_type(GameContext* pGame, CardID  id);
+char* card_sid(GameContext* pGame, CardID  id, char* buf, int buflen);
+char* card_name(GameContext* pGame, CardID  id, char* buf, int buflen);
+char* card_desc(GameContext* pGame, CardID  id, char* buf, int buflen);
+RESULT  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
+RESULT  card_out_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
+
+
+
 #ifdef __cplusplus
 }
 #endif

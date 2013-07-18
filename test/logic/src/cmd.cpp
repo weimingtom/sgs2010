@@ -104,13 +104,14 @@ static char* get_line(const char* prompt, char* buf, int size)
 	char    utf8[1024];
 	char*   sl;
 
-	log_text(prompt);
 
 	A2UTF8( prompt, utf8, sizeof(utf8));
 
+	log_text(utf8);
 	sl = readline(utf8);
 
-	add_history(sl);
+	if(strlen(sl) > 0)
+		add_history(sl);
 
 	strncpy(buf, sl, size);
 
@@ -318,32 +319,44 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "card") || !strcmp(argv[1], "c"))
 	{
+		int maxid;
 		int id;
-		const CardConfig *pCardCfg;
+		//const CardConfig *pCardCfg;
+		char  sid[128];
+		char  name[128];
+		char  desc[1024];
 		if(argc < 3)
 		{
-			for(id = 1; id < CardID_Max; id++)
+			maxid = card_maxid(pContext);
+			for(id = 1; id <= maxid; id++)
 			{
-				pCardCfg = get_card_config((CardID)id);
+				//pCardCfg = get_card_config((CardID)id);
 
-				if(pCardCfg)
-				{
-					MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
-				}
+				//if(pCardCfg)
+				//{
+				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
+				//}
+
+				MSG_OUT("(%d) {%s}, %s, %s\n", id, card_sid(pContext, (CardID)id, sid, sizeof(sid)),
+					card_name(pContext, (CardID)id, name, sizeof(name)), card_type_str(card_type(pContext, (CardID)id)));
 			}
 		}
 		else
 		{
-			id = atoi(argv[2]);
-			pCardCfg = get_card_config((CardID)id);
-			if(pCardCfg == NULL)
+			id = card_sid2id(pContext, argv[2]);
+			
+			//pCardCfg = get_card_config((CardID)id);
+			//if(pCardCfg == NULL)
+			if(id == CardID_None)
 			{
-				MSG_OUT("no card id  is %d!\n", id);
+				MSG_OUT("no card sid is \'%s\'!\n", argv[2]);
 				return R_E_PARAM;
 			}
 			else
 			{
-				MSG_OUT("(%d) %s, %s\n%s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type), pCardCfg->desc);
+				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, card_sid(pContext, (CardID)id, sid, sizeof(sid)),
+					card_name(pContext, (CardID)id, name, sizeof(name)), card_type_str(card_type(pContext, (CardID)id)), 
+					card_desc(pContext, (CardID)id, desc, sizeof(desc)));
 			}
 		}				
 	}

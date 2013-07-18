@@ -65,6 +65,13 @@ int game_prev_player(GameContext* pGame, int player)
 	return idx;
 }
 
+
+Player* get_game_player(GameContext* pGame, int player)
+{
+	return (player >= 0 && player < pGame->nPlayerCount) ? &pGame->players[player] : NULL;
+}
+
+
 RESULT set_game_cur_player(GameContext* pGame, int player)
 {
 	if(player < 0 || player >= pGame->nPlayerCount)
@@ -1421,7 +1428,7 @@ void game_import_file(lua_State* L, const char* pattern)
 
 		lua_pop(L, 1);  // ... [t] 
 
-		MSG_OUT("importing (%d) \"%s\" ...\n", n, full_path);
+		MSG_OUT("import \"%s\"\n", full_path);
 
 		if(0 != luaL_dofile(L, full_path))
 		{

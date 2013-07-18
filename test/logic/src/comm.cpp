@@ -380,7 +380,7 @@ RESULT to_float(const char* text, float* pv)
 
 void log_text(const char* fmt, ...)
 {
-
+	
 }
 
 #ifdef OUTPUT_UTF8
@@ -433,6 +433,8 @@ int message_printf(const char* fmt, ...)
 	va_end(vl);
 
 	A2UTF8(text, utf8, sizeof(utf8));
+
+	log_text("%s", utf8);
 
 	return printf("%s", utf8);
 

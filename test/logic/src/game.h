@@ -111,6 +111,9 @@ Status get_game_status(GameContext* pGame);
 
 int game_player_dis(GameContext* pGame, int p1, int p2);
 
+Player* get_game_player(GameContext* pGame, int player);
+
+
 
 //}}
 // tolua_end

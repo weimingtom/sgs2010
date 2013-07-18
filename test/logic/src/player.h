@@ -126,8 +126,6 @@ typedef  struct  tagPlayer
 RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
-const char* player_id_str(PlayerID id);
-const char* equip_idx_str(int idx);
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
 
@@ -142,7 +140,41 @@ RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard);
 RESULT player_add_judge_card(Player* pPlayer, Card* pCard);
 RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos);
 
+
+
+// tolua_begin
+// {{
+
+const char* player_id_str(PlayerID id);
+const char* equip_idx_str(int idx);
+
+PlayerID get_player_id(Player* pPlayer);
+const char* get_player_name(Player* pPlayer);
+HeroID get_player_hero(Player* pPlayer);
+int get_player_curlife(Player* pPlayer);
+int get_player_maxlife(Player* pPlayer);
+
+int get_player_handcard_num(Player* pPlayer);
+int get_player_judgecard_num(Player* pPlayer);
+Card* get_player_handcard(Player* pPlayer, int index);
+Card* get_player_judgecard(Player* pPlayer, int index);
+Card* get_player_equipcard(Player* pPlayer, int index);
+
+PlayerStatus  get_player_status(Player* pPlayer);
+PlayerFlag  get_player_flag(Player* pPlayer);
+
+YESNO is_player_dead(Player* pPlayer);
+YESNO is_player_show(Player* pPlayer);
+YESNO is_player_perdead(Player* pPlayer);
 YESNO is_player_handfull(Player* player);
+
+int get_player_parem(Player* pPlayer, int index);
+void set_player_parem(Player* pPlayer, int index, int val);
+
+
+
+// }}
+// tolua_end
 
 
 #ifdef __cplusplus

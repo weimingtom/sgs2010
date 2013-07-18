@@ -9,6 +9,7 @@ $cfile "../src/get.h"
 $cfile "../src/equip.h"
 $cfile "../src/life.h"
 $cfile "../src/player.h"
+$cfile "../src/card_stack.h"
 
 
 void game_import_file @ import(lua_State* L, const char* pattern);

@@ -65,7 +65,7 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 			//pattern.num = 1;
 			//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
 			//pattern.where = PlayerCard_Hand;
-			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, &pEvent->pPatternOut->pattern, NULL, &pEvent->pPatternOut->out) )
+			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, "h:{defend}", NULL, &pEvent->pPatternOut->out) )
 			{
 				// out card instead mine 
 				return R_SUCC;

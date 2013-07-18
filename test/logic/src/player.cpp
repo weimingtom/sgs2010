@@ -84,11 +84,114 @@ const char* equip_idx_str(int idx)
 	return "×°±¸";
 }
 
+PlayerID get_player_id(Player* pPlayer)
+{
+	return pPlayer->id;
+}
+
+const char* get_player_name(Player* pPlayer)
+{
+	return pPlayer->name;
+}
+
+HeroID get_player_hero(Player* pPlayer)
+{
+	return pPlayer->hero;
+}
+int get_player_curlife(Player* pPlayer)
+{
+	return pPlayer->curLife;
+}
+
+int get_player_maxlife(Player* pPlayer)
+{
+	return pPlayer->maxLife;
+}
+
+int get_player_handcard_num(Player* pPlayer)
+{
+	return pPlayer->nHandCardNum;
+}
+
+int get_player_judgecard_num(Player* pPlayer)
+{
+	return pPlayer->nJudgmentCardNum;
+}
+
+Card* get_player_handcard(Player* pPlayer, int index)
+{
+	if(index < 0 || index>= pPlayer->nHandCardNum)
+		return NULL;
+	return PLAYER_HANDCARD(pPlayer, index);
+}
+
+Card* get_player_judgecard(Player* pPlayer, int index)
+{
+	if(index < 0 || index>= pPlayer->nJudgmentCardNum)
+		return NULL;
+	return PLAYER_JUDGECARD(pPlayer, index);
+}
+
+Card* get_player_equipcard(Player* pPlayer, int index)
+{
+	if(index < 0 || index>= EquipIdx_Max)
+		return NULL;
+
+	if(CARD_VALID(&pPlayer->stEquipCard[index]))
+		return &pPlayer->stEquipCard[index];
+
+	return NULL;
+}
+
+
+PlayerStatus  get_player_status(Player* pPlayer)
+{
+	return pPlayer->status;
+}
+
+PlayerFlag  get_player_flag(Player* pPlayer)
+{
+	return pPlayer->flag;
+}
+
+YESNO is_player_dead(Player* pPlayer)
+{
+	return B2YESNO(IS_PLAYER_DEAD(pPlayer));
+}
+
+YESNO is_player_show(Player* pPlayer)
+{
+	return B2YESNO(IS_PLAYER_SHOW(pPlayer));
+}
+
+YESNO is_player_perdead(Player* pPlayer)
+{
+	return B2YESNO(IS_PLAYER_PERDEAD(pPlayer));
+}
 
 YESNO is_player_handfull(Player* player)
 {
 	return B2YESNO(player->nHandCardNum == MAX_HAND_CARD);
 }
+
+
+int get_player_parem(Player* pPlayer, int index)
+{
+	if(index >= 0 && index < MAX_PLAYER_PARAM)
+		return pPlayer->params[index];
+	return 0;
+}
+
+void set_player_parem(Player* pPlayer, int index, int val)
+{
+	if(index >= 0 && index < MAX_PLAYER_PARAM)
+	{
+		pPlayer->params[index] = val;
+	}
+}
+
+
+
 
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
