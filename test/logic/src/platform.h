@@ -20,7 +20,7 @@
 #define strncasecmp   _strnicmp
 #define chdir         _chdir
 #define getcwd        _getcwd
-#define mkdir         _mkdir
+#define mkdir(s,m)    _mkdir(s)
 
 #define __ATTR_FMT__(f,m,n)
 
