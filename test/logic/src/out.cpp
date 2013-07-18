@@ -557,7 +557,7 @@ static RESULT  load_pattern(OutCardPattern* pPattern, const char* szPattern)
 {
 	//RESULT       ret;
 	const char*  p;
-	int          sp;
+	//int          sp;
 	char         tmp[256];
 	int          tln;
 	CardPattern* pcp;
@@ -598,7 +598,7 @@ static RESULT  load_pattern(OutCardPattern* pPattern, const char* szPattern)
 		pcp = &pPattern->patterns[pPattern->num];
 		pPattern->num++;
 
-		sp = 0;
+		//sp = 0;
 
 		// <{sid}>
 		if(*p == '{')

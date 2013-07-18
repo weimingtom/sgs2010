@@ -464,6 +464,8 @@ int message_printf(const char* fmt, ...)
 	sz = vsnprintf(text, sizeof(text), fmt, vl);
 	va_end(vl);
 
+	(void)sz;
+
 	A2UTF8(text, utf8, sizeof(utf8));
 
 	log_text("%s", utf8);
