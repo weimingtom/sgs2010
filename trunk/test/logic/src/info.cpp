@@ -157,17 +157,24 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 			p->name, p->curLife, p->maxLife, p->nHandCardNum);
 
 		// equiped cards
-		MSG_OUT("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-		MSG_OUT("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
-		MSG_OUT("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-		MSG_OUT("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+		if(CARD_VALID(&p->stEquipCard[EquipIdx_Weapon]))
+			MSG_OUT("    Weapon : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Weapon], buf, sizeof(buf), "None") );
+		if(CARD_VALID(&p->stEquipCard[EquipIdx_Armor]))
+			MSG_OUT("    Armor : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_Armor], buf, sizeof(buf), "None") );
+		if(CARD_VALID(&p->stEquipCard[EquipIdx_HorseInc]))
+			MSG_OUT("    Horse(+1) : %s\n", card_str_def(&p->stEquipCard[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
+		if(CARD_VALID(&p->stEquipCard[EquipIdx_HorseDec]))
+			MSG_OUT("    Horse(-1) : %s\n",  card_str_def(&p->stEquipCard[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
 
 		// judgment cards
-		MSG_OUT("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
-		for(n = 0; n < p->nJudgmentCardNum; n++)
+		if( p->nJudgmentCardNum > 0)
 		{
-			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-			MSG_OUT("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+			MSG_OUT("    Judgment cards (%d):\n",  p->nJudgmentCardNum);
+			for(n = 0; n < p->nJudgmentCardNum; n++)
+			{
+				//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
+				MSG_OUT("      (%d) %s;\n", n+1, card_str(&p->stJudgmentCards[n], buf, sizeof(buf)));
+			}
 		}
 	}
 	MSG_OUT("(*) stack   cards: %d\n", pGame->stGetCardStack.count);

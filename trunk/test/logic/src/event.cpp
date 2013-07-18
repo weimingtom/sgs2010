@@ -126,7 +126,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	Player* pPlayer;
 	const HeroConfig* pHero;
 	const HeroSkill* pSkill;
-	const CardConfig* pCardConfig;
+	// const CardConfig* pCardConfig;
 	int  n;
 	YESNO ret;
 	int   may_skills = 0;
@@ -165,29 +165,33 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	// check player hand card
 	for(n = 0; n < pPlayer->nHandCardNum; n++)
 	{
-		pCardConfig = get_card_config(pPlayer->stHandCards[n].id);
-		if(pCardConfig && pCardConfig->check)
-		{
-			ret = (*pCardConfig->check)(pGame, pEvent, player);
-
-			if(ret == YES)
-				may_cards++;
-		}
+		//pCardConfig = get_card_config(pPlayer->stHandCards[n].id);
+		//if(pCardConfig && pCardConfig->check)
+		//{
+		//	ret = (*pCardConfig->check)(pGame, pEvent, player);
+		//	if(ret == YES)
+		//		may_cards++;
+		//}
+		ret = card_check_call(pPlayer->stHandCards[n].id, pGame, pEvent, player);
+		if(ret == YES)
+			may_cards++;
 	}
 
 
-	// check player equip card
+	// check player equip card skills
 
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
 		if(CARD_VALID(&pPlayer->stEquipCard[n]))
 		{
-			pCardConfig = get_card_config(pPlayer->stEquipCard[n].id);
-			if(pCardConfig && pCardConfig->out)
-			{
-				// for this event to calc the equip effect
-				(*pCardConfig->out)(pGame, pEvent, player);
-			}
+			//pCardConfig = get_card_config(pPlayer->stEquipCard[n].id);
+			//if(pCardConfig && pCardConfig->out)
+			//{
+			//	// for this event to calc the equip effect
+			//	(*pCardConfig->out)(pGame, pEvent, player);
+			//}
+			if(R_SUCC == card_out_call(pPlayer->stEquipCard[n].id, pGame, pEvent, player))
+				may_skills++;
 		}
 	}
 

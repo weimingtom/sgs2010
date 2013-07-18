@@ -2,12 +2,6 @@
 #define __PLATFORM_H__
 
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #ifdef WIN32
 
 
@@ -26,7 +20,7 @@ extern "C" {
 #define strncasecmp   _strnicmp
 #define chdir         _chdir
 #define getcwd        _getcwd
-
+#define mkdir         _mkdir
 
 #define __ATTR_FMT__(f,m,n)
 
@@ -61,7 +55,21 @@ extern "C" {
 
 #endif
 
+#define REPLACE_CHAR(str, chfrom, chto)  do { char* p = (str); while(*p) { if(*p == (chfrom) ) { *p = (chto); } p++; } } while(0)
+#define REGULAR_PATH(str)  REPLACE_CHAR((str),'\\', '/')
+#define WIN_PATH(str)  REPLACE_CHAR((str),'/', '\\')
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+char* get_path_name(const char* file_path, char* buf, int buflen);
+char* get_app_path(char*  buf, int buflen);
+
+char* get_cur_path(char*  buf, int buflen);
+int set_cur_path(const char* path);
 
 
 

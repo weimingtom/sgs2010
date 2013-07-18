@@ -12,9 +12,9 @@ $cfile "../src/player.h"
 $cfile "../src/card_stack.h"
 
 
-void game_import_file @ import(lua_State* L, const char* pattern);
+// void game_import_file @ import(lua_State* L, const char* pattern);
 
-
+/*
 class Card
 {
 	CardID    id;
@@ -31,4 +31,6 @@ class CardPattern
 	CardValue value_min;
 	CardValue value_max;
 };
+
+*/
 

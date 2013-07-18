@@ -175,14 +175,14 @@ YESNO is_player_handfull(Player* player)
 }
 
 
-int get_player_parem(Player* pPlayer, int index)
+int get_player_param(Player* pPlayer, int index)
 {
 	if(index >= 0 && index < MAX_PLAYER_PARAM)
 		return pPlayer->params[index];
 	return 0;
 }
 
-void set_player_parem(Player* pPlayer, int index, int val)
+void set_player_param(Player* pPlayer, int index, int val)
 {
 	if(index >= 0 && index < MAX_PLAYER_PARAM)
 	{

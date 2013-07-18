@@ -6,6 +6,7 @@
 #include "cmd.h"
 #include "comm.h"
 #include "event.h"
+#include "script.h"
 
 /*
 
@@ -77,11 +78,20 @@ int main(int argc, char** argv)
 
 	MSG_OUT(PROJ_NAME" "VERSION_STR"\n");
 
+	if(R_SUCC != init_game_script())
+	{
+		return 1;
+	}
+
+
 	ST_ZERO(stGameContext);
 
 	INIT_EVENT(&stEvent, GameEvent_None, 0, 0, NULL);
 
 	cmd_loop(&stGameContext, &stEvent, NULL);
+
+
+	close_game_script();
 
 	return 0;
 }

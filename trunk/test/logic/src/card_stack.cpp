@@ -2,6 +2,8 @@
 #include "card_stack.h"
 #include "comm.h"
 
+
+/*
 static const char s_szInitCard[] = 
 {
 	CardID_Attack, CardColor_Diamond, CardValue_6, CardColor_Diamond, CardValue_7, CardColor_Diamond, CardValue_8, CardColor_Diamond, CardValue_9, 
@@ -52,6 +54,7 @@ static const char s_szInitCard[] =
 	0,
 
 };
+*/
 
 
 // INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE
@@ -70,7 +73,7 @@ int card_comp_cv(const void* a, const void* b, void*)
 	return 0;
 }
 
-
+/*
 RESULT init_card_stack(CardStack* pCardStack)
 {
 	int n, id;
@@ -97,6 +100,8 @@ RESULT init_card_stack(CardStack* pCardStack)
 	//card_stack_dump(pCardStack);
 	return R_SUCC;
 }
+*/
+
 
 RESULT card_stack_random(CardStack* pCardStack)
 {
@@ -296,6 +301,10 @@ RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard)
 	return R_SUCC;
 }
 
+int  stack_size(CardStack* pCardStack)
+{
+	return pCardStack->count;
+}
 
 void stack_clear(CardStack* pCardStack)
 {
