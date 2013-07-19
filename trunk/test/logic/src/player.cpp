@@ -84,40 +84,6 @@ const char* equip_idx_str(int idx)
 	return "×°±¸";
 }
 
-PlayerID get_player_id(Player* pPlayer)
-{
-	return pPlayer->id;
-}
-
-const char* get_player_name(Player* pPlayer)
-{
-	return pPlayer->name;
-}
-
-HeroID get_player_hero(Player* pPlayer)
-{
-	return pPlayer->hero;
-}
-int get_player_curlife(Player* pPlayer)
-{
-	return pPlayer->cur_life;
-}
-
-int get_player_maxlife(Player* pPlayer)
-{
-	return pPlayer->max_life;
-}
-
-int get_player_handcard_num(Player* pPlayer)
-{
-	return pPlayer->hand_card_num;
-}
-
-int get_player_judgecard_num(Player* pPlayer)
-{
-	return pPlayer->judgment_card_num;
-}
-
 Card* get_player_handcard(Player* pPlayer, int index)
 {
 	if(index < 0 || index>= pPlayer->hand_card_num)
@@ -144,15 +110,6 @@ Card* get_player_equipcard(Player* pPlayer, int index)
 }
 
 
-PlayerStatus  get_player_status(Player* pPlayer)
-{
-	return pPlayer->status;
-}
-
-PlayerFlag  get_player_flag(Player* pPlayer)
-{
-	return pPlayer->flag;
-}
 
 YESNO is_player_dead(Player* pPlayer)
 {
