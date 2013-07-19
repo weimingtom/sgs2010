@@ -22,7 +22,7 @@ RESULT game_first_getcard(GameContext* pGame)
 
 	player = get_game_master_player(pGame);
 
-	for(n = 0; n < pGame->nPlayerCount; n++)
+	for(n = 0; n < pGame->player_count; n++)
 	{
 		// get 4 card each player
 		for(k = 0; k < 4; k++)
@@ -35,8 +35,8 @@ RESULT game_first_getcard(GameContext* pGame)
 		player = game_next_player(pGame, player);
 	}
 
-	//pGame->nRoundNum = 1;
-	//pGame->nRoundPlayer = get_game_master_player(pGame);
+	//pGame->round_num = 1;
+	//pGame->round_player = get_game_master_player(pGame);
 
 	return R_SUCC;
 }
@@ -44,17 +44,17 @@ RESULT game_first_getcard(GameContext* pGame)
 static RESULT  trigger_pergetcard_event(GameContext* pGame, GameEventContext* pEvent)
 {
 	GameEventContext  stEvent;
-	INIT_EVENT(&stEvent, GameEvent_PerGetCard, pGame->nCurPlayer, 0, pEvent);
+	INIT_EVENT(&stEvent, GameEvent_PerGetCard, pGame->cur_player, 0, pEvent);
 	trigger_game_event(pGame, &stEvent);
 
 	return stEvent.result;
 }
 
-static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* pEvent, PosCard* pPosCard)
+static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* pEvent, PosCard* pos_card)
 {
 	GameEventContext  stEvent;
-	INIT_EVENT(&stEvent, GameEvent_PostGetCard, pGame->nCurPlayer, 0, pEvent);
-	stEvent.pPosCard = pPosCard;
+	INIT_EVENT(&stEvent, GameEvent_PostGetCard, pGame->cur_player, 0, pEvent);
+	stEvent.pos_card = pos_card;
 
 	trigger_game_event(pGame, &stEvent);
 
@@ -72,9 +72,9 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	{
 		// in round get, must get 2 card
 
-		if(pEvent->pGetCard->num != num)
+		if(pEvent->get_card->num != num)
 		{
-			MSG_OUT("get card num error! must be %d\n", pEvent->pGetCard->num);
+			MSG_OUT("get card num error! must be %d\n", pEvent->get_card->num);
 			return R_E_PARAM;
 		}
 
@@ -101,7 +101,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	{
 		// passive get without per/postgetcard event
 		// get event.num cards
-		for(n = 0; n < pEvent->pGetCard->num; n++)
+		for(n = 0; n < pEvent->get_card->num; n++)
 		{
 			if(YES != is_player_handfull(CUR_PLAYER(pGame)) 
 				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
@@ -128,7 +128,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, 0, pEvent);
-	event.pGetCard = &stGetCard;
+	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 
@@ -155,7 +155,7 @@ RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int pl
 
 
 	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, 0, pEvent);
-	event.pGetCard = &stGetCard;
+	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 

@@ -14,7 +14,7 @@
 reg_card {
 	sid = 'chitu',
 	name = '赤兔',
-	type = CardType_Armor,
+	type = CardType_HorseDec,
 	desc = [==[你计算与其他角色的距离时，始终-1。（你可以理解为一种进攻上的优势）
 不同名称的-1马，其效果是相同的。]==],
 

@@ -44,7 +44,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	// GameEvent_PerDecideCard
 	INIT_EVENT(&event, GameEvent_PerDecideCard, player, 0, pParentEvent);
-	event.pPosCard = &stCard;
+	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
 	// some skill can make the decide success or fail directly.
@@ -70,7 +70,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	// GameEvent_PerDecideCardCalc 
 	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, 0, pParentEvent);
-	event.pPosCard = &stCard;
+	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
 	ret = card_match(&stCard.card, 1, &pattern, 1);
@@ -78,7 +78,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	// some skill can get the decide card after it be calculated.
 	// GameEvent_PostDecideCard
 	INIT_EVENT(&event, GameEvent_PostDecideCard, player, 0, pParentEvent);
-	event.pPosCard = &stCard;
+	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
 

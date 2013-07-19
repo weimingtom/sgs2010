@@ -17,13 +17,13 @@ static RESULT card_bowqiling_out(GameContext* pGame, GameEventContext* pEvent, i
 {
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_BowQiLing)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_BowQiLing)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}
@@ -31,7 +31,7 @@ static RESULT card_bowqiling_out(GameContext* pGame, GameEventContext* pEvent, i
 	else if(pEvent->id == GameEvent_CalcAttackDis)
 	{
 		// equip effect to set base attack range
-		pEvent->pAttackDis->base = 3;
+		pEvent->attack_dis->base = 3;
 		return R_SUCC;
 	}
 	return R_SUCC;

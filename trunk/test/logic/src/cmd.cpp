@@ -210,7 +210,7 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 
 	// new game
 	INIT_EVENT(&event, GameEvent_NewGame, 0, 0, pEvent);
-	event.pNewGameConfig = pConfig;
+	event.new_game_config = pConfig;
 
 
 	//ret = init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
@@ -272,17 +272,17 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			char  buffer[128];
 			Card* pCard;
 			MSG_OUT("Game Current Discard Stack:\n");
-			for(n = 0; n < pContext->nCurDiscardCardNum; n++)
+			for(n = 0; n < pContext->cur_discard_card_num; n++)
 			{
-				pCard = &pContext->stCurDiscardCards[n];
+				pCard = &pContext->cur_discard_cards[n];
 				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
 			}
 
 			MSG_OUT("Game Discard Stack:\n");		
-			card_stack_dump(&pContext->stDiscardCardStack);
+			card_stack_dump(&pContext->discard_card_stack);
 
 			MSG_OUT("Game Get Stack:\n");		
-			card_stack_dump(&pContext->stGetCardStack);
+			card_stack_dump(&pContext->get_card_stack);
 		}
 	}
 	else if(!strcmp(argv[1], "player") || !strcmp(argv[1], "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
@@ -327,15 +327,15 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 
 		if(cp == '+')
 		{
-			n = (n + pContext->nCurPlayer) % pContext->nPlayerCount;
+			n = (n + pContext->cur_player) % pContext->player_count;
 		}
 		else if(cp == '-')
 		{
-			n = (pContext->nCurPlayer - n % pContext->nPlayerCount + pContext->nPlayerCount) % pContext->nPlayerCount;
+			n = (pContext->cur_player - n % pContext->player_count + pContext->player_count) % pContext->player_count;
 		}
 		else
 		{
-			n = n % pContext->nPlayerCount;
+			n = n % pContext->player_count;
 		}
 
 		game_other_player_info(pContext, pEvent, n);
@@ -587,7 +587,7 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 	// load game
 
 	INIT_EVENT(&event, GameEvent_LoadGame, 0,0, pEvent);
-	event.szFileName = argv[1];
+	event.file_name = argv[1];
 
 	//ret = game_load(pContext, argv[1]);
 	

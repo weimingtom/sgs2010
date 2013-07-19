@@ -20,8 +20,8 @@ typedef enum _CardType
 	CardType_Strategy = 2,    // strategy card with a specified skill
 	CardType_Armor = 3,       // used when be attacked
 	CardType_Weapon = 4,      // used when attack a target
-	CardType_HorseChase = 5,  // attack the target distance add 1 unit.
-	CardType_HorseRun = 6,    // be attacked the attacker distance dec 1 unit.
+	CardType_HorseInc = 5,    // be attacked the target distance from attack add 1 unit.
+	CardType_HorseDec = 6,    // attack other , target distance from attack  dec 1 unit.
 }CardType;
 
 // card identification

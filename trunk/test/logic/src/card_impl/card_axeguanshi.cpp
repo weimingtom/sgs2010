@@ -14,13 +14,13 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 	// in out card 
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_AxeGuanShi)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_AxeGuanShi)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Weapon, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}
@@ -28,15 +28,15 @@ static RESULT card_axeguanshi_out(GameContext* pGame, GameEventContext* pEvent, 
 	else if(pEvent->id == GameEvent_CalcAttackDis)
 	{
 		// equip effect to set base attack range
-		pEvent->pAttackDis->base = 3;
+		pEvent->attack_dis->base = 3;
 		return R_SUCC;
 	}
 	else if(pEvent->id == GameEvent_PostPassiveOutCard)
 	{
 		// target use 'Defend' to defend my 'attack'
-		if(pEvent->pOut->vcard.id == CardID_Defend
+		if(pEvent->out_card->vcard.id == CardID_Defend
 			&& pEvent->parent_event->id == GameEvent_OutCard
-			&& pEvent->parent_event->pOut->vcard.id == CardID_Attack
+			&& pEvent->parent_event->out_card->vcard.id == CardID_Attack
 			&& pEvent->parent_event->trigger == player)
 		{
 			// role can dicide to active the deffect of the card

@@ -32,7 +32,7 @@ static RESULT card_attack_out(GameContext* pGame, GameEventContext* pEvent, int 
 	{
 		// select target
 		ret = game_select_target(pGame, pEvent, player, 1, NO, YES, "you need select a target role for card 'attack':", &target);
-		pEvent->pOut->target = target;
+		pEvent->out_card->target = target;
 		return ret;
 	}
 	else if(pEvent->id == GameEvent_OutCard)

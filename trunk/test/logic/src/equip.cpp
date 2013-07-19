@@ -10,28 +10,28 @@
 //////////////////////////////////////////////////////////////////////////
 // script exports
 
-int get_equipcard_equip_pos(EquipCard* pEquipCard)
+int get_equipcard_equip_pos(EquipCard* equip_card)
 {
-	return pEquipCard->equip_pos;
+	return equip_card->equip_pos;
 }
 
-int get_equipcard_supply(EquipCard* pEquipCard)
+int get_equipcard_supply(EquipCard* equip_card)
 {
-	return pEquipCard->supply;
+	return equip_card->supply;
 }
 
-Card* get_equipcard_card(EquipCard* pEquipCard)
+Card* get_equipcard_card(EquipCard* equip_card)
 {
-	return &pEquipCard->card.card;
+	return &equip_card->card.card;
 }
 
-CardWhere get_equipcard_where(EquipCard* pEquipCard)
+CardWhere get_equipcard_where(EquipCard* equip_card)
 {
-	return pEquipCard->card.where;
+	return equip_card->card.where;
 }
-int get_equipcard_pos(EquipCard* pEquipCard)
+int get_equipcard_pos(EquipCard* equip_card)
 {
-	return pEquipCard->card.pos;
+	return equip_card->card.pos;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 {
 	char buf[128];
 	Player* pPlayer;
-	EquipCard  stEquipCard;
+	EquipCard  equip_cards;
 	GameEventContext  event;
 
 	if(!IS_PLAYER_VALID(pGame, player))
@@ -67,14 +67,14 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
-	ST_ZERO(stEquipCard);
+	ST_ZERO(equip_cards);
 
 
-	stEquipCard.supply = player;
-	stEquipCard.equip_pos = equip_pos;
+	equip_cards.supply = player;
+	equip_cards.equip_pos = equip_pos;
 
 	// get card from hand
-	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &stEquipCard.card.card))
+	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &equip_cards.card.card))
 	{
 		if(L) {
 			luaL_error(L, "game_player_equip_card: invalid hand card pos - %d", hand_pos );
@@ -84,14 +84,14 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 		return R_E_PARAM;
 	}
 
-	stEquipCard.card.where = CardWhere_PlayerHand;
-	stEquipCard.card.pos = hand_pos;
+	equip_cards.card.where = CardWhere_PlayerHand;
+	equip_cards.card.pos = hand_pos;
 
 
 	// add event per equip card
 
 	INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
-	event.pEquipCard = &stEquipCard;
+	event.equip_card = &equip_cards;
 
 	trigger_game_event(pGame, &event);
 
@@ -104,25 +104,25 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	if(R_SUCC == player_remove_card(pPlayer, CardWhere_PlayerHand, hand_pos, NULL))
 	{
 
-		if(CARD_VALID(&pPlayer->stEquipCard[equip_pos]))
+		if(CARD_VALID(&pPlayer->equip_cards[equip_pos]))
 		{
 			game_player_discard_card(pGame, pParentEvent, player, CardWhere_PlayerEquip, equip_pos);
 		}
 
-		MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(equip_pos), card_str(&stEquipCard.card.card, buf, sizeof(buf)));
+		MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(equip_pos), card_str(&equip_cards.card.card, buf, sizeof(buf)));
 
-		pPlayer->stEquipCard[equip_pos] = stEquipCard.card.card;
-		pPlayer->stEquipCard[equip_pos].flag = CardFlag_None;
+		pPlayer->equip_cards[equip_pos] = equip_cards.card.card;
+		pPlayer->equip_cards[equip_pos].flag = CardFlag_None;
 
 
-		stEquipCard.card.where = CardWhere_PlayerEquip;
-		stEquipCard.card.pos = equip_pos;
+		equip_cards.card.where = CardWhere_PlayerEquip;
+		equip_cards.card.pos = equip_pos;
 
 
 		// add event post equip card
 
 		INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
-		event.pEquipCard = &stEquipCard;
+		event.equip_card = &equip_cards;
 
 		trigger_game_event(pGame, &event);
 

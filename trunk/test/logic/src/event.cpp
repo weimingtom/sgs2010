@@ -63,33 +63,33 @@ Card* get_event_card(GameEventContext* pEvent)
 
 OutCard* get_event_out(GameEventContext* pEvent)
 {
-	return pEvent->pOut;
+	return pEvent->out_card;
 }
 /*
-void  set_event_out(GameEventContext* pEvent, OutCard* pOut)
+void  set_event_out(GameEventContext* pEvent, OutCard* out_card)
 {
-	pEvent->pOut = pOut;
+	pEvent->out_card = out_card;
 }
 */
 
 PosCard* get_event_poscard(GameEventContext* pEvent)
 {
-	return pEvent->pPosCard;
+	return pEvent->pos_card;
 }
 
 EquipCard* get_event_equipcard(GameEventContext* pEvent)
 {
-	return pEvent->pEquipCard;
+	return pEvent->equip_card;
 }
 
 ChangeLife* get_event_changelife(GameEventContext* pEvent)
 {
-	return pEvent->pChangeLife;
+	return pEvent->change_life;
 }
 
 AttackDis* get_event_attackdis(GameEventContext* pEvent)
 {
-	return pEvent->pAttackDis;
+	return pEvent->attack_dis;
 }
 
 
@@ -102,7 +102,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 	int n;
 	int m = pEvent->trigger;
 
-	for(n = 0; n < pGame->nPlayerCount; n++)
+	for(n = 0; n < pGame->player_count; n++)
 	{
 		if(!IS_PLAYER_DEAD(GAME_PLAYER(pGame, m)))
 		{
@@ -110,7 +110,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 			if(pEvent->block == YES)
 				break;
 		}
-		m = (m + 1) % pGame->nPlayerCount;
+		m = (m + 1) % pGame->player_count;
 	}
 
 	return R_SUCC;
@@ -161,16 +161,16 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	
 	
 	// check player hand card
-	for(n = 0; n < pPlayer->nHandCardNum; n++)
+	for(n = 0; n < pPlayer->hand_card_num; n++)
 	{
-		//pCardConfig = get_card_config(pPlayer->stHandCards[n].id);
+		//pCardConfig = get_card_config(pPlayer->hand_cards[n].id);
 		//if(pCardConfig && pCardConfig->check)
 		//{
 		//	ret = (*pCardConfig->check)(pGame, pEvent, player);
 		//	if(ret == YES)
 		//		may_cards++;
 		//}
-		ret = card_check_call(pPlayer->stHandCards[n].id, pGame, pEvent, player);
+		ret = card_check_call(pPlayer->hand_cards[n].id, pGame, pEvent, player);
 		if(ret == YES)
 			may_cards++;
 	}
@@ -180,15 +180,15 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
-		if(CARD_VALID(&pPlayer->stEquipCard[n]))
+		if(CARD_VALID(&pPlayer->equip_cards[n]))
 		{
-			//pCardConfig = get_card_config(pPlayer->stEquipCard[n].id);
+			//pCardConfig = get_card_config(pPlayer->equip_cards[n].id);
 			//if(pCardConfig && pCardConfig->out)
 			//{
 			//	// for this event to calc the equip effect
 			//	(*pCardConfig->out)(pGame, pEvent, player);
 			//}
-			if(R_SUCC == card_out_call(pPlayer->stEquipCard[n].id, pGame, pEvent, player))
+			if(R_SUCC == card_out_call(pPlayer->equip_cards[n].id, pGame, pEvent, player))
 				may_skills++;
 		}
 	}

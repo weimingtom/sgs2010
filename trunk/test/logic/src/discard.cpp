@@ -10,49 +10,49 @@
 
 RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos)
 {
-	if(pGame->nCurDiscardCardNum >= MAX_CUR_DISCARD_NUM)
+	if(pGame->cur_discard_card_num >= MAX_CUR_DISCARD_NUM)
 		return R_E_FAIL;
 
-	pGame->stCurDiscardCards[pGame->nCurDiscardCardNum] = *pCard;
+	pGame->cur_discard_cards[pGame->cur_discard_card_num] = *pCard;
 
-	if(pos) *pos = pGame->nCurDiscardCardNum;
+	if(pos) *pos = pGame->cur_discard_card_num;
 
-	pGame->nCurDiscardCardNum++;
+	pGame->cur_discard_card_num++;
 	
 	return R_SUCC;
 }
 
 RESULT game_get_discard_cur(GameContext* pGame, int pos, Card* pCard)
 {
-	if(pos < 0 || pos >= pGame->nCurDiscardCardNum || !CARD_VALID(&pGame->stCurDiscardCards[pos]))
+	if(pos < 0 || pos >= pGame->cur_discard_card_num || !CARD_VALID(&pGame->cur_discard_cards[pos]))
 		return R_E_FAIL;
 
-	*pCard = pGame->stCurDiscardCards[pos];
+	*pCard = pGame->cur_discard_cards[pos];
 	
 	return R_SUCC;
 }
 
 RESULT game_clr_discard_cur(GameContext* pGame, int pos)
 {
-	if(pos < 0 || pos >= pGame->nCurDiscardCardNum)
+	if(pos < 0 || pos >= pGame->cur_discard_card_num)
 		return R_E_FAIL;
 
-	ST_ZERO(pGame->stCurDiscardCards[pos]);
+	ST_ZERO(pGame->cur_discard_cards[pos]);
 	return R_SUCC;
 }
 
 void game_flush_discard_cur(GameContext* pGame)
 {
 	int n;
-	for(n = 0; n < pGame->nCurDiscardCardNum; n++)
+	for(n = 0; n < pGame->cur_discard_card_num; n++)
 	{
-		if(CARD_VALID(&pGame->stCurDiscardCards[n]))
+		if(CARD_VALID(&pGame->cur_discard_cards[n]))
 		{
-			card_stack_push(&pGame->stDiscardCardStack, &pGame->stCurDiscardCards[n]);
+			card_stack_push(&pGame->discard_card_stack, &pGame->cur_discard_cards[n]);
 		}
 	}
-	pGame->nCurDiscardCardNum = 0;
-	ST_ZERO(pGame->stCurDiscardCards);
+	pGame->cur_discard_card_num = 0;
+	ST_ZERO(pGame->cur_discard_cards);
 
 }
 
@@ -83,7 +83,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 	// event: per discard card 
 	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, 0, pParentEvent);
-	event.pPosCard = &stCard;
+	event.pos_card = &stCard;
 
 	trigger_game_event(pGame, &event);
 
@@ -100,7 +100,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		// event: post discard card
 		
 		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, 0, pParentEvent);
-		event.pPosCard = &stCard;
+		event.pos_card = &stCard;
 		trigger_game_event(pGame, &event);
 
 	}

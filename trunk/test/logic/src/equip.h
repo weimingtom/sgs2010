@@ -28,11 +28,11 @@ typedef struct tagEquipCard
 
 // read equipcard struct for script
 
-int get_equipcard_equip_pos(EquipCard* pEquipCard);
-int get_equipcard_supply(EquipCard* pEquipCard);
-Card* get_equipcard_card(EquipCard* pEquipCard);
-CardWhere get_equipcard_where(EquipCard* pEquipCard);
-int get_equipcard_pos(EquipCard* pEquipCard);
+int get_equipcard_equip_pos(EquipCard* equip_card);
+int get_equipcard_supply(EquipCard* equip_card);
+Card* get_equipcard_card(EquipCard* equip_card);
+CardWhere get_equipcard_where(EquipCard* equip_card);
+int get_equipcard_pos(EquipCard* equip_card);
 
 
 // do equip a card 

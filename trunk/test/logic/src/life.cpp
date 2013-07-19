@@ -6,35 +6,35 @@
 #include "comm.h"
 
 
-int  get_changelife_delta(ChangeLife* pChangeLife)
+int  get_changelife_delta(ChangeLife* change_life)
 {
-	return pChangeLife->delta;
+	return change_life->delta;
 }
 
-int  get_changelife_after_life(ChangeLife* pChangeLife)
+int  get_changelife_after_life(ChangeLife* change_life)
 {
-	return pChangeLife->after_life;
+	return change_life->after_life;
 }
 
-int  get_changelife_src_player(ChangeLife* pChangeLife)
+int  get_changelife_src_player(ChangeLife* change_life)
 {
-	return pChangeLife->src_player;
+	return change_life->src_player;
 }
 
-OutCard*  get_changelife_src_cards(ChangeLife* pChangeLife)
+OutCard*  get_changelife_src_cards(ChangeLife* change_life)
 {
-	return &pChangeLife->src_cards;
+	return &change_life->src_cards;
 }
 
-int  get_changelife_src_skill(ChangeLife* pChangeLife)
+int  get_changelife_src_skill(ChangeLife* change_life)
 {
-	return pChangeLife->src_skill;
+	return change_life->src_skill;
 }
 
 
-void  set_changelife_delta(ChangeLife* pChangeLife, int delta)
+void  set_changelife_delta(ChangeLife* change_life, int delta)
 {
-	pChangeLife->delta = delta;
+	change_life->delta = delta;
 }
 
 
@@ -67,7 +67,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	// event per change life
 	INIT_EVENT(&event, GameEvent_PerChangeLife, player, 0, pParentEvent);
-	event.pChangeLife = &stChgLife;
+	event.change_life = &stChgLife;
 
 	trigger_game_event(pGame, &event);
 
@@ -77,21 +77,21 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	pPlayer = GAME_PLAYER(pGame, player);
 
-	pPlayer->curLife += stChgLife.delta;
+	pPlayer->cur_life += stChgLife.delta;
 
 	if(stChgLife.delta < 0)
-		MSG_OUT("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -stChgLife.delta, pPlayer->curLife, pPlayer->maxLife);
+		MSG_OUT("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
 	else
-		MSG_OUT("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, stChgLife.delta, pPlayer->curLife, pPlayer->maxLife);
+		MSG_OUT("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
 
-	if(pPlayer->curLife > pPlayer->maxLife)
+	if(pPlayer->cur_life > pPlayer->max_life)
 	{
-		pPlayer->curLife = pPlayer->maxLife;
+		pPlayer->cur_life = pPlayer->max_life;
 	}
 
-	stChgLife.after_life = pPlayer->curLife;
+	stChgLife.after_life = pPlayer->cur_life;
 
-	if(pPlayer->curLife <= 0)
+	if(pPlayer->cur_life <= 0)
 	{
 		// event perdead ?
 		INIT_EVENT(&event, GameEvent_PerDead, player, 0, pParentEvent);
@@ -99,7 +99,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 
 		// event dead
 
-		if(pPlayer->curLife <= 0)
+		if(pPlayer->cur_life <= 0)
 		{
 			// set the player to dead
 			pPlayer->status = PlayerStatus_Dead;
@@ -113,7 +113,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	}
 
 	INIT_EVENT(&event, GameEvent_PostChangeLife, player, 0, pParentEvent);
-	event.pChangeLife = &stChgLife;
+	event.change_life = &stChgLife;
 
 	trigger_game_event(pGame, &event);
 

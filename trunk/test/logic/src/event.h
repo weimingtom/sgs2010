@@ -145,16 +145,16 @@ struct tagGameEventContext
 	RESULT   result;
 	YESNO	 block;
 	union {
-		const NewGameConfig* pNewGameConfig;
-		const char* szFileName;
-		//Card*       pCard;       // for calc card, judge card ... 
-		GetCard*    pGetCard;        // num for get card, discard card. etc
-		AttackDis*  pAttackDis; 
-		PatternOut* pPatternOut; // for passive out, supply card etc..
- 		OutCard*    pOut;       // real out,  per/post out
-		PosCard*    pPosCard;  // lost card,
-		EquipCard*  pEquipCard; // for per/post equip card
-		ChangeLife* pChangeLife; // when life is changed 
+		const NewGameConfig* new_game_config;
+		const char* file_name;
+		//Card*       card;       // for calc card, judge card ... 
+		GetCard*    get_card;        // num for get card, discard card. etc
+		AttackDis*  attack_dis; 
+		PatternOut* pattern_out; // for passive out, supply card etc..
+ 		OutCard*    out_card;       // real out,  per/post out
+		PosCard*    pos_card;  // lost card,
+		EquipCard*  equip_card; // for per/post equip card
+		ChangeLife* change_life; // when life is changed 
 	};
 };
 
@@ -200,7 +200,7 @@ AttackDis* get_event_attackdis(GameEventContext* pEvent);
 
 
 
-//void  set_event_out(GameEventContext* pEvent, OutCard* pOut);
+//void  set_event_out(GameEventContext* pEvent, OutCard* out_card);
 
 
 // ...

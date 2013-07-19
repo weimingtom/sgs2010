@@ -34,15 +34,15 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	idbegin = self_select == YES ? 0 : 1;
 	idcnt = 0;
 
-	for(n = idbegin; n < pGame->nPlayerCount; n++)
+	for(n = idbegin; n < pGame->player_count; n++)
 	{
-		t = (player + n) % pGame->nPlayerCount;
+		t = (player + n) % pGame->player_count;
 		pTarget = GAME_PLAYER(pGame, t);
 		if(!IS_PLAYER_DEAD(pTarget))
 		{
 			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d", 
 				player_id_str( (t == player || IS_PLAYER_SHOW(pTarget) || IS_PLAYER_DEAD(pTarget)) ? pTarget->id : PlayerID_Unknown),
-				pTarget->name, pTarget->curLife, pTarget->maxLife, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->nHandCardNum);
+				pTarget->name, pTarget->cur_life, pTarget->max_life, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->hand_card_num);
 
 			snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%d", idbegin + idcnt);
 			sel_opts[idcnt].value = t;
@@ -97,7 +97,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			dis.flag = 0;
 
 			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, t, pParentEvent);
-			event.pAttackDis = &dis;
+			event.attack_dis = &dis;
 
 			// calc the skill and equip effect to target distance or attack range
 			// target effect
