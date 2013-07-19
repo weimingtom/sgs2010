@@ -10,29 +10,8 @@
 //////////////////////////////////////////////////////////////////////////
 // script exports
 
-int get_equipcard_equip_pos(EquipCard* equip_card)
-{
-	return equip_card->equip_pos;
-}
 
-int get_equipcard_supply(EquipCard* equip_card)
-{
-	return equip_card->supply;
-}
 
-Card* get_equipcard_card(EquipCard* equip_card)
-{
-	return &equip_card->card.card;
-}
-
-CardWhere get_equipcard_where(EquipCard* equip_card)
-{
-	return equip_card->card.where;
-}
-int get_equipcard_pos(EquipCard* equip_card)
-{
-	return equip_card->card.pos;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

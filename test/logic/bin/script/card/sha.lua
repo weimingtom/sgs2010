@@ -27,54 +27,52 @@ reg_card {
 
 
 	check = function(cfg, game, event, player)
-		local eid = get_event_id(event);
 		local p = get_game_player(game, player);
 		-- reset attack count in round begin
-		if(eid == GameEvent_RoundBegin) then
-			set_player_param(p, 0, 0); 
+		if(event.id == GameEvent_RoundBegin) then
+			p.params[0] = 0;
 		end
 
 
-		-- use in round out 
-		if(eid == GameEvent_RoundOutCard) then
-			if(get_player_param(p, 0) == 0) then
+		-- use in round out
+		if(event.id == GameEvent_RoundOutCard) then
+			if(p.params[0] == 0) then
 				return YES;
 			end
 		end
-	
+
 		-- other ways : NO
 		return  NO;
 	end,
-	
+
 	out = function(cfg, game, event, player)
 		local ret;
 		local target = -1;
-		local eid = get_event_id(event);
-	
-		if(eid== GameEvent_OutCardPrepare) then
+
+		if(event.id== GameEvent_OutCardPrepare) then
 			-- select target
-			ret, target = game_select_target(game, event, player, 1, NO, YES, 
+			ret, target = game_select_target(game, event, player, 1, NO, YES,
 				"请为【"..cfg.name.."】指定一个目标:", target);
 			if(ret == R_SUCC) then
-				set_out_target(get_event_out(event), target);
+				event.out_card.target = target;
 			end
 			return ret;
-		elseif(eid == GameEvent_OutCard) then
+		elseif(event.id == GameEvent_OutCard) then
 			local p = get_game_player(game, player);
-			set_player_param(p, 0, get_player_param(p, 0) + 1);
+			p.params[0] = p.params[0] + 1;
 			-- target passive shan
-	
-			ret = game_passive_out(game, event, get_event_target(event), player, "h:{shan}", 
+
+			ret = game_passive_out(game, event, event.target, player, "h:{shan}",
 				"请出一张【"..card_sid2name('shan').."】:");
-	
+
 			if(ret ~= R_SUCC) then
 				-- lost life( from player, out card 'sha', skill 0 )
-				game_player_add_life(game, event,get_event_target(event), -1, player, get_event_out(event), 0);
+				game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
 			end
-	
+
 			return R_SUCC;
 		end
 
-		return R_E_FAIL;	
+		return R_E_FAIL;
 	end,
 };

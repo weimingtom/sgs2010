@@ -55,28 +55,6 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 
 
 
-// tolua_begin
-
-int get_outcard_trigger(OutCard* pOutCard);
-int get_outcard_supply(OutCard* pOutCard);
-int get_outcard_target(OutCard* pOutCard);
-Card* get_outcard_vcard(OutCard* pOutCard);
-int get_outcard_rcard_num(OutCard* pOutCard);
-Card* get_outcard_rcard(OutCard* pOutCard, int index);
-CardWhere get_outcard_rcard_where(OutCard* pOutCard, int index);
-int get_outcard_rcard_pos(OutCard* pOutCard, int index);
-
-
-int get_outpattern_where(OutCardPattern* pOutPattern);
-YESNO get_outpattern_fixed(OutCardPattern* pOutPattern);
-int get_outpattern_num(OutCardPattern* pOutPattern);
-CardPattern* get_outpattern_pattern(OutCardPattern* pOutPattern, int index);
-
-
-void set_out_target(OutCard* out_card, int target);
-
-// tolua_end
-
 
 
 // tolua_begin

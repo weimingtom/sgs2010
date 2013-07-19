@@ -178,27 +178,6 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 // tolua_begin
 
-GameEvent get_event_id(GameEventContext* pEvent);
-int get_event_trigger(GameEventContext* pEvent);
-int get_event_target(GameEventContext* pEvent);
-GameEventContext*  get_parent_event(GameEventContext* pEvent);
-RESULT get_event_result(GameEventContext* pEvent);
-void set_event_result(GameEventContext* pEvent, RESULT result);
-YESNO  get_event_block(GameEventContext* pEvent);
-void  set_event_block(GameEventContext* pEvent, YESNO  yesno);
-
-//Card* get_event_card(GameEventContext* pEvent);
-
-OutCard* get_event_out(GameEventContext* pEvent);
-
-PosCard* get_event_poscard(GameEventContext* pEvent);
-EquipCard* get_event_equipcard(GameEventContext* pEvent);
-ChangeLife* get_event_changelife(GameEventContext* pEvent);
-
-AttackDis* get_event_attackdis(GameEventContext* pEvent);
-
-
-
 
 //void  set_event_out(GameEventContext* pEvent, OutCard* out_card);
 

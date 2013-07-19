@@ -6,37 +6,6 @@
 #include "comm.h"
 
 
-int  get_changelife_delta(ChangeLife* change_life)
-{
-	return change_life->delta;
-}
-
-int  get_changelife_after_life(ChangeLife* change_life)
-{
-	return change_life->after_life;
-}
-
-int  get_changelife_src_player(ChangeLife* change_life)
-{
-	return change_life->src_player;
-}
-
-OutCard*  get_changelife_src_cards(ChangeLife* change_life)
-{
-	return &change_life->src_cards;
-}
-
-int  get_changelife_src_skill(ChangeLife* change_life)
-{
-	return change_life->src_skill;
-}
-
-
-void  set_changelife_delta(ChangeLife* change_life, int delta)
-{
-	change_life->delta = delta;
-}
-
 
 RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc, int src_player, OutCard* src_cards, int src_skill)
 {

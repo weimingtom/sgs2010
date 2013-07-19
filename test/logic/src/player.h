@@ -141,20 +141,10 @@ RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* po
 const char* player_id_str(PlayerID id);
 const char* equip_idx_str(int idx);
 
-PlayerID get_player_id(Player* pPlayer);
-const char* get_player_name(Player* pPlayer);
-HeroID get_player_hero(Player* pPlayer);
-int get_player_curlife(Player* pPlayer);
-int get_player_maxlife(Player* pPlayer);
-
-int get_player_handcard_num(Player* pPlayer);
-int get_player_judgecard_num(Player* pPlayer);
 Card* get_player_handcard(Player* pPlayer, int index);
 Card* get_player_judgecard(Player* pPlayer, int index);
 Card* get_player_equipcard(Player* pPlayer, int index);
 
-PlayerStatus  get_player_status(Player* pPlayer);
-PlayerFlag  get_player_flag(Player* pPlayer);
 
 YESNO is_player_dead(Player* pPlayer);
 YESNO is_player_show(Player* pPlayer);
