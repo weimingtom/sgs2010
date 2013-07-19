@@ -39,6 +39,8 @@ RESULT card_stack_remove(CardStack* pCardStack, int offset, Card* pCard);
 
 // tolua_begin
 
+// for init card stack in script
+
 int  stack_size(CardStack* pCardStack);
 void stack_clear(CardStack* pCardStack);
 void stack_add_card(CardStack* pCardStack, CardID id, CardColor color, CardValue val);

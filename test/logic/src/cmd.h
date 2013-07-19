@@ -18,7 +18,7 @@ typedef struct tagGameEventContext  GameEventContext;
 typedef struct tagSelOption SelOption;
 
 
-struct tagSelOption
+typedef struct tagSelOption
 {
 	char text[MAX_SEL_OPTION_LEN];
 	// input string is multi strings, divide by '\0', the twice 0 is used to end of string group. 
@@ -26,7 +26,7 @@ struct tagSelOption
 	char input[MAX_SEL_INPUT_LEN];
 	// when select finished value is return through out_value.
 	int  value;
-};
+} SelOption;
 
 
 //typedef int (*FunCmdPerProc)(const char** argv, int argc, GameContext* pContext, void* ud);

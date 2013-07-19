@@ -1,36 +1,19 @@
 $cfile "../src/config.h"
 $cfile "../src/event.h"
 $cfile "../src/card.h"
+$cfile "../src/card_stack.h"
 $cfile "../src/hero.h"
 $cfile "../src/game.h"
+$cfile "../src/player.h"
+$cfile "../src/get.h"
 $cfile "../src/out.h"
 $cfile "../src/select.h"
-$cfile "../src/get.h"
 $cfile "../src/equip.h"
+$cfile "../src/decide.h"
+$cfile "../src/discard.h"
 $cfile "../src/life.h"
-$cfile "../src/player.h"
-$cfile "../src/card_stack.h"
+$cfile "../src/hero.h"
+//$cfile "../src/skill.h"
 
 
 // void game_import_file @ import(lua_State* L, const char* pattern);
-
-/*
-class Card
-{
-	CardID    id;
-	CardColor color;
-	CardValue value;
-	CardFlag  flag;
-};
-
-
-class CardPattern 
-{
-	CardID id;
-	CardColor color;
-	CardValue value_min;
-	CardValue value_max;
-};
-
-*/
-

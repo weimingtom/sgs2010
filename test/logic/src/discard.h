@@ -25,8 +25,12 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 
 RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int* idx, int num);
 
+
+
 // discard card
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos);
+
+
 
 #ifdef __cplusplus
 }

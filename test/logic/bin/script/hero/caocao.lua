@@ -36,10 +36,10 @@ reg_hero({
 所有魏势力角色按行动顺序依次选择是否打出一张【闪】“提供”给你（视为由你使用或打出），
 直到有一名角色或没有任何角色决定如此做时为止。
 ★同一张牌的一次完整的结算中（包括因结算引发的其他事件）只能发动一次奸雄。\n]==],
-	group = "魏",
-	sex = SEX_MALE,
+	group = HeroGroup_Wei,
+	sex = HeroSex_Male,
 	skills	= { 
-		{
+		[1] = {
 			name="奸雄",
 			flag=0,
 			check = function(self, game, event, player)
@@ -49,9 +49,9 @@ reg_hero({
 				return R_SUCC;
 			end,
 		},
-		{
+		[2] = {
 			name="护驾",
-			flag=SKILL_MASTER,
+			flag=SkillFlag_Master,
 			check = function(self, game, event, player)
 				return YES;
 			end,
