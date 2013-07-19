@@ -180,6 +180,170 @@ void card_dump(const Card* pCard)
 }
 
 
+
+RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len)
+{
+	const char* p;
+	const char* pe;
+	int   tln;
+	char  tmp[128];
+
+	p = szPattern;
+
+	pe = len > 0 ? p + len : p + strlen(p);
+
+	if(p >= pe)
+	{
+		// empty pattern string
+		return R_E_PARAM;
+	}
+
+	// <{sid}>
+	if(p < pe && *p == '{')
+	{
+		p++;
+		// get {sid}
+		tln = 0;
+		while(p < pe && *p != '}')
+		{
+			if(tln > (int)sizeof(tmp) - 1)
+			{
+				// too long sid string
+				return R_E_FAIL;
+			}
+			tmp[tln] = *p;
+			tln++;
+			p++;
+		}
+		tmp[tln] = 0;
+
+		if(p >= pe || *p != '}')
+		{
+			// expected '}' for end of sid
+			return R_E_FAIL;
+		}
+
+		p++;
+
+		if(0 == strcmp(tmp, "none"))
+		{
+			pCardPattern->id = CardID_None;
+		}
+		else
+		{
+			pCardPattern->id = card_sid2id(tmp);
+			if(pCardPattern->id == (CardID_None))
+			{
+				// invalid card sid
+				return R_E_FAIL;
+			}
+		}
+	}
+
+	if(p < pe)
+	{
+
+		switch(*p)
+		{
+		case 's': pCardPattern->color = CardColor_Spade; break;
+		case 'h': pCardPattern->color = CardColor_Heart; break;
+		case 'd': pCardPattern->color = CardColor_Diamond; break;
+		case 'c': pCardPattern->color = CardColor_Club; break;
+		case 'b': pCardPattern->color = CardColor_GeneralBlack; break;
+		case 'r': pCardPattern->color = CardColor_GeneralRed; break;
+		case 'n': pCardPattern->color = CardColor_None; break;
+		default:  goto  __v_parse;
+		}
+		p++;
+	}
+
+__v_parse:
+	if(p < pe)
+	{
+
+		switch(*p)
+		{
+		case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+			pCardPattern->value_min = (CardValue)(CardValue_2 + (*p - '2'));
+			break;
+		case '1':
+			if(p+1 < pe && *(p+1) == '0')
+			{
+				p++;
+				pCardPattern->value_min = CardValue_10;
+			}
+			else
+			{
+				// expected '0' for card value 10
+				return R_E_FAIL;
+			}
+			break;
+		case 'J': pCardPattern->value_min = CardValue_J; break;
+		case 'Q': pCardPattern->value_min = CardValue_J; break;
+		case 'K': pCardPattern->value_min = CardValue_J; break;
+		case 'A': pCardPattern->value_min = CardValue_J; break;
+		case 'N': pCardPattern->value_min = CardValue_None; break;
+		default: goto __fini_parse;
+		}
+		p++;
+
+		if(p < pe)
+		{
+			if(*p != '-')
+			{
+				// error format
+				return R_E_FAIL;
+			}
+			p++;
+
+			if(p >= pe)
+			{
+				// error format
+				return R_E_FAIL;
+			}
+
+			switch(*p)
+			{
+			case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+				pCardPattern->value_max = (CardValue)(CardValue_2 + (*p - '2'));
+				break;
+			case '1':
+				if(p+1 < pe && *(p+1) == '0')
+				{
+					p++;
+					pCardPattern->value_max = CardValue_10;
+				}
+				else
+				{
+					// expected '0' for card value 10
+					return R_E_FAIL;
+				}
+				break;
+			case 'J': pCardPattern->value_max = CardValue_J; break;
+			case 'Q': pCardPattern->value_max = CardValue_J; break;
+			case 'K': pCardPattern->value_max = CardValue_J; break;
+			case 'A': pCardPattern->value_max = CardValue_J; break;
+			case 'N': pCardPattern->value_max = CardValue_None; break;
+			default: return R_E_FAIL;
+			}
+			p++;
+
+		}
+		else
+		{
+			pCardPattern->value_max = pCardPattern->value_min;
+		}
+	}
+
+__fini_parse:
+
+	if(p != pe)
+		return R_E_FAIL;
+
+	return R_SUCC;
+}
+
+
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen)
 {
 	char name[128];

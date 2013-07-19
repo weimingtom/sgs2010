@@ -7,27 +7,127 @@
 #include "player.h"
 #include "comm.h"
 
+//////////////////////////////////////////////////////////////////////////
+// script exports
+
+int get_equipcard_equip_pos(EquipCard* pEquipCard)
+{
+	return pEquipCard->equip_pos;
+}
+
+int get_equipcard_supply(EquipCard* pEquipCard)
+{
+	return pEquipCard->supply;
+}
+
+Card* get_equipcard_card(EquipCard* pEquipCard)
+{
+	return &pEquipCard->card.card;
+}
+
+CardWhere get_equipcard_where(EquipCard* pEquipCard)
+{
+	return pEquipCard->card.where;
+}
+int get_equipcard_pos(EquipCard* pEquipCard)
+{
+	return pEquipCard->card.pos;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 
-RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard)
+RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int hand_pos, int equip_pos)
 {
 	char buf[128];
-	Player* pPlayer = GAME_PLAYER(pGame, player);
+	Player* pPlayer;
+	EquipCard  stEquipCard;
+	GameEventContext  event;
 
-	// add event per equip card
-
-	if(CARD_VALID(&pPlayer->stEquipCard[pos]))
+	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		game_player_discard_card(pGame, pParentEvent, player, PlayerCard_Equip, pos);
+		if(L) {
+			luaL_error(L, "game_player_equip_card: invalid player index - %d", player );
+		} else {
+			MSG_OUT("game_player_equip_card: invalid player index - %d\n", player );
+		}
+		return R_E_PARAM;
+	}
+
+	if(equip_pos < 0 || equip_pos >= EquipIdx_Max)
+	{
+		if(L) {
+			luaL_error(L, "game_player_equip_card: invalid equip pos - %d", equip_pos );
+		} else {
+			MSG_OUT("game_player_equip_card: invalid equip pos - %d\n", equip_pos );
+		}
+		return R_E_PARAM;
 	}
 
 
-	MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(pos), card_str(pCard, buf, sizeof(buf)));
+	pPlayer = GAME_PLAYER(pGame, player);
 
-	pPlayer->stEquipCard[pos] = *pCard;
-	pPlayer->stEquipCard[pos].flag = CardFlag_None;
+	ST_ZERO(stEquipCard);
 
-	// add event post equip card
+
+	stEquipCard.supply = player;
+	stEquipCard.equip_pos = equip_pos;
+
+	// get card from hand
+	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &stEquipCard.card.card))
+	{
+		if(L) {
+			luaL_error(L, "game_player_equip_card: invalid hand card pos - %d", hand_pos );
+		} else {
+			MSG_OUT("game_player_equip_card: invalid hand card pos - %d\n", hand_pos );
+		}
+		return R_E_PARAM;
+	}
+
+	stEquipCard.card.where = CardWhere_PlayerHand;
+	stEquipCard.card.pos = hand_pos;
+
+
+	// add event per equip card
+
+	INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
+	event.pEquipCard = &stEquipCard;
+
+	trigger_game_event(pGame, &event);
+
+	// some skill can break equip a card? 
+	if(event.result == R_CANCEL)
+	{
+		return R_CANCEL;
+	}
+
+	if(R_SUCC == player_remove_card(pPlayer, CardWhere_PlayerHand, hand_pos, NULL))
+	{
+
+		if(CARD_VALID(&pPlayer->stEquipCard[equip_pos]))
+		{
+			game_player_discard_card(pGame, pParentEvent, player, CardWhere_PlayerEquip, equip_pos);
+		}
+
+		MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(equip_pos), card_str(&stEquipCard.card.card, buf, sizeof(buf)));
+
+		pPlayer->stEquipCard[equip_pos] = stEquipCard.card.card;
+		pPlayer->stEquipCard[equip_pos].flag = CardFlag_None;
+
+
+		stEquipCard.card.where = CardWhere_PlayerEquip;
+		stEquipCard.card.pos = equip_pos;
+
+
+		// add event post equip card
+
+		INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
+		event.pEquipCard = &stEquipCard;
+
+		trigger_game_event(pGame, &event);
+
+		// ignore event result
+	}
 
 	return R_SUCC;
 }

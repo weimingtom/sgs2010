@@ -13,9 +13,30 @@ typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
 
+
+typedef struct tagEquipCard
+{
+	int equip_pos;
+	int supply;
+	PosCard  card;
+} EquipCard;
+
+
+
 // tolua_begin
 
-RESULT game_player_equip_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int pos, Card* pCard);
+
+// read equipcard struct for script
+
+int get_equipcard_equip_pos(EquipCard* pEquipCard);
+int get_equipcard_supply(EquipCard* pEquipCard);
+Card* get_equipcard_card(EquipCard* pEquipCard);
+CardWhere get_equipcard_where(EquipCard* pEquipCard);
+int get_equipcard_pos(EquipCard* pEquipCard);
+
+
+// do equip a card 
+RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int hand_pos, int equip_pos);
 
 
 // tolua_end

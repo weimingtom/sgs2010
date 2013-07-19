@@ -7,6 +7,8 @@
 #include "config.h"
 #include "card.h"
 #include "out.h"
+#include "equip.h"
+#include "life.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,52 +28,53 @@ enum GameEvent
 	GameEvent_LoadGame,     // 加载保存的进度
 	GameEvent_RoundBegin,   // 回合开始时
 	GameEvent_PerRoundJudge,    
+	GameEvent_RoundJudgeCard,
 	GameEvent_PostRoundJudge,
-	GameEvent_PerJudgeCard,
-	GameEvent_PostJudgeCard,
 	GameEvent_PerRoundGet,
+	GameEvent_RoundGetCard,
 	GameEvent_PostRoundGet,
 	GameEvent_PerRoundOut,
+	GameEvent_RoundOutCard,
 	GameEvent_PostRoundOut,
 	GameEvent_PerRoundDiscard,
 	GameEvent_PostRoundDiscard,
-	GameEvent_PerDiscardCard,
-	GameEvent_PostDiscardCard,
 	GameEvent_RoundEnd,
 	GameEvent_PerAttack,
 	GameEvent_PostAttack,
 	GameEvent_PerBeAttacked,
 	GameEvent_PostBeAttacked,
-	GameEvent_PerAddLife,
-	GameEvent_PostAddLife,
-	GameEvent_PerLostLife,
-	GameEvent_PostLostLife,
+	GameEvent_PerChangeLife,
+	GameEvent_PostChangeLife,
 	GameEvent_PerDead,
 	GameEvent_Dead,
 	GameEvent_PerKill,
 	GameEvent_UseSkill,
 	GameEvent_PostKill,
-	GameEvent_PerCardJudge,
-	GameEvent_PostCardJudge,
-	GameEvent_RoundGetCard,
+	//GameEvent_PerCardJudge,
+	//GameEvent_PostCardJudge,
+	GameEvent_PerJudgeCard,
+	GameEvent_PostJudgeCard,
 	GameEvent_PerGetCard,
 	GameEvent_PostGetCard,
 	GameEvent_PassiveGetCard,
 	GameEvent_OutCardPrepare,
-	GameEvent_OutCard,
-	GameEvent_RoundOutCard,
 	GameEvent_PerOutCard,
+	GameEvent_OutCard,
 	GameEvent_PostOutCard,
+	GameEvent_PerPassiveOutCard,
+	GameEvent_PassiveOutCard,
+	GameEvent_PostPassiveOutCard,
+	GameEvent_PerEquipCard,
+	GameEvent_PostEquipCard,
 	GameEvent_PerLostCard,
 	GameEvent_PostLostCard,
+	GameEvent_PerDiscardCard,
+	GameEvent_PostDiscardCard,
 	GameEvent_HandCardEmpty,
 	GameEvent_PerCardCalc,
 	GameEvent_CardCalc,
 	GameEvent_PostCardCalc,
 	GameEvent_FiniCardCalc,
-	GameEvent_PerPassiveOutCard,
-	GameEvent_PassiveOutCard,
-	GameEvent_PostPassiveOutCard,
 	GameEvent_SupplyCard,
 	GameEvent_CalcAttackDis,
 	GameEvent_SelectTarget,
@@ -120,13 +123,6 @@ typedef struct tagAttackDis
 	int     flag;
 }AttackDis;
 
-typedef struct tagPosCard
-{
-	Card card;
-	int  where;
-	int  pos;
-}PosCard;
-
 
 
 typedef struct tagGameEventContext GameEventContext;
@@ -145,12 +141,14 @@ struct tagGameEventContext
 	union {
 		const NewGameConfig* pNewGameConfig;
 		const char* szFileName;
-		Card*       pCard;       // for calc card, judge card ... 
+		//Card*       pCard;       // for calc card, judge card ... 
 		int*        pNum;        // num for get card, discard card. etc
 		AttackDis*  pAttackDis; 
 		PatternOut* pPatternOut; // for passive out, supply card etc..
  		OutCard*    pOut;       // real out,  per/post out
 		PosCard*    pPosCard;  // lost card,
+		EquipCard*  pEquipCard; // for per/post equip card
+		ChangeLife* pChangeLife; // when life is changed 
 	};
 };
 
@@ -169,7 +167,6 @@ struct tagGameEventContext
 
 
 
-
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
 
@@ -184,11 +181,15 @@ void set_event_result(GameEventContext* pEvent, RESULT result);
 YESNO  get_event_block(GameEventContext* pEvent);
 void  set_event_block(GameEventContext* pEvent, YESNO  yesno);
 
-Card* get_event_card(GameEventContext* pEvent);
+//Card* get_event_card(GameEventContext* pEvent);
 
 OutCard* get_event_out(GameEventContext* pEvent);
-void  set_event_out(GameEventContext* pEvent, OutCard* pOut);
-void set_out_target(OutCard* pOut, int target);
+
+PosCard* get_event_poscard(GameEventContext* pEvent);
+EquipCard* get_event_equipcard(GameEventContext* pEvent);
+ChangeLife* get_event_changelife(GameEventContext* pEvent);
+
+//void  set_event_out(GameEventContext* pEvent, OutCard* pOut);
 
 
 // ...

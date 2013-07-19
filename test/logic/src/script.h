@@ -14,6 +14,8 @@ RESULT  reload_game_script();
 
 lua_State* get_ai_script();
 
+
+
 #ifdef __cplusplus
 };
 #endif

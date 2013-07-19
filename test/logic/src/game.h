@@ -80,6 +80,7 @@ typedef enum _GameResult
 #define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
 #define GAME_PLAYER(pGame, pl)   (&(pGame)->players[(pl)])
 
+#define IS_PLAYER_VALID(pGame, p) ((p)>=0 && (p)<(pGame)->nPlayerCount && (pGame)->players[(p)].status != PlayerStatus_Dead)
 
 // game process base funs
 
@@ -92,6 +93,11 @@ RESULT game_load(GameContext* pGame, const char* file_name);
 
 
 RESULT set_game_cur_player(GameContext* pGame, int player);
+
+// if the game is over, this function do not return.
+void game_check_gameover(GameContext* pGame, int player);
+
+
 
 
 // tolua_begin
