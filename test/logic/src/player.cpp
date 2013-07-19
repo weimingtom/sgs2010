@@ -228,6 +228,8 @@ RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag
 			return R_SUCC;
 		}
 		break;
+	default:
+		break;
 	}
 
 	return R_E_PARAM;
@@ -261,6 +263,8 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 			pCard->flag = CardFlag_FromJudge;
 			return R_SUCC;
 		}
+		break;
+	default:
 		break;
 	}
 
@@ -297,6 +301,8 @@ RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard
 			arrray_remove_t(pPlayer->judgment_cards, sizeof(pPlayer->judgment_cards[0]), &pPlayer->judgment_card_num, pos, NULL);
 			return R_SUCC;
 		}
+		break;
+	default:
 		break;
 	}
 
