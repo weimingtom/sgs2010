@@ -21,17 +21,22 @@ reg_card {
 ★由八卦使用或打出的【闪】，并非从你的手牌中使用或打出。]==],
 
 	check = function(cfg, game, event, player)
-		if( get_event_id(event) == GameEvent_OutCard  and get_game_round_player(game)==player) then
+		if( get_event_id(event) == GameEvent_RoundOutCard  and get_game_round_player(game)==player) then
 			return YES;
 		end
 		return NO;
 	end,
 	
 	out = function(cfg, game, event, player)
-		if ( get_event_id(event) == GameEvent_OutCard ) then
-			return game_player_equip_card(game, event, player, EquipIdx_Armor, get_event_out(event));
+		if ( get_event_id(event) == GameEvent_OutCardPrepare ) then
+			local oc = get_event_out(event);
+			--if(get_outcard_rcard_num(oc) ~= 1 or get_outcard_rcard_where(oc, 0) ~= CardWhere_PlayerHand) then
+				
+			--end
+			game_player_equip_card(game, event, player, get_outcard_rcard_pos(oc, 0), EquipIdx_Armor);
+			return R_CANCEL;
 		end
-		return R_SUCC;
+		return R_E_FAIL;
 	end,
 };
 

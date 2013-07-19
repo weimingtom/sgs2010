@@ -524,6 +524,8 @@ RESULT card_match(const Card* pCard,  int nCardNum, const CardPattern* pPattern,
 	return n == nCardNum ? R_SUCC : R_E_FAIL;
 }
 
+/*
+
 void set_card_id(Card* pCard, CardID id)
 {
 	pCard->id = id;
@@ -543,6 +545,7 @@ void set_card_flag(Card* pCard, CardFlag flag)
 {
 	pCard->flag = flag;
 }
+*/
 
 
 

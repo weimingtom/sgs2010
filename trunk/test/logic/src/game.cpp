@@ -380,15 +380,15 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 {
-	int num;
+	GetCard num;
 	GameEventContext  event;
 
 	MSG_OUT("enter the round [%d]  get card phase, round player is [%s]\n", pGame->nRoundNum, ROUND_PLAYER(pGame)->name);
 
 
-	num = 2;  // in get round init to get 2 card 
+	num.num = 2;  // in get round init to get 2 card 
 	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->nRoundPlayer, 0, pEvent);
-	event.pNum = &num;
+	event.pGetCard = &num;
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);
@@ -400,7 +400,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 		return R_SUCC;
 	}
 	
-	game_round_do_get(pGame, pEvent, pGame->nRoundPlayer, num);
+	game_round_do_get(pGame, pEvent, pGame->nRoundPlayer, num.num);
 
 	game_flush_discard_cur(pGame);
 
