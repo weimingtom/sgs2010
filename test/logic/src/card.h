@@ -288,11 +288,12 @@ const char* card_color_str(CardColor color);
 const char* card_value_str(CardValue value);
 
 
-
+/*
 void set_card_id(Card* pCard, CardID id);
 void set_card_color(Card* pCard, CardColor cl);
 void set_card_value(Card* pCard, CardValue val);
 void set_card_flag(Card* pCard, CardFlag flag);
+*/
 
 RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
 

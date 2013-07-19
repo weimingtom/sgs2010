@@ -17,3 +17,134 @@ $cfile "../src/hero.h"
 
 
 // void game_import_file @ import(lua_State* L, const char* pattern);
+
+struct Card
+{
+	CardID    id;
+	CardColor color;
+	CardValue value;
+	CardFlag  flag;
+
+};
+
+
+struct CardPattern 
+{
+	CardID id;
+	CardColor color;
+	CardValue value_min;
+	CardValue value_max;
+};
+
+
+struct PosCard
+{
+	Card       card;
+	CardWhere  where;
+	int        pos;
+};
+
+
+
+
+
+struct CardList
+{
+	int    num;
+	Card   cards[MAX_CARD_LIST_NUM];
+};
+
+struct PosCardList
+{
+	int      num;
+	PosCard  pcards[MAX_CARD_LIST_NUM];
+};
+
+
+struct GetCard
+{
+	int num;
+} ;
+
+
+struct EquipCard
+{
+	int equip_pos;
+	int supply;
+	PosCard  card;
+} ;
+
+
+struct OutCard
+{
+	int      trigger;
+	int      supply;
+	int      target;
+	Card     vcard;    //  use as card (virtaul) 
+	PosCardList list;
+};
+
+struct OutCardPattern
+{
+	tolua_readonly int         where;    // limited where the card is comes from 
+	tolua_readonly YESNO       fixed;    // limited the card is fixed or can use hero skill/weapon skill/armor skill to generate 
+	tolua_readonly int         num;      // pattern count
+	 CardPattern patterns[MAX_CARD_LIST_NUM];
+};
+
+
+struct PatternOut
+{
+	tolua_readonly OutCardPattern pattern;
+	tolua_readonly OutCard        out; 
+} ;
+
+
+
+struct  Player
+{
+	tolua_readonly PlayerID id;
+	tolua_readonly HeroID   hero;
+	tolua_readonly int      maxLife;
+	tolua_readonly int      curLife;
+	tolua_readonly char     name[MAX_NAME_LEN];
+	tolua_readonly int      nHandCardNum;
+	tolua_readonly int      nJudgmentCardNum;
+	//tolua_readonly Card     stHandCards[MAX_HAND_CARD];
+	//tolua_readonly Card     stEquipCard[EquipIdx_Max];
+	//tolua_readonly Card     stJudgmentCards[MAX_JUDGMENT_CARD];
+	tolua_readonly PlayerStatus   status;
+	tolua_readonly PlayerFlag  flag;
+	               int      params[MAX_PLAYER_PARAM];
+};
+
+
+struct ChangeLife
+{
+	int  delta;    // how many life is changed
+	tolua_readonly int  after_life; 
+	tolua_readonly int  src_player;  // the damage come from (player index)
+	tolua_readonly OutCard   src_cards; // the damage come from (cards) if damage is not from card, it will be empty
+	tolua_readonly int  src_skill;   // if the damage comes rom a skill, otherwise 0;
+};
+
+
+struct GameEventContext
+{
+	tolua_readonly GameEvent      id;
+	tolua_readonly int      trigger;
+	tolua_readonly int      target;
+	tolua_readonly GameEventContext* parent_event;
+	RESULT   result;
+	YESNO	 block;
+
+	tolua_readonly GetCard*    pGetCard;        // num for get card, discard card. etc
+	tolua_readonly AttackDis*  pAttackDis; 
+	tolua_readonly PatternOut* pPatternOut; // for passive out, supply card etc..
+	tolua_readonly OutCard*    pOut;       // real out,  per/post out
+	tolua_readonly PosCard*    pPosCard;  // lost card,
+	tolua_readonly EquipCard*  pEquipCard; // for per/post equip card
+	tolua_readonly ChangeLife* pChangeLife; // when life is changed 
+};
+
+

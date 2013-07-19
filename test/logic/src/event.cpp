@@ -87,6 +87,10 @@ ChangeLife* get_event_changelife(GameEventContext* pEvent)
 	return pEvent->pChangeLife;
 }
 
+AttackDis* get_event_attackdis(GameEventContext* pEvent)
+{
+	return pEvent->pAttackDis;
+}
 
 
 // end lua interface implements

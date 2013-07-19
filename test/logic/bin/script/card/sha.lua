@@ -68,8 +68,8 @@ reg_card {
 				"Çë³öÒ»ÕÅ¡¾"..card_sid2name('shan').."¡¿:");
 	
 			if(ret ~= R_SUCC) then
-				-- lost life
-				game_player_add_life(game, event,get_event_target(event), -1);
+				-- lost life( from player, out card 'sha', skill 0 )
+				game_player_add_life(game, event,get_event_target(event), -1, player, get_event_out(event), 0);
 			end
 	
 			return R_SUCC;

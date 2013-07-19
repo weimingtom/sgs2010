@@ -72,9 +72,9 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	{
 		// in round get, must get 2 card
 
-		if(*pEvent->pNum != num)
+		if(pEvent->pGetCard->num != num)
 		{
-			MSG_OUT("get card num error! must be %d\n", *pEvent->pNum);
+			MSG_OUT("get card num error! must be %d\n", pEvent->pGetCard->num);
 			return R_E_PARAM;
 		}
 
@@ -101,7 +101,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	{
 		// passive get without per/postgetcard event
 		// get event.num cards
-		for(n = 0; n < *pEvent->pNum; n++)
+		for(n = 0; n < pEvent->pGetCard->num; n++)
 		{
 			if(YES != is_player_handfull(CUR_PLAYER(pGame)) 
 				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
@@ -121,13 +121,18 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 	RESULT ret;
 	GameEventContext  event;
 	char buffer[128];
+
+	GetCard    stGetCard;
+
+	stGetCard.num = num;
+
 	
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, 0, pEvent);
-	event.pNum = &num;
+	event.pGetCard = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(buffer, sizeof(buffer), "please get %d card:", num);
+	snprintf(buffer, sizeof(buffer), "please get %d card:", stGetCard.num);
 
 	ret = cmd_loop(pGame, &event, buffer);
 
@@ -140,6 +145,25 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int player, int num)
 {
+	RESULT ret;
+	GameEventContext  event;
+	char buffer[128];
+
+	GetCard    stGetCard;
+
+	stGetCard.num = num;
+
+
+	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, 0, pEvent);
+	event.pGetCard = &stGetCard;
+
+	set_game_cur_player(pGame, player);
+
+	snprintf(buffer, sizeof(buffer), "please get %d card:", stGetCard.num);
+
+	ret = cmd_loop(pGame, &event, buffer);
+
+	(void)ret;
 
 	return R_SUCC;
 }

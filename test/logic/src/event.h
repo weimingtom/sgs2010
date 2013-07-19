@@ -99,6 +99,12 @@ typedef struct tagNewGameConfig
 	int mutineers;
 }NewGameConfig;
 
+// for get card
+typedef struct tagGetCard
+{
+	int num;
+} GetCard;
+
 // for passive out, supply out
 typedef struct tagPatternOut
 {
@@ -142,7 +148,7 @@ struct tagGameEventContext
 		const NewGameConfig* pNewGameConfig;
 		const char* szFileName;
 		//Card*       pCard;       // for calc card, judge card ... 
-		int*        pNum;        // num for get card, discard card. etc
+		GetCard*    pGetCard;        // num for get card, discard card. etc
 		AttackDis*  pAttackDis; 
 		PatternOut* pPatternOut; // for passive out, supply card etc..
  		OutCard*    pOut;       // real out,  per/post out
@@ -188,6 +194,11 @@ OutCard* get_event_out(GameEventContext* pEvent);
 PosCard* get_event_poscard(GameEventContext* pEvent);
 EquipCard* get_event_equipcard(GameEventContext* pEvent);
 ChangeLife* get_event_changelife(GameEventContext* pEvent);
+
+AttackDis* get_event_attackdis(GameEventContext* pEvent);
+
+
+
 
 //void  set_event_out(GameEventContext* pEvent, OutCard* pOut);
 
