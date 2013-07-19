@@ -10,8 +10,8 @@ static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int p
 	// be damaged and target is self and the source of damage is card. 
 	if(pEvent->id == GameEvent_PostChangeLife
 		&& pEvent->trigger == player
-		&& pEvent->pChangeLife->delta < 0
-		&& pEvent->pChangeLife->src_cards.list.num > 0 // 需要判断指向的牌是否存在
+		&& pEvent->change_life->delta < 0
+		&& pEvent->change_life->src_cards.list.num > 0 // 需要判断指向的牌是否存在
 		&& YES != is_player_handfull(&pGame->players[player]))
 		return YES;
 	return NO;
@@ -22,7 +22,7 @@ static RESULT jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int pl
 	// damage and
 	if(pEvent->id == GameEvent_PostChangeLife)
 	{
-		//add_player_handle_card(GAME_PLAYER(pGame, player, &pEvent->pChangeLife->src_cards.list))
+		//add_player_handle_card(GAME_PLAYER(pGame, player, &pEvent->change_life->src_cards.list))
 		return R_SUCC;
 	}
 
@@ -36,9 +36,9 @@ static YESNO hujia_check(GameContext* pGame, GameEventContext* pEvent, int playe
 	if(pEvent->id == GameEvent_PassiveOutCard && pEvent->trigger == player)
 	{
 		n = 0;
-		for(n = 0; n < pEvent->pPatternOut->pattern.num; n++)
+		for(n = 0; n < pEvent->pattern_out->pattern.num; n++)
 		{
-			if(pEvent->pPatternOut->pattern.patterns[n].id == card_sid2id("shan"))
+			if(pEvent->pattern_out->pattern.patterns[n].id == card_sid2id("shan"))
 			{
 				return YES;
 			}
@@ -59,9 +59,9 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 
 	nextplayer = player;
 
-	for(n = 1; n < pGame->nPlayerCount; n++)
+	for(n = 1; n < pGame->player_count; n++)
 	{
-		nextplayer = (nextplayer + 1) % pGame->nPlayerCount;
+		nextplayer = (nextplayer + 1) % pGame->player_count;
 
 		pHero = get_hero_config(pGame->players[nextplayer].hero);
 
@@ -70,7 +70,7 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 			//pattern.num = 1;
 			//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
 			//pattern.where = PlayerCard_Hand;
-			if(R_SUCC == game_supply_card(NULL, pGame, pEvent, player, nextplayer, "h:{defend}", NULL, &pEvent->pPatternOut->out) )
+			if(R_SUCC == game_supply_card(NULL, pGame, pEvent, player, nextplayer, "h:{defend}", NULL, &pEvent->pattern_out->out) )
 			{
 				// out card instead mine 
 				return R_SUCC;

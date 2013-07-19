@@ -5,10 +5,10 @@ static YESNO card_medicine_check(GameContext* pGame, GameEventContext* pEvent, i
 {
 	Player* pPlayer; 
 	// in out round , you can use to self
-	if(pEvent->id == GameEvent_RoundOutCard && pGame->nRoundPlayer == player )
+	if(pEvent->id == GameEvent_RoundOutCard && pGame->round_player == player )
 	{
 		pPlayer = (GAME_PLAYER(pGame, player));
-		if(pPlayer->curLife < pPlayer->maxLife)
+		if(pPlayer->cur_life < pPlayer->max_life)
 			return YES;
 	}
 	else if(pEvent->id == GameEvent_PerDead)

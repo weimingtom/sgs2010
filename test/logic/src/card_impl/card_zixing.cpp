@@ -15,13 +15,13 @@ static RESULT card_zixing_out(GameContext* pGame, GameEventContext* pEvent, int 
 {
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_ZiXing)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_ZiXing)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_HorseDec, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_HorseDec, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}
@@ -31,7 +31,7 @@ static RESULT card_zixing_out(GameContext* pGame, GameEventContext* pEvent, int 
 		// when role attack other, the dis from other is -1
 		if(player == pEvent->trigger)
 		{
-			pEvent->pAttackDis->dis -= 1;
+			pEvent->attack_dis->dis -= 1;
 		}
 	}
 	return R_SUCC;

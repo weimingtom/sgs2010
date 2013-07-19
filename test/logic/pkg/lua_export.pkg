@@ -105,17 +105,34 @@ struct  Player
 {
 	tolua_readonly PlayerID id;
 	tolua_readonly HeroID   hero;
-	tolua_readonly int      maxLife;
-	tolua_readonly int      curLife;
+	tolua_readonly int      max_life;
+	tolua_readonly int      cur_life;
 	tolua_readonly char     name[MAX_NAME_LEN];
-	tolua_readonly int      nHandCardNum;
-	tolua_readonly int      nJudgmentCardNum;
-	//tolua_readonly Card     stHandCards[MAX_HAND_CARD];
-	//tolua_readonly Card     stEquipCard[EquipIdx_Max];
-	//tolua_readonly Card     stJudgmentCards[MAX_JUDGMENT_CARD];
+	tolua_readonly int      hand_card_num;
+	tolua_readonly int      judgment_card_num;
+	//tolua_readonly Card    hand_cards[MAX_HAND_CARD];
+	//tolua_readonly Card    equip_card[EquipIdx_Max];
+	//tolua_readonly Card    judgment_cards[MAX_JUDGMENT_CARD];
 	tolua_readonly PlayerStatus   status;
 	tolua_readonly PlayerFlag  flag;
 	               int      params[MAX_PLAYER_PARAM];
+};
+
+struct GameContext
+{
+	tolua_readonly int        player_count;
+	tolua_readonly int        minster_count;
+	tolua_readonly int        spy_count;
+	tolua_readonly int        mutineer_count;
+	//Player     players[MAX_PLAYER_NUM];
+	//CardStack  get_card_stack;              // card stack for get card from
+	//CardStack  discard_card_stack;          // card stack for discard card to
+	//int        cur_discard_card_num;          // the current out discard card number
+	//Card       cur_discard_cards[MAX_CUR_DISCARD_NUM]; 
+	tolua_readonly int        round_num;
+	tolua_readonly int        round_player;
+	tolua_readonly int        cur_player;
+	tolua_readonly Status     status;
 };
 
 
@@ -138,13 +155,13 @@ struct GameEventContext
 	RESULT   result;
 	YESNO	 block;
 
-	tolua_readonly GetCard*    pGetCard;        // num for get card, discard card. etc
-	tolua_readonly AttackDis*  pAttackDis; 
-	tolua_readonly PatternOut* pPatternOut; // for passive out, supply card etc..
-	tolua_readonly OutCard*    pOut;       // real out,  per/post out
-	tolua_readonly PosCard*    pPosCard;  // lost card,
-	tolua_readonly EquipCard*  pEquipCard; // for per/post equip card
-	tolua_readonly ChangeLife* pChangeLife; // when life is changed 
+	tolua_readonly GetCard*    get_card;        // num for get card, discard card. etc
+	tolua_readonly AttackDis*  attack_dis; 
+	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
+	tolua_readonly OutCard*    out_card;       // real out,  per/post out
+	tolua_readonly PosCard*    pos_card;  // lost card,
+	tolua_readonly EquipCard*  equip_card; // for per/post equip card
+	tolua_readonly ChangeLife* change_life; // when life is changed 
 };
 
 

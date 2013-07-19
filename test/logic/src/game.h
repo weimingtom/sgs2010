@@ -45,18 +45,18 @@ typedef struct tagGameContext GameContext;
 
 struct tagGameContext
 {
-	int        nPlayerCount;
-	int        nMinsterCount;
-	int        nSpyCount;
-	int        nMutineerCount;
+	int        player_count;
+	int        minster_count;
+	int        spy_count;
+	int        mutineer_count;
 	Player     players[MAX_PLAYER_NUM];
-	CardStack  stGetCardStack;              // card stack for get card from
-	CardStack  stDiscardCardStack;          // card stack for discard card to
-	int        nCurDiscardCardNum;          // the current out discard card number
-	Card       stCurDiscardCards[MAX_CUR_DISCARD_NUM];           // ...
-	int        nRoundNum;
-	int        nRoundPlayer;
-	int        nCurPlayer;
+	CardStack  get_card_stack;              // card stack for get card from
+	CardStack  discard_card_stack;          // card stack for discard card to
+	int        cur_discard_card_num;          // the current out discard card number
+	Card       cur_discard_cards[MAX_CUR_DISCARD_NUM];           // ...
+	int        round_num;
+	int        round_player;
+	int        cur_player;
 	Status     status;
 	//jmp_buf    __jb__;  // for quit a game directly
 	//lua_State  *L;      // for run card/hero logic in lua engine
@@ -76,11 +76,11 @@ typedef enum _GameResult
 
 // tolua_end
 
-#define ROUND_PLAYER(pGame)   (&(pGame)->players[(pGame)->nRoundPlayer])
-#define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->nCurPlayer])
+#define ROUND_PLAYER(pGame)   (&(pGame)->players[(pGame)->round_player])
+#define CUR_PLAYER(pGame)   (&(pGame)->players[(pGame)->cur_player])
 #define GAME_PLAYER(pGame, pl)   (&(pGame)->players[(pl)])
 
-#define IS_PLAYER_VALID(pGame, p) ((p)>=0 && (p)<(pGame)->nPlayerCount && (pGame)->players[(p)].status != PlayerStatus_Dead)
+#define IS_PLAYER_VALID(pGame, p) ((p)>=0 && (p)<(pGame)->player_count && (pGame)->players[(p)].status != PlayerStatus_Dead)
 
 // game process base funs
 

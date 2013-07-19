@@ -14,13 +14,13 @@ static RESULT card_dilu_out(GameContext* pGame, GameEventContext* pEvent, int pl
 {
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_DiLu)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_DiLu)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_HorseInc, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_HorseInc, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}
@@ -30,7 +30,7 @@ static RESULT card_dilu_out(GameContext* pGame, GameEventContext* pEvent, int pl
 		// when other attack me, the dis from other is +1
 		if(player == pEvent->target)
 		{
-			pEvent->pAttackDis->dis += 1;
+			pEvent->attack_dis->dis += 1;
 		}
 	}
 	return R_SUCC;

@@ -51,7 +51,7 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent);
 // 
 RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int player);
 
-RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
+RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card);
 
 
 
@@ -73,7 +73,7 @@ int get_outpattern_num(OutCardPattern* pOutPattern);
 CardPattern* get_outpattern_pattern(OutCardPattern* pOutPattern, int index);
 
 
-void set_out_target(OutCard* pOut, int target);
+void set_out_target(OutCard* out_card, int target);
 
 // tolua_end
 
@@ -81,8 +81,8 @@ void set_out_target(OutCard* pOut, int target);
 
 // tolua_begin
 
-// trigger supply from player the card match the  pattern, return through pOut
-RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern, const char* alter_text, OutCard* pOut);
+// trigger supply from player the card match the  pattern, return through out_card
+RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern, const char* alter_text, OutCard* out_card);
 
 // passive out process
 RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const char* pattern, const char* alter_text);

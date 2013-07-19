@@ -11,7 +11,7 @@
 #include "discard.h"
 
 
-static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* pOut)
+static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
 {
 	RESULT  ret;
 	//const CardConfig* pCardConfig;
@@ -19,7 +19,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	GameEventContext  stEvent;
 	
 
-	//pCardConfig = get_card_config(pOut->vcard.id);
+	//pCardConfig = get_card_config(out_card->vcard.id);
 
 	//if(pCardConfig == NULL)
 	//	return R_E_FAIL;
@@ -28,11 +28,11 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	//if(pCardConfig->out)
 	{
 		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, 0, pParentEvent);
-		stEvent.pOut = pOut;
-		pOut->target = -1;  // for require fill the target
+		stEvent.out_card = out_card;
+		out_card->target = -1;  // for require fill the target
 
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
-		ret = card_out_call(pOut->vcard.id, pGame, &stEvent, trigger);
+		ret = card_out_call(out_card->vcard.id, pGame, &stEvent, trigger);
 
 		CHECK_RET(ret, ret);
 	}
@@ -41,11 +41,11 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 }
 
 
-static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, target, pParentEvent);
-	event.pOut = pOut;
+	event.out_card = out_card;
 
 	trigger_game_event(pGame, &event);
 
@@ -53,21 +53,21 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 }
 
 
-static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	RESULT   ret;
 	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
 	INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
-	stEvent.pOut = pOut;
+	stEvent.out_card = out_card;
 
 	// out procedure
-	//pCardConfig = get_card_config(pOut->vcard.id);
+	//pCardConfig = get_card_config(out_card->vcard.id);
 	//if(pCardConfig != NULL && pCardConfig->out != NULL)
 	{
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
-		ret = card_out_call(pOut->vcard.id, pGame, &stEvent, trigger);
+		ret = card_out_call(out_card->vcard.id, pGame, &stEvent, trigger);
 		CHECK_RET(ret, ret);
 
 	}
@@ -75,33 +75,33 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 }
 
 
-static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* pOut)
+static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, target, pParentEvent);
-	event.pOut = pOut;
+	event.out_card = out_card;
 
 	trigger_game_event(pGame, &event);
 
 	return event.result;	
 }
 
-static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pPosCard)
+static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
 {
 	GameEventContext   event;
 	INIT_EVENT(&event, GameEvent_PerLostCard, player, 0, pParentEvent);
-	event.pPosCard = pPosCard;
+	event.pos_card = pos_card;
 
 	trigger_game_event(pGame, &event);
 
 	return event.result;
 }
 
-static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pPosCard)
+static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
 {
 	GameEventContext   event;
 	INIT_EVENT(&event, GameEvent_PostLostCard, player, 0, pParentEvent);
-	event.pPosCard = pPosCard;
+	event.pos_card = pos_card;
 	
 	trigger_game_event(pGame, &event);
 	
@@ -120,23 +120,23 @@ static RESULT match_out_card_list(Player* pPlayer, PosCardList* pList)
 	k = 0;
 
 	// check hand
-	for(n = pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
+	for(n = pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num - 1; n >= 0; n--)
 	{
-		if(n < pPlayer->nHandCardNum)
+		if(n < pPlayer->hand_card_num)
 		{
-			pCard = &pPlayer->stHandCards[n];
+			pCard = &pPlayer->hand_cards[n];
 			f = CardFlag_FromHand;
 		}
-		else if(n < pPlayer->nHandCardNum + EquipIdx_Max)
+		else if(n < pPlayer->hand_card_num + EquipIdx_Max)
 		{
-			pCard = &pPlayer->stEquipCard[n-pPlayer->nHandCardNum];
+			pCard = &pPlayer->equip_cards[n-pPlayer->hand_card_num];
 			//if(!CARD_VALID(pCard))
 			//	continue;
 			f = CardFlag_FromEquip;
 		}
-		else /*if(n < pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum) */
+		else /*if(n < pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num) */
 		{
-			pCard = &pPlayer->stJudgmentCards[n - pPlayer->nHandCardNum - EquipIdx_Max];
+			pCard = &pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
 			f = CardFlag_FromJudge;
 		}
 
@@ -164,132 +164,132 @@ static RESULT match_out_card_list(Player* pPlayer, PosCardList* pList)
 }
 
 
-static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutCard* pOut)
+static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutCard* out_card)
 {
 	int n;
 	char buf[128];
 	char buf2[512];
 	PosCard   stCard;
 	//CardFlag  f;
-	Player* pPlayer = GAME_PLAYER(pGame, pOut->supply);
+	Player* pPlayer = GAME_PLAYER(pGame, out_card->supply);
 	
-	if(pOut->list.num > 0)
+	if(out_card->list.num > 0)
 	{
-		// test player cards with CardFlag_PrepareOut is match pOut
-		if(match_out_card_list(pPlayer, &pOut->list))
+		// test player cards with CardFlag_PrepareOut is match out_card
+		if(match_out_card_list(pPlayer, &out_card->list))
 			return R_E_FAIL;
 
 		// log
-		if(pOut->list.num == 1 && CARD_EQUAL(&pOut->list.pcards[0].card, &pOut->vcard))
+		if(out_card->list.num == 1 && CARD_EQUAL(&out_card->list.pcards[0].card, &out_card->vcard))
 		{
-			MSG_OUT("player [%s] out a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, card_str(&pOut->list.pcards[0].card, buf, sizeof(buf)));
+			MSG_OUT("player [%s] out a card %s\n", GAME_PLAYER(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
 		}
 		else
 		{
 			buf2[0] = 0;
-			for(n = 0; n < pOut->list.num; n++)
+			for(n = 0; n < out_card->list.num; n++)
 			{
-				strcat(buf2, card_str(&pOut->list.pcards[n].card, buf, sizeof(buf)));
+				strcat(buf2, card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 			}
 
-			MSG_OUT("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, pOut->trigger)->name, pOut->list.num, buf2, card_str(&pOut->vcard, buf, sizeof(buf)));
+			MSG_OUT("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
-		for(n = pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum - 1; n >= 0; n--)
+		for(n = pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num - 1; n >= 0; n--)
 		{
-			if(n < pPlayer->nHandCardNum)
+			if(n < pPlayer->hand_card_num)
 			{
-				stCard.card = pPlayer->stHandCards[n];
+				stCard.card = pPlayer->hand_cards[n];
 				stCard.where = CardWhere_PlayerHand;
 				stCard.pos = n;
 				//f = CardFlag_FromHand;
 			}
-			else if(n < pPlayer->nHandCardNum + EquipIdx_Max)
+			else if(n < pPlayer->hand_card_num + EquipIdx_Max)
 			{
-				stCard.card = pPlayer->stEquipCard[n-pPlayer->nHandCardNum];
+				stCard.card = pPlayer->equip_cards[n-pPlayer->hand_card_num];
 				stCard.where = CardWhere_PlayerEquip;
-				stCard.pos = n-pPlayer->nHandCardNum;
+				stCard.pos = n-pPlayer->hand_card_num;
 				//if(!CARD_VALID(pCard))
 				//	continue;
 				//f = CardFlag_FromEquip;
 			}
-			else /*if(n < pPlayer->nHandCardNum + EquipIdx_Max + pPlayer->nJudgmentCardNum) */
+			else /*if(n < pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num) */
 			{
-				stCard.card = pPlayer->stJudgmentCards[n - pPlayer->nHandCardNum - EquipIdx_Max];
+				stCard.card = pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
 				stCard.where = CardWhere_PlayerJudgment;
-				stCard.pos = n - pPlayer->nHandCardNum - EquipIdx_Max;
+				stCard.pos = n - pPlayer->hand_card_num - EquipIdx_Max;
 				//f = CardFlag_FromJudge;
 			}
 			
 			if(CARD_VALID(&stCard.card) && stCard.card.flag == CardFlag_PrepareOut)
 			{
 				// todo : perlostcard
-				per_lost_card(pGame, pEvent, pOut->supply, &stCard);
+				per_lost_card(pGame, pEvent, out_card->supply, &stCard);
 				if(R_SUCC != player_remove_card(pPlayer, stCard.where, stCard.pos, NULL))
 				{
 					// after check , fail is impossible
-					MSG_OUT("remove out card [%s] from player [%d] failed ", card_str(&stCard.card, buf, sizeof(buf)), pOut->supply);
+					MSG_OUT("remove out card [%s] from player [%d] failed ", card_str(&stCard.card, buf, sizeof(buf)), out_card->supply);
 					return R_E_FAIL;
 				}
 				// todo : postlostcard
-				post_lost_card(pGame, pEvent, pOut->supply, &stCard);
+				post_lost_card(pGame, pEvent, out_card->supply, &stCard);
 			}
 		}
 	}
 	return R_SUCC;
 }
 
-static RESULT add_out_stack(GameContext* pGame, OutCard* pOut)
+static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 {
 	int n;
 	int  pos;
 	char buf[128];
-	if(pOut->list.num > 0)
+	if(out_card->list.num > 0)
 	{
-		for(n = 0; n < pOut->list.num; n++)
+		for(n = 0; n < out_card->list.num; n++)
 		{
-			// pOut->list.pcards[n].card.flag = CardFlag_None;
-			if(R_SUCC != game_add_discard_cur(pGame, &pOut->list.pcards[n].card, &pos))
+			// out_card->list.pcards[n].card.flag = CardFlag_None;
+			if(R_SUCC != game_add_discard_cur(pGame, &out_card->list.pcards[n].card, &pos))
 			{
-				MSG_OUT("add out card [%s] failed ", card_str(&pOut->list.pcards[n].card, buf, sizeof(buf)));
+				MSG_OUT("add out card [%s] failed ", card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 				return R_E_FAIL;
 			}
-			pOut->list.pcards[n].where = CardWhere_CurDiscardStack;
-			pOut->list.pcards[n].pos = pos;
-			//ST_ZERO(pOut->list.pcards[n]);
+			out_card->list.pcards[n].where = CardWhere_CurDiscardStack;
+			out_card->list.pcards[n].pos = pos;
+			//ST_ZERO(out_card->list.pcards[n]);
 		}
 	}
-	pOut->list.num = 0;
+	out_card->list.num = 0;
 
 	return R_SUCC;
 }
 
-RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut)
+RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card)
 {
 	RESULT ret;
 	//int target;
 	
 	// prepare out card
-	ret = out_card_prepare(pGame, pEvent, player, pOut);
+	ret = out_card_prepare(pGame, pEvent, player, out_card);
 	
 	if(ret != R_SUCC && ret != R_DEF)
 		return ret;
 
 
-	if(R_CANCEL == per_out_card(pGame, pEvent, player, pOut->target, pOut))
+	if(R_CANCEL == per_out_card(pGame, pEvent, player, out_card->target, out_card))
 		return R_CANCEL;
 
 
-	ret = remove_out_card(pGame, pEvent, pOut);
+	ret = remove_out_card(pGame, pEvent, out_card);
 	CHECK_RET(ret,ret);
-	add_out_stack(pGame, pOut);
+	add_out_stack(pGame, out_card);
 
 
-	ret = do_out_card(pGame, pEvent, player, pOut->target, pOut);
+	ret = do_out_card(pGame, pEvent, player, out_card->target, out_card);
 
 	// post out maybe modify out cards 
-	ret = post_out_card(pGame, pEvent, player, pOut->target, pOut);
+	ret = post_out_card(pGame, pEvent, player, out_card->target, out_card);
 
 
 	// the out is not effect
@@ -310,7 +310,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 	ST_ZERO(out_card);
 
 	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, 0, pEvent);
-	stEvent.pOut = &out_card;
+	stEvent.out_card = &out_card;
 
 	set_game_cur_player(pGame, player);
 
@@ -372,8 +372,8 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 
 		//if(pCardConfig == NULL || pCardConfig->check == NULL
-		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->nCurPlayer))
-		if(YES != card_check_call(stCard[0].id, pGame, pEvent, pGame->nCurPlayer))
+		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->cur_player))
+		if(YES != card_check_call(stCard[0].id, pGame, pEvent, pGame->cur_player))
 		{
 			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0], buffer, sizeof(buffer)));
 			return R_E_PARAM;
@@ -381,13 +381,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		set_player_card_flag(pPlayer, where[0], pos[0], CardFlag_PrepareOut);
 
-		pEvent->pOut->list.pcards[0].card = stCard[0];
-		pEvent->pOut->list.pcards[0].where = where[0];
-		pEvent->pOut->list.pcards[0].pos = pos[0];
-		pEvent->pOut->list.num = 1;
-		pEvent->pOut->vcard = pEvent->pOut->list.pcards[0].card;
-		pEvent->pOut->trigger = pGame->nCurPlayer;
-		pEvent->pOut->supply = pGame->nCurPlayer;
+		pEvent->out_card->list.pcards[0].card = stCard[0];
+		pEvent->out_card->list.pcards[0].where = where[0];
+		pEvent->out_card->list.pcards[0].pos = pos[0];
+		pEvent->out_card->list.num = 1;
+		pEvent->out_card->vcard = pEvent->out_card->list.pcards[0].card;
+		pEvent->out_card->trigger = pGame->cur_player;
+		pEvent->out_card->supply = pGame->cur_player;
 
 
 		pEvent->result = R_SUCC;
@@ -399,9 +399,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	else if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		// check out pattern
-		if(num != pEvent->pPatternOut->pattern.num)
+		if(num != pEvent->pattern_out->pattern.num)
 		{
-			MSG_OUT("out card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
+			MSG_OUT("out card number not match pattern [%d] cards!\n", pEvent->pattern_out->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -414,7 +414,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 				return R_E_PARAM;
 			}
 
-			if(!CHECK_WHERE_PATTERN(where[n], pEvent->pPatternOut->pattern.where))
+			if(!CHECK_WHERE_PATTERN(where[n], pEvent->pattern_out->pattern.where))
 			{
 				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
 				return R_E_PARAM;
@@ -424,7 +424,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(stCard, num, pEvent->pPatternOut->pattern.patterns, pEvent->pPatternOut->pattern.num))
+		if(R_SUCC != card_match(stCard, num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
 		{
 			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;
@@ -435,18 +435,18 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		for(n = 0; n < num; n++)
 		{
 			// must success
-			get_player_card(pPlayer,where[n], pos[n], &pEvent->pPatternOut->out.list.pcards[n].card);
-			pEvent->pPatternOut->out.list.pcards[n].where = where[n];
-			pEvent->pPatternOut->out.list.pcards[n].pos = pos[n];
+			get_player_card(pPlayer,where[n], pos[n], &pEvent->pattern_out->out.list.pcards[n].card);
+			pEvent->pattern_out->out.list.pcards[n].where = where[n];
+			pEvent->pattern_out->out.list.pcards[n].pos = pos[n];
 			set_player_card_flag(pPlayer, where[n], pos[n], CardFlag_PrepareOut);
 		}
-		pEvent->pPatternOut->out.list.num = num;
+		pEvent->pattern_out->out.list.num = num;
 		if (num == 1)
 		{
-			pEvent->pPatternOut->out.vcard = pEvent->pPatternOut->out.list.pcards[0].card;
+			pEvent->pattern_out->out.vcard = pEvent->pattern_out->out.list.pcards[0].card;
 		}
-		pEvent->pPatternOut->out.supply = get_game_cur_player(pGame);
-		pEvent->pPatternOut->out.trigger = get_game_cur_player(pGame);
+		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
+		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
 
 		pEvent->result = R_SUCC;
 		pEvent->block = YES;
@@ -459,9 +459,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 
 		// check out pattern
-		if(num != pEvent->pPatternOut->pattern.num)
+		if(num != pEvent->pattern_out->pattern.num)
 		{
-			MSG_OUT("supply card number not match pattern [%d] cards!\n", pEvent->pPatternOut->pattern.num);
+			MSG_OUT("supply card number not match pattern [%d] cards!\n", pEvent->pattern_out->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -474,7 +474,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 				return R_E_PARAM;
 			}
 
-			if((where[n] & pEvent->pPatternOut->pattern.where) == 0)
+			if((where[n] & pEvent->pattern_out->pattern.where) == 0)
 			{
 				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
 				return R_E_PARAM;
@@ -484,7 +484,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(stCard, num, pEvent->pPatternOut->pattern.patterns, pEvent->pPatternOut->pattern.num))
+		if(R_SUCC != card_match(stCard, num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
 		{
 			MSG_OUT("out card is not match pattern!\n");
 			return R_E_PARAM;
@@ -496,18 +496,18 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		for(n = 0; n < num; n++)
 		{
 			// must success
-			get_player_card(pPlayer,where[n], pos[n], &pEvent->pPatternOut->out.list.pcards[n].card);
-			pEvent->pPatternOut->out.list.pcards[n].where = where[n];
-			pEvent->pPatternOut->out.list.pcards[n].pos = pos[n];
+			get_player_card(pPlayer,where[n], pos[n], &pEvent->pattern_out->out.list.pcards[n].card);
+			pEvent->pattern_out->out.list.pcards[n].where = where[n];
+			pEvent->pattern_out->out.list.pcards[n].pos = pos[n];
 			set_player_card_flag(pPlayer, where[n], pos[n], CardFlag_PrepareOut);
 		}
-		pEvent->pPatternOut->out.list.num = num;
+		pEvent->pattern_out->out.list.num = num;
 		if (num == 1)
 		{
-			pEvent->pPatternOut->out.vcard = pEvent->pPatternOut->out.list.pcards[0].card;
+			pEvent->pattern_out->out.vcard = pEvent->pattern_out->out.list.pcards[0].card;
 		}
-		pEvent->pPatternOut->out.supply = get_game_cur_player(pGame);
-		pEvent->pPatternOut->out.trigger = get_game_cur_player(pGame);
+		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
+		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
 
 		pEvent->result = R_SUCC;
 		pEvent->block = YES;
@@ -622,9 +622,9 @@ CardPattern* get_outpattern_pattern(OutCardPattern* pOutPattern, int index)
 
 
 
-void set_out_target(OutCard* pOut, int target)
+void set_out_target(OutCard* out_card, int target)
 {
-	pOut->target = target;
+	out_card->target = target;
 }
 
 
@@ -839,22 +839,22 @@ __fini_parse:
 }
 
 
-static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pPatternOut)
+static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pattern_out)
 {
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PerPassiveOutCard, player, target, pParentEvent);
-	event.pPatternOut = pPatternOut;
+	event.pattern_out = pattern_out;
 
 	trigger_game_event(pGame, &event);
 
 	return event.result;
 }
 
-static RESULT post_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pPatternOut)
+static RESULT post_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pattern_out)
 {
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_PostPassiveOutCard, player, target, pParentEvent);
-	event.pPatternOut = pPatternOut;
+	event.pattern_out = pattern_out;
 
 	trigger_game_event(pGame, &event);
 
@@ -906,7 +906,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, target, pParentEvent);
-	event.pPatternOut = &pattern_out;
+	event.pattern_out = &pattern_out;
 
 	set_game_cur_player(pGame, player);
 
@@ -937,7 +937,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 }
 
 
-RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern,const char* alter_text, OutCard* pOut)
+RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern,const char* alter_text, OutCard* out_card)
 {
 	//char   text[1024];
 	//char   temp[128];
@@ -970,7 +970,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		return R_E_PARAM;
 	}
 
-	event.pPatternOut = &pattern_out;
+	event.pattern_out = &pattern_out;
 
 	set_game_cur_player(pGame, player);
 
@@ -987,7 +987,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	CHECK_RET(event.result, event.result);
 
 
-	*pOut = pattern_out.out;
+	*out_card = pattern_out.out;
 
 	return R_SUCC;
 }

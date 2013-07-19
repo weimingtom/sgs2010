@@ -15,8 +15,8 @@ const char* card_type_str(CardType type)
 	case CardType_Strategy: return "锦囊";
 	case CardType_Armor: return "防具";
 	case CardType_Weapon: return "武器";
-	case CardType_HorseChase: return "马(+1)";
-	case CardType_HorseRun: return "马(-1)";
+	case CardType_HorseInc: return "马(+1)";
+	case CardType_HorseDec: return "马(-1)";
 	default: return "Invalid";
 	}
 }

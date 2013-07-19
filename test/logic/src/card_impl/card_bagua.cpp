@@ -13,18 +13,18 @@ static RESULT card_bagua_out(GameContext* pGame, GameEventContext* pEvent, int p
 {
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_BaGua)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_BaGua)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Armor, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Armor, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}
 	}
-	//else if(pEvent->id == GameEvent_PassiveOutCard && pEvent->pPatternOut->pattern)
+	//else if(pEvent->id == GameEvent_PassiveOutCard && pEvent->pattern_out->pattern)
 
 	return R_SUCC;
 }

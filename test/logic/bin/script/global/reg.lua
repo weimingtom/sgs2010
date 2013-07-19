@@ -18,8 +18,8 @@ local chk_card_type = {
 	[CardType_Strategy] = 1,
 	[CardType_Armor] = 1,
 	[CardType_Weapon] = 1,
-	[CardType_HorseChase] = 1,
-	[CardType_HorseRun] = 1,
+	[CardType_HorseInc] = 1,
+	[CardType_HorseDec] = 1,
 };
 
 local chk_hero_sex = {

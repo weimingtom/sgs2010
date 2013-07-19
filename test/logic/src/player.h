@@ -76,16 +76,16 @@ typedef  struct  tagPlayer
 {
 	PlayerID id;
 	HeroID   hero;
-	int      maxLife;
-	int      curLife;
+	int      max_life;
+	int      cur_life;
 	char     name[MAX_NAME_LEN];
-	int      nHandCardNum;
-	int      nJudgmentCardNum;
-	Card     stHandCards[MAX_HAND_CARD];
-	Card     stEquipCard[EquipIdx_Max];
-	Card     stJudgmentCards[MAX_JUDGMENT_CARD];
+	int      hand_card_num;
+	int      judgment_card_num;
+	Card     hand_cards[MAX_HAND_CARD];
+	Card     equip_cards[EquipIdx_Max];
+	Card     judgment_cards[MAX_JUDGMENT_CARD];
 	PlayerStatus   status;
-	PlayerFlag  flag;
+	PlayerFlag     flag;
 	int      params[MAX_PLAYER_PARAM];
 } Player;
 
@@ -98,7 +98,7 @@ typedef  struct  tagPlayer
 #define IS_PLAYER_DEAD(p)   ((p)->status == PlayerStatus_Dead)
 #define IS_PLAYER_SHOW(p)  ((p)->status == PlayerStatus_Show)
 
-#define IS_PLAYER_PERDEAD(p)   ((p)->status != PlayerStatus_Dead && (p)->curLife <= 0)
+#define IS_PLAYER_PERDEAD(p)   ((p)->status != PlayerStatus_Dead && (p)->cur_life <= 0)
 
 
 #define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
@@ -107,14 +107,14 @@ typedef  struct  tagPlayer
 #define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = PlayerFlag_None)
 
 
-#define PLAYER_WEAPON(p)   (&(p)->stEquipCard[EquipIdx_Weapon])
-#define PLAYER_ARMOR(p)   (&(p)->stEquipCard[EquipIdx_Armor])
-#define PLAYER_HORSEINC(p)   (&(p)->stEquipCard[EquipIdx_HorseInc])
-#define PLAYER_HORSEDEC(p)   (&(p)->stEquipCard[EquipIdx_HorseDec])
+#define PLAYER_WEAPON(p)   (&(p)->equip_cards[EquipIdx_Weapon])
+#define PLAYER_ARMOR(p)   (&(p)->equip_cards[EquipIdx_Armor])
+#define PLAYER_HORSEINC(p)   (&(p)->equip_cards[EquipIdx_HorseInc])
+#define PLAYER_HORSEDEC(p)   (&(p)->equip_cards[EquipIdx_HorseDec])
 
-#define PLAYER_HANDCARD(p, idx)   (&(p)->stHandCards[idx])
+#define PLAYER_HANDCARD(p, idx)   (&(p)->hand_cards[idx])
 
-#define PLAYER_JUDGECARD(p, idx)   (&(p)->stJudgmentCards[idx])
+#define PLAYER_JUDGECARD(p, idx)   (&(p)->judgment_cards[idx])
 
 RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 

@@ -13,13 +13,13 @@ static RESULT card_sheildrenwang_out(GameContext* pGame, GameEventContext* pEven
 {
 	if(pEvent->id == GameEvent_OutCard)
 	{
-		if(pEvent->pOut->list.num == 1 && pEvent->pOut->list.cards[0].id == CardID_SheildRenWang)
+		if(pEvent->out_card->list.num == 1 && pEvent->out_card->list.cards[0].id == CardID_SheildRenWang)
 		{
 			// equip pos Weapon
-			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Armor, &pEvent->pOut->list.cards[0]))
+			if(R_SUCC == game_player_equip_card(pGame, pEvent, player, EquipIdx_Armor, &pEvent->out_card->list.cards[0]))
 			{
-				pEvent->pOut->list.num = 0;
-				ST_ZERO(pEvent->pOut->list.cards[0]);
+				pEvent->out_card->list.num = 0;
+				ST_ZERO(pEvent->out_card->list.cards[0]);
 			}
 			return R_SUCC;
 		}

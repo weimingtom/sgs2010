@@ -48,12 +48,11 @@ reg_card {
 
 
 	check = function(cfg, game, event, player)
-		local eid = get_event_id(event);
 
 		-- use in round out restore my life
-		if(eid == GameEvent_RoundOutCard and get_game_round_player(game)==player) then
+		if(event.id == GameEvent_RoundOutCard and get_game_round_player(game)==player) then
 			local p = get_game_player(game, player);
-			if(get_player_curlife(p) < get_player_maxlife(p) ) then
+			if(p.cur_life < p.max_life ) then
 				 return YES;
 			end
 		end
@@ -65,12 +64,11 @@ reg_card {
 	out = function(cfg, game, event, player)
 		local ret;
 		local target = -1;
-		local eid = get_event_id(event);
 	
-		if(eid == GameEvent_RoundOutCard) then
+		if(event.id == GameEvent_OutCard) then
 			game_player_add_life(game, event, player, 1);
-		elseif(eid == GameEvent_PerDead) then
-			game_player_add_life(game, event, get_event_trigger(event), 1);
+		elseif(event.id == GameEvent_PerDead) then
+			game_player_add_life(game, event, event.trigger, 1);
 		end
 	
 		return R_SUCC;	
