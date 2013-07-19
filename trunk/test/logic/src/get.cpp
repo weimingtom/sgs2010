@@ -50,11 +50,11 @@ static RESULT  trigger_pergetcard_event(GameContext* pGame, GameEventContext* pE
 	return stEvent.result;
 }
 
-static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* pEvent, Card* pCard)
+static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* pEvent, PosCard* pPosCard)
 {
 	GameEventContext  stEvent;
 	INIT_EVENT(&stEvent, GameEvent_PostGetCard, pGame->nCurPlayer, 0, pEvent);
-	stEvent.pCard = pCard;
+	stEvent.pPosCard = pPosCard;
 
 	trigger_game_event(pGame, &stEvent);
 
@@ -66,7 +66,7 @@ static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* p
 RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 {
 	int n;
-	Card  stCard;
+	PosCard  stCard;
 
 	if(pEvent->id == GameEvent_RoundGetCard)
 	{
@@ -82,13 +82,14 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 		{
 			if(R_CANCEL != trigger_pergetcard_event(pGame, pEvent)
 				&& YES != is_player_handfull(CUR_PLAYER(pGame)) 
-				&& R_SUCC == game_pop_stack_card(pGame, &stCard))
+				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
 			{
 				trigger_postgetcard_event(pGame, pEvent, &stCard);
+
 				// after event , the card  may be empty
-				if(stCard.id != CardID_None)
+				if(stCard.card.id != CardID_None)
 				{
-					player_add_hand_card(CUR_PLAYER(pGame), &stCard);
+					player_add_hand_card(CUR_PLAYER(pGame), &stCard.card);
 				}
 			}
 		}
@@ -103,9 +104,9 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 		for(n = 0; n < *pEvent->pNum; n++)
 		{
 			if(YES != is_player_handfull(CUR_PLAYER(pGame)) 
-				&& R_SUCC == game_pop_stack_card(pGame, &stCard))
+				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
 			{
-				player_add_hand_card(CUR_PLAYER(pGame), &stCard);
+				player_add_hand_card(CUR_PLAYER(pGame), &stCard.card);
 			}
 		}
 

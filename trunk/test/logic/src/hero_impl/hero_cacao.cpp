@@ -8,9 +8,10 @@
 static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	// be damaged and target is self and the source of damage is card. 
-	if(pEvent->id == GameEvent_PostLostLife
-		&& pEvent->target == player
-		&& pEvent->pCard->id != CardID_None
+	if(pEvent->id == GameEvent_PostChangeLife
+		&& pEvent->trigger == player
+		&& pEvent->pChangeLife->delta < 0
+		&& pEvent->pChangeLife->src_cards.list.num > 0 // 需要判断指向的牌是否存在
 		&& YES != is_player_handfull(&pGame->players[player]))
 		return YES;
 	return NO;
@@ -19,9 +20,13 @@ static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int p
 static RESULT jianxiong_use(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	// damage and
-	
+	if(pEvent->id == GameEvent_PostChangeLife)
+	{
+		//add_player_handle_card(GAME_PLAYER(pGame, player, &pEvent->pChangeLife->src_cards.list))
+		return R_SUCC;
+	}
 
-	return R_SUCC;
+	return R_E_FAIL;
 }
 
 
@@ -65,7 +70,7 @@ static RESULT hujia_use(GameContext* pGame, GameEventContext* pEvent, int player
 			//pattern.num = 1;
 			//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Defend);
 			//pattern.where = PlayerCard_Hand;
-			if(R_SUCC == game_supply_card(pGame, pEvent, player, nextplayer, "h:{defend}", NULL, &pEvent->pPatternOut->out) )
+			if(R_SUCC == game_supply_card(NULL, pGame, pEvent, player, nextplayer, "h:{defend}", NULL, &pEvent->pPatternOut->out) )
 			{
 				// out card instead mine 
 				return R_SUCC;

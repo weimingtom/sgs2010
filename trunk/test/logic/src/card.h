@@ -157,6 +157,13 @@ struct tagCard
 	CardFlag  flag;
 };
 
+#define RESET_CARD(pCard)   ST_ZERO(*pCard)
+#define CARD_VALID(p)   ((p)->id != CardID_None)
+
+#define CARD_EQUAL(p1, p2)    ( CARD_EQUAL_ID((p1), (p2))  && CARD_EQUAL_COLOR((p1), (p2)) && CARD_EQUAL_VALUE((p1), (p2)) )
+#define CARD_EQUAL_ID(p1, p2)   ((p1)->id == (p2)->id)
+#define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
+#define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
 
 
 typedef struct tagCardPattern CardPattern;
@@ -168,13 +175,75 @@ struct tagCardPattern
 	CardValue value_max;
 };
 
-#define RESET_CARD(pCard)   ST_ZERO(*pCard)
-#define CARD_VALID(p)   ((p)->id != CardID_None)
 
-#define CARD_EQUAL(p1, p2)    ( CARD_EQUAL_ID((p1), (p2))  && CARD_EQUAL_COLOR((p1), (p2)) && CARD_EQUAL_VALUE((p1), (p2)) )
-#define CARD_EQUAL_ID(p1, p2)   ((p1)->id == (p2)->id)
-#define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
-#define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
+#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
+#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
+
+
+
+// tolua_begin
+
+enum CardWhere
+{
+	CardWhere_None = 0,
+	CardWhere_PlayerHand = 1,
+	CardWhere_PlayerEquip,
+	CardWhere_PlayerJudgment,
+	CardWhere_GetStack,
+	CardWhere_CurDiscardStack,
+	CardWhere_DiscardStack,
+};
+
+
+// need or bits
+enum PatternCardWhere{
+	PatternCard_None = 0,
+	PatternCard_Hand = (1<<CardWhere_PlayerHand),
+	PatternCard_Equip = (1<<CardWhere_PlayerEquip),
+	PatternCard_Judgment = (1<<CardWhere_PlayerJudgment),
+};
+
+// tolua_end
+
+
+#define CHECK_WHERE_PATTERN(where, where_pattern)   (((where_pattern)&(1<<(where)))!=0)
+
+
+
+
+typedef struct tagPosCard
+{
+	Card       card;
+	CardWhere  where;
+	int        pos;
+}PosCard;
+
+
+
+
+#define MAX_CARD_LIST_NUM  20
+
+typedef struct tagCardList CardList;
+
+struct tagCardList
+{
+	int    num;
+	Card   cards[MAX_CARD_LIST_NUM];
+};
+
+
+
+typedef struct tagPosCardList PosCardList;
+
+struct tagPosCardList
+{
+	int      num;
+	PosCard  pcards[MAX_CARD_LIST_NUM];
+};
+
+
 
 
 const char* card_type_str(CardType type);
@@ -196,6 +265,21 @@ char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);
+
+
+// card  pattern: <{sid}><color><val>
+//         each <...> can be [<from>-<to>] or [<p1><p2><p3>] ...
+//        <{sid}> : the card sid name. can be empty, that means any sid is valid, equal to {none}
+//        <color> : one of char - can be empty, that means any color
+//             s  : spade
+//             h  : heart
+//             d  : diamond
+//             c  : club
+//             b  : black (spade or club)
+//             r  : red (heart or diamond)
+//             n  : none (any color)
+//        <val> : one of '2 - 10, J, Q, K, A' , can use [from-to] format, if it is empty, means any value.
+RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len);
 
 // tolua_begin
 

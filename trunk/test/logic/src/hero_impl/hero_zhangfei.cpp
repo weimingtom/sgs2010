@@ -28,7 +28,7 @@ static RESULT paoxiao_use(GameContext* pGame, GameEventContext* pEvent, int play
 	//INIT_CARDPATTERN_USE_ID(&pattern.patterns[0], CardID_Attack);
 	//pattern.where = PlayerCard_Hand;
 
-	ret = game_supply_card(pGame, pEvent, player, player, "h:{attack}", "please out a card 'attack' or cancel the skill:", &out_card);
+	ret = game_supply_card(NULL, pGame, pEvent, player, player, "h:{attack}", "please out a card 'attack' or cancel the skill:", &out_card);
 	CHECK_RET(ret, ret);
 
 	return game_real_out_card(pGame, pEvent, player, &out_card);

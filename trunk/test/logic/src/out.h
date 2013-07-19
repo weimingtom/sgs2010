@@ -17,21 +17,7 @@ typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
 
-
-
-#define MAX_CARD_LIST_NUM  20
-
-typedef struct tagCardList CardList;
-
-struct tagCardList
-{
-	int    num;
-	Card   cards[MAX_CARD_LIST_NUM];
-};
-
-
 typedef struct tagOutCard OutCard;
-
 
 struct tagOutCard
 {
@@ -39,9 +25,7 @@ struct tagOutCard
 	int      supply;
 	int      target;
 	Card     vcard;    //  use as card (virtaul) 
-	CardList list;
-	//int     nrcard;   //  real card number ,. if 0 vcard is also real card 
-	//Card    rcards[MAX_RCARD_NUM];  // rcard array;
+	PosCardList list;
 };
 
 
@@ -58,10 +42,6 @@ struct tagOutCardPattern
 
 
 
-#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
-#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
 
 
 // out card command process
@@ -74,13 +54,38 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* pOut);
 
 
+
+// tolua_begin
+
+int get_outcard_trigger(OutCard* pOutCard);
+int get_outcard_supply(OutCard* pOutCard);
+int get_outcard_target(OutCard* pOutCard);
+Card* get_outcard_vcard(OutCard* pOutCard);
+int get_outcard_rcard_num(OutCard* pOutCard);
+Card* get_outcard_rcard(OutCard* pOutCard, int index);
+CardWhere get_outcard_rcard_where(OutCard* pOutCard, int index);
+int get_outcard_rcard_pos(OutCard* pOutCard, int index);
+
+
+int get_outpattern_where(OutCardPattern* pOutPattern);
+YESNO get_outpattern_fixed(OutCardPattern* pOutPattern);
+int get_outpattern_num(OutCardPattern* pOutPattern);
+CardPattern* get_outpattern_pattern(OutCardPattern* pOutPattern, int index);
+
+
+void set_out_target(OutCard* pOut, int target);
+
+// tolua_end
+
+
+
 // tolua_begin
 
 // trigger supply from player the card match the  pattern, return through pOut
-RESULT game_supply_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern, const char* alter_text, OutCard* pOut);
+RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern, const char* alter_text, OutCard* pOut);
 
 // passive out process
-RESULT game_passive_out(GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const char* pattern, const char* alter_text);
+RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target, const char* pattern, const char* alter_text);
 
 
 

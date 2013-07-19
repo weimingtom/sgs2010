@@ -54,27 +54,40 @@ void  set_event_block(GameEventContext* pEvent, YESNO  yesno)
 	pEvent->block = yesno;
 }
 
-
+/*
 Card* get_event_card(GameEventContext* pEvent)
 {
 	return pEvent->pCard;
 }
-
+*/
 
 OutCard* get_event_out(GameEventContext* pEvent)
 {
 	return pEvent->pOut;
 }
-
+/*
 void  set_event_out(GameEventContext* pEvent, OutCard* pOut)
 {
 	pEvent->pOut = pOut;
 }
+*/
 
-void set_out_target(OutCard* pOut, int target)
+PosCard* get_event_poscard(GameEventContext* pEvent)
 {
-	pOut->target = target;
+	return pEvent->pPosCard;
 }
+
+EquipCard* get_event_equipcard(GameEventContext* pEvent)
+{
+	return pEvent->pEquipCard;
+}
+
+ChangeLife* get_event_changelife(GameEventContext* pEvent)
+{
+	return pEvent->pChangeLife;
+}
+
+
 
 // end lua interface implements
 

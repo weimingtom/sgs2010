@@ -8,12 +8,15 @@
 #include "comm.h"
 
 
-RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard)
+RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos)
 {
 	if(pGame->nCurDiscardCardNum >= MAX_CUR_DISCARD_NUM)
 		return R_E_FAIL;
 
 	pGame->stCurDiscardCards[pGame->nCurDiscardCardNum] = *pCard;
+
+	if(pos) *pos = pGame->nCurDiscardCardNum;
+
 	pGame->nCurDiscardCardNum++;
 	
 	return R_SUCC;
@@ -65,25 +68,41 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 
 
 
-RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int pos)
+RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos)
 {
+	GameEventContext    event;
 	PosCard  stCard;
-	char buf[128];
+	char buf[256];
 	Player* pPlayer = GAME_PLAYER(pGame, player);
 
-	// event: per lost card 
+	if(R_SUCC != get_player_card(pPlayer, where, pos, &stCard.card))
+		return R_E_FAIL;
+
+	stCard.where = where;
+	stCard.pos = pos;
+
+	// event: per discard card 
+	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, 0, pParentEvent);
+	event.pPosCard = &stCard;
+
+	trigger_game_event(pGame, &event);
 
 	if(R_SUCC == player_remove_card(pPlayer, where, pos, &stCard.card))
 	{
-		stCard.card.flag = CardFlag_None;
-		stCard.where = where;
-		stCard.pos = pos;
+		//stCard.card.flag = CardFlag_None;
+		//stCard.where = where;
+		//stCard.pos = pos;
+		game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
+		stCard.where = CardWhere_CurDiscardStack;
 
 		MSG_OUT("[%s] discard a card %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
 
-		// event: post lost card
+		// event: post discard card
+		
+		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, 0, pParentEvent);
+		event.pPosCard = &stCard;
+		trigger_game_event(pGame, &event);
 
-		game_add_discard_cur(pGame, &stCard.card);
 	}
 	return R_SUCC;
 }

@@ -203,25 +203,25 @@ RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
 	return R_SUCC;
 }
 
-RESULT set_player_card_flag(Player* pPlayer,  int where, int pos, CardFlag flag)
+RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag flag)
 {
 	switch(where)
 	{
-	case PlayerCard_Hand:
+	case CardWhere_PlayerHand:
 		if(0 <= pos && pos < pPlayer->nHandCardNum)
 		{
 			pPlayer->stHandCards[pos].flag = flag;
 			return R_SUCC;
 		}
 		break;
-	case PlayerCard_Equip:
+	case CardWhere_PlayerEquip:
 		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
 		{
 			pPlayer->stEquipCard[pos].flag = flag;
 			return R_SUCC;
 		}
 		break;
-	case PlayerCard_Judgment:
+	case CardWhere_PlayerJudgment:
 		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
 		{
 			pPlayer->stJudgmentCards[pos].flag = flag;
@@ -234,11 +234,11 @@ RESULT set_player_card_flag(Player* pPlayer,  int where, int pos, CardFlag flag)
 }
 
 
-RESULT get_player_card(Player* pPlayer, int where, int pos, Card* pCard)
+RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 {
 	switch(where)
 	{
-	case PlayerCard_Hand:
+	case CardWhere_PlayerHand:
 		if(0 <= pos && pos < pPlayer->nHandCardNum)
 		{
 			*pCard = pPlayer->stHandCards[pos];
@@ -246,7 +246,7 @@ RESULT get_player_card(Player* pPlayer, int where, int pos, Card* pCard)
 			return R_SUCC;
 		}
 		break;
-	case PlayerCard_Equip:
+	case CardWhere_PlayerEquip:
 		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
 		{
 			*pCard = pPlayer->stEquipCard[pos];
@@ -254,7 +254,7 @@ RESULT get_player_card(Player* pPlayer, int where, int pos, Card* pCard)
 			return R_SUCC;
 		}
 		break;
-	case PlayerCard_Judgment:
+	case CardWhere_PlayerJudgment:
 		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
 		{
 			*pCard = pPlayer->stJudgmentCards[pos];
@@ -269,11 +269,11 @@ RESULT get_player_card(Player* pPlayer, int where, int pos, Card* pCard)
 }
 
 
-RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
+RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 {
 	switch(where)
 	{
-	case PlayerCard_Hand:
+	case CardWhere_PlayerHand:
 		if(0 <= pos && pos < pPlayer->nHandCardNum)
 		{
 			if(pCard != NULL) *pCard = pPlayer->stHandCards[pos];
@@ -282,7 +282,7 @@ RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
 		}
 
 		break;
-	case PlayerCard_Equip:
+	case CardWhere_PlayerEquip:
 		if(0 <= pos && pos < EquipIdx_Max && pPlayer->stEquipCard[pos].id != CardID_None && CARD_VALID(&pPlayer->stEquipCard[pos]))
 		{
 			if(pCard != NULL) *pCard = pPlayer->stEquipCard[pos];
@@ -290,7 +290,7 @@ RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
 			return R_SUCC;
 		}
 		break;
-	case PlayerCard_Judgment:
+	case CardWhere_PlayerJudgment:
 		if(0 <= pos && pos < pPlayer->nJudgmentCardNum)
 		{
 			if(pCard != NULL) *pCard = pPlayer->stJudgmentCards[pos];
@@ -304,7 +304,7 @@ RESULT player_remove_card(Player* pPlayer, int where, int pos, Card* pCard)
 }
 
 
-RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
+RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* pos)
 {
 	int n;
 	if(idx < 1 )
@@ -312,7 +312,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 
 	if(idx <= player->nHandCardNum)
 	{
-		*where = PlayerCard_Hand;
+		*where = CardWhere_PlayerHand;
 		*pos = idx - 1;
 		return R_SUCC;
 	}
@@ -325,7 +325,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 		{
 			if(idx == 1)
 			{
-				*where = PlayerCard_Equip;
+				*where = CardWhere_PlayerEquip;
 				*pos = n;
 				return R_SUCC;
 			}
@@ -335,7 +335,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, int* where, int* pos)
 
 	if(idx <= player->nJudgmentCardNum)
 	{
-		*where = PlayerCard_Judgment;
+		*where = CardWhere_PlayerJudgment;
 		*pos = idx - 1;
 		return R_SUCC;
 	}

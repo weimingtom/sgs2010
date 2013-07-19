@@ -311,13 +311,15 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	
 	// judge cards
 	Player* pPlayer = ROUND_PLAYER(pGame);
-	Card stCard;
+	PosCard stCard;
 	//const CardConfig* pCardConfig;
 
 
 	while(pPlayer->nJudgmentCardNum > 0)
 	{
-		stCard = pPlayer->stJudgmentCards[pPlayer->nJudgmentCardNum-1];
+		stCard.card = pPlayer->stJudgmentCards[pPlayer->nJudgmentCardNum-1];
+		stCard.where = CardWhere_PlayerJudgment;
+		stCard.pos = pPlayer->nJudgmentCardNum-1;
 		pPlayer->nJudgmentCardNum--;
 
 		//pCardConfig = get_card_config(stCard.id);
@@ -325,7 +327,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		//if(pCardConfig)
 		{
 			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->nRoundPlayer, 0, pEvent);
-			event.pCard = &stCard;
+			event.pPosCard = &stCard;
 			trigger_game_event(pGame, &event);
 
 			if(event.result != R_CANCEL) // if card calc is cancel .
@@ -333,26 +335,26 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				//if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->nRoundPlayer, 0, pEvent);
-					event.pCard = &stCard;
+					event.pPosCard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->nCurPlayer);
-					card_out_call(stCard.id, pGame, &event, pGame->nCurPlayer);
+					card_out_call(stCard.card.id, pGame, &event, pGame->nCurPlayer);
 				}
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->nRoundPlayer, 0, pEvent);
-				event.pCard = &stCard;
+				event.pPosCard = &stCard;
 				trigger_game_event(pGame, &event);
 
 			}
 
 			// after calc
-			if(stCard.id != CardID_None)
+			if(stCard.card.id != CardID_None)
 			{
 				//if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->nRoundPlayer, 0, pEvent);
-					event.pCard = &stCard;
+					event.pPosCard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->nCurPlayer);
-					card_out_call(stCard.id, pGame, &event, pGame->nCurPlayer);
+					card_out_call(stCard.card.id, pGame, &event, pGame->nCurPlayer);
 				}
 				//else
 				//{
@@ -1243,6 +1245,14 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	return R_SUCC;
 }
 
+
+
+// if the game is over, this function do not return.
+void game_check_gameover(GameContext* pGame, int player)
+{
+
+	// TODO: not yet implements
+}
 
 
 
