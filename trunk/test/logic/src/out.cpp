@@ -918,7 +918,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	if(event.result == R_CANCEL)
 		return event.result;
 
-	ret = remove_out_card(pGame, pParentEvent, &pattern_out.out);
+	ret = remove_out_card(pGame, pParentEvent, &pattern_out.out); 
 
 	if(ret != R_SUCC)
 		return ret;

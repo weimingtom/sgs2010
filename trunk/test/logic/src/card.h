@@ -28,6 +28,8 @@ typedef enum _CardType
 typedef enum _CardID
 {
 	CardID_None = 0,
+	// other cardid is registered in script.
+	//
 	/*
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
 	CardID_Defend,   // SHAN - a normal defend card, counteract the effect of the SHA card
@@ -185,7 +187,7 @@ struct tagCardPattern
 
 // tolua_begin
 
-enum CardWhere
+typedef enum _CardWhere
 {
 	CardWhere_None = 0,
 	CardWhere_PlayerHand = 1,
@@ -194,16 +196,16 @@ enum CardWhere
 	CardWhere_GetStack,
 	CardWhere_CurDiscardStack,
 	CardWhere_DiscardStack,
-};
+} CardWhere;
 
 
 // need or bits
-enum PatternCardWhere{
+typedef enum _PatternCardWhere{
 	PatternCard_None = 0,
 	PatternCard_Hand = (1<<CardWhere_PlayerHand),
 	PatternCard_Equip = (1<<CardWhere_PlayerEquip),
 	PatternCard_Judgment = (1<<CardWhere_PlayerJudgment),
-};
+} PatternCardWhere;
 
 // tolua_end
 
@@ -246,11 +248,6 @@ struct tagPosCardList
 
 
 
-const char* card_type_str(CardType type);
-//const char* card_id_str(CardID id);
-const char* card_color_str(CardColor color);
-const char* card_value_str(CardValue value);
-
 // const CardConfig* get_card_config(CardID id);
 
 void card_dump(const Card* pCard);
@@ -283,13 +280,22 @@ RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int l
 
 // tolua_begin
 
-RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
+
+
+const char* card_type_str(CardType type);
+//const char* card_id_str(CardID id);
+const char* card_color_str(CardColor color);
+const char* card_value_str(CardValue value);
+
 
 
 void set_card_id(Card* pCard, CardID id);
 void set_card_color(Card* pCard, CardColor cl);
 void set_card_value(Card* pCard, CardValue val);
 void set_card_flag(Card* pCard, CardFlag flag);
+
+RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
+
 
 // tolua_end
 
