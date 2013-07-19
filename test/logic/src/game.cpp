@@ -1111,6 +1111,11 @@ static int lua_game_load(lua_State* L)
 
 	// do {
 		lua_newtable(L);  // [t]
+		lua_pushvalue(L, -1);  // [t] [t]
+		lua_pushstring(L, "__index");
+		lua_pushvalue(L, LUA_GLOBALSINDEX);  // [t] [t] ['__index'] [_G]
+		lua_rawset(L, -3);   // [t] [t]
+		lua_setmetatable(L, -2);  // [t]
 
 		if(0 != luaL_loadfile(L, file_name))   // [t] [f]
 		{
