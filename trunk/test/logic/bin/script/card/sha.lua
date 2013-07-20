@@ -25,7 +25,26 @@ reg_card {
 ★游戏开始时你的攻击范围是1，关于攻击范围的解释请看“用语集”。
 ★每个出牌阶段你只能使用一张杀。]==],
 
-
+	
+	events = {
+		[GameEvent_RoundBegin] = function(cfg, game, event, player)
+			local p = get_game_player(game, player);
+			-- reset the sha out counter
+			p.params[0] = 0;
+			return R_DEF;
+		end,
+		
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player)
+			local p = get_game_player(game, player);
+			if(p.params[0] == 0) then
+				return YES;
+			end			
+		end
+	},
+	
+	
+	
+	
 	check = function(cfg, game, event, player)
 		local p = get_game_player(game, player);
 		-- reset attack count in round begin
