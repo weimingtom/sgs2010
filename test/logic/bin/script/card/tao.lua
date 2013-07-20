@@ -66,9 +66,9 @@ reg_card {
 		local target = -1;
 	
 		if(event.id == GameEvent_OutCard) then
-			game_player_add_life(game, event, player, 1);
+			game_player_add_life(game, event, player, 1, player, event.out_card, 0);
 		elseif(event.id == GameEvent_PerDead) then
-			game_player_add_life(game, event, event.trigger, 1);
+			game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
 		end
 	
 		return R_SUCC;	
