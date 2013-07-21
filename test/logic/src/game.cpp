@@ -122,11 +122,13 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 {
 	int n, c;
 	int pids[MAX_PLAYER_NUM];
-	int hids[HeroID_Max];
+	int hids[MAX_HERO_NUM];
 	int hcnt;
 	int hmcnt;
 	int hscnt;
-	const HeroConfig* pHero;
+
+	//const HeroConfig* pHero;
+	char        temp[128];
 	char        title[512];
 	SelOption   sel_opts[5];
 	int         sel_n;
@@ -138,37 +140,42 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 		return R_E_PARAM;
 	}
 	
-	hcnt = 0;
-	hmcnt = 0;
-	for(n = 0; n < HeroID_Max; n++)
+
+	hcnt = hero_maxid();
+
+	if(hcnt == 0)
 	{
-		pHero = get_hero_config((HeroID)n);
-		if(pHero)
+		MSG_OUT("没有任何武将！\n");
+		return R_E_FAIL;
+	}
+
+	// the hero over MAX_HERO_NUM is ignored
+	if(hcnt > MAX_HERO_NUM)
+		hcnt = MAX_HERO_NUM;
+	hmcnt = 0;
+	for(n = 1; n < hcnt; n++)
+	{
+		//pHero = get_hero_config((HeroID)n);
+		//if(pHero)
 		{
-			if(pHero->isMaster)
+			if(YES == hero_master((HeroID)n))
 			{
-				if(hcnt > hmcnt)
+				if(n > hmcnt)
 				{
-					hids[hcnt] = hids[hmcnt];
+					hids[n] = hids[hmcnt];
 				}
 				hids[hmcnt] = n;
 				hmcnt++;
 			}
 			else
 			{
-				hids[hcnt] = n;
+				hids[n] = n;
 			}
-			hcnt++;
+			//hcnt++;
 		}
 	}
 
-	if(hcnt == 0 || hmcnt == 0)
-	{
-		MSG_OUT("not any valid hero config.\n");
-		return R_E_FAIL;
-	}
 
-	// 这里不能清空。因为这Game->L已经赋值，外面已经清除
 	//memset(pGame, 0, sizeof(*pGame));
 
 	pGame->player_count = minsters + spies + mutineers + 1;
@@ -176,7 +183,8 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	pGame->spy_count = spies;
 	pGame->mutineer_count = mutineers;
 	
-	MSG_OUT("new game: %d players - (%d master + %d minster + %d spy + %d mutineer)\n", pGame->player_count, 1, pGame->minster_count, pGame->spy_count, pGame->mutineer_count);
+	MSG_OUT("开始新游戏: 配置为【%d】玩家 - (%d 主公, %d 忠臣, %d 内奸, %d 反贼)\n", 
+		pGame->player_count, 1, pGame->minster_count, pGame->spy_count, pGame->mutineer_count);
 
 	// init players
 	c = 0;
@@ -205,49 +213,57 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 	for(n = 0; n < pGame->player_count; n++)
 	{
-		if(n == 0)
+		if(hcnt > 0)
 		{
-			if(hcnt > hmcnt)
+			if(n == 0)
 			{
-				rand_array_i(hids + hmcnt, hcnt - hmcnt, (hcnt - hmcnt) * 3);
+				if(hcnt > hmcnt)
+				{
+					rand_array_i(hids + hmcnt, hcnt - hmcnt, (hcnt - hmcnt) * 3);
+				}
+				hscnt = MIN(5, hcnt);
 			}
-			hscnt = MIN(5, hcnt);
+			else
+			{
+				rand_array_i(hids, hcnt, hcnt * 3);
+				hscnt = MIN(3, hcnt);
+			}
+
+			//while(1)
+			{
+				snprintf(title, sizeof(title), "玩家 [%d], 身份：%s， 请选择武将：", pGame->cur_player, player_id_str((PlayerID)pids[pGame->cur_player]));
+				sel_n = 0;
+				ST_ZERO(sel_opts);
+				for(c = 0; c < hscnt; c++)
+				{
+					//pHero = get_hero_config((HeroID)hids[c]);
+					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %smax life %d", 
+						hero_name((HeroID)hids[c], temp, sizeof(temp)), hero_master((HeroID)hids[c])==YES ? "[主公], ":"", hero_life((HeroID)hids[c]));
+					sel_opts[sel_n].value = c+1;
+					sel_n++;
+				}
+
+				//MSG_OUT("please select (%d-%d): ", 1, hscnt);
+				//fflush(stdin);
+				//if(1 == scanf("%d", &c) && c >= 1 && c <= hscnt)
+				//{
+				//	break;
+				//}
+				if(R_SUCC != select_loop(pGame, NULL, sel_opts, sel_n, title, &c))
+					return R_E_FAIL;
+
+			}
+			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], (HeroID)hids[c-1]);
+			if(c < hcnt)
+			{
+				hids[c-1] = hids[hcnt-1];
+			}
+			hcnt--;
 		}
 		else
 		{
-			rand_array_i(hids, hcnt, hcnt * 3);
-			hscnt = MIN(3, hcnt);
+			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], HeroID_None);
 		}
-
-		//while(1)
-		{
-			snprintf(title, sizeof(title), "current player [%d], identification is %s, select hero:", pGame->cur_player, player_id_str((PlayerID)pids[pGame->cur_player]));
-			sel_n = 0;
-			ST_ZERO(sel_opts);
-			for(c = 0; c < hscnt; c++)
-			{
-				pHero = get_hero_config((HeroID)hids[c]);
-				snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %smax life %d", pHero->name, pHero->isMaster ? "[主公], ":"", pHero->life);
-				sel_opts[sel_n].value = c+1;
-				sel_n++;
-			}
-
-			//MSG_OUT("please select (%d-%d): ", 1, hscnt);
-			//fflush(stdin);
-			//if(1 == scanf("%d", &c) && c >= 1 && c <= hscnt)
-			//{
-			//	break;
-			//}
-			if(R_SUCC != select_loop(pGame, NULL, sel_opts, sel_n, title, &c))
-				return R_E_FAIL;
-
-		}
-		init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], (HeroID)hids[c-1]);
-		if(c < hcnt)
-		{
-			hids[c-1] = hids[hcnt-1];
-		}
-		hcnt--;
 
 		pGame->cur_player = (pGame->cur_player + 1) % pGame->player_count;
 		

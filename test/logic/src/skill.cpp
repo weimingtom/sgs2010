@@ -12,32 +12,36 @@
 
 RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 {
+	char name[128];
+	int skill_num;
 	Player* p = CUR_PLAYER(pGame);
 
-	const HeroConfig* pHero = get_hero_config(p->hero);
+	//const HeroConfig* pHero = get_hero_config(p->hero);
 
-	if(pHero == NULL)
+	//if(pHero == NULL)
+	//{
+	//	MSG_OUT("skill (%d) not exist!\n", idx );
+	//	return R_E_PARAM;
+	//}
+
+	skill_num = hero_skill_num(p->hero);
+
+	if(idx < 1 || idx > skill_num)
 	{
-		MSG_OUT("skill (%d) not exist!\n", idx );
+		MSG_OUT("无效的技能序号 [%d] !\n", idx );
 		return R_E_PARAM;
 	}
 
-	if(idx < 1 || idx > pHero->skillNum)
-	{
-		MSG_OUT("invalid skill (%d) !\n", idx );
-		return R_E_PARAM;
-	}
 
-
-	if(pHero->skills[idx-1].check == NULL || (*pHero->skills[idx-1].check)(pGame, pEvent, pGame->cur_player) != YES)
+	if(call_hero_skill_can_use(p->hero, idx, pGame, pEvent, pGame->cur_player) != YES)
 	{
-		MSG_OUT("cannot use skill '%s' in current status!\n", pHero->skills[idx-1].name );
+		MSG_OUT("当前你不能使用技能【%s】!\n", hero_skill_name(p->hero, idx, name, sizeof(name)) );
 		return R_E_STATUS;
 	}
 
 	// todo: trigger event per use skill
 
-	return  (*pHero->skills[idx-1].use)(pGame, pEvent, pGame->cur_player);
+	return  call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
 
 	// post trigger use skill
 

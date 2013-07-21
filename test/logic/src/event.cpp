@@ -43,9 +43,11 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 {
 	// check player skill
 	Player* pPlayer;
-	const HeroConfig* pHero;
-	const HeroSkill* pSkill;
+	//const HeroConfig* pHero;
+	//const HeroSkill* pSkill;
 	// const CardConfig* pCardConfig;
+	int skill_num;
+	int skill_flag;
 	PosCard    pos_card;
 	int  n;
 	YESNO ret;
@@ -53,24 +55,32 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	int   may_cards = 0;
 	
 	pPlayer = GAME_PLAYER(pGame, player);
-	
-	pHero = get_hero_config(pPlayer->hero);
 
-	if(pHero != NULL)
+	//pHero = get_hero_config(pPlayer->hero);
+
+	skill_num = hero_skill_num(pPlayer->hero);
+
+	//if(pHero != NULL)
+	if(skill_num > 0)
 	{
-		for(n = 0; n < pHero->skillNum; n++)
+		for(n = 1; n <=  skill_num; n++)
 		{
-			pSkill = &pHero->skills[n];
+			//pSkill = &pHero->skills[n];
 
-			if(pSkill->check)
+			//if(pSkill->check)
 			{
-				ret = (*pSkill->check)(pGame, pEvent, player);
+				//ret = (*pSkill->check)(pGame, pEvent, player);
+				ret = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
+				skill_flag = hero_skill_flag(pPlayer->hero, n);
 
-				if(ret == YES && pSkill->flag & SkillFlag_Passive)
+				if(ret == YES && (skill_flag & SkillFlag_Passive) == SkillFlag_Passive)
 				{
-					(*pSkill->use)(pGame, pEvent, player);
+					//(*pSkill->use)(pGame, pEvent, player);
+					call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
 					if(pEvent->block == YES)
 					{
+						if(pEvent->result == R_CANCEL)
+							return R_CANCEL;
 						return R_SUCC;
 					}
 				}

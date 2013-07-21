@@ -26,8 +26,10 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	int n;
 	char buf[128];
 	Player* p;
-	const HeroConfig*  pHero;
+	//const HeroConfig*  pHero;
 	int  idx = 1;
+	int skill_num;
+	int skill_flag;
 
 	if(get_game_status(pGame) == Status_None)
 	{
@@ -68,6 +70,18 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 	// skills
 
+	skill_num = hero_skill_num(p->hero);
+
+
+	for(n = 1; n <= skill_num; n++)
+	{
+		skill_flag = hero_skill_flag(p->hero, n);
+		MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
+			(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
+	
+	}
+
+	/*
 	pHero = get_hero_config(p->hero);
 
 	if(pHero && pHero->skillNum > 0)
@@ -78,7 +92,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			MSG_OUT(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
 		}
 	}
-
+	*/
 	return R_SUCC;
 }
 

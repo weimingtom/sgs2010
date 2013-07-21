@@ -360,7 +360,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
 				//}
 
-				MSG_OUT("(%d) {%s}, %s, %s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
+				MSG_OUT("(%d) {%s}: %s, %s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
 					card_name((CardID)id, name, sizeof(name)), card_type_str(card_type((CardID)id)));
 			}
 		}
@@ -385,40 +385,56 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "hero") || !strcmp(argv[1], "h"))
 	{
+		int maxid;
 		int id;
 		int n;
-		const HeroConfig *pHero;
+		char  sid[128];
+		char  name[128];
+		char  desc[1024];
+		int  skill_num;
+		int  skill_flag;
+		//const HeroConfig *pHero;
 		if(argc < 3)
 		{
-			for(id = 1; id < HeroID_Max; id++)
+			maxid = hero_maxid();
+			for(id = 1; id <= maxid; id++)
 			{
-				pHero = get_hero_config((HeroID)id);
+				//pHero = get_hero_config((HeroID)id);
 
-				if(pHero)
-				{
-					MSG_OUT("(%d) %s, %s, %s, life %d\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
-				}
+				//if(pHero)
+				//{
+				//	MSG_OUT("(%d) %s, %s, %s, life %d%s\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
+				//}
+				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, hero_sid((HeroID)id, sid, sizeof(sid)), 
+					hero_name((HeroID)id, name, sizeof(name)), hero_group_str(hero_group((HeroID)id)), 
+					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"");
 			}
 		}
 		else
 		{
-			id = atoi(argv[2]);
-			pHero = get_hero_config((HeroID)id);
-			if(pHero == NULL)
+			id = hero_sid2id(argv[2]);
+			//pHero = get_hero_config((HeroID)id);
+			//if(pHero == NULL)
+			if(id == HeroID_None)
 			{
-				MSG_OUT("no card id  is %d!\n", id);
+				MSG_OUT("no hero id  is %d!\n", id);
 				return R_E_PARAM;
 			}
 			else
 			{
-				MSG_OUT("(%d) %s, %s, %s, life %d\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
-				for(n = 0; n < pHero->skillNum; n++)
+				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, hero_sid((HeroID)id, sid, sizeof(sid)), 
+					hero_name((HeroID)id, name, sizeof(name)), hero_group_str(hero_group((HeroID)id)), 
+					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"", 
+					hero_desc((HeroID)id, desc, sizeof(desc)));
+				skill_num = hero_skill_num((HeroID)id);
+				for(n = 1; n <= skill_num; n++)
 				{
-					MSG_OUT(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
+					skill_flag = hero_skill_flag((HeroID)id, n);
+					MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  hero_skill_name((HeroID)id, n, name, sizeof(name)), 
+						(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
 				}
 			}
 		}				
-
 	}
 	else
 	{

@@ -2,7 +2,7 @@
 #include "card.h"
 #include "comm.h"
 #include "script.h"
-#include "card_impl/card_impl.h"
+//#include "card_impl/card_impl.h"
 
 
 const char* card_type_str(CardType type)

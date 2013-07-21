@@ -59,18 +59,46 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
-	INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
-	stEvent.out_card = out_card;
 
 	// out procedure
 	//pCardConfig = get_card_config(out_card->vcard.id);
 	//if(pCardConfig != NULL && pCardConfig->out != NULL)
 	{
+		// out card drive
+		INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
+		stEvent.out_card = out_card;
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 		CHECK_RET(ret, ret);
 
+
 	}
+
+	// per calc
+	INIT_EVENT(&stEvent, GameEvent_PerOutCardCalc, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+	
+	trigger_game_event(pGame, &stEvent);
+
+	if(stEvent.result == R_CANCEL)
+		return R_CANCEL;
+
+	// calc card
+	INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+
+	ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+	CHECK_RET(ret, ret);
+
+	// post calc
+	INIT_EVENT(&stEvent, GameEvent_PostOutCardCalc, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+
+	trigger_game_event(pGame, &stEvent);
+
+	if(stEvent.result == R_CANCEL)
+		return R_CANCEL;
+
 	return R_SUCC;
 }
 

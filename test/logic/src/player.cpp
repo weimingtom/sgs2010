@@ -5,7 +5,7 @@
 
 RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 {
-	const HeroConfig*  pHeroConfig = get_hero_config(hero);
+	//const HeroConfig*  pHeroConfig = get_hero_config(hero);
 
 	if(id < PlayerID_Valid_Min || id > PlayerID_Valid_Max)
 	{
@@ -13,11 +13,11 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 		return R_E_PARAM;
 	}
 
-	if(pHeroConfig == NULL)
-	{
-		MSG_OUT("init player: invalid hero ID %d\n", hero);
-		return R_E_FAIL;
-	}
+	//if(pHeroConfig == NULL)
+	//{
+	//	MSG_OUT("init player: invalid hero ID %d\n", hero);
+	//	return R_E_FAIL;
+	//}
 
 	// is master ?
 	/*
@@ -33,8 +33,11 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	pPlayer->id = id;
 	pPlayer->hero = hero;
-	pPlayer->max_life = pHeroConfig->life;
+	pPlayer->max_life = hero_life(hero);
 	pPlayer->status = PlayerStatus_Hide;
+
+	if(pPlayer->max_life == 0)
+		pPlayer->max_life = 3;
 
 	// master
 	if(id == PlayerID_Master)
@@ -45,12 +48,13 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	pPlayer->cur_life = pPlayer->max_life;
 
-	strncpy(pPlayer->name, pHeroConfig->name, MAX_NAME_LEN);
+	//strncpy(pPlayer->name, pHeroConfig->name, MAX_NAME_LEN);
+	hero_name(hero, pPlayer->name, sizeof(pPlayer->name));
 
 	pPlayer->hand_card_num = 0;
 	pPlayer->judgment_card_num = 0;
 
-	MSG_OUT("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pHeroConfig->name, pPlayer->max_life);
+	MSG_OUT("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pPlayer->name, pPlayer->max_life);
 
 	return R_SUCC;
 }

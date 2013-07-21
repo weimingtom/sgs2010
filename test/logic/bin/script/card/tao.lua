@@ -71,8 +71,14 @@ reg_card {
 	
 	event = {
 		[GameEvent_OutCard] = function(cfg, game, event, player)
+			-- out process is directly succss.
+			return true;
+		end,
+
+		[GameEvent_OutCardCalc] = function(cfg, game, event, player)
 			return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
 		end,
+
 		[GameEvent_PerDead] = function(cfg, game, event, player)
 			return game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
 		end,

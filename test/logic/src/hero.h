@@ -13,6 +13,8 @@ extern "C" {
 typedef enum _HeroID
 {
 	HeroID_None = 0,
+	// other hero ids are registered in script
+	/*
 	HeroID_CaoCao = 1,
 	HeroID_LiuBei,
 	HeroID_SunQuan,
@@ -28,7 +30,7 @@ typedef enum _HeroID
 
 
 	HeroID_Max,
-
+	*/
 }HeroID;
 
 
@@ -61,6 +63,8 @@ typedef enum _SkillFlag
 
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
+
+/*
 typedef YESNO  (*SKILLCHECKFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*SKILLUSEFUN)(GameContext*, GameEventContext*, int);
 
@@ -93,12 +97,45 @@ typedef struct  tagHeroConfig
 
 
 const HeroConfig* get_hero_config(HeroID id);
+
+*/
+
+
+// tolua_begin
+
 const char* hero_group_str(HeroGroup group);
 const char* hero_sex_str(HeroSex sex);
+
+// tolua_end
+
+// wrapper from lua to c code
+
+HeroID hero_maxid(void);
+HeroID hero_sid2id(const char* sid);
+char* hero_sid(HeroID id, char* buf, int buflen);
+char* hero_name(HeroID id, char* buf, int buflen);
+char* hero_desc(HeroID id, char* buf, int buflen);
+
+HeroGroup hero_group(HeroID id);
+HeroSex hero_sex(HeroID id);
+
+int hero_life(HeroID id);
+YESNO hero_master(HeroID id);
+
+int hero_skill_num(HeroID id);
+char* hero_skill_name(HeroID id, int index, char* buf, int buflen);
+int hero_skill_flag(HeroID id, int index);
+
+
+YESNO call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
+RESULT call_hero_skill_event(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
+
 
 #ifdef __cplusplus
 }
 #endif
+
+
 
 #endif /* __HERO_H__ */
 

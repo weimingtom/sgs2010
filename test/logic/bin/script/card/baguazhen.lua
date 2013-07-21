@@ -12,6 +12,11 @@
 
 --]]
 
+
+import "../global/reg.lua";
+
+
+
 local function bgz_can_use(cfg, game, event, player, pos_card)
 	-- 当需要出一张闪的时候
 	if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
@@ -48,8 +53,8 @@ local function bgz_use(cfg, game, event, player)
 		return R_BACK;
 	else
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
-		-- 你仍然可以打出一张闪
-		local ret = game_passive_out(game, event, player, event.target, 'hf:{shan}', alter);
+		-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
+		local ret = game_passive_out(game, event.parent, player, event.target, 'hf:{shan}', alter);
 		event.result = ret;
 		event.block = YES;
 		return R_BACK;
