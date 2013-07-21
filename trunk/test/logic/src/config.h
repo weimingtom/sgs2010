@@ -65,6 +65,7 @@ extern "C" {
 #define  MAX_NAME_LEN    32
 #define  MAX_DESC_LEN    512
 #define  MAX_PLAYER_NUM  20
+#define  MAX_ALTER_TEXT_LEN    256
 
 #ifndef COUNT
 #define COUNT(a)  (sizeof(a)/sizeof((a)[0]))
@@ -93,17 +94,13 @@ extern "C" {
 #define C2I(c)  ((int)(unsigned char)(c))
 
 // tolua_begin
+
 typedef enum _YESNO
 {
 	NO = 0,
 	YES = 1,
 } YESNO;
-// tolua_end
 
-#define B2YESNO(b) ((b)?YES:NO)
-
-
-// tolua_begin
 typedef enum _RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop
@@ -124,7 +121,10 @@ typedef enum _RESULT
 	R_E_TIMEOUT = -5, // op timeout
 	R_E_OVERFLOW = -6, // overflow , 
 } RESULT;
+
 // tolua_end
+
+#define B2YESNO(b) ((b)?YES:NO)
 
 
 #define IS_FAIL(res)  ((res) < 0)

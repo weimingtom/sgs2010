@@ -21,7 +21,7 @@ typedef struct tagGameContext GameContext;
 
 
 // tolua_begin
-enum GameEvent
+typedef enum _GameEvent
 {
 	GameEvent_None = 0,     // no
 	GameEvent_NewGame = 1,  // 开始新游戏
@@ -61,9 +61,14 @@ enum GameEvent
 	GameEvent_PerOutCard,
 	GameEvent_OutCard,
 	GameEvent_PostOutCard,
+	GameEvent_BeforePassiveOut,
 	GameEvent_PerPassiveOutCard,
 	GameEvent_PassiveOutCard,
 	GameEvent_PostPassiveOutCard,
+	GameEvent_AfterPassiveOut,
+	GameEvent_PerSupplyCard,
+	GameEvent_SupplyCard,
+	GameEvent_PostSupplyCard,
 	GameEvent_PerEquipCard,
 	GameEvent_PostEquipCard,
 	GameEvent_PerLostCard,
@@ -75,17 +80,26 @@ enum GameEvent
 	GameEvent_CardCalc,
 	GameEvent_PostCardCalc,
 	GameEvent_FiniCardCalc,
-	GameEvent_SupplyCard,
 	GameEvent_CalcAttackDis,
 	GameEvent_SelectTarget,
 	GameEvent_PerDecideCard,
 	GameEvent_PerDecideCardCalc,
 	GameEvent_PostDecideCard,
 
-};
+} GameEvent;
+
+
+typedef enum _AttackDisFlag
+{
+	AttackDisFlag_UseWeapon = 1,
+	AttackDisFlag_UseHorse = 2,
+} AttackDisFlag;
 
 
 // tolua_end
+
+
+// tolua_begin
 
 
 // for create a new game
@@ -113,13 +127,14 @@ typedef struct tagPatternOut
 	OutCard        out; 
 } PatternOut;
 
+// for before passive out, modify the pattern and alter taxt
 
-
-enum AttackDisFlag
+typedef struct tagBeforeBassiveOut
 {
-	AttackDisFlag_UseWeapon = 1,
-	AttackDisFlag_UseHorse = 2,
-};
+	OutCardPattern pattern;
+	char alter_text[MAX_ALTER_TEXT_LEN];
+}BeforeBassiveOut;
+
 
 typedef struct tagAttackDis
 {
@@ -129,6 +144,7 @@ typedef struct tagAttackDis
 	int     flag;
 }AttackDis;
 
+// tolua_end
 
 
 typedef struct tagGameEventContext GameEventContext;
@@ -150,6 +166,8 @@ struct tagGameEventContext
 		//Card*       card;       // for calc card, judge card ... 
 		GetCard*    get_card;        // num for get card, discard card. etc
 		AttackDis*  attack_dis; 
+		BeforeBassiveOut* before_pout; 
+		OutCardPattern* card_pattern;
 		PatternOut* pattern_out; // for passive out, supply card etc..
  		OutCard*    out_card;       // real out,  per/post out
 		PosCard*    pos_card;  // lost card,
@@ -177,9 +195,6 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
 
 // tolua_begin
-
-
-//void  set_event_out(GameEventContext* pEvent, OutCard* out_card);
 
 
 // ...

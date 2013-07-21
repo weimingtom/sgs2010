@@ -16,7 +16,9 @@ typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
 
-RESULT game_cmd_useskill(GameContext* pGame, GameEventContext* pEvent, int idx);
+RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx);
+RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent);
+RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent);
 
 RESULT game_cmd_cancelskill(GameContext* pGame, GameEventContext* pEvent);
 

@@ -16,7 +16,8 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	int       pos;
 	PosCard   stCard;
 	CardPattern pattern;
-
+	char temp[128];
+	char temp2[128];
 
 
 	if(!IS_PLAYER_VALID(pGame, player))
@@ -63,17 +64,21 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 		game_add_discard_cur(pGame, &stCard.card, &pos);
 		stCard.where = CardWhere_CurDiscardStack;
 		stCard.pos = pos;
+		MSG_OUT("从摸牌堆顶得到判定牌%s\n", card_str(&stCard.card, temp, sizeof(temp)));
 	}
 
 
-	// some skill can out a card instead the current decide card. 9do it in GameEvent_PerDecideCardCalc event
+	// some skill can out a card instead the current decide card. do it in GameEvent_PerDecideCardCalc event
 
 	// GameEvent_PerDecideCardCalc 
 	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, 0, pParentEvent);
 	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
-	ret = card_match(&stCard.card, 1, &pattern, 1);
+	ret = card_match(&stCard.card, sizeof(PosCard), 1, &pattern, 1);
+
+
+	MSG_OUT("判定牌%s,判定条件%s,结果：%s\n",card_str(&stCard.card, temp, sizeof(temp)), card_pattern_str(&pattern, temp2, sizeof(temp2)), ret == R_SUCC ? "成功" : "失败");
 
 	// some skill can get the decide card after it be calculated.
 	// GameEvent_PostDecideCard
@@ -82,7 +87,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	trigger_game_event(pGame, &event);
 
 
-	return NO;
+	return B2YESNO(ret == R_SUCC);
 }
 
 

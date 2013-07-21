@@ -13,92 +13,9 @@ $cfile "../src/decide.h"
 $cfile "../src/discard.h"
 $cfile "../src/life.h"
 $cfile "../src/hero.h"
-//$cfile "../src/skill.h"
 
 
 // void game_import_file @ import(lua_State* L, const char* pattern);
-
-struct Card
-{
-	CardID    id;
-	CardColor color;
-	CardValue value;
-	CardFlag  flag;
-
-};
-
-
-struct CardPattern 
-{
-	CardID id;
-	CardColor color;
-	CardValue value_min;
-	CardValue value_max;
-};
-
-
-struct PosCard
-{
-	Card       card;
-	CardWhere  where;
-	int        pos;
-};
-
-
-
-
-
-struct CardList
-{
-	int    num;
-	Card   cards[MAX_CARD_LIST_NUM];
-};
-
-struct PosCardList
-{
-	int      num;
-	PosCard  pcards[MAX_CARD_LIST_NUM];
-};
-
-
-struct GetCard
-{
-	int num;
-} ;
-
-
-struct EquipCard
-{
-	int equip_pos;
-	int supply;
-	PosCard  card;
-} ;
-
-
-struct OutCard
-{
-	int      trigger;
-	int      supply;
-	int      target;
-	Card     vcard;    //  use as card (virtaul) 
-	PosCardList list;
-};
-
-struct OutCardPattern
-{
-	tolua_readonly int         where;    // limited where the card is comes from 
-	tolua_readonly YESNO       fixed;    // limited the card is fixed or can use hero skill/weapon skill/armor skill to generate 
-	tolua_readonly int         num;      // pattern count
-	 CardPattern patterns[MAX_CARD_LIST_NUM];
-};
-
-
-struct PatternOut
-{
-	tolua_readonly OutCardPattern pattern;
-	tolua_readonly OutCard        out; 
-} ;
-
 
 
 struct  Player
@@ -136,15 +53,6 @@ struct GameContext
 };
 
 
-struct ChangeLife
-{
-	int  delta;    // how many life is changed
-	tolua_readonly int  after_life; 
-	tolua_readonly int  src_player;  // the damage come from (player index)
-	tolua_readonly OutCard   src_cards; // the damage come from (cards) if damage is not from card, it will be empty
-	tolua_readonly int  src_skill;   // if the damage comes rom a skill, otherwise 0;
-};
-
 
 struct GameEventContext
 {
@@ -157,6 +65,8 @@ struct GameEventContext
 
 	tolua_readonly GetCard*    get_card;        // num for get card, discard card. etc
 	tolua_readonly AttackDis*  attack_dis; 
+	tolua_readonly OutCardPattern* card_pattern;
+	tolua_readonly BeforeBassiveOut* before_pout; 
 	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
 	tolua_readonly OutCard*    out_card;       // real out,  per/post out
 	tolua_readonly PosCard*    pos_card;  // lost card,

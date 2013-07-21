@@ -95,6 +95,11 @@ end
 
 
 function get_card_name(id)
+
+	if (id == 0) then
+		return "任意";
+	end
+
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then
@@ -149,22 +154,33 @@ function card_sid2name(sid)
 	return get_card_name(get_card_id_by_sid(sid));
 end
 
-function call_card_check(id, game, event, player)
+function call_card_can_out(id, game, event, player, pos_card)
 	local cfg = card_list[id];
-	if(cfg == nil or cfg.check == nil) then
+	if(cfg == nil or cfg.can_out == nil or cfg.can_out[event.id] == nil) then
 		return NO;
 	end
 	
-	return cfg.check(cfg, game, event, player);
+	return cfg.can_out[event.id](cfg, game, event, player, pos_card);
 end
 
-function call_card_out(id, game, event, player)
+
+function call_card_can_use(id, game, event, player, pos_card)
 	local cfg = card_list[id];
-	if(cfg == nil or cfg.out == nil) then
+	if(cfg == nil or cfg.can_use == nil or cfg.can_use[event.id] == nil) then
+		return NO;
+	end
+	
+	return cfg.can_use[event.id](cfg, game, event, player, pos_card);
+end
+
+
+function call_card_event(id, game, event, player)
+	local cfg = card_list[id];
+	if(cfg == nil or cfg.event == nil or cfg.event[event.id] ==nil ) then
 		return R_DEF; 
 	end
 	
-	return cfg.out(cfg, game, event, player);
+	return cfg.event[event.id](cfg, game, event, player);
 end
 
 
