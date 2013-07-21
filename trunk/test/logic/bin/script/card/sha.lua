@@ -70,11 +70,15 @@ reg_card {
 				"Çë³öÒ»ÕÅ¡¾"..card_sid2name('shan').."¡¿:");
 
 			if(ret ~= R_SUCC) then
-				-- lost life( from player, out card 'sha', skill 0 )
-				game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
+				return R_SUCC;
 			end
 
-			return R_SUCC;
+			return R_CANCEL;
+		end,
+		
+		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
+			-- lost life( from player, out card 'sha', skill 0 )
+			game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
 		end,
 	},
 };

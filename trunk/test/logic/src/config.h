@@ -66,6 +66,7 @@ extern "C" {
 #define  MAX_DESC_LEN    512
 #define  MAX_PLAYER_NUM  20
 #define  MAX_ALTER_TEXT_LEN    256
+#define  MAX_HERO_NUM    256
 
 #ifndef COUNT
 #define COUNT(a)  (sizeof(a)/sizeof((a)[0]))

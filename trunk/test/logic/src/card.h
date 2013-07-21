@@ -28,7 +28,7 @@ typedef enum _CardType
 typedef enum _CardID
 {
 	CardID_None = 0,
-	// other cardid is registered in script.
+	// other card ids are registered in script.
 	//
 	/*
 	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
@@ -161,6 +161,7 @@ typedef struct tagPosCardList PosCardList;
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
+/*
 typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
 typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 
@@ -175,6 +176,7 @@ typedef struct tagCardConfig
 	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
 	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
 }CardConfig;
+*/
 
 // tolua_begin
 

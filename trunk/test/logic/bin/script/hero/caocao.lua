@@ -35,29 +35,48 @@ reg_hero({
 护驾——主公技，当你需要使用（或打出）一张【闪】时，你可以发动护驾。
 所有魏势力角色按行动顺序依次选择是否打出一张【闪】“提供”给你（视为由你使用或打出），
 直到有一名角色或没有任何角色决定如此做时为止。
-★同一张牌的一次完整的结算中（包括因结算引发的其他事件）只能发动一次奸雄。\n]==],
+★同一张牌的一次完整的结算中（包括因结算引发的其他事件）只能发动一次奸雄。]==],
 	group = HeroGroup_Wei,
 	sex = HeroSex_Male,
+	master = YES,
+	life = 4,
 	skills	= { 
 		[1] = {
 			name="奸雄",
 			flag=0,
-			check = function(self, game, event, player)
-				return YES;
-			end,
-			use = function(self, game, event, player)
-				return R_SUCC;
-			end,
+			can_use = {
+				[GameEvent_PostChangeLife] = function(self, game, event, player)
+					if(event.change_life.delta < 0 and event.change_life.src_cards.list.num > 0) then
+						return YES;
+					end
+					return NO;
+				end,
+			},
+			event = {
+				[GameEvent_PostChangeLife] = function(self, game, event, player)
+					-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
+					return R_SUCC;
+				end,
+			},
 		},
 		[2] = {
 			name="护驾",
 			flag=SkillFlag_Master,
-			check = function(self, game, event, player)
-				return YES;
-			end,
-			use = function(self, game, event, player)
-				return R_SUCC;
-			end,
+			can_use = {
+				[GameEvent_PassiveOutCard] = function(self, game, event, player)
+					-- 当需要出一张闪的时候
+					if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
+						get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
+						return YES;
+					end
+					return NO;
+				end,
+			},
+			event = {
+				[GameEvent_PassiveOutCard]= function(self, game, event, player)
+					return R_SUCC;
+				end,
+			},
 		},
 	},
 });

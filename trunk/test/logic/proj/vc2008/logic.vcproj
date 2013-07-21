@@ -353,58 +353,6 @@
 				RelativePath="..\..\src\stack.h"
 				>
 			</File>
-			<Filter
-				Name="hero_impl"
-				>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_cacao.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_guanyu.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_impl.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_liubei.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_luxun.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_machao.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_sunquan.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_sunshangxiang.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_xiahoudun.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_zhangfei.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_zhangliao.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hero_impl\hero_zhaoyu.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="include"

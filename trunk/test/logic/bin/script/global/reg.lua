@@ -34,7 +34,9 @@ local chk_hero_group = {
 	[HeroGroup_People] = 1,
 };
 
-
+---------------------------------------------------------------
+-- register functions
+---------------------------------------------------------------
 
 function reg_card(cfg)
 	if(cfg.sid == nil or cfg.sid == '') then
@@ -66,9 +68,22 @@ end
 function reg_hero(cfg)
 
 	if(cfg.sid == nil) then
-		error('invalid card sid');
+		error('invalid hero sid');
 	end
 	
+	if(cfg.name == nil or cfg.name == '') then
+		error('reg_hero('..cfg.sid..'): invalid hero name');
+	end
+
+	if(cfg.group == nil or chk_hero_group[cfg.group] ~= 1) then
+		error('reg_hero('..cfg.sid..'): invalid hero group');
+	end
+
+	if(cfg.sex == nil or chk_hero_sex[cfg.sex] ~= 1) then
+		error('reg_hero('..cfg.sid..'): invalid hero sex');
+	end
+
+
 	if(hero_index[cfg.sid] ~= nil) then
 		error('register duplicated hero sid\''..cfg.sid..'\'. ')
 	end
@@ -81,16 +96,12 @@ function reg_hero(cfg)
 	return id;
 end
 
-
+-------------------------------------------------------------------
+-- card functions
+-------------------------------------------------------------------
 
 function get_card_maxid()
 	return table.getn(card_list);
-end
-
-
-
-function get_hero_maxid()
-	return table.getn(hero_list);
 end
 
 
@@ -183,5 +194,160 @@ function call_card_event(id, game, event, player)
 	return cfg.event[event.id](cfg, game, event, player);
 end
 
+--------------------------------------------------------------
+-- hero functions
+--------------------------------------------------------------
+
+
+
+function get_hero_maxid()
+	return table.getn(hero_list);
+end
+
+
+function get_hero_sid(id)
+	if (id == HeroID_None) then
+		return 'none';
+	end
+	
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.sid;
+
+end
+
+
+
+function get_hero_name(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.name or cfg.sid;
+end
+
+function get_hero_desc(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.desc or '';
+end
+
+function get_hero_master(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.master;
+end
+
+function get_hero_life(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.life;
+end
+
+
+function get_hero_group(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.group;
+end
+
+function get_hero_sex(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil) then
+		return nil;
+	end
+	
+	return cfg.sex;
+end
+
+function get_hero_skill_num(id)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil or cfg.skills == nil) then
+		return 0;
+	end
+	
+	return table.getn(cfg.skills);
+end
+
+function get_hero_skill_name(id, index)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil or cfg.skills == nil or cfg.skills[index] == nil) then
+		return nil;
+	end
+	
+	return cfg.skills[index].name;
+end
+
+function get_hero_skill_flag(id, index)
+	local cfg = hero_list[id];
+	
+	if (cfg == nil or cfg.skills == nil or cfg.skills[index] == nil) then
+		return nil;
+	end
+	
+	return cfg.skills[index].flag;
+end
+
+function get_hero_id_by_sid(sid)
+	return hero_index[sid] or HeroID_None;
+end
+
+function call_hero_skill_can_use(id, index, game, event, player)
+	local cfg = hero_list[id];
+	
+	if(cfg == nil or cfg.skills == nil) then
+		return NO;
+	end
+	
+	local skill = cfg.skills[index];
+	
+	if(skill == nil or skill.can_use == nil or skill.can_use[event.id] == nil) then
+		return NO;
+	end
+	
+	return  skill.can_use[event.id](cfg, game, event, player);
+end
+
+
+function call_hero_skill_event(id, index, game, event, player)
+	local cfg = hero_list[id];
+	
+	if(cfg == nil or cfg.skills == nil) then
+		return NO;
+	end
+	
+	local skill = cfg.skills[index];
+	
+	if(skill == nil or skill.event == nil or skill.event[event.id] == nil) then
+		return NO;
+	end
+	
+	return  skill.event[event.id](cfg, game, event, player);
+end
 
 
