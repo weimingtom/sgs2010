@@ -153,23 +153,23 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	if(hcnt > MAX_HERO_NUM)
 		hcnt = MAX_HERO_NUM;
 	hmcnt = 0;
-	for(n = 1; n < hcnt; n++)
+	for(n = 0; n < hcnt; n++)
 	{
 		//pHero = get_hero_config((HeroID)n);
 		//if(pHero)
 		{
-			if(YES == hero_master((HeroID)n))
+			if(YES == hero_master((HeroID)(n+1)))
 			{
 				if(n > hmcnt)
 				{
 					hids[n] = hids[hmcnt];
 				}
-				hids[hmcnt] = n;
+				hids[hmcnt] = n+1;
 				hmcnt++;
 			}
 			else
 			{
-				hids[n] = n;
+				hids[n] = n+1;
 			}
 			//hcnt++;
 		}
@@ -205,7 +205,8 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	{
 		if(pids[n] == PlayerID_Master)
 		{
-			set_game_cur_player(pGame, n);
+			//set_game_cur_player(pGame, n);
+			pGame->cur_player = n;
 			pGame->round_player = n;
 			break;
 		}
@@ -231,13 +232,13 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 			//while(1)
 			{
-				snprintf(title, sizeof(title), "玩家 [%d], 身份：%s， 请选择武将：", pGame->cur_player, player_id_str((PlayerID)pids[pGame->cur_player]));
+				snprintf(title, sizeof(title), "玩家 [%d], 身份：%s， 请选择武将：", pGame->cur_player+1, player_id_str((PlayerID)pids[pGame->cur_player]));
 				sel_n = 0;
 				ST_ZERO(sel_opts);
 				for(c = 0; c < hscnt; c++)
 				{
 					//pHero = get_hero_config((HeroID)hids[c]);
-					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %smax life %d", 
+					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %s最大体力: %d", 
 						hero_name((HeroID)hids[c], temp, sizeof(temp)), hero_master((HeroID)hids[c])==YES ? "[主公], ":"", hero_life((HeroID)hids[c]));
 					sel_opts[sel_n].value = c+1;
 					sel_n++;
@@ -263,6 +264,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 		else
 		{
 			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], HeroID_None);
+			snprintf(pGame->players[pGame->cur_player].name, MAX_NAME_LEN, "玩家%d", pGame->cur_player+1);
 		}
 
 		pGame->cur_player = (pGame->cur_player + 1) % pGame->player_count;
