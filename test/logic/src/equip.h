@@ -13,6 +13,7 @@ typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
 
+// tolua_begin
 
 typedef struct tagEquipCard
 {
@@ -21,6 +22,8 @@ typedef struct tagEquipCard
 	PosCard  card;
 } EquipCard;
 
+
+// tolua_end
 
 
 // tolua_begin

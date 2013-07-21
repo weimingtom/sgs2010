@@ -172,7 +172,7 @@ RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag
 		}
 		break;
 	case CardWhere_PlayerEquip:
-		if(0 <= pos && pos < EquipIdx_Max && pPlayer->equip_cards[pos].id != CardID_None && CARD_VALID(&pPlayer->equip_cards[pos]))
+		if(0 <= pos && pos < EquipIdx_Max && CARD_VALID(&pPlayer->equip_cards[pos]))
 		{
 			pPlayer->equip_cards[pos].flag = flag;
 			return R_SUCC;
@@ -206,7 +206,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 		}
 		break;
 	case CardWhere_PlayerEquip:
-		if(0 <= pos && pos < EquipIdx_Max && pPlayer->equip_cards[pos].id != CardID_None && CARD_VALID(&pPlayer->equip_cards[pos]))
+		if(0 <= pos && pos < EquipIdx_Max && CARD_VALID(&pPlayer->equip_cards[pos]))
 		{
 			*pCard = pPlayer->equip_cards[pos];
 			pCard->flag = CardFlag_FromEquip;

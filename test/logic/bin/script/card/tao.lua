@@ -47,30 +47,34 @@ reg_card {
 二、当有角色处于濒死状态时，你可以对该角色使用【桃】，防止该角色的死亡。]==],
 
 
-	check = function(cfg, game, event, player)
-
-		-- use in round out restore my life
-		if(event.id == GameEvent_RoundOutCard and get_game_round_player(game)==player) then
+	can_out = {
+		-- 出牌时，如果自己的体力小于最大体力，则可以出桃
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
 			local p = get_game_player(game, player);
 			if(p.cur_life < p.max_life ) then
 				 return YES;
 			end
-		end
+			return NO;
+		end,
+		-- 有玩家处于濒死状态，则可以对它使用桃
+		[GameEvent_PerDead] = function(cfg, game, event, player, pos_card)
+			local p = get_game_player(game, event.trigger);
+			if(p.cur_life < 0) then
+				return YES;
+			end
+			return NO;
+		end,
+	},
 	
-		-- other ways : NO
-		return  NO;
-	end,
+	can_use = {
+	},
 	
-	out = function(cfg, game, event, player)
-		local ret;
-		local target = -1;
-	
-		if(event.id == GameEvent_OutCard) then
-			game_player_add_life(game, event, player, 1, player, event.out_card, 0);
-		elseif(event.id == GameEvent_PerDead) then
-			game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
-		end
-	
-		return R_SUCC;	
-	end,
+	event = {
+		[GameEvent_OutCard] = function(cfg, game, event, player)
+			return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
+		end,
+		[GameEvent_PerDead] = function(cfg, game, event, player)
+			return game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
+		end,
+	},
 };

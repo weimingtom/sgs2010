@@ -46,6 +46,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	const HeroConfig* pHero;
 	const HeroSkill* pSkill;
 	// const CardConfig* pCardConfig;
+	PosCard    pos_card;
 	int  n;
 	YESNO ret;
 	int   may_skills = 0;
@@ -68,13 +69,14 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 				if(ret == YES && pSkill->flag & SkillFlag_Passive)
 				{
 					(*pSkill->use)(pGame, pEvent, player);
+					if(pEvent->block == YES)
+					{
+						return R_SUCC;
+					}
 				}
-				if(ret == YES)
-					may_skills++;
-
-				if(pEvent->block == YES)
+				else if(ret == YES)
 				{
-					return R_SUCC;
+					may_skills++;
 				}
 			}
 		}
@@ -91,9 +93,15 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 		//	if(ret == YES)
 		//		may_cards++;
 		//}
-		ret = card_check_call(pPlayer->hand_cards[n].id, pGame, pEvent, player);
-		if(ret == YES)
-			may_cards++;
+		//if(R_SUCC == get_player_card(pPlayer, CardWhere_PlayerHand, n, &pos_card.card))
+		{
+			pos_card.card = pPlayer->hand_cards[n];
+			pos_card.where = CardWhere_PlayerHand;
+			pos_card.pos = n;
+			ret = call_card_can_out(pPlayer->hand_cards[n].id, pGame, pEvent, player, &pos_card);
+			if(ret == YES)
+				may_cards++;
+		}
 	}
 
 
@@ -109,8 +117,15 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 			//	// for this event to calc the equip effect
 			//	(*pCardConfig->out)(pGame, pEvent, player);
 			//}
-			if(R_SUCC == card_out_call(pPlayer->equip_cards[n].id, pGame, pEvent, player))
-				may_skills++;
+			//if(R_SUCC == get_player_card(pPlayer, CardWhere_PlayerEquip, n, &pos_card.card))
+			{
+				pos_card.card = pPlayer->equip_cards[n];
+				pos_card.where = CardWhere_PlayerEquip;
+				pos_card.pos = n;
+				ret = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
+				if(ret == YES)
+					may_skills++;
+			}
 		}
 	}
 

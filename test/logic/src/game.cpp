@@ -337,7 +337,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, 0, pEvent);
 					event.pos_card = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					card_out_call(stCard.card.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
 				}
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, 0, pEvent);
@@ -354,7 +354,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, 0, pEvent);
 					event.pos_card = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					card_out_call(stCard.card.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
 				}
 				//else
 				//{

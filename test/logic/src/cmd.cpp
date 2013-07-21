@@ -472,7 +472,7 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 
 	for(n = 1; n < argc && cnt < MAX_PARAM_NUM; n++)
 	{
-		if(0 != to_int(argv[1], &idx[cnt]))
+		if(0 != to_int(argv[n], &idx[cnt]))
 		{
 			param_error(argv[0]);
 			return R_E_PARAM;
@@ -497,8 +497,15 @@ static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, G
 
 	if(argc >= 2 && 0 == to_int(argv[1], &idx))
 	{
-		return  game_cmd_useskill(pContext, pEvent, idx);
-
+		return  game_cmd_use_skill(pContext, pEvent, idx);
+	}
+	else if(argc >= 2 && (0 == strcasecmp(argv[1], "weapon") || 0 == strcasecmp(argv[1], "w")) )
+	{
+		return  game_cmd_use_weapon(pContext, pEvent);
+	}
+	else if(argc >= 2 && (0 == strcasecmp(argv[1], "armor") || 0 == strcasecmp(argv[1], "a")) )
+	{
+		return  game_cmd_use_armor(pContext, pEvent);
 	}
 	else
 	{
@@ -509,12 +516,14 @@ static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, G
 	return R_SUCC;
 }
 
-
+/*
 static RESULT cmd_useweapon(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
 	// no need param
 	return R_SUCC;
 }
+*/
+
 
 static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
@@ -654,11 +663,13 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		"out/o <card idx> ...\n\tout one or more card.", 
 		NULL},
 	{ "useskill", "u",	cmd_useskill, 
-		"useskill/u <skill idx> ...\n\tuse a skill.", 
+		"useskill/u <skill idx> ...\n\tuse a hero skill.\n" 
+		"useskill/u w/weapon ...\n\tuse weapon skill.\n"
+		"useskill/u a/armor ...\n\tuse armor skill.", 
 		NULL},
-	{ "usesweapon", "w",	cmd_useweapon, 
+	/*{ "usesweapon", "w",	cmd_useweapon, 
 		"usesweapon/w ...\n\tuse the weapon card - some weapon can active in out card round - as a skill.", 
-		NULL},
+		NULL},*/
 	{ "cancel", "c",	cmd_cancelskill, 
 		"cancel/c \n\tcancel the skill in using.", 
 		NULL},

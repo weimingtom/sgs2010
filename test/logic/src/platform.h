@@ -55,6 +55,12 @@
 
 #endif
 
+// 放在这里，如果在cofig.h里定义，tolua编译时会出错 -_-!!!
+#ifndef tolua_readonly
+#define tolua_readonly
+#endif
+
+
 #define REPLACE_CHAR(str, chfrom, chto)  do { char* p = (str); while(*p) { if(*p == (chfrom) ) { *p = (chto); } p++; } } while(0)
 #define REGULAR_PATH(str)  REPLACE_CHAR((str),'\\', '/')
 #define WIN_PATH(str)  REPLACE_CHAR((str),'/', '\\')

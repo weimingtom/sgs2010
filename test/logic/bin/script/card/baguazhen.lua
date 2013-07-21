@@ -12,6 +12,50 @@
 
 --]]
 
+local function bgz_can_use(cfg, game, event, player, pos_card)
+	-- 当需要出一张闪的时候
+	if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
+		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
+		return YES;
+	end
+	return NO;
+end
+
+local function bgz_equip(cfg, game, event, player)
+	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+		error("invalid out equip card in event OutCardPrepare.");
+		return R_E_FAIL;
+	end
+	game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Armor);
+	return R_CANCEL;
+end
+
+
+local function bgz_use(cfg, game, event, player)
+	-- 进行一次判定
+	if(game_decide_card(game,event,player, 'r') == YES) then
+		-- 判定成功，则视为你已经出了一张闪，无花色，无点数
+		message('【'..cfg.name..'】判定成功，视为你已经打出了一张【'..card_sid2name('shan')..'】。');
+		event.result = R_SUCC;
+		event.block = YES;
+		event.pattern_out.out.trigger = player;
+		event.pattern_out.out.supply = player;
+		event.pattern_out.out.target = event.target;
+		event.pattern_out.out.vcard.id = get_card_id_by_sid('shan');
+		event.pattern_out.out.vcard.color = CardColor_None;
+		event.pattern_out.out.vcard.value = CardValue_None;
+		event.pattern_out.out.vcard.flag = CardFlag_None;
+		return R_BACK;
+	else
+		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
+		-- 你仍然可以打出一张闪
+		local ret = game_passive_out(game, event, player, event.target, 'hf:{shan}', alter);
+		event.result = ret;
+		event.block = YES;
+		return R_BACK;
+	end
+end
+
 reg_card {
 	sid = 'bgz',
 	name = '八卦阵',
@@ -20,24 +64,27 @@ reg_card {
 
 ★由八卦使用或打出的【闪】，并非从你的手牌中使用或打出。]==],
 
-	check = function(cfg, game, event, player)
-		if( event.id == GameEvent_RoundOutCard  and game.round_player == player) then
-			return YES;
-		end
-		return NO;
-	end,
+	can_out = {
 	
-	out = function(cfg, game, event, player)
-		if ( event.id == GameEvent_OutCardPrepare ) then
-			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
-				error("invalid out equip card in event OutCardPrepare.");
-				return R_E_FAIL;
-			end
-			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Armor);
-			return R_CANCEL;
-		end
-		return R_E_FAIL;
-	end,
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+	
+	can_use = {
+		[GameEvent_PassiveOutCard] = bgz_can_use,
+		
+		[GameEvent_SupplyCard] = bgz_can_use,
+	},
+
+	event = {
+		[GameEvent_OutCardPrepare] = bgz_equip;
+		
+		[GameEvent_PassiveOutCard] = bgz_use,
+
+		[GameEvent_SupplyCard] = bgz_use,
+	},
 };
 
 

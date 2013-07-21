@@ -127,65 +127,6 @@ typedef enum _TargetType
 	Target_All,      // all role include me
 }TargetType;
 
-// tolua_end
-
-typedef struct tagCard Card;
-typedef struct tagGameContext GameContext;
-typedef struct tagGameEventContext GameEventContext;
-
-typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
-
-
-typedef struct tagCardConfig
-{
-	CardID       id;
-	CardType     type;
-	char         name[MAX_NAME_LEN];
-	char         desc[MAX_DESC_LEN];
-	TargetType   target;  // target select strategy
-	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
-	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
-}CardConfig;
-
-
-
-typedef struct tagCard Card;
-struct tagCard
-{
-	CardID    id;
-	CardColor color;
-	CardValue value;
-	CardFlag  flag;
-};
-
-#define RESET_CARD(pCard)   ST_ZERO(*pCard)
-#define CARD_VALID(p)   ((p)->id != CardID_None)
-
-#define CARD_EQUAL(p1, p2)    ( CARD_EQUAL_ID((p1), (p2))  && CARD_EQUAL_COLOR((p1), (p2)) && CARD_EQUAL_VALUE((p1), (p2)) )
-#define CARD_EQUAL_ID(p1, p2)   ((p1)->id == (p2)->id)
-#define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
-#define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
-
-
-typedef struct tagCardPattern CardPattern;
-struct tagCardPattern 
-{
-	CardID id;
-	CardColor color;
-	CardValue value_min;
-	CardValue value_max;
-};
-
-
-#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
-#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
-#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
-
-
-
-// tolua_begin
 
 typedef enum _CardWhere
 {
@@ -207,10 +148,53 @@ typedef enum _PatternCardWhere{
 	PatternCard_Judgment = (1<<CardWhere_PlayerJudgment),
 } PatternCardWhere;
 
+
 // tolua_end
 
+typedef struct tagCard Card;
+typedef struct tagPosCard PosCard;
+typedef struct tagCardPattern CardPattern;
+typedef struct tagCardList CardList;
+typedef struct tagPosCardList PosCardList;
 
-#define CHECK_WHERE_PATTERN(where, where_pattern)   (((where_pattern)&(1<<(where)))!=0)
+
+typedef struct tagGameContext GameContext;
+typedef struct tagGameEventContext GameEventContext;
+
+typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
+typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
+
+
+typedef struct tagCardConfig
+{
+	CardID       id;
+	CardType     type;
+	char         name[MAX_NAME_LEN];
+	char         desc[MAX_DESC_LEN];
+	TargetType   target;  // target select strategy
+	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
+	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
+}CardConfig;
+
+// tolua_begin
+
+typedef struct tagCard 
+{
+	CardID    id;
+	CardColor color;
+	CardValue value;
+	CardFlag  flag;
+} Card;
+
+
+typedef struct tagCardPattern
+{
+	CardID id;
+	CardColor color;
+	CardValue value_min;
+	CardValue value_max;
+} CardPattern;
+
 
 
 
@@ -223,27 +207,44 @@ typedef struct tagPosCard
 }PosCard;
 
 
-
-
 #define MAX_CARD_LIST_NUM  20
 
-typedef struct tagCardList CardList;
 
-struct tagCardList
+typedef struct tagCardList
 {
 	int    num;
 	Card   cards[MAX_CARD_LIST_NUM];
-};
+} CardList;
 
 
-
-typedef struct tagPosCardList PosCardList;
-
-struct tagPosCardList
+typedef struct tagPosCardList
 {
 	int      num;
 	PosCard  pcards[MAX_CARD_LIST_NUM];
-};
+}PosCardList;
+
+
+
+// tolua_end
+
+#define RESET_CARD(pCard)   ST_ZERO(*pCard)
+#define CARD_VALID(p)   ((p)->id != CardID_None)
+
+#define CARD_EQUAL(p1, p2)    ( CARD_EQUAL_ID((p1), (p2))  && CARD_EQUAL_COLOR((p1), (p2)) && CARD_EQUAL_VALUE((p1), (p2)) )
+#define CARD_EQUAL_ID(p1, p2)   ((p1)->id == (p2)->id)
+#define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
+#define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
+
+
+
+#define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_COLOR(cp, _c)  ((cp)->id=CardID_None, (cp)->color=(c), (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
+#define INIT_CARDPATTERN_USE_VALUE(cp, _v)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v), (cp)->value_max=(_v))
+#define INIT_CARDPATTERN_USE_VALUE_RANGE(cp, _v1, _v2)  ((cp)->id=CardID_None, (cp)->color=CardColor_None, (cp)->value_min=(_v1), (cp)->value_max=(_v2))
+
+
+
+#define CHECK_WHERE_PATTERN(where, where_pattern)   (((where_pattern)&(1<<(where)))!=0)
 
 
 
@@ -278,9 +279,10 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 //        <val> : one of '2 - 10, J, Q, K, A' , can use [from-to] format, if it is empty, means any value.
 RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len);
 
+RESULT card_match(const Card* pCard, size_t offset, int nCardNum, const CardPattern* pPattern, int nPatternNum);
+
+
 // tolua_begin
-
-
 
 const char* card_type_str(CardType type);
 //const char* card_id_str(CardID id);
@@ -295,7 +297,6 @@ void set_card_value(Card* pCard, CardValue val);
 void set_card_flag(Card* pCard, CardFlag flag);
 */
 
-RESULT card_match(const Card* pCard, int nCardNum, const CardPattern* pPattern, int nPatternNum);
 
 
 // tolua_end
@@ -308,8 +309,9 @@ CardType card_type(CardID  id);
 char* card_sid(CardID  id, char* buf, int buflen);
 char* card_name(CardID  id, char* buf, int buflen);
 char* card_desc(CardID  id, char* buf, int buflen);
-YESNO  card_check_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
-RESULT  card_out_call(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
+YESNO  call_card_can_out(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
+YESNO  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
+RESULT  call_card_event(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 
 
 
