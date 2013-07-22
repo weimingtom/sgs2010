@@ -143,7 +143,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 
-RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int player, int num)
+RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num)
 {
 	RESULT ret;
 	GameEventContext  event;
@@ -151,10 +151,31 @@ RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	GetCard    stGetCard;
 
+	if(pGame == NULL || pParentEvent == NULL)
+	{
+		if(L) {
+			luaL_error(L, "game_passive_getcard: invalid null param");
+		} else {
+			MSG_OUT("game_passive_getcard: invalid null param\n");
+		}
+		return R_E_PARAM;
+	}
+	
+	
+	if(!IS_PLAYER_VALID(pGame, player))
+	{
+		if(L) {
+			luaL_error(L, "game_passive_getcard: invalid player index - %d", player );
+		} else {
+			MSG_OUT("game_passive_getcard: invalid player index - %d\n", player );
+		}
+		return R_E_PARAM;
+	}
+
+	
 	stGetCard.num = num;
 
-
-	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pEvent);
+	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pParentEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);

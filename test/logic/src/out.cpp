@@ -210,7 +210,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 		// log
 		if(out_card->list.num == 1 && CARD_EQUAL(&out_card->list.pcards[0].card, &out_card->vcard))
 		{
-			MSG_OUT("player [%s] out a card %s\n", get_game_player(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
+			MSG_OUT("玩家【%s】打出牌 %s\n", get_game_player(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
 		}
 		else
 		{
@@ -220,7 +220,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				strcat(buf2, card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 			}
 
-			MSG_OUT("player [%s] out %d cards %s as a card %s\n", get_game_player(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
+			MSG_OUT("玩家【%s】将[%d]张牌 %s 当作 %s 打出\n", get_game_player(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
@@ -530,7 +530,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		out_card.list.pcards[0] = stCard[0];
 		out_card.list.num = 1;
-		out_card.vcard = pEvent->out_card->list.pcards[0].card;
+		out_card.vcard = out_card.list.pcards[0].card;
 		out_card.trigger = pGame->cur_player;
 		out_card.supply = pGame->cur_player;
 
@@ -816,7 +816,7 @@ static RESULT post_passive_out_card(GameContext* pGame, GameEventContext* pParen
 
 
 
-RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int target, OutCardPattern* out_pattern, const char* alter_text)
+static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int target, OutCardPattern* out_pattern, const char* alter_text)
 {
 	RESULT  ret;
 	GameEventContext event;
@@ -888,6 +888,16 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	GameEventContext  event;
 	RESULT ret;
 	int n;
+
+	if(pGame == NULL || pParentEvent == NULL)
+	{
+		if(L) {
+			luaL_error(L, "game_passive_out: invalid null param");
+		} else {
+			MSG_OUT("game_passive_out: invalid null param\n");
+		}
+		return R_E_PARAM;
+	}
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
@@ -984,6 +994,16 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	GameEventContext  event;
 	PatternOut   pattern_out;
 	RESULT ret;
+
+	if(pGame == NULL || pParentEvent == NULL)
+	{
+		if(L) {
+			luaL_error(L, "game_supply_card: invalid null param");
+		} else {
+			MSG_OUT("game_supply_card: invalid null param\n");
+		}
+		return R_E_PARAM;
+	}
 
 
 	if(!IS_PLAYER_VALID(pGame, player))

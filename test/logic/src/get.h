@@ -21,7 +21,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 // tolua_begin
-RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int player, int num);
+RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num);
 
 // tolua_end
 

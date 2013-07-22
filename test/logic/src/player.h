@@ -134,7 +134,6 @@ RESULT player_add_judge_card(Player* pPlayer, Card* pCard);
 RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* pos);
 
 
-
 // tolua_begin
 // {{
 
