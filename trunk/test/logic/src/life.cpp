@@ -49,9 +49,9 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	pPlayer->cur_life += stChgLife.delta;
 
 	if(stChgLife.delta < 0)
-		MSG_OUT("[%s] lost %d life, cur life is %d/%d\n", pPlayer->name, -stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
+		MSG_OUT("【%s】失去[%d]点体力, 当前体力为: %d/%d。\n", pPlayer->name, -stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
 	else
-		MSG_OUT("[%s] add %d life, cur life is %d/%d\n", pPlayer->name, stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
+		MSG_OUT("【%s】回复[%d]点体力, 当前体力为: %d/%d。\n", pPlayer->name, stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
 
 	if(pPlayer->cur_life > pPlayer->max_life)
 	{

@@ -68,11 +68,17 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 		if(ret != R_SUCC)
 			return ret;
 
-		if(idcnt == -100)
+		if(t == -100)
 			return R_CANCEL;
 
 
 		pTarget = get_game_player(pGame, t);
+
+		if(pTarget == NULL)
+		{
+			MSG_OUT("error select target return : %d\n", t);
+			return R_E_FAIL;
+		}
 
 
 		// can set target?
@@ -83,7 +89,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 		if(event.result == R_CANCEL)
 		{
 			// cannot select this player as target
-			MSG_OUT("The selected role cannot be as a target, please select another!\n");
+			MSG_OUT("你选择的角色不能成为目标, 请重新选择!\n");
 			continue;
 		}
 
@@ -110,7 +116,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			if(dis.base + dis.inc < dis.dis)
 			{
 				// Attack range less the distance to taget
-				MSG_OUT("The selected role is out of your attack range, please select another!\n");
+				MSG_OUT("你选择的角色不在你的攻击范围内, 请重新选择!\n");
 				continue;
 			}
 		}

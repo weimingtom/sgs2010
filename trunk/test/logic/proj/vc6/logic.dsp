@@ -87,58 +87,6 @@ LINK32=link.exe
 # Begin Group "src"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Group "hero_impl"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_cacao.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_guanyu.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_impl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_liubei.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_luxun.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_machao.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_sunquan.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_sunshangxiang.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_xiahoudun.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_zhangfei.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_zhangliao.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\hero_impl\hero_zhaoyu.cpp
-# End Source File
-# End Group
 # Begin Source File
 
 SOURCE=..\..\src\card.cpp

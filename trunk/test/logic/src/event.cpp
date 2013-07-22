@@ -17,6 +17,23 @@
 
 // end lua interface implements
 
+static RESULT call_player_global_event(GameContext* pGame, GameEventContext* pEvent, int player)
+{
+	RESULT ret = R_DEF;
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "call_player_event");	
+	tolua_pushusertype(L, pGame, "GameContext");
+	tolua_pushusertype(L, pEvent, "GameEventContext");
+	tolua_pushnumber(L, player);
+	//tolua_pushusertype(L, pos_card, "PosCard");
+	lua_call(L, 3, 1);
+	if(lua_isnumber(L, -1))
+	{
+		ret = (RESULT)lua_tointeger(L, -1);
+	}
+	lua_pop(L, 1);
+	return ret;
+}
 
 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
@@ -39,10 +56,9 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 }
 
 
-
-RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player)
+static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use)
 {
-	// check player skill
+	// check player skills
 	Player* pPlayer;
 	//const HeroConfig* pHero;
 	//const HeroSkill* pSkill;
@@ -55,6 +71,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	CANUSE  cu;
 	int   may_skills = 0;
 	int   may_cards = 0;
+	int   use_cnt = 0;
 	
 	pPlayer = get_game_player(pGame, player);
 
@@ -77,13 +94,17 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 				if(cu == USE_AUTO)
 				{
-					//(*pSkill->use)(pGame, pEvent, player);
-					call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
-					if(pEvent->block == YES)
+					if(auto_use)
 					{
-						if(pEvent->result == R_CANCEL)
-							return R_CANCEL;
-						return R_SUCC;
+						use_cnt++;
+						//(*pSkill->use)(pGame, pEvent, player);
+						call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+						if(pEvent->block == YES)
+						{
+							//if(pEvent->result == R_CANCEL)
+							//	return R_CANCEL;
+							return R_BACK;
+						}
 					}
 				}
 				else if(cu == USE_MANUAL)
@@ -137,12 +158,16 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 				cu = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
 				if(cu == USE_AUTO)
 				{
-					call_card_event(pos_card.card.id, pGame, pEvent, player);
-					if(pEvent->block == YES)
+					if(auto_use)
 					{
-						if(pEvent->result == R_CANCEL)
-							return R_CANCEL;
-						return R_SUCC;
+						use_cnt++;
+						call_card_event(pos_card.card.id, pGame, pEvent, player);
+						if(pEvent->block == YES)
+						{
+							//if(pEvent->result == R_CANCEL)
+							//	return R_CANCEL;
+							return R_BACK;
+						}
 					}
 				}
 				else if(cu == USE_MANUAL)
@@ -153,11 +178,53 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 		}
 	}
 
-	if(may_skills > 0 || may_cards > 0)
+	if(auto_use)
+	{
+		if(use_cnt > 0)
+			return R_DEF;
+	}
+
+	if(may_cards > 0 || may_skills > 0)
+	{
+		return R_SUCC;
+	}
+	else
+	{
+		return R_BACK;
+	}
+}
+
+
+RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player)
+{
+	RESULT ret;
+
+	ret = call_player_global_event(pGame, pEvent, player);
+
+	if(pEvent->block == YES)
+	{
+		//if(pEvent->result == R_CANCEL)
+		//	return R_CANCEL;
+		return R_BACK;
+	}
+
+	// auto use card and skills
+	ret = check_player_event(pGame, pEvent, player, 1);
+
+	if(ret == R_BACK)
+		return R_BACK;
+
+	if(ret == R_DEF)
+	{
+		ret = check_player_event(pGame, pEvent, player, 0);
+	}
+
+
+	while(ret == R_SUCC)
 	{
 		set_game_cur_player(pGame, player);
-		cmd_loop(pGame, pEvent, "please use skill or out card:");
-		if()
+		cmd_loop(pGame, pEvent, "请出一张牌或者发动技能:");
+		ret = check_player_event(pGame, pEvent, player, 0);
 	}
 
 	return R_SUCC;

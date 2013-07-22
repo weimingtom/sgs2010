@@ -96,7 +96,7 @@ RESULT set_game_cur_player(GameContext* pGame, int player)
 	if(player != pGame->cur_player)
 	{
 		pGame->cur_player = player;
-		MSG_OUT("the current player is set to [%s]\n", CUR_PLAYER(pGame)->name);
+		MSG_OUT("当前玩家切换为【%s】\n", CUR_PLAYER(pGame)->name);
 	}
 
 	return R_SUCC;

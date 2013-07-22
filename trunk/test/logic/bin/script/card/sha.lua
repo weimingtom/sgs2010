@@ -16,6 +16,21 @@
 
 import "../global/reg.lua";
 
+
+add_player_event(
+	GameEvent_RoundBegin, 
+	function(game, event, player)
+		if(event.trigger == player) then
+			local p = get_game_player(game, player);
+			-- reset the sha out counter
+			message('reset sha counter for ['..p.name..']')
+			p.params[0] = 0;
+		end
+		return R_DEF;
+	end
+);
+
+
 reg_card {
 	sid = "sha",
 	name="ɱ",
@@ -41,12 +56,6 @@ reg_card {
 	},
 	
 	event = {
-		[GameEvent_RoundBegin] = function(cfg, game, event, player)
-			local p = get_game_player(game, player);
-			-- reset the sha out counter
-			p.params[0] = 0;
-			return R_DEF;
-		end,
 	
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- select target

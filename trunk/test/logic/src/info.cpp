@@ -28,9 +28,9 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	p = CUR_PLAYER(pGame);
 	player = pGame->cur_player;
 	// round info
-	MSG_OUT("回合【%d】,玩家【%s】,阶段【%s】\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
+	MSG_OUT("回合[%d],玩家【%s】,阶段【%s】\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 	// base info
-	MSG_OUT("当前玩家: (%d) 【%s】, %s, 体力: %d/%d\n", pGame->cur_player, p->name, player_id_str(p->id), p->cur_life, p->max_life);
+	MSG_OUT("当前玩家: [%d]【%s】, %s, 体力: %d/%d\n", pGame->cur_player, p->name, player_id_str(p->id), p->cur_life, p->max_life);
 	// hand cards
 	MSG_OUT("手牌 (共%d张):\n",  p->hand_card_num);
 	for(n = 0; n < p->hand_card_num; n++)

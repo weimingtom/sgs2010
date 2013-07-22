@@ -54,7 +54,7 @@ local function bgz_use(cfg, game, event, player)
 	else
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 		-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-		local ret = game_passive_out(game, event.parent, player, event.target, 'hf:{shan}', alter);
+		local ret = game_passive_out(game, event.parent_event, player, event.target, 'hf:{shan}', alter);
 		event.result = ret;
 		event.block = YES;
 		return R_BACK;
