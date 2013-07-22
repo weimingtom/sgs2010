@@ -157,6 +157,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	{
 		set_game_cur_player(pGame, player);
 		cmd_loop(pGame, pEvent, "please use skill or out card:");
+		if()
 	}
 
 	return R_SUCC;

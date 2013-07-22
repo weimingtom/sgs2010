@@ -56,8 +56,9 @@ reg_card {
 				"请为【"..cfg.name.."】指定一个目标:", target);
 			if(ret == R_SUCC) then
 				event.out_card.target = target;
+				return R_SUCC;
 			end
-			return ret;
+			return R_CANCEL;
 		end,
 		
 		[GameEvent_OutCard] = function(cfg, game, event, player)
@@ -69,16 +70,16 @@ reg_card {
 			ret = game_passive_out(game, event, event.target, player, "h:{shan}",
 				"请出一张【"..card_sid2name('shan').."】:");
 
-			if(ret ~= R_SUCC) then
-				return R_SUCC;
+			if(ret == R_SUCC) then
+				return R_CANCEL;
 			end
 
-			return R_CANCEL;
+			return R_SUCC;
 		end,
 		
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- lost life( from player, out card 'sha', skill 0 )
-			game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
+			return game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
 		end,
 	},
 };

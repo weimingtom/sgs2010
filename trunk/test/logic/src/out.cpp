@@ -332,17 +332,17 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	RESULT    ret;
-	OutCard  out_card;
+	//OutCard  out_card;
 	GameEventContext  stEvent;
 
-	ST_ZERO(out_card);
+	//ST_ZERO(out_card);
 
 	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, INVALID_PLAYER, pEvent);
-	stEvent.out_card = &out_card;
+	//stEvent.out_card = &out_card;
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &stEvent, "please out a card, or use a skill:");
+	ret = cmd_loop(pGame, &stEvent, "请出一张牌或者发动技能:");
 
 	CHECK_RET(ret, ret);
 
@@ -350,9 +350,6 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 		return stEvent.result;
 
 	// 
-
-	game_real_out_card(pGame, pEvent, player, &out_card);
-
 	return R_SUCC;
 }
 
@@ -367,61 +364,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	int n;
 
 
-	if(pEvent->id == GameEvent_RoundOutCard)
-	{
-		// must out one card
-		if(num != 1)
-		{
-			MSG_OUT("only can out one card!\n");
-			return R_E_PARAM;
-		}
-
-		// any hand card , can check out out
-
-		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[0], &stCard[0].where, &stCard[0].pos))
-		{
-			MSG_OUT("input card idx [%d] is error!\n", idx[0]);
-			return R_E_PARAM;
-		}
-
-		if(stCard[0].where != CardWhere_PlayerHand)
-		{
-			MSG_OUT("only can out hand card!\n");
-			return R_E_PARAM;
-		}
-		
-		// get card
-		//pCard = PLAYER_HANDCARD(CUR_PLAYER(pGame), pos);
-		get_player_card(pPlayer, stCard[0].where, stCard[0].pos, &stCard[0].card);
-
-		// check can out?
-		// const CardConfig* pCardConfig = get_card_config(stCard[0].id);
-
-
-		//if(pCardConfig == NULL || pCardConfig->check == NULL
-		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->cur_player))
-		if(YES != call_card_can_out(stCard[0].card.id, pGame, pEvent, pGame->cur_player, &stCard[0]))
-		{
-			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0].card, buffer, sizeof(buffer)));
-			return R_E_PARAM;
-		}
-
-		set_player_card_flag(pPlayer, stCard[0].where, stCard[0].pos, CardFlag_PrepareOut);
-
-		pEvent->out_card->list.pcards[0] = stCard[0];
-		pEvent->out_card->list.num = 1;
-		pEvent->out_card->vcard = pEvent->out_card->list.pcards[0].card;
-		pEvent->out_card->trigger = pGame->cur_player;
-		pEvent->out_card->supply = pGame->cur_player;
-
-
-		pEvent->result = R_SUCC;
-		pEvent->block = YES;
-
-		return R_BACK;
-
-	}
-	else if(pEvent->id == GameEvent_PassiveOutCard)
+	if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		// check out pattern
 		if(num != pEvent->pattern_out->pattern.num)
@@ -542,6 +485,64 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		return R_BACK;
 
 	}
+	else /*	if(pEvent->id == GameEvent_RoundOutCard) */  // in any event can out is allowed
+	{
+		// must out one card
+		if(num != 1)
+		{
+			MSG_OUT("only can out one card!\n");
+			return R_E_PARAM;
+		}
+
+		// any hand card , can check out out
+
+		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[0], &stCard[0].where, &stCard[0].pos))
+		{
+			MSG_OUT("input card idx [%d] is error!\n", idx[0]);
+			return R_E_PARAM;
+		}
+
+		if(stCard[0].where != CardWhere_PlayerHand)
+		{
+			MSG_OUT("only can out hand card!\n");
+			return R_E_PARAM;
+		}
+
+		// get card
+		//pCard = PLAYER_HANDCARD(CUR_PLAYER(pGame), pos);
+		get_player_card(pPlayer, stCard[0].where, stCard[0].pos, &stCard[0].card);
+
+		// check can out?
+		// const CardConfig* pCardConfig = get_card_config(stCard[0].id);
+
+
+		//if(pCardConfig == NULL || pCardConfig->check == NULL
+		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->cur_player))
+		if(YES != call_card_can_out(stCard[0].card.id, pGame, pEvent, pGame->cur_player, &stCard[0]))
+		{
+			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0].card, buffer, sizeof(buffer)));
+			return R_E_PARAM;
+		}
+
+		set_player_card_flag(pPlayer, stCard[0].where, stCard[0].pos, CardFlag_PrepareOut);
+
+		OutCard   out_card;
+
+		out_card.list.pcards[0] = stCard[0];
+		out_card.list.num = 1;
+		out_card.vcard = pEvent->out_card->list.pcards[0].card;
+		out_card.trigger = pGame->cur_player;
+		out_card.supply = pGame->cur_player;
+
+		game_real_out_card(pGame, pEvent, pGame->cur_player, &out_card);
+
+
+
+		//pEvent->result = R_SUCC;
+		//pEvent->block = YES;
+
+		return R_BACK;
+	}
 
 	// other event can not out card
 	return R_E_STATUS;
@@ -551,18 +552,19 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 {
-	if(pEvent->id == GameEvent_RoundOutCard)
-	{
-
-		pEvent->result = R_CANCEL;
-		return R_BACK;
-	}
-	else if(pEvent->id == GameEvent_PassiveOutCard)
+	
+	if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		pEvent->result = R_CANCEL;
 		return R_BACK;
 	}
 	else if(pEvent->id == GameEvent_SupplyCard)
+	{
+
+		pEvent->result = R_CANCEL;
+		return R_BACK;
+	}
+	else /* if(pEvent->id == GameEvent_RoundOutCard) */ // out card in any status is allowed
 	{
 
 		pEvent->result = R_CANCEL;

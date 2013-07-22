@@ -5,22 +5,6 @@
 #include "event.h"
 
 
-static const char* game_status_str(Status s)
-{
-	switch(s)
-	{
-	case Status_None: return  "不在游戏中";
-	case Status_NewGame: return  "开始新游戏";
-	case Status_Round_Begin: return  "回合开始阶段";
-	case Status_Round_Judge: return  "判定阶段";
-	case Status_Round_Get: return  "摸牌阶段";
-	case Status_Round_Out: return  "出牌阶段";
-	case Status_Round_Discard: return  "弃牌阶段";
-	case Status_Round_End: return  "回合结束阶段";
-	default: return "";
-	}
-}
-
 
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 {
