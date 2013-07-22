@@ -102,6 +102,14 @@ typedef enum _YESNO
 	YES = 1,
 } YESNO;
 
+typedef enum _CANUSE
+{
+	USE_CANNOT = 0,
+	USE_MANUAL = 1,
+	USE_AUTO = 2,
+
+} CANUSE;
+
 typedef enum _RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop

@@ -127,7 +127,7 @@ char* hero_skill_name(HeroID id, int index, char* buf, int buflen);
 int hero_skill_flag(HeroID id, int index);
 
 
-YESNO call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
+CANUSE call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
 RESULT call_hero_skill_event(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
 
 

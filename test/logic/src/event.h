@@ -203,6 +203,10 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 // tolua_end
 
 
+// wrapped function from lua
+char* get_event_str(GameEvent eid, char* buf, int buflen);
+
+
 #ifdef __cplusplus
 }
 #endif

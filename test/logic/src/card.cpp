@@ -669,9 +669,9 @@ YESNO  call_card_can_out(CardID  id, GameContext* pGame, GameEventContext* pEven
 }
 
 
-YESNO  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card)
+CANUSE  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card)
 {
-	YESNO ret = NO;
+	CANUSE ret = USE_CANNOT;
 	lua_State* L = get_game_script();
 	lua_getglobal(L, "call_card_can_use");	
 	tolua_pushnumber(L, id);
@@ -682,7 +682,7 @@ YESNO  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEven
 	lua_call(L, 5, 1);
 	if(lua_isnumber(L, -1))
 	{
-		ret = (YESNO)lua_tointeger(L, -1);
+		ret = (CANUSE)lua_tointeger(L, -1);
 	}
 	lua_pop(L, 1);
 	return ret;

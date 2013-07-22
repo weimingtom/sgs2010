@@ -13,17 +13,19 @@ extern "C" {
 #endif
 
 
-// tolua_begin
-
-#define MAX_CUR_DISCARD_NUM     32
-
-// tolua_end
 
 // foward  decalare
 typedef struct tagGameEventContext GameEventContext;
 typedef struct tagOutCard  OutCard;
 typedef struct tagPatternOut PatternOut;
 
+// tolua_begin
+
+#define MAX_CUR_DISCARD_NUM     32
+
+#define INVALID_PLAYER         -1
+
+// tolua_end
 
 // tolua_begin
 typedef enum _Status

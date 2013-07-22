@@ -82,8 +82,8 @@ const char* equip_idx_str(int idx)
 	{
 	case EquipIdx_Weapon: return "武器";
 	case EquipIdx_Armor: return "防具";
-	case EquipIdx_HorseInc: return "马(+1)";
-	case EquipIdx_HorseDec: return "马(-1)";
+	case EquipIdx_HorseInc: return "马+1";
+	case EquipIdx_HorseDec: return "马-1";
 	}
 	return "装备";
 }

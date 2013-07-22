@@ -44,7 +44,7 @@ RESULT game_first_getcard(GameContext* pGame)
 static RESULT  trigger_pergetcard_event(GameContext* pGame, GameEventContext* pEvent)
 {
 	GameEventContext  stEvent;
-	INIT_EVENT(&stEvent, GameEvent_PerGetCard, pGame->cur_player, 0, pEvent);
+	INIT_EVENT(&stEvent, GameEvent_PerGetCard, pGame->cur_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &stEvent);
 
 	return stEvent.result;
@@ -53,7 +53,7 @@ static RESULT  trigger_pergetcard_event(GameContext* pGame, GameEventContext* pE
 static RESULT  trigger_postgetcard_event(GameContext* pGame, GameEventContext* pEvent, PosCard* pos_card)
 {
 	GameEventContext  stEvent;
-	INIT_EVENT(&stEvent, GameEvent_PostGetCard, pGame->cur_player, 0, pEvent);
+	INIT_EVENT(&stEvent, GameEvent_PostGetCard, pGame->cur_player, INVALID_PLAYER, pEvent);
 	stEvent.pos_card = pos_card;
 
 	trigger_game_event(pGame, &stEvent);
@@ -127,7 +127,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 	stGetCard.num = num;
 
 	
-	INIT_EVENT(&event, GameEvent_RoundGetCard, player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_RoundGetCard, player, INVALID_PLAYER, pEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
@@ -154,7 +154,7 @@ RESULT game_passive_getcard(GameContext* pGame, GameEventContext* pEvent, int pl
 	stGetCard.num = num;
 
 
-	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);

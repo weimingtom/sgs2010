@@ -312,7 +312,7 @@ char* card_sid(CardID  id, char* buf, int buflen);
 char* card_name(CardID  id, char* buf, int buflen);
 char* card_desc(CardID  id, char* buf, int buflen);
 YESNO  call_card_can_out(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
-YESNO  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
+CANUSE  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
 RESULT  call_card_event(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 
 

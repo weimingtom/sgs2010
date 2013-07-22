@@ -108,7 +108,7 @@ end
 function get_card_name(id)
 
 	if (id == 0) then
-		return "‰ªªÊÑè";
+		return "»Œ“‚";
 	end
 
 	local cfg = card_list[id];
@@ -178,7 +178,7 @@ end
 function call_card_can_use(id, game, event, player, pos_card)
 	local cfg = card_list[id];
 	if(cfg == nil or cfg.can_use == nil or cfg.can_use[event.id] == nil) then
-		return NO;
+		return USE_CANNOT;
 	end
 	
 	return cfg.can_use[event.id](cfg, game, event, player, pos_card);
@@ -321,13 +321,13 @@ function call_hero_skill_can_use(id, index, game, event, player)
 	local cfg = hero_list[id];
 	
 	if(cfg == nil or cfg.skills == nil) then
-		return NO;
+		return USE_CANNOT;
 	end
 	
 	local skill = cfg.skills[index];
 	
 	if(skill == nil or skill.can_use == nil or skill.can_use[event.id] == nil) then
-		return NO;
+		return USE_CANNOT;
 	end
 	
 	return  skill.can_use[event.id](cfg, game, event, player);

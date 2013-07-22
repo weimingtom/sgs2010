@@ -28,7 +28,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	set_game_cur_player(pGame,player );
 
 
-	pPlayer = GAME_PLAYER(pGame, player);
+	pPlayer = get_game_player(pGame, player);
 	(void)pPlayer;
 
 	idbegin = self_select == YES ? 0 : 1;
@@ -37,7 +37,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	for(n = idbegin; n < pGame->player_count; n++)
 	{
 		t = (player + n) % pGame->player_count;
-		pTarget = GAME_PLAYER(pGame, t);
+		pTarget = get_game_player(pGame, t);
 		if(!IS_PLAYER_DEAD(pTarget))
 		{
 			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d", 
@@ -72,7 +72,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 			return R_CANCEL;
 
 
-		pTarget = GAME_PLAYER(pGame, t);
+		pTarget = get_game_player(pGame, t);
 
 
 		// can set target?

@@ -2,6 +2,7 @@
 #include "game.h"
 #include "info.h"
 #include "comm.h"
+#include "event.h"
 
 
 static const char* game_status_str(Status s)
@@ -25,11 +26,14 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n;
 	char buf[128];
+	int player;
 	Player* p;
 	//const HeroConfig*  pHero;
 	int  idx = 1;
 	int skill_num;
 	int skill_flag;
+	PosCard  pos_card;
+	int cu;
 
 	if(get_game_status(pGame) == Status_None)
 	{
@@ -38,34 +42,81 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 	p = CUR_PLAYER(pGame);
+	player = pGame->cur_player;
 	// round info
-	MSG_OUT("Round [%d] Playe [%s], Phase [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
+	MSG_OUT("回合【%d】,玩家【%s】,阶段【%s】\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 	// base info
-	MSG_OUT("Current Player: %d, %s, %s, life: %d/%d\n", pGame->cur_player, player_id_str(p->id), p->name, p->cur_life, p->max_life);
+	MSG_OUT("当前玩家: (%d) 【%s】, %s, 体力: %d/%d\n", pGame->cur_player, p->name, player_id_str(p->id), p->cur_life, p->max_life);
 	// hand cards
-	MSG_OUT("Hand cards (%d):\n",  p->hand_card_num);
+	MSG_OUT("手牌 (共%d张):\n",  p->hand_card_num);
 	for(n = 0; n < p->hand_card_num; n++)
 	{
+		pos_card.card = p->hand_cards[n];
+		pos_card.where = CardWhere_PlayerHand;
+		pos_card.pos = n;
+
+		if(pEvent->id == GameEvent_PassiveOutCard || pEvent->id == GameEvent_SupplyCard)
+		{
+			// 是否匹配
+			if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->pattern_out->pattern.where ) 
+				&& R_SUCC == card_match(&pos_card.card, sizeof(PosCard), 1, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+			{
+				cu = 1;
+			}
+			else
+			{
+				cu = 0;
+			}
+		}
+		else
+		{
+			cu = (YES == call_card_can_out(pos_card.card.id, pGame, pEvent, player, &pos_card));
+		}
+
 		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-		MSG_OUT("  (%d) %s;\n", idx++, card_str(&p->hand_cards[n], buf, sizeof(buf)));
+		MSG_OUT("%s [%d] %s;\n", cu ? "*":" ", idx++, card_str(&p->hand_cards[n], buf, sizeof(buf)));
 	}
 
 	// equiped cards
-	if(CARD_VALID(&p->equip_cards[EquipIdx_Weapon]))
-		MSG_OUT("Weapon    : (%d) %s\n", idx++, card_str(&p->equip_cards[EquipIdx_Weapon], buf, sizeof(buf)) );
-	if(CARD_VALID(&p->equip_cards[EquipIdx_Armor]))
-		MSG_OUT("Armor     : (%d) %s\n", idx++, card_str(&p->equip_cards[EquipIdx_Armor], buf, sizeof(buf)) );
-	if(CARD_VALID(&p->equip_cards[EquipIdx_HorseInc]))
-		MSG_OUT("Horse(+1) : (%d) %s\n", idx++, card_str(&p->equip_cards[EquipIdx_HorseInc], buf, sizeof(buf)) );
-	if(CARD_VALID(&p->equip_cards[EquipIdx_HorseDec]))
-		MSG_OUT("Horse(-1) : (%d) %s\n", idx++, card_str(&p->equip_cards[EquipIdx_HorseDec], buf, sizeof(buf)) );
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&p->equip_cards[n]))
+		{
+			pos_card.card = p->equip_cards[n];
+			pos_card.where = CardWhere_PlayerEquip;
+			pos_card.pos = n;
+
+			if(pEvent->id == GameEvent_PassiveOutCard || pEvent->id == GameEvent_SupplyCard)
+			{
+				// 是否匹配
+				if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->pattern_out->pattern.where ) 
+					&& card_match(&pos_card.card, sizeof(PosCard), 1, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+				{
+					cu = 1;
+				}
+				else
+				{
+					cu = 0;
+				}
+			}
+			else
+			{
+			//	cu = call_card_can_out(pos_card.card.id, pGame, pEvent, pGame->cur_player, &pos_card);
+				cu = 0;
+			}
+			MSG_OUT("%s :%s [%d] %s\n", equip_idx_str(n), cu ? "*":" ", idx++, card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+		}
+	}
 
 	// judgment cards
-	MSG_OUT("Judgment cards (%d):\n",  p->judgment_card_num);
-	for(n = 0; n < p->judgment_card_num; n++)
+	if(p->judgment_card_num > 0)
 	{
-		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-		MSG_OUT("  (%d) %s;\n", idx++, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
+		MSG_OUT("判定区(共%d张):\n",  p->judgment_card_num);
+		for(n = 0; n < p->judgment_card_num; n++)
+		{
+			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
+			MSG_OUT("  [%d] %s;\n", idx++, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
+		}
 	}
 
 	// skills
@@ -75,24 +126,32 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 	for(n = 1; n <= skill_num; n++)
 	{
+		cu = (USE_MANUAL == call_hero_skill_can_use(p->hero, n, pGame, pEvent, player));
 		skill_flag = hero_skill_flag(p->hero, n);
-		MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
+		MSG_OUT("%s 技能[%d]： 【%s】%s%s\n", cu ? "*":" ", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
 			(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
 	
 	}
 
-	/*
-	pHero = get_hero_config(p->hero);
-
-	if(pHero && pHero->skillNum > 0)
+	// equip skills
+	for(n = 0l; n < EquipIdx_Max; n++)
 	{
-		MSG_OUT("Hero Skills:\n");
-		for(n = 0; n < pHero->skillNum; n++)
+		if(CARD_VALID(&p->equip_cards[n]))
 		{
-			MSG_OUT(" skill (%d) %s: %s\n", n + 1, pHero->skills[n].name, pHero->skills[n].desc);
+			pos_card.card = p->equip_cards[n];
+			pos_card.where = CardWhere_PlayerEquip;
+			pos_card.pos = n;
+
+			cu = (USE_MANUAL == call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card));
+
+			if(cu)
+			{
+				MSG_OUT("%s 技能[%c]： 装备效果 - 【%s】\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)));
+			}
+
 		}
 	}
-	*/
+
 	return R_SUCC;
 }
 
@@ -110,28 +169,31 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 
 	pPlayer = &pGame->players[player];
 
-	MSG_OUT("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", player + 1,
+	MSG_OUT("  (%d) %s%s +%d 【%s】, %s, 体力: %d/%d, 手牌: %d\n", player + 1,
 		pGame->round_player == player ? "R":"-", pGame->cur_player == player  ? "C":"-",
 		game_player_dis(pGame, pGame->cur_player, player),
-		player_id_str( (player == pGame->cur_player || IS_PLAYER_SHOW(pPlayer) ) ? pPlayer->id : PlayerID_Unknown),
-		pPlayer->name, pPlayer->cur_life, pPlayer->max_life, pPlayer->hand_card_num);
+		pPlayer->name, player_id_str( (player == pGame->cur_player || IS_PLAYER_SHOW(pPlayer) ) ? pPlayer->id : PlayerID_Unknown),
+		pPlayer->cur_life, pPlayer->max_life, pPlayer->hand_card_num);
 
 	// equiped cards
-	if(CARD_VALID(&pPlayer->equip_cards[EquipIdx_Weapon]))
-		MSG_OUT("    Weapon : %s\n",  card_str(&pPlayer->equip_cards[EquipIdx_Weapon], buf, sizeof(buf)) );
-	if(CARD_VALID(&pPlayer->equip_cards[EquipIdx_Armor]))
-		MSG_OUT("    Armor : %s\n",  card_str(&pPlayer->equip_cards[EquipIdx_Armor], buf, sizeof(buf)) );
-	if(CARD_VALID(&pPlayer->equip_cards[EquipIdx_HorseInc]))
-		MSG_OUT("    Horse(+1) : %s\n", card_str(&pPlayer->equip_cards[EquipIdx_HorseInc], buf, sizeof(buf)) );
-	if(CARD_VALID(&pPlayer->equip_cards[EquipIdx_HorseDec]))
-		MSG_OUT("    Horse(-1) : %s\n",  card_str(&pPlayer->equip_cards[EquipIdx_HorseDec], buf, sizeof(buf)) );
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&pPlayer->equip_cards[n]))
+		{
+			MSG_OUT("    %s : %s\n",  equip_idx_str(n), card_str(&pPlayer->equip_cards[n], buf, sizeof(buf)) );
+		}
+	}
 
 	// judgment cards
-	//MSG_OUT("    Judgment cards (%d):\n",  pPlayer->judgment_card_num);
-	for(n = 0; n < pPlayer->judgment_card_num; n++)
+	if(pPlayer->judgment_card_num > 0)
 	{
-		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-		MSG_OUT("    Judgment cards: (%d) %s;\n", n+1, card_str(&pPlayer->judgment_cards[n], buf, sizeof(buf)));
+		MSG_OUT("判定区 (%d):\n",  pPlayer->judgment_card_num);
+		for(n = 0; n < pPlayer->judgment_card_num; n++)
+		{
+			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
+			MSG_OUT("    [%d] %s;\n", n+1, card_str(&pPlayer->judgment_cards[n], buf, sizeof(buf)));
+		}
+
 	}
 	return R_SUCC;
 }
@@ -152,7 +214,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 
 
 	// round info
-	MSG_OUT("Round [%d] Playe [%s], Phase [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
+	MSG_OUT("回合【%d】,玩家【%s】,阶段【%s】\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 
 	// all players
 	MSG_OUT("(*) %d players (%d+%d+%d+%d): \n", pGame->player_count, 1, pGame->minster_count, pGame->spy_count, pGame->mutineer_count);
@@ -164,30 +226,27 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 		if(IS_PLAYER_DEAD(p) )
 			continue;
 
-		MSG_OUT("  (%d) %s%s +%d %s, %s, life: %d/%d, hand cards: %d\n", k + 1,
+		MSG_OUT("  (%d) %s%s +%d 【%s】, %s, 体力: %d/%d, 手牌: %d\n", k + 1,
 			pGame->round_player == k ? "R":"-", pGame->cur_player == k ? "C":"-",
 			game_player_dis(pGame, pGame->cur_player, k),
-			player_id_str((k == pGame->cur_player || IS_PLAYER_SHOW(p) ) ? p->id : PlayerID_Unknown ),
-			p->name, p->cur_life, p->max_life, p->hand_card_num);
+			p->name, player_id_str((k == pGame->cur_player || IS_PLAYER_SHOW(p) ) ? p->id : PlayerID_Unknown ),
+			p->cur_life, p->max_life, p->hand_card_num);
 
 		// equiped cards
-		if(CARD_VALID(&p->equip_cards[EquipIdx_Weapon]))
-			MSG_OUT("    Weapon : %s\n",  card_str_def(&p->equip_cards[EquipIdx_Weapon], buf, sizeof(buf), "None") );
-		if(CARD_VALID(&p->equip_cards[EquipIdx_Armor]))
-			MSG_OUT("    Armor : %s\n",  card_str_def(&p->equip_cards[EquipIdx_Armor], buf, sizeof(buf), "None") );
-		if(CARD_VALID(&p->equip_cards[EquipIdx_HorseInc]))
-			MSG_OUT("    Horse(+1) : %s\n", card_str_def(&p->equip_cards[EquipIdx_HorseInc], buf, sizeof(buf), "None") );
-		if(CARD_VALID(&p->equip_cards[EquipIdx_HorseDec]))
-			MSG_OUT("    Horse(-1) : %s\n",  card_str_def(&p->equip_cards[EquipIdx_HorseDec], buf, sizeof(buf), "None") );
+		for(n = 0; n < EquipIdx_Max; n++)
+		{
+			if(CARD_VALID(&p->equip_cards[n]))
+				MSG_OUT("    %s : %s\n",  equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+		}
 
 		// judgment cards
 		if( p->judgment_card_num > 0)
 		{
-			MSG_OUT("    Judgment cards (%d):\n",  p->judgment_card_num);
+			MSG_OUT("    判定区 (%d):\n",  p->judgment_card_num);
 			for(n = 0; n < p->judgment_card_num; n++)
 			{
 				//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-				MSG_OUT("      (%d) %s;\n", n+1, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
+				MSG_OUT("      [%d] %s;\n", n+1, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
 			}
 		}
 	}
@@ -199,4 +258,28 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	// [RoleName] Passive Out: [(card str) (card str)] from [RoleName] As (card str) 
 	return R_SUCC;
 }
+
+RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent)
+{
+	int deep;
+	GameEventContext* pe;
+	char   buf[128];
+
+	pe = pEvent;
+
+	for(deep = 0; pe != NULL; deep++)
+	{
+		get_event_str(pe->id, buf, sizeof(buf));
+		Player* ptr = get_game_player(pGame, pe->trigger);
+		Player* pta = get_game_player(pGame, pe->target);
+
+		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无" );
+
+
+		pe = pe->parent_event;
+	}
+	return R_SUCC;
+
+}
+
 
