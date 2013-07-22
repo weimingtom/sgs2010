@@ -9,6 +9,7 @@
 #include "card.h"
 #include "hero.h"
 #include "cmd.h"
+#include "script.h"
 
 
 // begin lua interface implements
@@ -25,7 +26,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 
 	for(n = 0; n < pGame->player_count; n++)
 	{
-		if(!IS_PLAYER_DEAD(GAME_PLAYER(pGame, m)))
+		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
 		{
 			trigger_player_event(pGame, pEvent, m);
 			if(pEvent->block == YES)
@@ -47,14 +48,15 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	//const HeroSkill* pSkill;
 	// const CardConfig* pCardConfig;
 	int skill_num;
-	int skill_flag;
+	//int skill_flag;
 	PosCard    pos_card;
 	int  n;
-	YESNO ret;
+	YESNO   ret;
+	CANUSE  cu;
 	int   may_skills = 0;
 	int   may_cards = 0;
 	
-	pPlayer = GAME_PLAYER(pGame, player);
+	pPlayer = get_game_player(pGame, player);
 
 	//pHero = get_hero_config(pPlayer->hero);
 
@@ -70,10 +72,10 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 			//if(pSkill->check)
 			{
 				//ret = (*pSkill->check)(pGame, pEvent, player);
-				ret = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
-				skill_flag = hero_skill_flag(pPlayer->hero, n);
+				cu = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
+				//skill_flag = hero_skill_flag(pPlayer->hero, n);
 
-				if(ret == YES && (skill_flag & SkillFlag_Passive) == SkillFlag_Passive)
+				if(cu == USE_AUTO)
 				{
 					//(*pSkill->use)(pGame, pEvent, player);
 					call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
@@ -84,7 +86,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 						return R_SUCC;
 					}
 				}
-				else if(ret == YES)
+				else if(cu == USE_MANUAL)
 				{
 					may_skills++;
 				}
@@ -132,9 +134,21 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 				pos_card.card = pPlayer->equip_cards[n];
 				pos_card.where = CardWhere_PlayerEquip;
 				pos_card.pos = n;
-				ret = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
-				if(ret == YES)
+				cu = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
+				if(cu == USE_AUTO)
+				{
+					call_card_event(pos_card.card.id, pGame, pEvent, player);
+					if(pEvent->block == YES)
+					{
+						if(pEvent->result == R_CANCEL)
+							return R_CANCEL;
+						return R_SUCC;
+					}
+				}
+				else if(cu == USE_MANUAL)
+				{
 					may_skills++;
+				}
 			}
 		}
 	}
@@ -146,5 +160,24 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	}
 
 	return R_SUCC;
+}
+
+char* get_event_str(GameEvent eid, char* buf, int buflen)
+{
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "get_event_str");
+	lua_pushnumber(L, eid);	
+	lua_call(L, 1, 1);
+	if(lua_isstring(L, -1))
+	{
+		strncpy(buf, lua_tostring(L, -1), buflen);
+	}
+	else
+	{
+		buf[0] = 0;
+	}
+	lua_pop(L, 1);
+	return buf;
+
 }
 

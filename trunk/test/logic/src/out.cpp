@@ -27,7 +27,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 
 	//if(pCardConfig->out)
 	{
-		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, 0, pParentEvent);
+		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
 		stEvent.out_card = out_card;
 		out_card->target = -1;  // for require fill the target
 
@@ -117,7 +117,7 @@ static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, 
 static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
 {
 	GameEventContext   event;
-	INIT_EVENT(&event, GameEvent_PerLostCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerLostCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = pos_card;
 
 	trigger_game_event(pGame, &event);
@@ -128,7 +128,7 @@ static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, 
 static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
 {
 	GameEventContext   event;
-	INIT_EVENT(&event, GameEvent_PostLostCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PostLostCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = pos_card;
 	
 	trigger_game_event(pGame, &event);
@@ -199,7 +199,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 	char buf2[512];
 	PosCard   stCard;
 	//CardFlag  f;
-	Player* pPlayer = GAME_PLAYER(pGame, out_card->supply);
+	Player* pPlayer = get_game_player(pGame, out_card->supply);
 	
 	if(out_card->list.num > 0)
 	{
@@ -210,7 +210,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 		// log
 		if(out_card->list.num == 1 && CARD_EQUAL(&out_card->list.pcards[0].card, &out_card->vcard))
 		{
-			MSG_OUT("player [%s] out a card %s\n", GAME_PLAYER(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
+			MSG_OUT("player [%s] out a card %s\n", get_game_player(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
 		}
 		else
 		{
@@ -220,7 +220,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				strcat(buf2, card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 			}
 
-			MSG_OUT("player [%s] out %d cards %s as a card %s\n", GAME_PLAYER(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
+			MSG_OUT("player [%s] out %d cards %s as a card %s\n", get_game_player(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
 		}
 
 		// real remove from supply
@@ -337,7 +337,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	ST_ZERO(out_card);
 
-	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, 0, pEvent);
+	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, INVALID_PLAYER, pEvent);
 	stEvent.out_card = &out_card;
 
 	set_game_cur_player(pGame, player);

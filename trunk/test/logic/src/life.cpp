@@ -35,7 +35,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	stChgLife.src_skill = src_skill;
 
 	// event per change life
-	INIT_EVENT(&event, GameEvent_PerChangeLife, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerChangeLife, player, INVALID_PLAYER, pParentEvent);
 	event.change_life = &stChgLife;
 
 	trigger_game_event(pGame, &event);
@@ -63,7 +63,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	if(pPlayer->cur_life <= 0)
 	{
 		// event perdead ?
-		INIT_EVENT(&event, GameEvent_PerDead, player, 0, pParentEvent);
+		INIT_EVENT(&event, GameEvent_PerDead, player, INVALID_PLAYER, pParentEvent);
 		trigger_game_event(pGame, &event);
 
 		// event dead
@@ -76,12 +76,12 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 			// check the game over?
 			game_check_gameover(pGame, player);
 
-			INIT_EVENT(&event, GameEvent_Dead, player, 0, pParentEvent);
+			INIT_EVENT(&event, GameEvent_Dead, player, INVALID_PLAYER, pParentEvent);
 			trigger_game_event(pGame, &event);
 		}
 	}
 
-	INIT_EVENT(&event, GameEvent_PostChangeLife, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PostChangeLife, player, INVALID_PLAYER, pParentEvent);
 	event.change_life = &stChgLife;
 
 	trigger_game_event(pGame, &event);

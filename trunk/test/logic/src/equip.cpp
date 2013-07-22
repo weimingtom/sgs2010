@@ -44,7 +44,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	}
 
 
-	pPlayer = GAME_PLAYER(pGame, player);
+	pPlayer = get_game_player(pGame, player);
 
 	ST_ZERO(equip_cards);
 
@@ -69,7 +69,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 
 	// add event per equip card
 
-	INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerEquipCard, player, INVALID_PLAYER, pParentEvent);
 	event.equip_card = &equip_cards;
 
 	trigger_game_event(pGame, &event);
@@ -100,7 +100,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 
 		// add event post equip card
 
-		INIT_EVENT(&event, GameEvent_PerEquipCard, player, 0, pParentEvent);
+		INIT_EVENT(&event, GameEvent_PerEquipCard, player, INVALID_PLAYER, pParentEvent);
 		event.equip_card = &equip_cards;
 
 		trigger_game_event(pGame, &event);

@@ -44,7 +44,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	ST_ZERO(stCard);
 
 	// GameEvent_PerDecideCard
-	INIT_EVENT(&event, GameEvent_PerDecideCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerDecideCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
@@ -71,7 +71,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	// some skill can out a card instead the current decide card. do it in GameEvent_PerDecideCardCalc event
 
 	// GameEvent_PerDecideCardCalc 
-	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 
@@ -82,7 +82,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	// some skill can get the decide card after it be calculated.
 	// GameEvent_PostDecideCard
-	INIT_EVENT(&event, GameEvent_PostDecideCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PostDecideCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
 

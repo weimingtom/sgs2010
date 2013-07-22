@@ -25,9 +25,7 @@ local function chitu_equip(cfg, game, event, player)
 end
 
 local function chitu_calc_dis(cfg, game, event, player)
-	if(player == event.trigger ) then
-		event.attack_dis.dis = event.attack_dis.dis - 1;
-	end
+	event.attack_dis.dis = event.attack_dis.dis - 1;
 	return R_DEF;
 end
 
@@ -49,6 +47,12 @@ reg_card {
 	
 	-- cannot be used directly
 	can_use = {
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_AUTO;
+			end
+			return USE_CANNOT;
+		end
 	},
 	
 	

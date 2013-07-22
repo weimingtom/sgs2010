@@ -209,7 +209,7 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 	}
 
 	// new game
-	INIT_EVENT(&event, GameEvent_NewGame, 0, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_NewGame, INVALID_PLAYER, INVALID_PLAYER, pEvent);
 	event.new_game_config = pConfig;
 
 
@@ -241,7 +241,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game global info
 	{
-		MSG_OUT("current event: %d\n", pEvent->id);
+		game_event_info(pContext, pEvent);
 	}
 	else if(!strcmp(argv[1], "game") || !strcmp(argv[1], "g")) // game global info
 	{
@@ -611,7 +611,7 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 	
 	// load game
 
-	INIT_EVENT(&event, GameEvent_LoadGame, 0,0, pEvent);
+	INIT_EVENT(&event, GameEvent_LoadGame, INVALID_PLAYER , INVALID_PLAYER, pEvent);
 	event.file_name = argv[1];
 
 	//ret = game_load(pContext, argv[1]);

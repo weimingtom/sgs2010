@@ -256,9 +256,9 @@ int hero_skill_flag(HeroID id, int index)
 }
 
 
-YESNO call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player)
+CANUSE call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player)
 {
-	YESNO ret = NO;
+	CANUSE ret = USE_CANNOT;
 	lua_State* L = get_game_script();
 	lua_getglobal(L, "call_hero_skill_can_use");	
 	tolua_pushnumber(L, id);
@@ -269,7 +269,7 @@ YESNO call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEven
 	lua_call(L, 5, 1);
 	if(lua_isnumber(L, -1))
 	{
-		ret = (YESNO)lua_tointeger(L, -1);
+		ret = (CANUSE)lua_tointeger(L, -1);
 	}
 	lua_pop(L, 1);
 	return ret;

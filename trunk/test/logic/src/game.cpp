@@ -305,7 +305,7 @@ static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("the round [%d] is start, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->round_player, INVALID_PLAYER, pEvent);
 
 
 	trigger_game_event(pGame, &event);
@@ -320,7 +320,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("enter the round [%d]  judgment phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 
 	// is ot not skip this round step ?
@@ -344,7 +344,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 		//if(pCardConfig)
 		{
-			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->round_player, 0, pEvent);
+			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 			event.pos_card = &stCard;
 			trigger_game_event(pGame, &event);
 
@@ -352,13 +352,13 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 			{
 				//if(pCardConfig->out != NULL)
 				{
-					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, 0, pEvent);
+					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 					event.pos_card = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
 					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
 				}
 
-				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, 0, pEvent);
+				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 				event.pos_card = &stCard;
 				trigger_game_event(pGame, &event);
 
@@ -369,7 +369,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 			{
 				//if(pCardConfig->out != NULL)
 				{
-					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, 0, pEvent);
+					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 					event.pos_card = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
 					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
@@ -389,7 +389,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		game_flush_discard_cur(pGame);
 	}
 
-	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 
 	return R_SUCC;
@@ -405,7 +405,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 
 
 	num.num = 2;  // in get round init to get 2 card 
-	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
 	event.get_card = &num;
 	trigger_game_event(pGame, &event);
 
@@ -423,7 +423,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	game_flush_discard_cur(pGame);
 
 
-	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);
@@ -437,7 +437,7 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 
 	MSG_OUT("enter the round [%d]  out card phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
-	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
@@ -453,7 +453,7 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 		game_flush_discard_cur(pGame);
 	}
 
-	INIT_EVENT(&event, GameEvent_PostRoundOut, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PostRoundOut, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
@@ -467,7 +467,7 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	MSG_OUT("enter the round [%d]  discard card phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	// trigger round discard event
-	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
@@ -483,7 +483,7 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 
 
 	// wait cmd_loop discard cmd execute
-	INIT_EVENT(&event, GameEvent_PostRoundDiscard, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_PostRoundDiscard, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
@@ -498,7 +498,7 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("the round [%d] is finish, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 
-	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->round_player, 0, pEvent);
+	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->round_player, INVALID_PLAYER, pEvent);
 
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
@@ -866,8 +866,10 @@ static void game_save_cardstack(CardStack* pCardStack, FILE* file, int tabs)
 static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 {
 	int n;
+	char sid[128];
+
 	fprintf_tab(file, tabs, "id = %s,\n", player_id_id_str(pPlayer->id));
-	fprintf_tab(file, tabs, "hero = %d,\n", pPlayer->hero);
+	fprintf_tab(file, tabs, "hero = \'%s\',\n", hero_sid(pPlayer->hero, sid, sizeof(sid)));
 	fprintf_tab(file, tabs, "max_life = %d,\n", pPlayer->max_life);
 	fprintf_tab(file, tabs, "cur_life = %d,\n", pPlayer->cur_life);
 	fprintf_tab(file, tabs, "name = \'%s\',\n", pPlayer->name);
@@ -1054,7 +1056,10 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	int n;
 
 	LOAD_INT_CAST(pPlayer, id, L, PlayerID);
-	LOAD_INT_CAST(pPlayer, hero, L, HeroID);
+	//LOAD_INT_CAST(pPlayer, hero, L, HeroID);
+	lua_getfield(L, -1, "hero");
+	pPlayer->hero = hero_sid2id(lua_tostring(L, -1));
+	lua_pop(L, 1);
 	LOAD_INT(pPlayer, max_life, L);
 	LOAD_INT(pPlayer, cur_life, L);
 	LOAD_STRING(pPlayer, name, L);

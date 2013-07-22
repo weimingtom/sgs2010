@@ -47,9 +47,9 @@ reg_hero({
 			can_use = {
 				[GameEvent_PostChangeLife] = function(self, game, event, player)
 					if(event.change_life.delta < 0 and event.change_life.src_cards.list.num > 0) then
-						return YES;
+						return USE_MANUAL;
 					end
-					return NO;
+					return USE_CANNOT;
 				end,
 			},
 			event = {
@@ -67,9 +67,9 @@ reg_hero({
 					-- 当需要出一张闪的时候
 					if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
 						get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
-						return YES;
+						return USE_MANUAL;
 					end
-					return NO;
+					return USE_CANNOT;
 				end,
 			},
 			event = {

@@ -21,9 +21,9 @@ local function bgz_can_use(cfg, game, event, player, pos_card)
 	-- 当需要出一张闪的时候
 	if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
 		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
-		return YES;
+		return USE_MANUAL;
 	end
-	return NO;
+	return USE_CANNOT;
 end
 
 local function bgz_equip(cfg, game, event, player)

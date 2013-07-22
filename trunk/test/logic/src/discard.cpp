@@ -73,7 +73,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 	GameEventContext    event;
 	PosCard  stCard;
 	char buf[256];
-	Player* pPlayer = GAME_PLAYER(pGame, player);
+	Player* pPlayer = get_game_player(pGame, player);
 
 	if(R_SUCC != get_player_card(pPlayer, where, pos, &stCard.card))
 		return R_E_FAIL;
@@ -82,7 +82,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 	stCard.pos = pos;
 
 	// event: per discard card 
-	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, 0, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 
 	trigger_game_event(pGame, &event);
@@ -99,7 +99,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 		// event: post discard card
 		
-		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, 0, pParentEvent);
+		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		event.pos_card = &stCard;
 		trigger_game_event(pGame, &event);
 
