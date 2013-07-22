@@ -72,7 +72,7 @@ reg_card {
 	event = {
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- out process is directly succss.
-			return true;
+			return R_SUCC;
 		end,
 
 		[GameEvent_OutCardCalc] = function(cfg, game, event, player)
