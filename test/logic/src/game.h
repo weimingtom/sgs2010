@@ -115,6 +115,9 @@ int game_prev_player(GameContext* pGame, int player);
 
 Status get_game_status(GameContext* pGame);
 
+const char* game_status_str(Status s);
+
+
 /// calc player distance to other
 
 int game_player_dis(GameContext* pGame, int p1, int p2);
