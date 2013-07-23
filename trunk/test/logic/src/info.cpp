@@ -243,6 +243,358 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	return R_SUCC;
 }
 
+
+static void game_event_param__new_game_config(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->new_game_config)
+	{
+		MSG_OUT("    new_game_config=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    new_game_config.players=%d;\n", pEvent->new_game_config->players);
+		MSG_OUT("    new_game_config.masters=%d;\n", pEvent->new_game_config->masters);
+		MSG_OUT("    new_game_config.minsters=%d;\n", pEvent->new_game_config->minsters);
+		MSG_OUT("    new_game_config.spies=%d;\n", pEvent->new_game_config->spies);
+		MSG_OUT("    new_game_config.mutineers=%d;\n", pEvent->new_game_config->mutineers);
+	}
+}
+
+static void game_event_param__file_name(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->file_name)
+	{
+		MSG_OUT("    file_name=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    file_name=\"%s\";\n", pEvent->file_name);
+	}
+}
+
+static void game_event_param__get_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->get_card)
+	{
+		MSG_OUT("    get_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    get_card.num=%d;\n", pEvent->get_card->num);
+	}
+}
+
+static void game_event_param__attack_dis(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->attack_dis)
+	{
+		MSG_OUT("    attack_dis=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    attack_dis.base=%d;\n", pEvent->attack_dis->base);
+		MSG_OUT("    attack_dis.inc=%d;\n", pEvent->attack_dis->inc);
+		MSG_OUT("    attack_dis.dis=%d;\n", pEvent->attack_dis->dis);
+		MSG_OUT("    attack_dis.flag=%d;\n", pEvent->attack_dis->flag);
+	}
+
+}
+
+// from game.cpp
+extern const char* card_value_id_str(CardValue value);
+extern const char* card_color_id_str(CardColor color);
+
+
+static char* card_where_str(int where, char* buf, int buflen)
+{
+	int n = 0;
+	if(where == PatternCard_None) {
+		strncpy(buf, "PatternCard_None", buflen);
+	} else {
+		if(where  & PatternCard_Hand) {
+			n += snprintf(buf+n, buflen-n, "%s", "PatternCard_Hand");
+			where &= ~PatternCard_Hand;
+		}
+		if(where  & PatternCard_Equip) {
+			n += snprintf(buf+n, buflen-n, "%s%s", n > 0 ? "|":"", "PatternCard_Equip");
+			where &= ~PatternCard_Equip;
+		}
+		if(where  & PatternCard_Judgment) {
+			n += snprintf(buf+n, buflen-n, "%s%s",  n > 0 ? "|":"", "PatternCard_Judgment");
+			where &= ~PatternCard_Judgment;
+		}
+		if(where != 0)
+		{
+			n += snprintf(buf+n, buflen-n, "%s0x%x", n > 0 ? "|":"", where);
+		}
+	}
+	return buf;
+}
+
+
+static void game_event_param__before_pout(GameContext* pGame, GameEventContext* pEvent)
+{
+	int   n;
+	char  buf[512];
+	if(NULL == pEvent->before_pout)
+	{
+		MSG_OUT("    before_pout=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    before_pout.pattern.where=%s;\n", card_where_str(pEvent->before_pout->pattern.where, buf, sizeof(buf)));
+		MSG_OUT("    before_pout.pattern.fixed=%s;\n", pEvent->before_pout->pattern.fixed == YES ? "YES" : "NO");
+		MSG_OUT("    before_pout.pattern.num=%d;\n", pEvent->before_pout->pattern.num);
+		for(n = 0; n < pEvent->before_pout->pattern.num; n++)
+		{
+			MSG_OUT("    before_pout.pattern.patterns[%d].id=%d {%s};\n", n, pEvent->before_pout->pattern.patterns[n].id, 
+				card_sid(pEvent->before_pout->pattern.patterns[n].id, buf, sizeof(buf)));
+			MSG_OUT("    before_pout.pattern.patterns[%d].color=%s;\n", n, card_color_id_str(pEvent->before_pout->pattern.patterns[n].color));
+			MSG_OUT("    before_pout.pattern.patterns[%d].value_min=%s;\n", n, card_value_id_str(pEvent->before_pout->pattern.patterns[n].value_min));
+			MSG_OUT("    before_pout.pattern.patterns[%d].value_max=%s;\n", n, card_value_id_str(pEvent->before_pout->pattern.patterns[n].value_max));
+		}
+		MSG_OUT("    before_pout.alter_text=\"%s\";\n", pEvent->before_pout->alter_text);
+	}
+}
+
+static void game_event_param__card_pattern(GameContext* pGame, GameEventContext* pEvent)
+{
+	int n;
+	char  buf[512];
+	if(NULL == pEvent->card_pattern)
+	{
+		MSG_OUT("    card_pattern=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    card_pattern.where=%s;\n", card_where_str(pEvent->card_pattern->where, buf, sizeof(buf)));
+		MSG_OUT("    card_pattern.fixed=%s;\n", pEvent->card_pattern->fixed == YES ? "YES" : "NO");
+		MSG_OUT("    card_pattern.num=%d;\n", pEvent->card_pattern->num);
+		for(n = 0; n < pEvent->card_pattern->num; n++)
+		{
+			MSG_OUT("    card_pattern.patterns[%d].id=%d {%s};\n", n, pEvent->card_pattern->patterns[n].id, 
+				card_sid(pEvent->card_pattern->patterns[n].id, buf, sizeof(buf)));
+			MSG_OUT("    card_pattern.patterns[%d].color=%s;\n", n, card_color_id_str(pEvent->card_pattern->patterns[n].color));
+			MSG_OUT("    card_pattern.patterns[%d].value_min=%s;\n", n, card_value_id_str(pEvent->card_pattern->patterns[n].value_min));
+			MSG_OUT("    card_pattern.patterns[%d].value_max=%s;\n", n, card_value_id_str(pEvent->card_pattern->patterns[n].value_max));
+		}
+	}
+}
+
+static void game_event_param__pattern_out(GameContext* pGame, GameEventContext* pEvent)
+{
+	int   n;
+	char  buf[512];
+	if(NULL == pEvent->pattern_out)
+	{
+		MSG_OUT("    pattern_out=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    pattern_out.pattern.where=%s;\n", card_where_str(pEvent->pattern_out->pattern.where, buf, sizeof(buf)));
+		MSG_OUT("    pattern_out.pattern.fixed=%s;\n", pEvent->pattern_out->pattern.fixed == YES ? "YES" : "NO");
+		MSG_OUT("    pattern_out.pattern.num=%d;\n", pEvent->pattern_out->pattern.num);
+		for(n = 0; n < pEvent->pattern_out->pattern.num; n++)
+		{
+			MSG_OUT("    pattern_out.pattern.patterns[%d].id=%d {%s};\n", n, pEvent->pattern_out->pattern.patterns[n].id, 
+				card_sid(pEvent->pattern_out->pattern.patterns[n].id, buf, sizeof(buf)));
+			MSG_OUT("    pattern_out.pattern.patterns[%d].color=%s;\n", n, card_color_id_str(pEvent->pattern_out->pattern.patterns[n].color));
+			MSG_OUT("    pattern_out.pattern.patterns[%d].value_min=%s;\n", n, card_value_id_str(pEvent->pattern_out->pattern.patterns[n].value_min));
+			MSG_OUT("    pattern_out.pattern.patterns[%d].value_max=%s;\n", n, card_value_id_str(pEvent->pattern_out->pattern.patterns[n].value_max));
+		}
+		MSG_OUT("    pattern_out.out.trigger=%d;\n", pEvent->pattern_out->out.trigger);
+		MSG_OUT("    pattern_out.out.supply=%d;\n", pEvent->pattern_out->out.supply);
+		MSG_OUT("    pattern_out.out.target=%d;\n", pEvent->pattern_out->out.target);
+		MSG_OUT("    pattern_out.out.vcard.id=%d {%s};\n", pEvent->pattern_out->out.vcard.id, card_sid(pEvent->pattern_out->out.vcard.id, buf, sizeof(buf)));
+		MSG_OUT("    pattern_out.out.vcard.color=%s;\n", card_color_id_str(pEvent->pattern_out->out.vcard.color));
+		MSG_OUT("    pattern_out.out.vcard.value=%s;\n", card_value_id_str(pEvent->pattern_out->out.vcard.value));
+		MSG_OUT("    pattern_out.out.vcard.flag=0x%x;\n", pEvent->pattern_out->out.vcard.flag);
+		MSG_OUT("    pattern_out.out.list.num=0x%x;\n", pEvent->pattern_out->out.list.num);
+		for(n = 0; n < pEvent->pattern_out->out.list.num; n++)
+		{
+			MSG_OUT("    pattern_out.out.list.pcards[%d].card.id=%d {%s};\n", n, pEvent->pattern_out->out.list.pcards[n].card.id, card_sid(pEvent->pattern_out->out.list.pcards[n].card.id, buf, sizeof(buf)));
+			MSG_OUT("    pattern_out.out.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->pattern_out->out.list.pcards[n].card.color));
+			MSG_OUT("    pattern_out.out.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->pattern_out->out.list.pcards[n].card.value));
+			MSG_OUT("    pattern_out.out.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->pattern_out->out.list.pcards[n].card.flag);
+			MSG_OUT("    pattern_out.out.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->pattern_out->out.list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    pattern_out.out.list.pcards[%d].pos=%d;\n", n, pEvent->pattern_out->out.list.pcards[n].pos);
+		}
+	}
+	
+}
+
+static void game_event_param__out_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	int   n;
+	char  buf[512];
+	if(NULL == pEvent->out_card)
+	{
+		MSG_OUT("    out_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    out_card.trigger=%d;\n", pEvent->out_card->trigger);
+		MSG_OUT("    out_card.supply=%d;\n", pEvent->out_card->supply);
+		MSG_OUT("    out_card.target=%d;\n", pEvent->out_card->target);
+		MSG_OUT("    out_card.vcard.id=%d {%s};\n", pEvent->out_card->vcard.id, card_sid(pEvent->out_card->vcard.id, buf, sizeof(buf)));
+		MSG_OUT("    out_card.vcard.color=%s;\n", card_color_id_str(pEvent->out_card->vcard.color));
+		MSG_OUT("    out_card.vcard.value=%s;\n", card_value_id_str(pEvent->out_card->vcard.value));
+		MSG_OUT("    out_card.vcard.flag=0x%x;\n", pEvent->out_card->vcard.flag);
+		MSG_OUT("    out_card.list.num=0x%x;\n", pEvent->out_card->list.num);
+		for(n = 0; n < pEvent->out_card->list.num; n++)
+		{
+			MSG_OUT("    out_card.list.pcards[%d].card.id=%d {%s};\n", n, pEvent->out_card->list.pcards[n].card.id, card_sid(pEvent->out_card->list.pcards[n].card.id, buf, sizeof(buf)));
+			MSG_OUT("    out_card.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->out_card->list.pcards[n].card.color));
+			MSG_OUT("    out_card.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->out_card->list.pcards[n].card.value));
+			MSG_OUT("    out_card.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->out_card->list.pcards[n].card.flag);
+			MSG_OUT("    out_card.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->out_card->list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    out_card.list.pcards[%d].pos=%d;\n", n, pEvent->out_card->list.pcards[n].pos);
+		}
+
+	}
+}
+
+static void game_event_param__pos_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	char  buf[512];
+	if(NULL == pEvent->pos_card)
+	{
+		MSG_OUT("    pos_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    pos_card.card.id=%d {%s};\n", pEvent->pos_card->card.id, card_sid(pEvent->pos_card->card.id, buf, sizeof(buf)));
+		MSG_OUT("    pos_card.card.color=%s;\n", card_color_id_str(pEvent->pos_card->card.color));
+		MSG_OUT("    pos_card.card.value=%s;\n", card_value_id_str(pEvent->pos_card->card.value));
+		MSG_OUT("    pos_card.card.flag=0x%x;\n", pEvent->pos_card->card.flag);
+		MSG_OUT("    pos_card.where=%s;\n", card_where_str(pEvent->pos_card->where, buf, sizeof(buf)));
+		MSG_OUT("    pos_card.pos=%d;\n", pEvent->pos_card->pos);
+	}
+}
+
+static void game_event_param__equip_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	char  buf[512];
+	if(NULL == pEvent->equip_card)
+	{
+		MSG_OUT("    equip_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    equip_card.equip_pos=%s;\n", equip_idx_str(pEvent->equip_card->equip_pos));
+		MSG_OUT("    equip_card.supply=%d;\n", pEvent->equip_card->supply);
+		MSG_OUT("    equip_card.card.card.id=%d {%s};\n", pEvent->equip_card->card.card.id, card_sid(pEvent->equip_card->card.card.id, buf, sizeof(buf)));
+		MSG_OUT("    equip_card.card.card.color=%s;\n", card_color_id_str(pEvent->equip_card->card.card.color));
+		MSG_OUT("    equip_card.card.card.value=%s;\n", card_value_id_str(pEvent->equip_card->card.card.value));
+		MSG_OUT("    equip_card.card.card.flag=0x%x;\n", pEvent->equip_card->card.card.flag);
+		MSG_OUT("    equip_card.card.where=%s;\n", card_where_str(pEvent->equip_card->card.where, buf, sizeof(buf)));
+		MSG_OUT("    equip_card.card.pos=%d;\n", pEvent->equip_card->card.pos);
+	}
+}
+
+static void game_event_param__change_life(GameContext* pGame, GameEventContext* pEvent)
+{
+	int   n;
+	char  buf[512];
+	if(NULL == pEvent->change_life)
+	{
+		MSG_OUT("    change_life=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    change_life.delta=%d;\n", equip_idx_str(pEvent->change_life->delta));
+		MSG_OUT("    change_life.after_life=%d;\n", equip_idx_str(pEvent->change_life->after_life));
+		MSG_OUT("    change_life.src_player=%d;\n", equip_idx_str(pEvent->change_life->src_player));
+		MSG_OUT("    change_life.src_cards.trigger=%d;\n", pEvent->change_life->src_cards.trigger);
+		MSG_OUT("    change_life.src_cards.supply=%d;\n", pEvent->change_life->src_cards.supply);
+		MSG_OUT("    change_life.src_cards.target=%d;\n", pEvent->change_life->src_cards.target);
+		MSG_OUT("    change_life.src_cards.vcard.id=%d {%s};\n", pEvent->change_life->src_cards.vcard.id, card_sid(pEvent->change_life->src_cards.vcard.id, buf, sizeof(buf)));
+		MSG_OUT("    change_life.src_cards.vcard.color=%s;\n", card_color_id_str(pEvent->change_life->src_cards.vcard.color));
+		MSG_OUT("    change_life.src_cards.vcard.value=%s;\n", card_value_id_str(pEvent->change_life->src_cards.vcard.value));
+		MSG_OUT("    change_life.src_cards.vcard.flag=0x%x;\n", pEvent->change_life->src_cards.vcard.flag);
+		MSG_OUT("    change_life.src_cards.list.num=0x%x;\n", pEvent->change_life->src_cards.list.num);
+		for(n = 0; n < pEvent->pattern_out->out.list.num; n++)
+		{
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.id=%d {%s};\n", n, pEvent->change_life->src_cards.list.pcards[n].card.id, card_sid(pEvent->change_life->src_cards.list.pcards[n].card.id, buf, sizeof(buf)));
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->change_life->src_cards.list.pcards[n].card.color));
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->change_life->src_cards.list.pcards[n].card.value));
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->change_life->src_cards.list.pcards[n].card.flag);
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->change_life->src_cards.list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].pos=%d;\n", n, pEvent->change_life->src_cards.list.pcards[n].pos);
+		}
+		MSG_OUT("    change_life.src_skill=%s ;\n", equip_idx_str(pEvent->change_life->src_skill));
+	}
+
+}
+
+static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
+{
+	switch(pEvent->id)
+	{
+	case GameEvent_NewGame:
+		game_event_param__new_game_config(pGame, pEvent);
+		break;
+	case GameEvent_LoadGame:
+		game_event_param__file_name(pGame, pEvent);
+		break;
+	case GameEvent_PerRoundGet:
+	case GameEvent_RoundGetCard:
+	case GameEvent_PostRoundGet:
+		game_event_param__get_card(pGame, pEvent);
+		break;
+	case GameEvent_CalcAttackDis:
+		game_event_param__attack_dis(pGame, pEvent);
+		break;
+	case GameEvent_BeforePassiveOut:
+		game_event_param__before_pout(pGame, pEvent);
+		break;
+	case GameEvent_AfterPassiveOut:
+		game_event_param__card_pattern(pGame, pEvent);
+		break;
+	case GameEvent_PerPassiveOutCard:
+	case GameEvent_PassiveOutCard:
+	case GameEvent_PostPassiveOutCard:
+	case GameEvent_PerSupplyCard:
+	case GameEvent_SupplyCard:
+	case GameEvent_PostSupplyCard:
+		game_event_param__pattern_out(pGame, pEvent);
+		break;
+	case GameEvent_OutCardPrepare:
+	case GameEvent_PerOutCard:
+	case GameEvent_OutCard:
+	case GameEvent_PerOutCardCalc:
+	case GameEvent_OutCardCalc:
+	case GameEvent_PostOutCardCalc:
+	case GameEvent_PostOutCard:
+		game_event_param__out_card(pGame, pEvent);
+		break;
+	case GameEvent_PerDecideCard:
+	case GameEvent_PerDecideCardCalc:
+	case GameEvent_PostDecideCard:
+	case GameEvent_PerDiscardCard:
+	case GameEvent_PostDiscardCard:
+	case GameEvent_PerCardCalc:
+	case GameEvent_CardCalc:
+	case GameEvent_PostCardCalc:
+	case GameEvent_FiniCardCalc:
+	case GameEvent_PostGetCard:
+	case GameEvent_PerLostCard:
+	case GameEvent_PostLostCard:
+		game_event_param__pos_card(pGame, pEvent);
+		break;
+	case GameEvent_PerEquipCard:
+	case GameEvent_PostEquipCard:
+		game_event_param__equip_card(pGame, pEvent);
+		break;
+	case GameEvent_PerChangeLife:
+	case GameEvent_ChangeLife:
+	case GameEvent_PostChangeLife:
+		game_event_param__change_life(pGame, pEvent);
+		break;
+	}
+
+}
+
 RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent)
 {
 	int deep;
@@ -258,7 +610,7 @@ RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent)
 		Player* pta = get_game_player(pGame, pe->target);
 
 		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无" );
-
+		game_event_param(pGame, pe);
 
 		pe = pe->parent_event;
 	}

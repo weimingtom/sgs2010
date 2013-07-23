@@ -68,9 +68,9 @@ struct GameEventContext
 	tolua_readonly OutCardPattern* card_pattern;
 	tolua_readonly BeforeBassiveOut* before_pout; 
 	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
-	tolua_readonly OutCard*    out_card;       // real out,  per/post out
-	tolua_readonly PosCard*    pos_card;  // lost card,
-	tolua_readonly EquipCard*  equip_card; // for per/post equip card
+	tolua_readonly OutCard*    out_card;    // real out,  per/post out
+	tolua_readonly PosCard*    pos_card;    // lost card,
+	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
 	tolua_readonly ChangeLife* change_life; // when life is changed 
 };
 

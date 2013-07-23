@@ -440,6 +440,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 
 
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
+	event.get_card = &num;
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);

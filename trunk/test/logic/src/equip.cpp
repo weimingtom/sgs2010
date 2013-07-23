@@ -100,7 +100,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 
 		// add event post equip card
 
-		INIT_EVENT(&event, GameEvent_PerEquipCard, player, INVALID_PLAYER, pParentEvent);
+		INIT_EVENT(&event, GameEvent_PostEquipCard, player, INVALID_PLAYER, pParentEvent);
 		event.equip_card = &equip_cards;
 
 		trigger_game_event(pGame, &event);
