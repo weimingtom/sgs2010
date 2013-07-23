@@ -19,7 +19,7 @@ OUT=$(OUT_DIR)/logic
 
 SRC=$(shell ls $(SRC_DIR)/*.cpp)
 #SRC+=$(shell ls $(SRC_DIR)/card_impl/*.cpp)
-SRC+=$(shell ls $(SRC_DIR)/hero_impl/*.cpp)
+#SRC+=$(shell ls $(SRC_DIR)/hero_impl/*.cpp)
 
 PKG=$(shell ls $(PKG_DIR)/*.pkg)
 
