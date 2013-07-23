@@ -37,6 +37,7 @@ typedef enum _GameEvent
 	GameEvent_RoundOutCard,
 	GameEvent_PostRoundOut,
 	GameEvent_PerRoundDiscard,
+	GameEvent_RoundDiscardCard,
 	GameEvent_PostRoundDiscard,
 	GameEvent_RoundEnd,
 	GameEvent_PerAttack,
@@ -78,6 +79,8 @@ typedef enum _GameEvent
 	GameEvent_PostLostCard,
 	GameEvent_PerDiscardCard,
 	GameEvent_PostDiscardCard,
+	GameEvent_PerPassiveDiscardCard,
+	GameEvent_PostPassiveDiscardCard,
 	GameEvent_HandCardEmpty,
 	GameEvent_PerCardCalc,
 	GameEvent_CardCalc,
@@ -88,7 +91,6 @@ typedef enum _GameEvent
 	GameEvent_PerDecideCard,
 	GameEvent_PerDecideCardCalc,
 	GameEvent_PostDecideCard,
-
 } GameEvent;
 
 

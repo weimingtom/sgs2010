@@ -18,7 +18,7 @@ RESULT game_first_getcard(GameContext* pGame)
 	RESULT  ret;
 	Card stCard;
 
-	MSG_OUT("the first time each player get 4 cards.\n");
+	MSG_OUT("起始手牌每玩家摸[4]张.\n");
 
 	player = get_game_master_player(pGame);
 
@@ -132,7 +132,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(buffer, sizeof(buffer), "please get %d card:", stGetCard.num);
+	snprintf(buffer, sizeof(buffer), "请摸[%d]张牌:", stGetCard.num);
 
 	ret = cmd_loop(pGame, &event, buffer);
 
@@ -180,7 +180,7 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(buffer, sizeof(buffer), "please get %d card:", stGetCard.num);
+	snprintf(buffer, sizeof(buffer), "请摸[%d]张牌:", stGetCard.num);
 
 	ret = cmd_loop(pGame, &event, buffer);
 

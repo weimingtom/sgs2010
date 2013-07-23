@@ -32,6 +32,16 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 
 
+// tolua_begin
+// {{
+
+YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);
+RESULT add_cur_card_to_player(GameContext* pGame, CardWhere where, int pos, int player);
+// }}
+// tolua_end
+
+
+
 #ifdef __cplusplus
 }
 #endif

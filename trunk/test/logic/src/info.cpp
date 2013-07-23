@@ -234,9 +234,9 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 			}
 		}
 	}
-	MSG_OUT("(*) stack   cards: %d\n", pGame->get_card_stack.count);
-	MSG_OUT("(*) discard cards: %d\n", pGame->discard_card_stack.count);
-	MSG_OUT("(*) cur dis cards: %d\n", pGame->cur_discard_card_num);
+	MSG_OUT("(*) ÃşÅÆÅÆ¶Ñ: %d\n", pGame->get_card_stack.count);
+	MSG_OUT("(*) ÆúÅÆÅÆ¶Ñ: %d\n", pGame->discard_card_stack.count);
+	MSG_OUT("(*) µ±Ç°ÆúÅÆ: %d\n", pGame->cur_discard_card_num);
 
 	// [RoleName] Out Cards: [(card str) (card str)] from [RoleName] As (card str)
 	// [RoleName] Passive Out: [(card str) (card str)] from [RoleName] As (card str) 
@@ -305,7 +305,22 @@ extern const char* card_value_id_str(CardValue value);
 extern const char* card_color_id_str(CardColor color);
 
 
-static char* card_where_str(int where, char* buf, int buflen)
+static const char* card_where_id_str(CardWhere where)
+{
+	switch(where)
+	{
+	case CardWhere_None: return "CardWhere_None";
+	case CardWhere_PlayerHand: return "CardWhere_PlayerHand";
+	case CardWhere_PlayerEquip:return "CardWhere_PlayerEquip";
+	case CardWhere_PlayerJudgment:return "CardWhere_PlayerJudgment";
+	case CardWhere_GetStack:return "CardWhere_GetStack";
+	case CardWhere_CurDiscardStack:return "CardWhere_CurDiscardStack";
+	case CardWhere_DiscardStack:return "CardWhere_DiscardStack";
+	default: return "-1 {CardWhere_Invalid}";
+	}
+}
+
+static char* card_pattern_where_str(int where, char* buf, int buflen)
 {
 	int n = 0;
 	if(where == PatternCard_None) {
@@ -342,7 +357,7 @@ static void game_event_param__before_pout(GameContext* pGame, GameEventContext* 
 	}
 	else
 	{
-		MSG_OUT("    before_pout.pattern.where=%s;\n", card_where_str(pEvent->before_pout->pattern.where, buf, sizeof(buf)));
+		MSG_OUT("    before_pout.pattern.where=%s;\n", card_pattern_where_str(pEvent->before_pout->pattern.where, buf, sizeof(buf)));
 		MSG_OUT("    before_pout.pattern.fixed=%s;\n", pEvent->before_pout->pattern.fixed == YES ? "YES" : "NO");
 		MSG_OUT("    before_pout.pattern.num=%d;\n", pEvent->before_pout->pattern.num);
 		for(n = 0; n < pEvent->before_pout->pattern.num; n++)
@@ -367,7 +382,7 @@ static void game_event_param__card_pattern(GameContext* pGame, GameEventContext*
 	}
 	else
 	{
-		MSG_OUT("    card_pattern.where=%s;\n", card_where_str(pEvent->card_pattern->where, buf, sizeof(buf)));
+		MSG_OUT("    card_pattern.where=%s;\n", card_pattern_where_str(pEvent->card_pattern->where, buf, sizeof(buf)));
 		MSG_OUT("    card_pattern.fixed=%s;\n", pEvent->card_pattern->fixed == YES ? "YES" : "NO");
 		MSG_OUT("    card_pattern.num=%d;\n", pEvent->card_pattern->num);
 		for(n = 0; n < pEvent->card_pattern->num; n++)
@@ -391,7 +406,7 @@ static void game_event_param__pattern_out(GameContext* pGame, GameEventContext* 
 	}
 	else
 	{
-		MSG_OUT("    pattern_out.pattern.where=%s;\n", card_where_str(pEvent->pattern_out->pattern.where, buf, sizeof(buf)));
+		MSG_OUT("    pattern_out.pattern.where=%s;\n", card_pattern_where_str(pEvent->pattern_out->pattern.where, buf, sizeof(buf)));
 		MSG_OUT("    pattern_out.pattern.fixed=%s;\n", pEvent->pattern_out->pattern.fixed == YES ? "YES" : "NO");
 		MSG_OUT("    pattern_out.pattern.num=%d;\n", pEvent->pattern_out->pattern.num);
 		for(n = 0; n < pEvent->pattern_out->pattern.num; n++)
@@ -416,7 +431,7 @@ static void game_event_param__pattern_out(GameContext* pGame, GameEventContext* 
 			MSG_OUT("    pattern_out.out.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->pattern_out->out.list.pcards[n].card.color));
 			MSG_OUT("    pattern_out.out.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->pattern_out->out.list.pcards[n].card.value));
 			MSG_OUT("    pattern_out.out.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->pattern_out->out.list.pcards[n].card.flag);
-			MSG_OUT("    pattern_out.out.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->pattern_out->out.list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    pattern_out.out.list.pcards[%d].where=%s;\n", n, card_where_id_str(pEvent->pattern_out->out.list.pcards[n].where));
 			MSG_OUT("    pattern_out.out.list.pcards[%d].pos=%d;\n", n, pEvent->pattern_out->out.list.pcards[n].pos);
 		}
 	}
@@ -447,7 +462,7 @@ static void game_event_param__out_card(GameContext* pGame, GameEventContext* pEv
 			MSG_OUT("    out_card.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->out_card->list.pcards[n].card.color));
 			MSG_OUT("    out_card.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->out_card->list.pcards[n].card.value));
 			MSG_OUT("    out_card.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->out_card->list.pcards[n].card.flag);
-			MSG_OUT("    out_card.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->out_card->list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    out_card.list.pcards[%d].where=%s;\n", n, card_where_id_str(pEvent->out_card->list.pcards[n].where));
 			MSG_OUT("    out_card.list.pcards[%d].pos=%d;\n", n, pEvent->out_card->list.pcards[n].pos);
 		}
 
@@ -467,7 +482,7 @@ static void game_event_param__pos_card(GameContext* pGame, GameEventContext* pEv
 		MSG_OUT("    pos_card.card.color=%s;\n", card_color_id_str(pEvent->pos_card->card.color));
 		MSG_OUT("    pos_card.card.value=%s;\n", card_value_id_str(pEvent->pos_card->card.value));
 		MSG_OUT("    pos_card.card.flag=0x%x;\n", pEvent->pos_card->card.flag);
-		MSG_OUT("    pos_card.where=%s;\n", card_where_str(pEvent->pos_card->where, buf, sizeof(buf)));
+		MSG_OUT("    pos_card.where=%s;\n", card_where_id_str(pEvent->pos_card->where));
 		MSG_OUT("    pos_card.pos=%d;\n", pEvent->pos_card->pos);
 	}
 }
@@ -487,7 +502,7 @@ static void game_event_param__equip_card(GameContext* pGame, GameEventContext* p
 		MSG_OUT("    equip_card.card.card.color=%s;\n", card_color_id_str(pEvent->equip_card->card.card.color));
 		MSG_OUT("    equip_card.card.card.value=%s;\n", card_value_id_str(pEvent->equip_card->card.card.value));
 		MSG_OUT("    equip_card.card.card.flag=0x%x;\n", pEvent->equip_card->card.card.flag);
-		MSG_OUT("    equip_card.card.where=%s;\n", card_where_str(pEvent->equip_card->card.where, buf, sizeof(buf)));
+		MSG_OUT("    equip_card.card.where=%s;\n", card_where_id_str(pEvent->equip_card->card.where));
 		MSG_OUT("    equip_card.card.pos=%d;\n", pEvent->equip_card->card.pos);
 	}
 }
@@ -502,9 +517,9 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 	}
 	else
 	{
-		MSG_OUT("    change_life.delta=%d;\n", equip_idx_str(pEvent->change_life->delta));
-		MSG_OUT("    change_life.after_life=%d;\n", equip_idx_str(pEvent->change_life->after_life));
-		MSG_OUT("    change_life.src_player=%d;\n", equip_idx_str(pEvent->change_life->src_player));
+		MSG_OUT("    change_life.delta=%d;\n", pEvent->change_life->delta);
+		MSG_OUT("    change_life.after_life=%d;\n", pEvent->change_life->after_life);
+		MSG_OUT("    change_life.src_player=%d;\n", pEvent->change_life->src_player);
 		MSG_OUT("    change_life.src_cards.trigger=%d;\n", pEvent->change_life->src_cards.trigger);
 		MSG_OUT("    change_life.src_cards.supply=%d;\n", pEvent->change_life->src_cards.supply);
 		MSG_OUT("    change_life.src_cards.target=%d;\n", pEvent->change_life->src_cards.target);
@@ -519,10 +534,10 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.color=%s;\n", n, card_color_id_str(pEvent->change_life->src_cards.list.pcards[n].card.color));
 			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.value=%s;\n", n, card_value_id_str(pEvent->change_life->src_cards.list.pcards[n].card.value));
 			MSG_OUT("    change_life.src_cards.list.pcards[%d].card.flag=0x%x;\n", n, pEvent->change_life->src_cards.list.pcards[n].card.flag);
-			MSG_OUT("    change_life.src_cards.list.pcards[%d].where=%s;\n", n, card_where_str(pEvent->change_life->src_cards.list.pcards[n].where, buf, sizeof(buf)));
+			MSG_OUT("    change_life.src_cards.list.pcards[%d].where=%s;\n", n, card_where_id_str(pEvent->change_life->src_cards.list.pcards[n].where));
 			MSG_OUT("    change_life.src_cards.list.pcards[%d].pos=%d;\n", n, pEvent->change_life->src_cards.list.pcards[n].pos);
 		}
-		MSG_OUT("    change_life.src_skill=%s ;\n", equip_idx_str(pEvent->change_life->src_skill));
+		MSG_OUT("    change_life.src_skill=%s;\n", equip_idx_str(pEvent->change_life->src_skill));
 	}
 
 }
