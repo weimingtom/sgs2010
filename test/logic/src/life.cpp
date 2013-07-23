@@ -5,7 +5,32 @@
 #include "life.h"
 #include "comm.h"
 
+static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player)
+{
+	GameEventContext   event;
+	Player* pPlayer;
 
+	// event perdead ?
+	INIT_EVENT(&event, GameEvent_PerDead, player, INVALID_PLAYER, pParentEvent);
+	trigger_game_event(pGame, &event);
+
+	pPlayer = get_game_player(pGame, player);
+
+	// event dead
+
+	if(pPlayer->cur_life <= 0)
+	{
+		// set the player to dead
+		pPlayer->status = PlayerStatus_Dead;
+
+		// check the game over?
+		game_check_gameover(pGame, player);
+
+		INIT_EVENT(&event, GameEvent_Dead, player, INVALID_PLAYER, pParentEvent);
+		trigger_game_event(pGame, &event);
+	}
+	return R_SUCC;
+}
 
 RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc, int src_player, OutCard* src_cards, int src_skill)
 {
@@ -44,7 +69,12 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	if(event.result == R_CANCEL || stChgLife.delta == 0)
 		return R_CANCEL;
 
-	pPlayer = GAME_PLAYER(pGame, player);
+
+	INIT_EVENT(&event, GameEvent_ChangeLife, player, INVALID_PLAYER, pParentEvent);
+	event.change_life = &stChgLife;
+
+
+	pPlayer = get_game_player(pGame, player);
 
 	pPlayer->cur_life += stChgLife.delta;
 
@@ -62,23 +92,7 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	if(pPlayer->cur_life <= 0)
 	{
-		// event perdead ?
-		INIT_EVENT(&event, GameEvent_PerDead, player, INVALID_PLAYER, pParentEvent);
-		trigger_game_event(pGame, &event);
-
-		// event dead
-
-		if(pPlayer->cur_life <= 0)
-		{
-			// set the player to dead
-			pPlayer->status = PlayerStatus_Dead;
-
-			// check the game over?
-			game_check_gameover(pGame, player);
-
-			INIT_EVENT(&event, GameEvent_Dead, player, INVALID_PLAYER, pParentEvent);
-			trigger_game_event(pGame, &event);
-		}
+		game_player_dead(L, pGame, &event, player );
 	}
 
 	INIT_EVENT(&event, GameEvent_PostChangeLife, player, INVALID_PLAYER, pParentEvent);

@@ -288,7 +288,7 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 			//ST_ZERO(out_card->list.pcards[n]);
 		}
 	}
-	out_card->list.num = 0;
+	//out_card->list.num = 0;
 
 	return R_SUCC;
 }
