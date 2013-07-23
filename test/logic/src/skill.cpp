@@ -41,11 +41,11 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	// todo: trigger event per use skill
 
-	return  call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
+	call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
 
 	// post trigger use skill
 
-	return R_SUCC;
+	return R_BACK;
 }
 
 

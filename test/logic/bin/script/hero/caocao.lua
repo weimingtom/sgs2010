@@ -46,8 +46,15 @@ reg_hero({
 			flag=0,
 			can_use = {
 				[GameEvent_PostChangeLife] = function(self, game, event, player)
-					if(event.change_life.delta < 0 and event.change_life.src_cards.list.num > 0) then
-						return USE_MANUAL;
+					if(event.change_life.delta < 0 and event.trigger == player 
+						and event.change_life.src_cards.list.num > 0 and YES ~= is_player_handfull(get_game_player(game, player)) ) then
+						local cnt = 0;
+						for n = 0, event.change_life.src_cards.list.num - 1 do
+							if(YES == is_cur_card_valid(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos)) then
+								cnt = cnt + 1;
+							end
+						end
+						return cnt > 0 and USE_MANUAL or USE_CANNOT;
 					end
 					return USE_CANNOT;
 				end,
@@ -55,6 +62,10 @@ reg_hero({
 			event = {
 				[GameEvent_PostChangeLife] = function(self, game, event, player)
 					-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
+					for n = 0, event.change_life.src_cards.list.num - 1 do
+						add_cur_card_to_player(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
+					end
+					
 					return R_SUCC;
 				end,
 			},
@@ -65,7 +76,7 @@ reg_hero({
 			can_use = {
 				[GameEvent_PassiveOutCard] = function(self, game, event, player)
 					-- 当需要出一张闪的时候
-					if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
+					if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed ~= YES and
 						get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
 						return USE_MANUAL;
 					end
@@ -74,6 +85,7 @@ reg_hero({
 			},
 			event = {
 				[GameEvent_PassiveOutCard]= function(self, game, event, player)
+					
 					return R_SUCC;
 				end,
 			},

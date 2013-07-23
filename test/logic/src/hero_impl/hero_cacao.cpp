@@ -12,6 +12,7 @@ static YESNO jianxiong_check(GameContext* pGame, GameEventContext* pEvent, int p
 		&& pEvent->trigger == player
 		&& pEvent->change_life->delta < 0
 		&& pEvent->change_life->src_cards.list.num > 0 // 需要判断指向的牌是否存在
+		&& 
 		&& YES != is_player_handfull(&pGame->players[player]))
 		return YES;
 	return NO;

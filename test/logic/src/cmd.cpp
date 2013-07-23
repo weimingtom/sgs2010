@@ -271,17 +271,17 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			int n;
 			char  buffer[128];
 			Card* pCard;
-			MSG_OUT("Game Current Discard Stack:\n");
+			MSG_OUT("当前弃牌:\n");
 			for(n = 0; n < pContext->cur_discard_card_num; n++)
 			{
 				pCard = &pContext->cur_discard_cards[n];
 				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
 			}
 
-			MSG_OUT("Game Discard Stack:\n");		
+			MSG_OUT("弃牌牌堆:\n");		
 			card_stack_dump(&pContext->discard_card_stack);
 
-			MSG_OUT("Game Get Stack:\n");		
+			MSG_OUT("摸牌牌堆:\n");		
 			card_stack_dump(&pContext->get_card_stack);
 		}
 	}
@@ -372,7 +372,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			//if(pCardCfg == NULL)
 			if(id == CardID_None)
 			{
-				MSG_OUT("no card sid is \'%s\'!\n", argv[2]);
+				MSG_OUT("没找到sid为\'%s\'的卡牌!\n", argv[2]);
 				return R_E_PARAM;
 			}
 			else
@@ -417,7 +417,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			//if(pHero == NULL)
 			if(id == HeroID_None)
 			{
-				MSG_OUT("no hero id  is %d!\n", id);
+				MSG_OUT("没找到sid为'%s'的武将!\n", argv[2]);
 				return R_E_PARAM;
 			}
 			else
@@ -468,15 +468,16 @@ static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEv
 
 static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
+	int idx[MAX_PARAM_NUM];
+	int cnt = 0;
+	int n;
+
 	if(get_game_status(pContext) != Status_Round_Out)
 	{
 		MSG_OUT("not in out status!\n");
 		return R_E_STATUS;
 	}
 
-	int idx[MAX_PARAM_NUM];
-	int cnt = 0;
-	int n;
 
 	if(argc < 2)
 	{
@@ -570,6 +571,39 @@ static RESULT cmd_pass(const char** argv, int argc, GameContext* pContext, GameE
 	return game_cmd_pass(pContext, pEvent);
 
 	//return CMD_RET_SUCC;
+}
+
+static RESULT cmd_discard(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	int idx[MAX_PARAM_NUM];
+	int cnt = 0;
+	int n;
+
+	if(pContext->status == Status_None)
+	{
+		MSG_OUT("not in game!\n");
+		return R_E_STATUS;
+	}
+
+	if(argc < 2)
+	{
+		param_error(argv[0]);
+		return R_E_PARAM;
+	}
+
+	
+	for(n = 1; n < argc && cnt < MAX_PARAM_NUM; n++)
+	{
+		if(0 != to_int(argv[n], &idx[cnt]))
+		{
+			param_error(argv[0]);
+			return R_E_PARAM;
+		}
+		cnt++;
+	}
+
+
+	return game_cmd_discard_card(pContext, pEvent, idx, cnt);
 }
 
 
@@ -692,6 +726,10 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 	{ "pass", "p", cmd_pass,
 		"pass/p\n\tno out card, so pass this round.", 
 		NULL},
+	{ "discard", "d", cmd_discard,
+		"discard/d <card idx> ...\n\tdiscard card with idx.", 
+		NULL},
+
 	{ "save", NULL, cmd_save,
 		"save <file_name>\n\tsave current game context to file.", 
 		NULL},
