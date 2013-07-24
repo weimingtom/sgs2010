@@ -129,6 +129,7 @@ typedef enum _RESULT
 	R_E_STATUS = -4,  // error status
 	R_E_TIMEOUT = -5, // op timeout
 	R_E_OVERFLOW = -6, // overflow , 
+	R_E_CONFLICT = -7, // overflow , 
 } RESULT;
 
 // tolua_end

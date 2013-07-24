@@ -36,7 +36,8 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 // {{
 
 YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);
-RESULT add_cur_card_to_player(GameContext* pGame, CardWhere where, int pos, int player);
+RESULT add_cur_card_to_player_hand(GameContext* pGame, CardWhere where, int pos, int player);
+RESULT add_cur_card_to_player_judgment(GameContext* pGame, CardWhere where, int pos, int player);
 // }}
 // tolua_end
 

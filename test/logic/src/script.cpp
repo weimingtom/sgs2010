@@ -257,7 +257,7 @@ int luaex_import_file(lua_State* L )
 
 		lua_pop(L, 1);  // ... [t] 
 
-		MSG_OUT("import \"%s\"\n", full_path);
+		//MSG_OUT("import \"%s\"\n", full_path);
 
 		if(0 != luaL_dofile(L, full_path))
 		{

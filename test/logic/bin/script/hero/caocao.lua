@@ -63,7 +63,7 @@ reg_hero({
 				[GameEvent_PostChangeLife] = function(self, game, event, player)
 					-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
 					for n = 0, event.change_life.src_cards.list.num - 1 do
-						add_cur_card_to_player(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
+						add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
 					end
 					
 					return R_SUCC;

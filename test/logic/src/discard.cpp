@@ -153,7 +153,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
 		stCard.where = CardWhere_CurDiscardStack;
 
-		MSG_OUT("【%s】弃一张牌 %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
+		MSG_OUT("【%s】弃牌 %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
 
 		// event: post discard card
 		
@@ -179,7 +179,7 @@ YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos)
 	return NO;
 }
 
-RESULT add_cur_card_to_player(GameContext* pGame, CardWhere where, int pos, int player)
+RESULT add_cur_card_to_player_hand(GameContext* pGame, CardWhere where, int pos, int player)
 {
 	Player* p;
 	char buf[128];
@@ -206,3 +206,30 @@ RESULT add_cur_card_to_player(GameContext* pGame, CardWhere where, int pos, int 
 	return R_SUCC;
 }
 
+RESULT add_cur_card_to_player_judgment(GameContext* pGame, CardWhere where, int pos, int player)
+{
+	Player* p;
+	char buf[128];
+
+	if(YES != is_cur_card_valid(pGame, where, pos))
+	{
+		return R_E_FAIL;				
+	}
+
+	p = get_game_player(pGame, player);
+
+	if(p == NULL)
+	{
+		return R_E_FAIL;
+	}
+
+	if(R_SUCC != player_add_judgment_card(p, &pGame->cur_discard_cards[pos]))
+		return R_E_FAIL;
+
+
+	MSG_OUT("玩家【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
+	RESET_CARD(&pGame->cur_discard_cards[pos]);
+
+
+	return R_SUCC;
+}

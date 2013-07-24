@@ -121,16 +121,15 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
+RESULT player_add_judgment_card(Player* pPlayer, Card* pCard);
 
 
 RESULT set_player_card_flag(Player* pPlayer, CardWhere where, int pos, CardFlag flag);
 
-RESULT player_add_judge_card(Player* pPlayer, Card* pCard);
 
 RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
 RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
 
-RESULT player_add_judge_card(Player* pPlayer, Card* pCard);
 RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* pos);
 
 
