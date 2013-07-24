@@ -42,10 +42,11 @@ $(OBJS):%.obj:%.cpp
 	@echo compiling $< ...
 	@$(CC) -c -o $@  $< $(CFLAGS) $(INCL) -MT $@ -MF `echo $@ | sed -e 's,\.obj$$,.dep,'` -MD -MP
 
-../../pkg/lua_export.h ../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg
+../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg
 	@echo tolua gen $@ ...
 	@cd $(PKG_DIR) && $(TOLUA) -o lua_export.cpp -H lua_export.h -n game lua_export.pkg && cd -
 
+../../pkg/lua_export.h: ../../pkg/lua_export.pkg
 
 clean:
 	-rm -rf $(OBJS)

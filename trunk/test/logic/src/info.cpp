@@ -606,6 +606,9 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PostChangeLife:
 		game_event_param__change_life(pGame, pEvent);
 		break;
+	default:
+		/* do nothing */
+		break;
 	}
 
 }
