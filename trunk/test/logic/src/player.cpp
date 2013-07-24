@@ -164,6 +164,29 @@ RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
 	return R_SUCC;
 }
 
+
+RESULT player_add_judgment_card(Player* pPlayer, Card* pCard)
+{
+	int n;
+	if(pPlayer->judgment_card_num >= MAX_JUDGMENT_CARD)
+	{
+		return R_E_OVERFLOW;
+	}
+
+	// 不能有相同ID的判定牌
+	for(n = 0; n < pPlayer->judgment_card_num; n++)
+	{
+		if(pPlayer->judgment_cards[n].id == pCard->id)
+			return R_E_CONFLICT;
+	}
+	
+
+	pPlayer->judgment_cards[pPlayer->judgment_card_num] = *pCard;
+	pPlayer->judgment_card_num++;
+	return R_SUCC;
+}
+
+
 RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag flag)
 {
 	switch(where)
