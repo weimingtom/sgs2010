@@ -88,7 +88,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 			game_player_discard_card(pGame, pParentEvent, player, CardWhere_PlayerEquip, equip_pos);
 		}
 
-		MSG_OUT("[%s] equip a [%s] card %s\n", pPlayer->name, equip_idx_str(equip_pos), card_str(&equip_cards.card.card, buf, sizeof(buf)));
+		MSG_OUT("¡¾%s¡¿×°±¸[%s]ÅÆ %s\n", pPlayer->name, equip_idx_str(equip_pos), card_str(&equip_cards.card.card, buf, sizeof(buf)));
 
 		pPlayer->equip_cards[equip_pos] = equip_cards.card.card;
 		pPlayer->equip_cards[equip_pos].flag = CardFlag_None;

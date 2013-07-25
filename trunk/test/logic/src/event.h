@@ -122,6 +122,7 @@ typedef struct tagNewGameConfig
 typedef struct tagGetCard
 {
 	int num;
+	YESNO  can_cancel;
 } GetCard;
 
 // for passive out, supply out
