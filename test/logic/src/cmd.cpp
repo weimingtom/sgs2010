@@ -189,7 +189,7 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 
 	if(pContext->status != Status_None)
 	{
-		MSG_OUT("game has been started.");
+		MSG_OUT("你正在游戏中，不能开始一个新的游戏!");
 		return R_E_STATUS;
 	}
 
@@ -231,7 +231,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	{
 		if(pContext->status == Status_None)
 		{
-			MSG_OUT("not in game!\n");
+			MSG_OUT("游戏中才能查看当前玩家信息!\n");
 			return R_E_STATUS;
 		}
 		else
@@ -247,7 +247,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	{
 		if(pContext->status == Status_None)
 		{
-			MSG_OUT("not in game!\n");
+			MSG_OUT("游戏中才能查看游戏全局信息!\n");
 			return R_E_STATUS;
 		}
 		else
@@ -257,13 +257,13 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "gamefull") || !strcmp(argv[1], "gf")) // game full info 
 	{
-
+		MSG_OUT("暂时不支持该指令!\n");
 	}
 	else if(!strcmp(argv[1], "stack") || !strcmp(argv[1], "s")) // list out cards
 	{
 		if(pContext->status == Status_None)
 		{
-			MSG_OUT("not in game!\n");
+			MSG_OUT("游戏中才能查看牌堆信息!\n");
 			return R_E_STATUS;
 		}
 		else
@@ -290,6 +290,11 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		const char* pp;
 		char cp = 0;
 		int n = 0;
+		if(pContext->status == Status_None)
+		{
+			MSG_OUT("游戏中才能查看玩家信息!\n");
+			return R_E_STATUS;
+		}
 
 		if(argc < 3)
 		{
@@ -447,9 +452,9 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 
 static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(get_game_status(pContext) != Status_Round_Get)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in get status!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 	int num = 1;
@@ -472,9 +477,9 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 	int cnt = 0;
 	int n;
 
-	if(get_game_status(pContext) != Status_Round_Out)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in out status!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 
@@ -504,11 +509,12 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 
 static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(pContext->status == Status_None)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in game!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
+
 	int idx;
 
 
@@ -544,9 +550,9 @@ static RESULT cmd_useweapon(const char** argv, int argc, GameContext* pContext, 
 
 static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(pContext->status == Status_None)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in game!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 
@@ -561,9 +567,9 @@ static RESULT cmd_cancelskill(const char** argv, int argc, GameContext* pContext
 
 static RESULT cmd_pass(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(pContext->status == Status_None)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in game!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 
@@ -579,9 +585,9 @@ static RESULT cmd_discard(const char** argv, int argc, GameContext* pContext, Ga
 	int cnt = 0;
 	int n;
 
-	if(pContext->status == Status_None)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in game!\n");
+		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 
@@ -609,9 +615,9 @@ static RESULT cmd_discard(const char** argv, int argc, GameContext* pContext, Ga
 
 static RESULT cmd_save(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
-	if(pContext->status == Status_None)
+	if(get_game_status(pContext) == Status_None)
 	{
-		MSG_OUT("not in game!\n");
+		MSG_OUT("当前不在游戏中，不能保存进度!\n");
 		return R_E_STATUS;
 	}
 
@@ -633,7 +639,7 @@ static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameE
 	//RESULT ret;
 	if(pContext->status != Status_None)
 	{
-		MSG_OUT("already in game!\n");
+		MSG_OUT("已经在游戏中，不能加载一个游戏进度!\n");
 		return R_E_STATUS;
 	}
 
@@ -664,7 +670,7 @@ static RESULT cmd_reload(const char** argv, int argc, GameContext* pContext, Gam
 {
 	if(pContext->status != Status_None)
 	{
-		MSG_OUT("cannot reload script in playing game!\n");
+		MSG_OUT("在游戏中不能重新加载脚本，请先结束本局游戏!\n");
 		return R_E_STATUS;
 	}
 
@@ -787,7 +793,7 @@ static void cmd_help_i(const char* cmd)
 }
 
 
-RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* strAlter)
+RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cancel, const char* strAlter)
 {
 	char  prompt[MAX_NAME_LEN + 10];
 	char  cmdline[MAX_CMD_LEN];
@@ -853,20 +859,32 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* str
 					// return follow code back to parent caller
 					switch(ret)
 					{
+
+					case R_CANCEL:
+						if(can_cancel ==  YES)
+						{
+							pEvent->result = R_CANCEL;
+							return R_CANCEL;
+						}
+						else
+						{
+							MSG_OUT("当前不能取消操作！\n");
+							// continue loops
+						}
+						break;
 					case R_BACK:    // spec return R_BACK means back to caller with success
 						return R_SUCC;
 					case R_EXIT:
-					case R_CANCEL:
 					case R_RETRY:
 						return ret;
 					default:
-						// continue loop ...
+						// continue loops ...
 						break;
 					}
 				}
 				else
 				{
-					MSG_OUT("invalid cmd \'%s\'!\n", argv[0]);
+					MSG_OUT("无效的命令：\'%s\'!\n", argv[0]);
 				}
 			}
 		}
@@ -992,3 +1010,6 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 	}
 	return R_E_FAIL;
 }
+
+
+

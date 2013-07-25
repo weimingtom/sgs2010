@@ -77,7 +77,8 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 		
 		snprintf(buffer, sizeof(buffer), "请弃[%d]张牌:", p->hand_card_num - p->cur_life);
 		
-		ret = cmd_loop(pGame, &event, buffer);
+		ret = cmd_loop(pGame, &event,NO, buffer);
+		CHECK_RET(ret,ret);
 	}
 
 	
@@ -227,7 +228,7 @@ RESULT add_cur_card_to_player_judgment(GameContext* pGame, CardWhere where, int 
 		return R_E_FAIL;
 
 
-	MSG_OUT("玩家【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
+	MSG_OUT("玩家【%s】获得判定区牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
 	RESET_CARD(&pGame->cur_discard_cards[pos]);
 
 

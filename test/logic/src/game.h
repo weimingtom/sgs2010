@@ -40,7 +40,28 @@ typedef enum _Status
 	Status_Round_End,
 }Status;
 
+
+typedef enum _DisCardReson
+{
+	DisCardReson_None = 0,
+	DisCardReson_Out,
+	DisCardReson_PassiveOut,
+	DisCardReson_Discard,
+	DisCardReson_PassiveDiscard,
+	DisCardReson_DecideCard,
+	DisCardReson_Judgment,
+} DisCardReson;
+
+typedef struct tagDisCard
+{
+	Card        card;
+	int         from_player;
+	CardWhere   from_where;
+	DisCardReson   reson;
+} DisCard;
+
 // tolua_end
+
 
 typedef struct tagGameContext GameContext;
 

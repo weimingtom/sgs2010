@@ -70,8 +70,6 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 		CHECK_RET(ret, ret);
-
-
 	}
 
 	// per calc
@@ -342,7 +340,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &stEvent, "请出一张牌或者发动技能:");
+	ret = cmd_loop(pGame, &stEvent, YES, "请出一张牌或者发动技能:");
 
 	CHECK_RET(ret, ret);
 
@@ -369,7 +367,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 		if(num != pEvent->pattern_out->pattern.num)
 		{
-			MSG_OUT("out card number not match pattern [%d] cards!\n", pEvent->pattern_out->pattern.num);
+			MSG_OUT("出牌的数量不符合要求，应该出[%d]张牌!\n", pEvent->pattern_out->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -378,13 +376,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		{
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
 			{
-				MSG_OUT("input card idx [%d] is error!\n", idx[n]);
+				MSG_OUT("索引[%d]无效!\n", idx[n]);
 				return R_E_PARAM;
 			}
 
 			if(!CHECK_WHERE_PATTERN(stCard[n].where, pEvent->pattern_out->pattern.where))
 			{
-				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
+				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
 			}
 			// must success
@@ -394,7 +392,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// match pattern ?
 		if(R_SUCC != card_match(&stCard[0].card, sizeof(PosCard), num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
 		{
-			MSG_OUT("out card is not match pattern!\n");
+			MSG_OUT("你出的牌类型或者花色不符合要求!\n");
 			return R_E_PARAM;
 		}
 		
@@ -430,7 +428,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 		if(num != pEvent->pattern_out->pattern.num)
 		{
-			MSG_OUT("supply card number not match pattern [%d] cards!\n", pEvent->pattern_out->pattern.num);
+			MSG_OUT("提供的牌的数量不符合要求，应该提供[%d]张牌!\n", pEvent->pattern_out->pattern.num);
 			return R_E_PARAM;
 		}
 
@@ -439,13 +437,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		{
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
 			{
-				MSG_OUT("input card idx [%d] is error!\n", idx[n]);
+				MSG_OUT("索引[%d]无效!\n", idx[n]);
 				return R_E_PARAM;
 			}
 
 			if((stCard[n].where & pEvent->pattern_out->pattern.where) == 0)
 			{
-				MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
+				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
 			}
 			// must success
@@ -455,7 +453,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// match pattern ?
 		if(R_SUCC != card_match(&stCard[0].card, sizeof(PosCard), num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
 		{
-			MSG_OUT("out card is not match pattern!\n");
+			MSG_OUT("你提供的牌类型或者花色不符合要求!\n");
 			return R_E_PARAM;
 		}
 
@@ -490,7 +488,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// must out one card
 		if(num != 1)
 		{
-			MSG_OUT("only can out one card!\n");
+			MSG_OUT("你只能出一张牌!\n");
 			return R_E_PARAM;
 		}
 
@@ -498,13 +496,13 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[0], &stCard[0].where, &stCard[0].pos))
 		{
-			MSG_OUT("input card idx [%d] is error!\n", idx[0]);
+			MSG_OUT("索引[%d]无效!\n", idx[0]);
 			return R_E_PARAM;
 		}
 
 		if(stCard[0].where != CardWhere_PlayerHand)
 		{
-			MSG_OUT("only can out hand card!\n");
+			MSG_OUT("你只能将手牌打出!\n");
 			return R_E_PARAM;
 		}
 
@@ -520,7 +518,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->cur_player))
 		if(YES != call_card_can_out(stCard[0].card.id, pGame, pEvent, pGame->cur_player, &stCard[0]))
 		{
-			MSG_OUT("can not out this card: %s!\n", card_str(&stCard[0].card, buffer, sizeof(buffer)));
+			MSG_OUT("你当前不能出这张牌 %s!\n", card_str(&stCard[0].card, buffer, sizeof(buffer)));
 			return R_E_PARAM;
 		}
 
@@ -552,7 +550,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 {
-	
+	/*
 	if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		pEvent->result = R_CANCEL;
@@ -564,14 +562,15 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 		pEvent->result = R_CANCEL;
 		return R_BACK;
 	}
-	else /* if(pEvent->id == GameEvent_RoundOutCard) */ // out card in any status is allowed
+	else  // out card in any status is allowed
 	{
 
 		pEvent->result = R_CANCEL;
 		return R_BACK;
 	}
+	*/
 
-	return R_SUCC;
+	return R_CANCEL;
 }
 
 
@@ -849,7 +848,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &event, alter_text);
+	ret = cmd_loop(pGame, &event, YES, alter_text);
 
 	if(ret != R_SUCC)
 		return ret;
@@ -929,7 +928,6 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	event.before_pout = &before_pout;
 
 	trigger_game_event(pGame, &event);
-
 
 	// avoid the passive but result is cancel.
 	if(event.result == R_CANCEL)
@@ -1059,8 +1057,9 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		//alter_text = text;
 	}
 
-	ret = cmd_loop(pGame, &event, alter_text);
-	(void)ret;
+	ret = cmd_loop(pGame, &event, YES, alter_text);
+	
+	CHECK_RET(ret,ret);
 
 	CHECK_RET(event.result, event.result);
 
@@ -1073,11 +1072,9 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	trigger_game_event(pGame, &event);
 
-
 	// the passive out is not effect
 	if(event.result == R_CANCEL)
 		return R_CANCEL;
-
 
 
 	return R_SUCC;

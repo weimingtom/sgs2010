@@ -85,7 +85,7 @@ reg_hero({
 			},
 			event = {
 				[GameEvent_PassiveOutCard]= function(self, game, event, player)
-					
+					-- 请求Wei势力玩家支持闪，
 					return R_SUCC;
 				end,
 			},

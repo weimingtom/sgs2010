@@ -318,7 +318,7 @@ static  RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent);
 
 static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 {
-	MSG_OUT("the round [%d] is start, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("第[%d]回合，开始阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -333,19 +333,23 @@ static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
-	MSG_OUT("enter the round [%d]  judgment phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
-
+	RESULT ret;
+	Player* pPlayer;
+	PosCard stCard;
 	GameEventContext  event;
+
+	MSG_OUT("第[%d]回合，判定阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	// is ot not skip this round step ?
 	if(event.result == R_CANCEL)
 		return R_SUCC;
 	
 	// judge cards
-	Player* pPlayer = ROUND_PLAYER(pGame);
-	PosCard stCard;
+	pPlayer = ROUND_PLAYER(pGame);
+
 	//const CardConfig* pCardConfig;
 
 
@@ -374,6 +378,10 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
 				}
 
+				ret = game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
+				CHECK_RET(ret,ret);
+				stCard.where = CardWhere_CurDiscardStack;
+
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 				event.pos_card = &stCard;
 				trigger_game_event(pGame, &event);
@@ -381,7 +389,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 			}
 
 			// after calc
-			if(stCard.card.id != CardID_None)
+			//if(stCard.card.id != CardID_None)
 			{
 				//if(pCardConfig->out != NULL)
 				{
@@ -407,6 +415,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
+	game_flush_discard_cur(pGame);
 
 	return R_SUCC;
 }
@@ -414,10 +423,11 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT  ret;
 	GetCard num;
 	GameEventContext  event;
 
-	MSG_OUT("enter the round [%d]  get card phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("第[%d]回合，摸牌阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 
 	num.num = 2;  // in get round init to get 2 card 
@@ -434,7 +444,8 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 		return R_SUCC;
 	}
 	
-	game_round_do_get(pGame, pEvent, pGame->round_player, num.num);
+	ret = game_round_do_get(pGame, pEvent, pGame->round_player, num.num);
+	CHECK_RET(ret,ret);
 
 	game_flush_discard_cur(pGame);
 
@@ -452,7 +463,7 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	GameEventContext  event;
 
-	MSG_OUT("enter the round [%d]  out card phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("第[%d]回合，出牌阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	INIT_EVENT(&event, GameEvent_PerRoundOut, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
@@ -479,9 +490,10 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 
 static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT ret;
 	GameEventContext  event;
 
-	MSG_OUT("enter the round [%d]  discard card phase, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("第[%d]回合，弃牌阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 	// trigger round discard event
 	INIT_EVENT(&event, GameEvent_PerRoundDiscard, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -495,7 +507,9 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	}
 
 	// discard loop
-	// game_round_do_discard(pGame, pEvent, player);
+	ret = game_round_discard_card(pGame, pEvent, pGame->round_player);
+
+	CHECK_RET(ret,ret);
 	game_flush_discard_cur(pGame);
 
 
@@ -512,7 +526,7 @@ static RESULT game_round_end(GameContext* pGame, GameEventContext* pEvent)
 	// trigger round end event
 	GameEventContext  event;
 
-	MSG_OUT("the round [%d] is finish, round player is [%s]\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
+	MSG_OUT("第[%d]回合，结束阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
 
 	INIT_EVENT(&event, GameEvent_RoundEnd, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -540,7 +554,7 @@ static RESULT game_next_round(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 
-	MSG_OUT("next round: num [%d], round player is set to: %d, [%s]\n", pGame->round_num, pGame->round_player, ROUND_PLAYER(pGame)->name);
+	// MSG_OUT("next round: num [%d], round player is set to: %d, [%s]\n", pGame->round_num, pGame->round_player, ROUND_PLAYER(pGame)->name);
 
 	// set status round begin
 	pGame->status = Status_Round_Begin;

@@ -33,7 +33,7 @@ typedef struct tagSelOption
 
 // int cmd_loop(GameContext* pContext, const char* alter_text, FunCmdPerProc  funper, void* ud);
 
-RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, const char* strAlter);
+RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cancel, const char* strAlter);
 
 RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value);
 

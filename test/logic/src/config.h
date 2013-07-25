@@ -136,6 +136,8 @@ typedef enum _RESULT
 
 #define B2YESNO(b) ((b)?YES:NO)
 
+#define YESNO2STR(yesno)  ((yesno)==YES?"YES":"NO")
+
 
 #define IS_FAIL(res)  ((res) < 0)
 #define IS_SUCC(res)  ((res) == R_SUCC)

@@ -88,8 +88,7 @@ int main(int argc, char** argv)
 
 	INIT_EVENT(&stEvent, GameEvent_None, INVALID_PLAYER, INVALID_PLAYER, NULL);
 
-	cmd_loop(&stGameContext, &stEvent, NULL);
-
+	cmd_loop(&stGameContext, &stEvent, YES, NULL);
 
 	close_game_script();
 

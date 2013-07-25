@@ -112,6 +112,10 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 
 		return R_BACK;
 	}
+	else
+	{
+		MSG_OUT("当前不允许进行摸牌!\n");
+	}
 	
 	return R_E_STATUS;
 }
@@ -125,6 +129,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 	GetCard    stGetCard;
 
 	stGetCard.num = num;
+	stGetCard.can_cancel = NO;
 
 	
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, INVALID_PLAYER, pEvent);
@@ -134,16 +139,16 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	snprintf(buffer, sizeof(buffer), "请摸[%d]张牌:", stGetCard.num);
 
-	ret = cmd_loop(pGame, &event, buffer);
+	ret = cmd_loop(pGame, &event, stGetCard.can_cancel, buffer);
 
-	(void)ret;
+	CHECK_RET(ret,ret);
 
 	return R_SUCC;
 }
 
 
 
-RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num)
+RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num, YESNO can_cancel)
 {
 	RESULT ret;
 	GameEventContext  event;
@@ -174,6 +179,7 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	
 	stGetCard.num = num;
+	stGetCard.can_cancel = can_cancel;
 
 	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pParentEvent);
 	event.get_card = &stGetCard;
@@ -182,9 +188,11 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	snprintf(buffer, sizeof(buffer), "请摸[%d]张牌:", stGetCard.num);
 
-	ret = cmd_loop(pGame, &event, buffer);
+	ret = cmd_loop(pGame, &event, can_cancel, buffer);
 
-	(void)ret;
+	CHECK_RET(ret, ret);
 
 	return R_SUCC;
 }
+
+

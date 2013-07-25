@@ -223,7 +223,8 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	while(ret == R_SUCC)
 	{
 		set_game_cur_player(pGame, player);
-		cmd_loop(pGame, pEvent, "请出一张牌或者发动技能:");
+		ret = cmd_loop(pGame, pEvent, YES, "请出一张牌或者发动技能:");
+		CHECK_RET(ret, ret);
 		ret = check_player_event(pGame, pEvent, player, 0);
 	}
 
