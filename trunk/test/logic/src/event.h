@@ -80,6 +80,7 @@ typedef enum _GameEvent
 	GameEvent_PerDiscardCard,
 	GameEvent_PostDiscardCard,
 	GameEvent_PerPassiveDiscardCard,
+	GameEvent_PassiveDiscardCard,
 	GameEvent_PostPassiveDiscardCard,
 	GameEvent_HandCardEmpty,
 	GameEvent_PerCardCalc,
@@ -150,6 +151,13 @@ typedef struct tagAttackDis
 	int     flag;
 }AttackDis;
 
+
+typedef struct tagDiscardCard
+{
+	int num;
+	int where;
+} DiscardCard;
+
 // tolua_end
 
 
@@ -179,6 +187,7 @@ struct tagGameEventContext
 		PosCard*    pos_card;  // lost card,
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
+		DiscardCard* discard_card; // when round discard card, or passive discard card
 	};
 };
 

@@ -75,9 +75,12 @@ reg_hero({
 			flag=SkillFlag_Master,
 			can_use = {
 				[GameEvent_PassiveOutCard] = function(self, game, event, player)
-					-- 当需要出一张闪的时候
-					if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed ~= YES and
-						get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
+					-- 当需要出一张闪的时候,只能主公
+					local p = get_game_player(player);
+					if(p.id == PlayerID_Master and event.pattern_out.pattern.num == 1 
+						and event.pattern_out.pattern.fixed ~= YES
+						and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') 
+					then
 						return USE_MANUAL;
 					end
 					return USE_CANNOT;
@@ -85,7 +88,33 @@ reg_hero({
 			},
 			event = {
 				[GameEvent_PassiveOutCard]= function(self, game, event, player)
-					-- 请求Wei势力玩家支持闪，
+					-- 请求Wei势力玩家支持闪
+					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
+					local next_player = game_next_player(game, player);
+					
+					while(next_player ~= player) 
+					do
+						local p = get_game_player(next_player);
+						local group = get_hero_group(p.hero);
+						if(group == PlayerGroup_Wei) 
+						then
+							if(R_SUCC == game_supply_card(game, event, player, next_player, 'h:{shan}', 
+									'请为【'.. ..'】提供一张【闪】，你也可以拒绝该请求:', event.pattern_out.out)) 
+							then
+								event.result = R_SUCC;
+								event.block = YES;
+								return R_SUCC;
+							end
+						end
+					end
+					
+					--  没人响应，你仍然可以出一张闪
+					local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
+					-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
+					local ret = game_passive_out(game, event.parent_event, player, event.target, 'hf:{shan}', alter);
+					event.result = ret;
+					event.block = YES;
+					
 					return R_SUCC;
 				end,
 			},

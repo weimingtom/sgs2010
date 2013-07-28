@@ -271,17 +271,17 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			int n;
 			char  buffer[128];
 			Card* pCard;
-			MSG_OUT("µ±Ç°ÆúÅÆ:\n");
+			MSG_OUT("µ±Ç°ÆúÅÆ: ¹²[%d]ÕÅ\n", pContext->cur_discard_card_num);
 			for(n = 0; n < pContext->cur_discard_card_num; n++)
 			{
 				pCard = &pContext->cur_discard_cards[n];
 				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
 			}
 
-			MSG_OUT("ÆúÅÆÅÆ¶Ñ:\n");		
+			MSG_OUT("ÆúÅÆÅÆ¶Ñ: ¹²[%d]ÕÅ\n", pContext->discard_card_stack.count);		
 			card_stack_dump(&pContext->discard_card_stack);
 
-			MSG_OUT("ÃþÅÆÅÆ¶Ñ:\n");		
+			MSG_OUT("ÃþÅÆÅÆ¶Ñ: ¹²[%d]ÕÅ\n", pContext->get_card_stack.count);		
 			card_stack_dump(&pContext->get_card_stack);
 		}
 	}

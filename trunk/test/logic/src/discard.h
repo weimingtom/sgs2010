@@ -21,6 +21,9 @@ RESULT game_clr_discard_cur(GameContext* pGame, int pos);
 void game_flush_discard_cur(GameContext* pGame);
 
 
+
+
+
 RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player);
 
 RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int* idx, int num);

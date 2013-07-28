@@ -359,7 +359,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	//int pos[MAX_CARD_LIST_NUM];
 	PosCard stCard[MAX_CARD_LIST_NUM];
 	Player* pPlayer = CUR_PLAYER(pGame);
-	int n;
+	int n, m;
 
 
 	if(pEvent->id == GameEvent_PassiveOutCard)
@@ -374,6 +374,14 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		for(n = 0; n < num; n++)
 		{
+			for(m = 0; m < n; m++)
+			{
+				if(idx[m] == idx[n])
+				{
+					MSG_OUT("索引[%d]重复!\n", idx[n]);
+					return R_E_PARAM;
+				}
+			}
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
 			{
 				MSG_OUT("索引[%d]无效!\n", idx[n]);
@@ -435,6 +443,14 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		for(n = 0; n < num; n++)
 		{
+			for(m = 0; m < n; m++)
+			{
+				if(idx[m] == idx[n])
+				{
+					MSG_OUT("索引[%d]重复!\n", idx[n]);
+					return R_E_PARAM;
+				}
+			}
 			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
 			{
 				MSG_OUT("索引[%d]无效!\n", idx[n]);
@@ -621,9 +637,9 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 	{
 		switch(*p)
 		{
-		case 'h' : pPattern->where |= PatternCard_Hand; break;
-		case 'e' : pPattern->where |= PatternCard_Equip; break;
-		case 'j' : pPattern->where |=PatternCard_Judgment; break;
+		case 'h' : pPattern->where |= PatternWhere_Hand; break;
+		case 'e' : pPattern->where |= PatternWhere_Equip; break;
+		case 'j' : pPattern->where |=PatternWhere_Judgment; break;
 		case 'f' : pPattern->fixed = YES; break;
 		default: return R_E_FAIL;  // invalid flsg char.
 		}
