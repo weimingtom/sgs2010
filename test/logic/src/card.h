@@ -142,10 +142,10 @@ typedef enum _CardWhere
 
 // need or bits
 typedef enum _PatternCardWhere{
-	PatternCard_None = 0,
-	PatternCard_Hand = (1<<CardWhere_PlayerHand),
-	PatternCard_Equip = (1<<CardWhere_PlayerEquip),
-	PatternCard_Judgment = (1<<CardWhere_PlayerJudgment),
+	PatternWhere_None = 0,
+	PatternWhere_Hand = (1<<CardWhere_PlayerHand),
+	PatternWhere_Equip = (1<<CardWhere_PlayerEquip),
+	PatternWhere_Judgment = (1<<CardWhere_PlayerJudgment),
 } PatternCardWhere;
 
 

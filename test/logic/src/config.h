@@ -128,8 +128,13 @@ typedef enum _RESULT
 	R_E_MEMORY = -3,  // out of memory
 	R_E_STATUS = -4,  // error status
 	R_E_TIMEOUT = -5, // op timeout
-	R_E_OVERFLOW = -6, // overflow , 
-	R_E_CONFLICT = -7, // overflow , 
+	R_E_OVERFLOW = -6, // overflow, 
+	R_E_CONFLICT = -7, // conflict,
+	R_E_NUM = -8,  // invalid number of card
+	R_E_POS = -9, // invalid card pos
+	R_E_WHERE = -10, // card where not match
+	R_E_PATTERN = -11, // card pattern not match
+
 } RESULT;
 
 // tolua_end

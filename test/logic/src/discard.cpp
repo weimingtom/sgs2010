@@ -60,22 +60,31 @@ void game_flush_discard_cur(GameContext* pGame)
 RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player)
 {
 	RESULT ret;
+	DiscardCard   dis;
 	GameEventContext  event;
 	char buffer[128];
 	Player* p;
 
-	INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	
 	p = get_game_player(pGame, player);
 
 	if(p == NULL)
 		return R_E_FAIL;
 
+	// 如果手牌数量大于当前体力值，则需要弃置部分手牌，直到手牌数量等于当前体力，不能弃多，也不能不弃
 	while(p->hand_card_num > p->cur_life)
 	{
 		set_game_cur_player(pGame, player);
+
+		INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
+		dis.num = p->hand_card_num - p->cur_life;
+		dis.where = PatternWhere_Hand;
+
+
+		event.discard_card = &dis;
+
 		
-		snprintf(buffer, sizeof(buffer), "请弃[%d]张牌:", p->hand_card_num - p->cur_life);
+		snprintf(buffer, sizeof(buffer), "请弃[%d]张手牌:", dis.num);
 		
 		ret = cmd_loop(pGame, &event,NO, buffer);
 		CHECK_RET(ret,ret);
@@ -87,39 +96,111 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 	return R_SUCC;
 }
 
-RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int* idx, int num)
+static RESULT remove_discard_cards(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	int n;
+
+	Player* pPlayer;
+
+	pPlayer = get_game_player(pGame, player);
+
+	if(pPlayer == NULL)
+		return R_E_FAIL;
+
+	// remove hand discard cards
+	for(n = 0; n < pPlayer->hand_card_num; n++)
+	{
+		if(pPlayer->hand_cards[n].flag ==  CardFlag_PrepareDiscard)
+		{
+			game_player_discard_card(pGame, pEvent, player, CardWhere_PlayerHand, n);
+			n--;
+		}
+	}
+
+	// remove equip discard cards
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(pPlayer->equip_cards[n].flag ==  CardFlag_PrepareDiscard)
+		{
+			game_player_discard_card(pGame, pEvent, player, CardWhere_PlayerEquip, n);
+		}
+	}
+
+	// remove judgment discard cards
+	for(n = 0; n < pPlayer->judgment_card_num; n++)
+	{
+		if(pPlayer->judgment_cards[n].flag ==  CardFlag_PrepareDiscard)
+		{
+			game_player_discard_card(pGame, pEvent, player, CardWhere_PlayerJudgment, n);
+			n--;
+		}
+	}
+	return R_SUCC;
+}
+
+// 处理弃牌的命令
+RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int* idx, int num)
+{
+	RESULT  ret;
+	int     n, m;
 	PosCard stCard[MAX_CARD_LIST_NUM];
 
-	Player* pPlayer = CUR_PLAYER(pGame);
-
-	if(pPlayer->hand_card_num - pPlayer->cur_life < num || num > MAX_CARD_LIST_NUM)
+	Player* pPlayer;
+	
+	// 只有在弃牌阶段或者被动弃牌事件响应时才有效
+	if(pParentEvent->id == GameEvent_RoundDiscardCard || pParentEvent->id == GameEvent_PassiveDiscardCard)
 	{
-		MSG_OUT("discard card count %d is too many!\n", num);
-		return R_E_PARAM;
-	}
+		pPlayer = CUR_PLAYER(pGame);
 
-	for(n = 0; n < num; n++)
-	{
-		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
+		if(num > MAX_CARD_LIST_NUM)
 		{
-			MSG_OUT("input card idx [%d] is error!\n", idx[n]);
+			MSG_OUT("discard card count %d is too many!\n", num);
 			return R_E_PARAM;
 		}
 
-		if(stCard[n].where != CardWhere_PlayerHand)
+		if(num != pParentEvent->discard_card->num)
 		{
-			MSG_OUT("card idx [%d] is invalid place!\n", idx[n]);
+			MSG_OUT("弃牌的数量不正确!\n");
 			return R_E_PARAM;
 		}
 
-		get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
-	}
+		for(n = 0; n < num; n++)
+		{
+			for(m = 0; m < n; m++)
+			{
+				if(idx[m] == idx[n])
+				{
+					MSG_OUT("索引[%d]重复!\n", idx[n]);
+					return R_E_PARAM;
+				}
+			}
+			if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &stCard[n].where, &stCard[n].pos))
+			{
+				MSG_OUT("索引[%d]无效!\n", idx[n]);
+				return R_E_PARAM;
+			}
 
-	for(n = 0; n < num; n++)
-	{
-		set_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos, CardFlag_PrepareDiscard);
+			if(!CHECK_WHERE_PATTERN(stCard[n].where, pParentEvent->discard_card->where))
+			{
+				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
+				return R_E_PARAM;
+			}
+			// must success
+			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
+		}
+
+		for(n = 0; n < num; n++)
+		{
+			set_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos, CardFlag_PrepareDiscard);
+		}
+
+		ret = remove_discard_cards(pGame, pParentEvent, get_game_cur_player(pGame));
+		if(R_SUCC != ret)
+		{
+			return R_E_FAIL;
+		}
+
+		return R_BACK;
 	}
 
 	return R_E_STATUS;

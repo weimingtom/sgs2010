@@ -72,6 +72,7 @@ struct GameEventContext
 	tolua_readonly PosCard*    pos_card;    // lost card,
 	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
 	tolua_readonly ChangeLife* change_life; // when life is changed 
+	tolua_readonly DiscardCard* discard_card; // when life is changed 
 };
 
 

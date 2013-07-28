@@ -130,7 +130,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 			if(cu)
 			{
-				MSG_OUT("%s 技能[%c]： 装备效果 - 【%s】\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)));
+				MSG_OUT("%s 技能[%c]： 【%s】,%s技能\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
 			}
 
 		}
@@ -324,20 +324,20 @@ static const char* card_where_id_str(CardWhere where)
 static char* card_pattern_where_str(int where, char* buf, int buflen)
 {
 	int n = 0;
-	if(where == PatternCard_None) {
-		strncpy(buf, "PatternCard_None", buflen);
+	if(where == PatternWhere_None) {
+		strncpy(buf, "PatternWhere_None", buflen);
 	} else {
-		if(where  & PatternCard_Hand) {
-			n += snprintf(buf+n, buflen-n, "%s", "PatternCard_Hand");
-			where &= ~PatternCard_Hand;
+		if(where  & PatternWhere_Hand) {
+			n += snprintf(buf+n, buflen-n, "%s", "PatternWhere_Hand");
+			where &= ~PatternWhere_Hand;
 		}
-		if(where  & PatternCard_Equip) {
-			n += snprintf(buf+n, buflen-n, "%s%s", n > 0 ? "|":"", "PatternCard_Equip");
-			where &= ~PatternCard_Equip;
+		if(where  & PatternWhere_Equip) {
+			n += snprintf(buf+n, buflen-n, "%s%s", n > 0 ? "|":"", "PatternWhere_Equip");
+			where &= ~PatternWhere_Equip;
 		}
-		if(where  & PatternCard_Judgment) {
-			n += snprintf(buf+n, buflen-n, "%s%s",  n > 0 ? "|":"", "PatternCard_Judgment");
-			where &= ~PatternCard_Judgment;
+		if(where  & PatternWhere_Judgment) {
+			n += snprintf(buf+n, buflen-n, "%s%s",  n > 0 ? "|":"", "PatternWhere_Judgment");
+			where &= ~PatternWhere_Judgment;
 		}
 		if(where != 0)
 		{
@@ -543,6 +543,21 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 
 }
 
+static void game_event_param__discard_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	char  buf[512];
+	if(NULL == pEvent->change_life)
+	{
+		MSG_OUT("    discard_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    discard_card.num=%d;\n", pEvent->discard_card->num);
+		MSG_OUT("    discard_card.where=%s;\n", card_pattern_where_str(pEvent->discard_card->where, buf, sizeof(buf)));
+	}
+}
+
+
 static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 {
 	switch(pEvent->id)
@@ -606,6 +621,10 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_ChangeLife:
 	case GameEvent_PostChangeLife:
 		game_event_param__change_life(pGame, pEvent);
+		break;
+	case GameEvent_RoundDiscardCard:
+	case GameEvent_PassiveDiscardCard:
+		game_event_param__discard_card(pGame, pEvent);
 		break;
 	default:
 		/* do nothing */

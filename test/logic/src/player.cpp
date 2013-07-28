@@ -333,4 +333,42 @@ RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* po
 	return R_E_FAIL;
 }
 
+RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosCard*  pPosCards)
+{
+	int n, m;
+	CardWhere   where;
+	int  pos;
+	for(n = 0; n < num; n++)
+	{
+		if(R_SUCC != player_card_idx_to_pos(pPlayer, idx[n], &where, &pos))
+			return R_E_POS;
+		for(m = 0; m < n; m++)
+		{
+			if(pPosCards[m].where == where && pPosCards[m].pos == pos)
+				return R_E_POS;
+		}
+		if(R_SUCC != get_player_card(pPlayer, where, pos, &pPosCards[n].card))
+			return R_E_POS;
+
+		pPosCards[n].where = where;
+		pPosCards[n].pos = pos;
+
+	}
+
+	return R_SUCC;
+}
+
+RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num, CardFlag flag)
+{
+	RESULT  ret;
+	int n;
+	for(n = 0; n < num; n++)
+	{
+		ret = set_player_card_flag(pPlayer, pPosCards[n].where, pPosCards[n].pos, flag);
+
+		if(ret != R_SUCC)
+			return ret;
+	}
+	return R_SUCC;
+}
 

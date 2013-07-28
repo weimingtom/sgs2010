@@ -130,8 +130,10 @@ RESULT set_player_card_flag(Player* pPlayer, CardWhere where, int pos, CardFlag 
 RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
 RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
 
-RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* pos);
+RESULT player_card_idx_to_pos(Player* pPlayer, int idx, CardWhere* where, int* pos);
 
+RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosCard*  pPosCards);
+RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num, CardFlag flag);
 
 // tolua_begin
 // {{
