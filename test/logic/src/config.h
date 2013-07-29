@@ -149,6 +149,7 @@ typedef enum _RESULT
 #define IS_CANCEL(res) ((res) == R_CANCEL)
 #define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
 #define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
+#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_SKIP || (r)==R_BACK) { return R_SUCC; } */  }while(0)
 
 #ifdef __cplusplus
 }
