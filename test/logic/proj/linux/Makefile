@@ -16,7 +16,7 @@ PKG_DIR=../../pkg
 
 OUT=$(OUT_DIR)/logic
 
-
+HEADS=$(shell ls $(SRC_DIR)/*.h)
 SRC=$(shell ls $(SRC_DIR)/*.cpp)
 #SRC+=$(shell ls $(SRC_DIR)/card_impl/*.cpp)
 #SRC+=$(shell ls $(SRC_DIR)/hero_impl/*.cpp)
@@ -42,7 +42,7 @@ $(OBJS):%.obj:%.cpp
 	@echo compiling $< ...
 	@$(CC) -c -o $@  $< $(CFLAGS) $(INCL) -MT $@ -MF `echo $@ | sed -e 's,\.obj$$,.dep,'` -MD -MP
 
-../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg
+../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg $(HEADS)
 	@echo tolua gen $@ ...
 	@cd $(PKG_DIR) && $(TOLUA) -o lua_export.cpp -H lua_export.h -n game lua_export.pkg && cd -
 
