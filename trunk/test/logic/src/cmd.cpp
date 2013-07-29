@@ -860,7 +860,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cance
 					switch(ret)
 					{
 
-					case R_CANCEL:
+					case R_CANCEL:   // cancel the operator, need return to caller
 						if(can_cancel ==  YES)
 						{
 							pEvent->result = R_CANCEL;
@@ -874,8 +874,10 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cance
 						break;
 					case R_BACK:    // spec return R_BACK means back to caller with success
 						return R_SUCC;
-					case R_EXIT:
-					case R_RETRY:
+					case R_ABORT:   // fail and return to caller
+					case R_EXIT:    // back because need exit
+					case R_RETRY:   // not yet used
+					case R_SKIP:   // skip the operator with success
 						return ret;
 					default:
 						// continue loops ...
