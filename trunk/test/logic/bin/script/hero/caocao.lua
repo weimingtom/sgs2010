@@ -45,7 +45,7 @@ reg_hero({
 			name="奸雄",
 			flag=0,
 			can_use = {
-				[GameEvent_PostChangeLife] = function(self, game, event, player)
+				[GameEvent_PostChangeLife] = function(cfg, game, event, player)
 					if(event.change_life.delta < 0 and event.trigger == player 
 						and event.change_life.src_cards.list.num > 0 and YES ~= is_player_handfull(get_game_player(game, player)) ) then
 						local cnt = 0;
@@ -60,7 +60,7 @@ reg_hero({
 				end,
 			},
 			event = {
-				[GameEvent_PostChangeLife] = function(self, game, event, player)
+				[GameEvent_PostChangeLife] = function(cfg, game, event, player)
 					-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
 					for n = 0, event.change_life.src_cards.list.num - 1 do
 						add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
@@ -74,9 +74,9 @@ reg_hero({
 			name="护驾",
 			flag=SkillFlag_Master,
 			can_use = {
-				[GameEvent_PassiveOutCard] = function(self, game, event, player)
+				[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
 					-- 当需要出一张闪的时候,只能主公
-					local p = get_game_player(player);
+					local p = get_game_player(game, player);
 					if(p.id == PlayerID_Master and event.pattern_out.pattern.num == 1 
 						and event.pattern_out.pattern.fixed ~= YES
 						and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') 
@@ -87,29 +87,35 @@ reg_hero({
 				end,
 			},
 			event = {
-				[GameEvent_PassiveOutCard]= function(self, game, event, player)
+				--[[
+					问题: 1) 曹操使用护驾，某魏势力使用八卦阵，判定失败，且没有从手牌打出闪，则其它魏势力可以继续打出闪吗？
+				--]]
+				[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 					-- 请求Wei势力玩家支持闪
 					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
+					local self = get_game_player(game, player);
 					local next_player = game_next_player(game, player);
 					
 					while(next_player ~= player) 
 					do
-						local p = get_game_player(next_player);
+						local p = get_game_player(game, next_player);
+						message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
 						local group = get_hero_group(p.hero);
-						if(group == PlayerGroup_Wei) 
+						if(group == HeroGroup_Wei) 
 						then
 							if(R_SUCC == game_supply_card(game, event, player, next_player, 'h:{shan}', 
-									'请为【'.. ..'】提供一张【闪】，你也可以拒绝该请求:', event.pattern_out.out)) 
+									'请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', event.pattern_out.out)) 
 							then
 								event.result = R_SUCC;
 								event.block = YES;
 								return R_SUCC;
 							end
 						end
+						next_player = game_next_player(game, next_player);
 					end
 					
 					--  没人响应，你仍然可以出一张闪
-					local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
+					local alter = '你使用【'..cfg.skills[2].name..'】无人响应，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 					-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
 					local ret = game_passive_out(game, event.parent_event, player, event.target, 'hf:{shan}', alter);
 					event.result = ret;
