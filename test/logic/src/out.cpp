@@ -208,7 +208,15 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 		// log
 		if(out_card->list.num == 1 && CARD_EQUAL(&out_card->list.pcards[0].card, &out_card->vcard))
 		{
-			MSG_OUT("玩家【%s】打出牌 %s\n", get_game_player(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
+			if(out_card->trigger == out_card->supply)
+			{
+				MSG_OUT("【%s】出牌 %s。\n", get_game_player(pGame, out_card->trigger)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
+			}
+			else
+			{
+				MSG_OUT("【%s】打出由【%s】提供的牌 %s。\n", get_game_player(pGame, out_card->trigger)->name,
+					get_game_player(pGame, out_card->supply)->name, card_str(&out_card->list.pcards[0].card, buf, sizeof(buf)));
+			}
 		}
 		else
 		{
@@ -218,7 +226,16 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 				strcat(buf2, card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 			}
 
-			MSG_OUT("玩家【%s】将[%d]张牌 %s 当作 %s 打出\n", get_game_player(pGame, out_card->trigger)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
+			if(out_card->trigger == out_card->supply)
+			{
+				MSG_OUT("【%s】将[%d]张牌 %s 当作 %s 打出。\n", get_game_player(pGame, out_card->trigger)->name, 
+					out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
+			}
+			else
+			{
+				MSG_OUT("【%s】将由【%s】提供的[%d]张牌 %s 当作 %s 打出。\n", get_game_player(pGame, out_card->trigger)->name, 
+					get_game_player(pGame, out_card->supply)->name, out_card->list.num, buf2, card_str(&out_card->vcard, buf, sizeof(buf)));
+			}
 		}
 
 		// real remove from supply
@@ -457,7 +474,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 				return R_E_PARAM;
 			}
 
-			if((stCard[n].where & pEvent->pattern_out->pattern.where) == 0)
+			if(!CHECK_WHERE_PATTERN(stCard[n].where, pEvent->pattern_out->pattern.where))
 			{
 				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
@@ -490,8 +507,8 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		{
 			pEvent->pattern_out->out.vcard = pEvent->pattern_out->out.list.pcards[0].card;
 		}
-		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
-		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
+		pEvent->pattern_out->out.supply = get_game_cur_player(pGame); //suply card  is c current player
+		pEvent->pattern_out->out.trigger = pEvent->target;    // the supply card target player is real out card player
 
 		pEvent->result = R_SUCC;
 		pEvent->block = YES;

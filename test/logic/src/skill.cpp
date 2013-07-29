@@ -10,6 +10,19 @@
 
 
 
+YESNO can_use_skill(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(pEvent->id == GameEvent_RoundOutCard || pEvent->id == GameEvent_PassiveOutCard || pEvent->id == GameEvent_SupplyCard)
+	{
+		// 在出牌或者提供牌的情况下，如果pattern指出为fixed则，不能使用技能
+		if(pEvent->pattern_out->pattern.fixed == YES)
+			return NO;
+	}
+	return YES;
+}
+
+
+
 RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 {
 	char name[128];
@@ -30,6 +43,12 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 	{
 		MSG_OUT("无效的技能序号 [%d] !\n", idx );
 		return R_E_PARAM;
+	}
+
+	if(YES != can_use_skill(pGame, pEvent))
+	{
+		MSG_OUT("你当前不能使用技能！\n");
+		return R_E_STATUS;
 	}
 
 
@@ -61,6 +80,12 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 		return R_E_FAIL;
 	}
 
+	if(YES != can_use_skill(pGame, pEvent))
+	{
+		MSG_OUT("你当前不能使用技能！\n");
+		return R_E_STATUS;
+	}
+
 	pcard.where = CardWhere_PlayerEquip;
 	pcard.pos = EquipIdx_Weapon;
 
@@ -86,6 +111,13 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 		MSG_OUT("你没有装备防具！\n");
 		return R_E_FAIL;
 	}
+
+	if(YES != can_use_skill(pGame, pEvent))
+	{
+		MSG_OUT("你当前不能使用技能！\n");
+		return R_E_STATUS;
+	}
+
 
 	pcard.where = CardWhere_PlayerEquip;
 	pcard.pos = EquipIdx_Armor;
