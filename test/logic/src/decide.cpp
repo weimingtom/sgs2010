@@ -50,7 +50,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	(void)ret;
 
 	// some skill can make the decide success or fail directly.
-	if(event.result == R_CANCEL)
+	if(event.result == R_CANCEL || event.result == R_ABORT)
 		return NO;
 
 	if(event.result == R_SKIP)

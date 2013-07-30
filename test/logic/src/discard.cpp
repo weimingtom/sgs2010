@@ -227,6 +227,9 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 	trigger_game_event(pGame, &event);
 
+	// 暂时这里先不管返回值是否能防止弃牌。困为如果从这里返回，remove_discard_cards会进入死循环
+	//CHECK_BACK_RET(event.result);
+
 	if(R_SUCC == player_remove_card(pPlayer, where, pos, &stCard.card))
 	{
 		//stCard.card.flag = CardFlag_None;
@@ -242,6 +245,8 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		event.pos_card = &stCard;
 		trigger_game_event(pGame, &event);
+
+		// ignore event result
 
 	}
 	return R_SUCC;
