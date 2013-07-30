@@ -344,8 +344,11 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	game_flush_discard_cur(pGame);
 
 	// is ot not skip this round step ?
-	if(event.result == R_CANCEL)
+	if(event.result == R_SKIP)
+	{
+		// skip this step
 		return R_SUCC;
+	}
 	
 	// judge cards
 	pPlayer = ROUND_PLAYER(pGame);
@@ -438,9 +441,9 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	game_flush_discard_cur(pGame);
 
 
-	if(event.result == R_CANCEL)
+	if(event.result == R_SKIP)
 	{
-		// skip getcard step
+		// skip get card step
 		return R_SUCC;
 	}
 	
@@ -469,9 +472,9 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
-	if(event.result == R_CANCEL)
+	if(event.result == R_SKIP)
 	{
-		// skip getcard step
+		// skip out card  step
 		return R_SUCC;
 	}
 
@@ -500,9 +503,9 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
 
-	if(event.result == R_CANCEL)
+	if(event.result == R_SKIP)
 	{
-		// skip getcard step
+		// skip discard card step
 		return R_SUCC;
 	}
 
@@ -728,7 +731,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		{
 			MSG_OUT("init game failed: %s\n", lua_tostring(L, -1));
 			lua_pop(L, 1);
-			ret = R_ABORT;
+			ret = R_E_FAIL;
 			break;
 		}
 
@@ -755,7 +758,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		{
 			MSG_OUT("Game Abort: %s\n", lua_tostring(L, -1));
 			lua_pop(L, 1);
-			ret = R_ABORT;
+			ret = R_SUCC;
 			break;
 		}
 

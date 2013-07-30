@@ -78,8 +78,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	
 	trigger_game_event(pGame, &stEvent);
 
-	if(stEvent.result == R_CANCEL)
-		return R_CANCEL;
+	CHECK_BACK_RET(stEvent.result);
 
 	// calc card
 	INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
@@ -94,8 +93,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	trigger_game_event(pGame, &stEvent);
 
-	if(stEvent.result == R_CANCEL)
-		return R_CANCEL;
+	CHECK_BACK_RET(stEvent.result);
 
 	return R_SUCC;
 }
@@ -320,24 +318,26 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 		return ret;
 
 
-	if(R_CANCEL == per_out_card(pGame, pEvent, player, out_card->target, out_card))
-		return R_CANCEL;
+	ret = per_out_card(pGame, pEvent, player, out_card->target, out_card);
+
+	CHECK_BACK_RET(ret);
 
 
 	ret = remove_out_card(pGame, pEvent, out_card);
 	CHECK_RET(ret,ret);
+
 	add_out_stack(pGame, out_card);
 
 
 	ret = do_out_card(pGame, pEvent, player, out_card->target, out_card);
+	CHECK_RET(ret,ret);
 
 	// post out maybe modify out cards 
 	ret = post_out_card(pGame, pEvent, player, out_card->target, out_card);
 
 
 	// the out is not effect
-	if(ret == R_CANCEL)
-		return ret;
+	CHECK_BACK_RET(ret);
 
 	return R_SUCC;
 }
@@ -361,10 +361,8 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	CHECK_RET(ret, ret);
 
-	if(stEvent.result == R_CANCEL)
-		return stEvent.result;
+	CHECK_BACK_RET(stEvent.result);
 
-	// 
 	return R_SUCC;
 }
 
@@ -566,7 +564,6 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		out_card.supply = pGame->cur_player;
 
 		game_real_out_card(pGame, pEvent, pGame->cur_player, &out_card);
-
 
 
 		//pEvent->result = R_SUCC;
