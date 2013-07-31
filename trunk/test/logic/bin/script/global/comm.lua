@@ -26,6 +26,14 @@ function get_event_str(eid)
 	return event_tb[eid] or "";
 end
 
+function select(cond, a, b)
+	if(cond) then
+		return a;
+	else
+		return b;
+	end
+end
+
 
 
 
