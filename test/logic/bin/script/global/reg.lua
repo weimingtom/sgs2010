@@ -171,7 +171,12 @@ function call_card_can_out(id, game, event, player, pos_card)
 		return NO;
 	end
 	
-	return cfg.can_out[event.id](cfg, game, event, player, pos_card);
+	local ret = cfg.can_out[event.id](cfg, game, event, player, pos_card);
+	
+	if(ret ~= YES and ret ~= NO) then
+		error('call_card_can_out return result is invalid: '..tostring(ret));
+	end
+	return ret;
 end
 
 
@@ -181,7 +186,11 @@ function call_card_can_use(id, game, event, player, pos_card)
 		return USE_CANNOT;
 	end
 	
-	return cfg.can_use[event.id](cfg, game, event, player, pos_card);
+	local ret = cfg.can_use[event.id](cfg, game, event, player, pos_card);
+	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO) then
+		error('call_card_can_use return result is invalid: '..tostring(ret));
+	end
+	return ret;
 end
 
 
@@ -191,7 +200,12 @@ function call_card_event(id, game, event, player)
 		return R_DEF; 
 	end
 	
-	return cfg.event[event.id](cfg, game, event, player);
+	local ret = cfg.event[event.id](cfg, game, event, player);
+	
+	if( nil == ret or type(ret) ~= 'number' ) then
+		error('call_card_event return result is invalid: '..tostring(ret));	
+	end
+	return ret;
 end
 
 --------------------------------------------------------------
@@ -330,7 +344,11 @@ function call_hero_skill_can_use(id, index, game, event, player)
 		return USE_CANNOT;
 	end
 	
-	return  skill.can_use[event.id](cfg, game, event, player);
+	local ret = skill.can_use[event.id](cfg, game, event, player);
+	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO) then
+		error('call_hero_skill_can_use return result is invalid: '..tostring(ret));
+	end
+	return ret;
 end
 
 
@@ -338,16 +356,21 @@ function call_hero_skill_event(id, index, game, event, player)
 	local cfg = hero_list[id];
 	
 	if(cfg == nil or cfg.skills == nil) then
-		return NO;
+		return R_DEF;
 	end
 	
 	local skill = cfg.skills[index];
 	
 	if(skill == nil or skill.event == nil or skill.event[event.id] == nil) then
-		return NO;
+		return R_DEF;
 	end
 	
-	return  skill.event[event.id](cfg, game, event, player);
+	local ret = skill.event[event.id](cfg, game, event, player);
+	
+	if(ret == nil or type(ret) ~= 'number') then
+		error('call_hero_skill_event return result is invalid: '..tostring(ret));
+	end
+	return ret;
 end
 
 

@@ -96,36 +96,38 @@ reg_hero({
 					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
 					local self = get_game_player(game, player);
 					local next_player = game_next_player(game, player);
-					local ud = event.pattern_out.pattern.ud;
+					message('1 pattern.ud:', event.pattern_out.pattern.ud);
 					while(next_player ~= player) 
 					do
 						local p = get_game_player(game, next_player);
-						message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
+						--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
 						local group = get_hero_group(p.hero);
 						if(group == HeroGroup_Wei) then
 							local ret = game_supply_card(game, event, player, next_player, 
-									'h:{shan}?'..ud, 
+									'h:{shan}?'..event.pattern_out.pattern.ud, 
 									'请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', 
 									event.pattern_out.out);
+							message('2 pattern.ud:', event.pattern_out.pattern.ud);
 							if (R_SUCC == ret) then
 								event.result = R_SUCC;
 								event.block = YES;
 								return R_SUCC;
 							end
-							-- fix标志的作用为，当某玩家响应时，如果使用了技能或者其它代替出牌的方式但最终
-							-- 失败，并且没有从手牌打出闪，则接下来的人，只能从手牌提供，不能再使用其它方式。
-							if(ret == R_ABORT) then
-								ud = ud .. '{bgz}';
-							end
 						end
 						next_player = game_next_player(game, next_player);
 					end
 					
+					
+					message('3 pattern.ud:', event.pattern_out.pattern.ud);
+					-- 已经使用护驾，添加标记
+					event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '[hujia]';
 					--  没人响应，你仍然可以出一张闪
 					local alter = '你使用【'..cfg.skills[2].name..'】无人响应，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 					-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-					local ret = game_passive_out(game, event.parent_event, player, event.target, 'hf:{shan}', alter);
-					event.result = ret == R_SUCC and R_SUCC or R_ABORT;
+					local ret = game_passive_out(game, event.parent_event, player, event.target,
+									'h:{shan}?'..event.pattern_out.pattern.ud, alter);
+
+					event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);
 					event.block = YES;
 					
 					return R_SUCC;
