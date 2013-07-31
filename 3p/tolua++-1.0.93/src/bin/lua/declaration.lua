@@ -222,11 +222,16 @@ function classDeclaration:outchecktype (narg)
   def = 0
  end
  if self.dim ~= '' then
-	--if t=='string' then
-	--	return 'tolua_isstringarray(tolua_S,'..narg..','..def..',&tolua_err)'
-	--else
-	return '!tolua_istable(tolua_S,'..narg..',0,&tolua_err)'
- 	--end
+	-- 2013/7/31 by jerrykong : char array check as normal c string
+	if self.type == 'char*' then
+		return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
+	else
+		--if t=='string' then
+		--	return 'tolua_isstringarray(tolua_S,'..narg..','..def..',&tolua_err)'
+		--else
+		return '!tolua_istable(tolua_S,'..narg..',0,&tolua_err)'
+		--end
+	end
  elseif t then
 	return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
  else
