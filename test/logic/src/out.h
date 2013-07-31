@@ -27,7 +27,7 @@ typedef struct tagOutCard
 	PosCardList list;
 } OutCard;
 
-
+#define MAX_PATTERN_UD_LEN     256
 
 typedef struct tagOutCardPattern
 {
@@ -35,6 +35,7 @@ typedef struct tagOutCardPattern
 	YESNO       fixed;    // limited the card is fixed or can use hero skill/weapon skill/armor skill to generate 
 	int         num;      // pattern count
 	CardPattern patterns[MAX_CARD_LIST_NUM];
+	char        ud[MAX_PATTERN_UD_LEN];     // 用于脚本通过pattern在各脚本间传递一些暗示信息
 } OutCardPattern;
 
 // tolua_end

@@ -136,11 +136,11 @@ typedef struct tagPatternOut
 
 // for before passive out, modify the pattern and alter taxt
 
-typedef struct tagBeforeBassiveOut
+typedef struct tagBeforePassiveOut
 {
 	OutCardPattern pattern;
 	char alter_text[MAX_ALTER_TEXT_LEN];
-}BeforeBassiveOut;
+}BeforePassiveOut;
 
 
 typedef struct tagAttackDis
@@ -180,7 +180,7 @@ struct tagGameEventContext
 		//Card*       card;       // for calc card, judge card ... 
 		GetCard*    get_card;        // num for get card, discard card. etc
 		AttackDis*  attack_dis; 
-		BeforeBassiveOut* before_pout; 
+		BeforePassiveOut* before_pout; 
 		OutCardPattern* card_pattern;
 		PatternOut* pattern_out; // for passive out, supply card etc..
  		OutCard*    out_card;       // real out,  per/post out

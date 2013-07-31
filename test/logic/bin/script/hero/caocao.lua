@@ -65,7 +65,7 @@ reg_hero({
 					for n = 0, event.change_life.src_cards.list.num - 1 do
 						add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
 					end
-					
+
 					return R_SUCC;
 				end,
 			},
@@ -78,8 +78,9 @@ reg_hero({
 					-- 当需要出一张闪的时候,只能主公
 					local p = get_game_player(game, player);
 					if(p.id == PlayerID_Master and event.pattern_out.pattern.num == 1 
-						and event.pattern_out.pattern.fixed ~= YES
-						and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') 
+						-- and event.pattern_out.pattern.fixed ~= YES
+						and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan'
+						and not string.find(event.pattern_out.pattern.ud, '%[hujia%]') ) 
 					then
 						return USE_MANUAL;
 					end
@@ -95,14 +96,15 @@ reg_hero({
 					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
 					local self = get_game_player(game, player);
 					local next_player = game_next_player(game, player);
-					local fix = false;
+					local ud = event.pattern_out.pattern.ud;
 					while(next_player ~= player) 
 					do
 						local p = get_game_player(game, next_player);
 						message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
 						local group = get_hero_group(p.hero);
 						if(group == HeroGroup_Wei) then
-							local ret = game_supply_card(game, event, player, next_player, fix and 'hf:{shan}' or 'h:{shan}', 
+							local ret = game_supply_card(game, event, player, next_player, 
+									'h:{shan}?'..ud, 
 									'请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', 
 									event.pattern_out.out);
 							if (R_SUCC == ret) then
@@ -113,7 +115,7 @@ reg_hero({
 							-- fix标志的作用为，当某玩家响应时，如果使用了技能或者其它代替出牌的方式但最终
 							-- 失败，并且没有从手牌打出闪，则接下来的人，只能从手牌提供，不能再使用其它方式。
 							if(ret == R_ABORT) then
-								fix = true;
+								ud = ud .. '{bgz}';
 							end
 						end
 						next_player = game_next_player(game, next_player);

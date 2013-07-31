@@ -612,7 +612,7 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 
 
 
-// pattern:  <flags>:<card pattern 1>;<card pattern 2>;...
+// pattern:  <flags>:<card pattern 1>;<card pattern 2>;...?<custom_str>
 // flags: one or more follow chars -
 //         h : hand card is enable
 //         e : equip card is enable
@@ -672,8 +672,13 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 
 
 	// <card pattern n>; ...
-	while(*p)
+	while(*p && *p != ';' && *p != '\?')
 	{
+		if(pPattern->num>= MAX_CARD_LIST_NUM)
+		{
+			// too many pattern cards
+			return R_E_FAIL;
+		}
 		pcp = &pPattern->patterns[pPattern->num];
 		pPattern->num++;
 
@@ -800,7 +805,13 @@ __v_parse:
 __fini_parse:
 
 		if(*p == ';')
+		{
 			p++;
+		}
+		else if(*p == '\?')
+		{
+			break;
+		}
 		else if(*p != '\0')
 		{
 			// expected ';' or end of pattern
@@ -813,6 +824,13 @@ __fini_parse:
 	{
 		// expected at least one card pattern
 		return R_E_FAIL;
+	}
+
+
+	if(*p == '\?')
+	{
+		p++;
+		strncpy(pPattern->ud, p, sizeof(pPattern->ud));
 	}
 
 	return R_SUCC;
@@ -909,7 +927,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int target, const char* pattern, const char* alter_text)
 {
-	BeforeBassiveOut   before_pout;
+	BeforePassiveOut   before_pout;
 	OutCardPattern     out_pattern;
 	GameEventContext  event;
 	RESULT ret;
@@ -987,6 +1005,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 			out_pattern.where = before_pout.pattern.where;
 			out_pattern.num = 1;
 			out_pattern.patterns[0] = before_pout.pattern.patterns[n];
+			memcpy(out_pattern.ud, before_pout.pattern.ud, sizeof(out_pattern.ud));
 
 			ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &out_pattern, before_pout.alter_text);
 			if(ret != R_SUCC)
