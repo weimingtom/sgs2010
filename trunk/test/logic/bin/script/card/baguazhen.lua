@@ -19,8 +19,10 @@ import "../global/reg.lua";
 
 local function bgz_can_use(cfg, game, event, player, pos_card)
 	-- 当需要出一张闪的时候
-	if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
-		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
+	if(event.pattern_out.pattern.num == 1 and
+		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan' and
+		not string.find(event.pattern_out.pattern.ud, '{bgz}') ) 
+	then
 		return USE_MANUAL;
 	end
 	return USE_CANNOT;
@@ -52,9 +54,11 @@ local function bgz_use(cfg, game, event, player)
 		event.pattern_out.out.vcard.flag = CardFlag_None;
 		return R_BACK;
 	else
+		event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '{bgz}';
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 		-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-		local ret = game_passive_out(game, event.parent_event, player, event.target, 'hf:{shan}', alter);
+		local ret = game_passive_out(game, event.parent_event, player, event.target, 
+			'h:{shan}?'..event.pattern_out.pattern.ud, alter);
 		event.result = ret == R_SUCC and R_SUC or R_ABORT;  -- 没成功。则应该是失败
 		event.block = YES;
 		return R_BACK;

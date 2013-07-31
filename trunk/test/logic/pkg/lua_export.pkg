@@ -66,7 +66,7 @@ struct GameEventContext
 	tolua_readonly GetCard*    get_card;        // num for get card, discard card. etc
 	tolua_readonly AttackDis*  attack_dis; 
 	tolua_readonly OutCardPattern* card_pattern;
-	tolua_readonly BeforeBassiveOut* before_pout; 
+	tolua_readonly BeforePassiveOut* before_pout; 
 	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
 	tolua_readonly OutCard*    out_card;    // real out,  per/post out
 	tolua_readonly PosCard*    pos_card;    // lost card,
