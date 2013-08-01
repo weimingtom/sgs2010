@@ -517,6 +517,7 @@ static void game_event_param__discard_card(GameContext* pGame, GameEventContext*
 	{
 		MSG_OUT("    discard_card.num=%d;\n", pEvent->discard_card->num);
 		MSG_OUT("    discard_card.where=%s;\n", card_pattern_where_str(pEvent->discard_card->where, buf, sizeof(buf)));
+		MSG_OUT("    discard_card.alter_text=\"%s\";\n", pEvent->discard_card->alter_text);
 	}
 }
 
@@ -534,6 +535,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PerRoundGet:
 	case GameEvent_RoundGetCard:
 	case GameEvent_PostRoundGet:
+	case GameEvent_PassiveGetCard:
 		game_event_param__get_card(pGame, pEvent);
 		break;
 	case GameEvent_CalcAttackDis:

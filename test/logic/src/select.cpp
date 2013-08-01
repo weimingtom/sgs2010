@@ -133,7 +133,7 @@ YESNO game_select_yesno(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	SelOption   sel_opts[2];
 	ST_ZERO(sel_opts);
 
-	set_game_cur_player(pGame,player );
+	set_game_cur_player(pGame,player);
 
 
 	snprintf(sel_opts[0].text, sizeof(sel_opts[0].text),"[ Yes ]");
@@ -151,8 +151,65 @@ YESNO game_select_yesno(lua_State* L, GameContext* pGame, GameEventContext* pPar
 }
 
 // 多项选择(选项串为多行文本，每行一个选项。 返回 1~n 行号。)(如果有放弃的需要，把这个选项也要通过items给出)
-int game_select_custom(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* items)
+int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* items, const char* alter_text)
 {
+	const int max_items = 32;
+	SelOption   opts[max_items];   // 最多支持32项
+	int num;
+	const char*  p;
+	const char*  q;
+	int   result;
 
-	return 0;
+	if(!IS_PLAYER_VALID(pGame, player))
+	{
+		if(L) {
+			luaL_error(L, "game_passive_out: invalid player index - %d", player );
+		} else {
+			MSG_OUT("game_passive_out: invalid player index - %d\n", player );
+		}
+		return R_E_PARAM;
+	}
+
+
+	ST_ZERO(opts);
+
+	num = 0;
+	p = items;
+	
+	while(*p)
+	{
+		if(num >= max_items)
+		{
+			luaL_error(L, "game_select_custom: too many items is specified!");
+		}
+
+		q = strchr(p, '\n');
+
+
+		if(q == NULL)
+		{
+			q = p + strlen(p);
+		}
+
+		memcpy(opts[num].text, p, MIN(q-p, sizeof(opts[num].text)-1));
+		opts[num].text[MIN(q-p, sizeof(opts[num].text)-1)] = '\0';
+		opts[num].input[0] = '\0';
+		opts[num].value = num + 1;
+		num++;
+
+		p = q;
+		if(*p == '\n')
+		{
+			p++;
+		}
+	}
+
+	set_game_cur_player(pGame,player);
+
+	if(R_SUCC != select_loop(pGame, pParentEvent, opts, num, alter_text, &result))
+	{
+		luaL_error(L, "game_select_custom: select_loop return failed!");
+	}
+
+	return result;
 }

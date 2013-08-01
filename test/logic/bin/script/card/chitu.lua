@@ -52,7 +52,7 @@ reg_card {
 				return USE_AUTO;
 			end
 			return USE_CANNOT;
-		end
+		end,
 	},
 	
 	

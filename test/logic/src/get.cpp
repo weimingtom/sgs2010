@@ -177,6 +177,16 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 		return R_E_PARAM;
 	}
 
+	if(num <= 0)
+	{
+		if(L) {
+			luaL_error(L, "game_passive_getcard: invalid card num %d", num);
+		} else {
+			MSG_OUT("game_passive_getcard: invalid card  num %d\n", num);
+		}
+		return R_E_PARAM;
+	}
+
 	
 	stGetCard.num = num;
 	stGetCard.can_cancel = can_cancel;

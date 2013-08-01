@@ -156,6 +156,7 @@ typedef struct tagDiscardCard
 {
 	int num;
 	int where;
+	char alter_text[MAX_ALTER_TEXT_LEN];
 } DiscardCard;
 
 // tolua_end

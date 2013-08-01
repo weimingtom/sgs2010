@@ -52,15 +52,22 @@ reg_card {
 	},
 	
 	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_AUTO;
+			end
+			return USE_CANNOT;
+		end,
 		-- 武器效果触发
 		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player, pos_card)--
 			-- 如果结算的为自己出的杀。且目标为异性，则可以发动武器技能,(异性的判断暂时未实现)
 			if  event.out_card.vcard.id == get_card_id_by_sid('sha') 
 				and event.out_card.trigger == player
 			then
-				local  pta = get_game_player(event.out_card.target);
-				local  pme = get_game_player(event.out_card.trigger);
-				if pta and pme and 	get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
+				local  pta = get_game_player(game, event.out_card.target);
+				local  pme = get_game_player(game, event.out_card.trigger);
+				if pta and pme  -- and get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
 				then
 					return YES;
 				end
@@ -82,6 +89,7 @@ reg_card {
 		-- 攻击距离
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
+				message('attack base: 2');
 				event.attack_dis.base = 2;
 			end
 			return R_DEF;
@@ -89,8 +97,23 @@ reg_card {
 		-- 攻击效果
 		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player)
 			-- 让目标选择 1. 目标自己弃一张手牌， 2。攻击目标者摸一张牌
-			local ret = game_select
-		end,
+			local p = get_game_player(game, player);  -- 应该不会nil;
+			local t = get_game_player(game, event.out_card.target);
+			local sel;
+			if(t.hand_card_num > 0) then
+				sel = game_select_items(game, event, event.out_card.target, 
+					'自己弃一张手牌\n对方摸一张牌', 
+					'【'..p.name..'】向你发动【'..cfg.name..'】武器效果，请做以下选择:');
+			else -- 目标没手牌，则不进行选择，直接摸一张牌
+				sel = 2;
+			end
+			if sel == 1 then
+				game_passive_discard(game, event, event.out_card.target, PatternWhere_Hand, 1, NO, '请弃一张手牌');
+			elseif(sel == 2) then
+				game_passive_getcard(game, event, player, 1, NO);
+			end
+			return R_SUCC;  -- 武器效果执行完成，继续
+		end
 	},
 };
 

@@ -152,6 +152,29 @@ void set_player_param(Player* pPlayer, int index, int val)
 }
 
 
+int  player_count_card(Player* pPlayer, int where)
+{
+	int n;
+	int count = 0;
+	if(where | PatternWhere_Hand)
+	{
+		count += pPlayer->hand_card_num;
+	}
+
+	if(where | PatternWhere_Equip)
+	{
+		for(n = 0; n < EquipIdx_Max; n++)
+		{
+			if(CARD_VALID(&pPlayer->equip_cards[n]))
+				count++;
+		}
+	}
+	if(where | PatternWhere_Judgment)
+	{
+		count += pPlayer->judgment_card_num;
+	}
+	return count;
+}
 
 
 
