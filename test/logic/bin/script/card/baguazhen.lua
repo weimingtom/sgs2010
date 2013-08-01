@@ -55,11 +55,13 @@ local function bgz_use(cfg, game, event, player)
 		return R_BACK;
 	else
 		-- 已经使用八卦阵,添加标记
-		event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '{bgz}';
+		event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '{bgz}'; 
+		local out_p = OutCardPattern();
+		game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 		-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-		local ret = game_passive_out(game, event.parent_event, player, event.target, 
-			'h:{shan}?'..event.pattern_out.pattern.ud, alter);
+		local ret = game_passive_out(game, event.parent_event, player, event.target, out_p, alter);
+		event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
 		event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);  -- 没成功。则应该是失败
 		event.block = YES;
 		return R_BACK;
@@ -89,7 +91,7 @@ reg_card {
 	},
 
 	event = {
-		[GameEvent_OutCardPrepare] = bgz_equip;
+		[GameEvent_OutCardPrepare] = bgz_equip,
 		
 		[GameEvent_PassiveOutCard] = bgz_use,
 

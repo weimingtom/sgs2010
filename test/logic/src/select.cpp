@@ -10,7 +10,7 @@
 
 
 
-RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel,const char* alter_text, int* out_target)
+RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel,const char* alter_text, int* out_target)
 {
 	int n;
 	int t;
@@ -127,7 +127,7 @@ RESULT game_select_target(GameContext* pGame, GameEventContext* pParentEvent, in
 	return R_E_FAIL;
 }
 
-YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text)
+YESNO game_select_yesno(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text)
 {
 	int result;
 	SelOption   sel_opts[2];
@@ -150,3 +150,9 @@ YESNO game_select_yesno(GameContext* pGame, GameEventContext* pParentEvent, int 
 	return NO;
 }
 
+// 多项选择(选项串为多行文本，每行一个选项。 返回 1~n 行号。)(如果有放弃的需要，把这个选项也要通过items给出)
+int game_select_custom(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* items)
+{
+
+	return 0;
+}

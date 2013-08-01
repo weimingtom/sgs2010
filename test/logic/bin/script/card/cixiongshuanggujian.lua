@@ -52,22 +52,45 @@ reg_card {
 	},
 	
 	can_use = {
+		-- 武器效果触发
 		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player, pos_card)--
 			-- 如果结算的为自己出的杀。且目标为异性，则可以发动武器技能,(异性的判断暂时未实现)
-			if(event.out_card.vcard.id == get_card_id_by_sid('sha') and event.out_card.trigger == player and true) then
-				return YES;
+			if  event.out_card.vcard.id == get_card_id_by_sid('sha') 
+				and event.out_card.trigger == player
+			then
+				local  pta = get_game_player(event.out_card.target);
+				local  pme = get_game_player(event.out_card.trigger);
+				if pta and pme and 	get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
+				then
+					return YES;
+				end
 			end
 			return NO;
 		end,
 	},
 	
 	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+		-- 攻击距离
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				event.attack_dis.base = 2;
 			end
 			return R_DEF;
-		end
+		end,
+		-- 攻击效果
+		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player)
+			-- 让目标选择 1. 目标自己弃一张手牌， 2。攻击目标者摸一张牌
+			local ret = game_select
+		end,
 	},
 };
 
