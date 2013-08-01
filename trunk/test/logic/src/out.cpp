@@ -836,6 +836,19 @@ __fini_parse:
 	return R_SUCC;
 }
 
+void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char* s_pattern)
+{
+	if(R_SUCC != load_out_pattern(out_pattern, s_pattern))
+	{
+		if(L) {
+			luaL_error(L, "game_passive_out: error card pattern \"%s\"", s_pattern);
+		} else {
+			MSG_OUT("game_passive_out: error card pattern \"%s\"\n", s_pattern);
+		}
+	}
+}
+
+
 /*
 static RESULT per_passive_out_card(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, PatternOut* pattern_out)
 {
@@ -871,6 +884,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	ST_ZERO(pattern_out);
 	pattern_out.pattern = *out_pattern;
+
 
 	if(YES != pattern_out.pattern.fixed)
 	{
@@ -925,10 +939,10 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 }
 
 
-RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int target, const char* pattern, const char* alter_text)
+RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int target, OutCardPattern* out_pattern, const char* alter_text)
 {
 	BeforePassiveOut   before_pout;
-	OutCardPattern     out_pattern;
+	OutCardPattern     t_out_pattern;
 	GameEventContext  event;
 	RESULT ret;
 	int n;
@@ -955,6 +969,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 	ST_ZERO(before_pout);
+	/*
 	if(R_SUCC != load_out_pattern(&before_pout.pattern, pattern))
 	{
 		if(L) {
@@ -964,8 +979,9 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		}
 		return R_E_FAIL;
 	}
+	*/
 
-
+	before_pout.pattern = *out_pattern;
 	strncpy(before_pout.alter_text, alter_text, sizeof(before_pout.alter_text));
 
 	// before passive out , some skill can adjust the card pattern, or avoid the passive out.
@@ -974,6 +990,8 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	trigger_game_event(pGame, &event);
 
+
+	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 	// avoid the passive but result is cancel.
 	CHECK_BACK_RET(event.result);
 
@@ -985,11 +1003,14 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	if(before_pout.pattern.num == 0)
 		return R_SUCC;
 
-	if(YES == before_pout.pattern.fixed)
+	if(YES == before_pout.pattern.fixed || before_pout.pattern.num == 1)
 	{
 		// passive out whill complete out all the required cards;
 
 		ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &before_pout.pattern, before_pout.alter_text);
+
+		memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
+
 		if(ret != R_SUCC)
 			return ret;
 
@@ -1000,17 +1021,24 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 		for(n = 0; n < before_pout.pattern.num; n++)
 		{
-			ST_ZERO(out_pattern);
-			out_pattern.fixed = before_pout.pattern.fixed;
-			out_pattern.where = before_pout.pattern.where;
-			out_pattern.num = 1;
-			out_pattern.patterns[0] = before_pout.pattern.patterns[n];
-			memcpy(out_pattern.ud, before_pout.pattern.ud, sizeof(out_pattern.ud));
+			ST_ZERO(t_out_pattern);
+			t_out_pattern.fixed = before_pout.pattern.fixed;
+			t_out_pattern.where = before_pout.pattern.where;
+			t_out_pattern.num = 1;
+			t_out_pattern.patterns[0] = before_pout.pattern.patterns[n];
+			memcpy(t_out_pattern.ud, before_pout.pattern.ud, sizeof(t_out_pattern.ud));
 
-			ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &out_pattern, before_pout.alter_text);
+			ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &t_out_pattern, before_pout.alter_text);
+
+			memcpy(out_pattern->ud, t_out_pattern.ud, sizeof(out_pattern->ud));
+
+
 			if(ret != R_SUCC)
 				return ret;
 		}
+
+		memcpy(before_pout.pattern.ud, t_out_pattern.ud, sizeof(before_pout.pattern.ud));
+
 	}
 
 
@@ -1020,6 +1048,8 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	trigger_game_event(pGame, &event);
 
+	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
+
 	// the passive out is not effect
 	CHECK_BACK_RET(event.result);
 
@@ -1028,12 +1058,10 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 
-RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, const char* pattern,const char* alter_text, OutCard* out_card)
+RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player, OutCardPattern* out_pattern, const char* alter_text, OutCard* out_card)
 {
-	//char   text[1024];
-	//char   temp[128];
 	GameEventContext  event;
-	PatternOut   pattern_out;
+	PatternOut   t_pattern_out;
 	RESULT ret;
 
 	if(pGame == NULL || pParentEvent == NULL)
@@ -1057,9 +1085,9 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		return R_E_PARAM;
 	}
 
-
-	ST_ZERO(pattern_out);
-	if(R_SUCC != load_out_pattern(&pattern_out.pattern, pattern))
+	ST_ZERO(t_pattern_out);
+	/*
+	if(R_SUCC != load_out_pattern(&t_pattern_out.pattern, pattern))
 	{
 		if(L) {
 			luaL_error(L, "game_supply_card: error card pattern \"%s\"", pattern);
@@ -1068,16 +1096,23 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		}
 		return R_E_PARAM;
 	}
+	*/
+
+	t_pattern_out.pattern = *out_pattern;
+
 
 	// ignore fixed flag
 	//if(YES != pattern_out.pattern.fixed) 
 	{
 
 		INIT_EVENT(&event, GameEvent_PerSupplyCard, player, trigger, pParentEvent);
-		event.pattern_out = &pattern_out;
+		event.pattern_out = &t_pattern_out;
 
 		trigger_game_event(pGame, &event);
 		//ret = per_passive_out_card(pGame, pParentEvent, player, target, &pattern_out);
+
+		memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
+
 
 		CHECK_BACK_RET(event.result);
 
@@ -1088,7 +1123,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 	INIT_EVENT(&event, GameEvent_SupplyCard, player, trigger, pParentEvent);
-	event.pattern_out = &pattern_out;
+	event.pattern_out = &t_pattern_out;
 
 	set_game_cur_player(pGame, player);
 
@@ -1100,19 +1135,23 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	}
 
 	ret = cmd_loop(pGame, &event, YES, alter_text);
+
+	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 	
 	CHECK_RET(ret,ret);
 
 	CHECK_BACK_RET(event.result);
 
 	// 提供牌的过程，并不会真正从提供者手里删除，直到真正使用者在使用该牌的时候
-	*out_card = pattern_out.out;
+	*out_card = t_pattern_out.out;
 
 
 	INIT_EVENT(&event, GameEvent_PostSupplyCard, player, trigger, pParentEvent);
-	event.pattern_out = &pattern_out;
+	event.pattern_out = &t_pattern_out;
 
 	trigger_game_event(pGame, &event);
+
+	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
 	// the passive out is not effect
 	CHECK_BACK_RET(event.result);

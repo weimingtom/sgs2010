@@ -75,8 +75,11 @@ reg_card {
 			local p = get_game_player(game, player);
 			p.params[0] = p.params[0] + 1;
 			-- target passive shan
+			
+			local out_pattern  = OutCardPattern();
+			game_load_out_pattern(out_pattern,  'h:{shan}?');
 
-			ret = game_passive_out(game, event, event.target, player, "h:{shan}",
+			ret = game_passive_out(game, event, event.target, player, out_pattern,
 				"Çë³öÒ»ÕÅ¡¾"..card_sid2name('shan').."¡¿:");
 
 			if(ret == R_SUCC) then

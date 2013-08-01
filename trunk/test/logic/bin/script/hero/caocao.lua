@@ -66,7 +66,7 @@ reg_hero({
 						add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
 					end
 
-					return R_SUCC;
+					return R_SUCC; -- 返回SUCC，继续响应
 				end,
 			},
 		},
@@ -94,6 +94,7 @@ reg_hero({
 				[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 					-- 请求Wei势力玩家支持闪
 					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
+					local out_p = OutCardPattern();
 					local self = get_game_player(game, player);
 					local next_player = game_next_player(game, player);
 					message('1 pattern.ud:', event.pattern_out.pattern.ud);
@@ -103,15 +104,16 @@ reg_hero({
 						--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
 						local group = get_hero_group(p.hero);
 						if(group == HeroGroup_Wei) then
+							game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
 							local ret = game_supply_card(game, event, player, next_player, 
-									'h:{shan}?'..event.pattern_out.pattern.ud, 
-									'请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', 
+									out_p, '请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', 
 									event.pattern_out.out);
+							event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
 							message('2 pattern.ud:', event.pattern_out.pattern.ud);
 							if (R_SUCC == ret) then
 								event.result = R_SUCC;
 								event.block = YES;
-								return R_SUCC;
+								return R_BACK;   -- 返回BACK，因为 PassiveOut完成
 							end
 						end
 						next_player = game_next_player(game, next_player);
@@ -122,15 +124,16 @@ reg_hero({
 					-- 已经使用护驾，添加标记
 					event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '[hujia]';
 					--  没人响应，你仍然可以出一张闪
+					
+					game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
+					
 					local alter = '你使用【'..cfg.skills[2].name..'】无人响应，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 					-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-					local ret = game_passive_out(game, event.parent_event, player, event.target,
-									'h:{shan}?'..event.pattern_out.pattern.ud, alter);
-
+					local ret = game_passive_out(game, event.parent_event, player, event.target, out_p, alter);
+					event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
 					event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);
 					event.block = YES;
-					
-					return R_SUCC;
+					return R_BACK;  -- 返回BACK，因为 PassiveOut完成
 				end,
 			},
 		},

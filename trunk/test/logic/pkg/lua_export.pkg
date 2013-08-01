@@ -18,7 +18,7 @@ $cfile "../src/hero.h"
 // void game_import_file @ import(lua_State* L, const char* pattern);
 
 
-struct  Player
+typedef struct  tagPlayer
 {
 	tolua_readonly PlayerID id;
 	tolua_readonly HeroID   hero;
@@ -33,9 +33,9 @@ struct  Player
 	tolua_readonly PlayerStatus   status;
 	tolua_readonly PlayerFlag  flag;
 	               int      params[MAX_PLAYER_PARAM];
-};
+} Player;
 
-struct GameContext
+typedef struct tagGameContext
 {
 	tolua_readonly int        player_count;
 	tolua_readonly int        minster_count;
@@ -50,11 +50,11 @@ struct GameContext
 	tolua_readonly int        round_player;
 	tolua_readonly int        cur_player;
 	tolua_readonly Status     status;
-};
+}GameContext;
 
 
 
-struct GameEventContext
+typedef struct tagGameEventContext
 {
 	tolua_readonly GameEvent      id;
 	tolua_readonly int      trigger;
@@ -62,7 +62,7 @@ struct GameEventContext
 	tolua_readonly GameEventContext* parent_event;
 	RESULT   result;
 	YESNO	 block;
-
+	//union {
 	tolua_readonly GetCard*    get_card;        // num for get card, discard card. etc
 	tolua_readonly AttackDis*  attack_dis; 
 	tolua_readonly OutCardPattern* card_pattern;
@@ -73,6 +73,15 @@ struct GameEventContext
 	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
 	tolua_readonly ChangeLife* change_life; // when life is changed 
 	tolua_readonly DiscardCard* discard_card; // when life is changed 
+	//};
+} GameEventContext;
+
+struct OutCard
+{
+	OutCard();
 };
 
-
+struct OutCardPattern
+{
+	OutCardPattern();
+};
