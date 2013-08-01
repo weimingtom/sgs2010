@@ -62,7 +62,7 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 	RESULT ret;
 	DiscardCard   dis;
 	GameEventContext  event;
-	char buffer[128];
+	//char buffer[128];
 	Player* p;
 
 	
@@ -74,19 +74,18 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 	// 如果手牌数量大于当前体力值，则需要弃置部分手牌，直到手牌数量等于当前体力，不能弃多，也不能不弃
 	while(p->hand_card_num > p->cur_life)
 	{
+		ST_ZERO(dis);
+
 		set_game_cur_player(pGame, player);
 
 		INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		dis.num = p->hand_card_num - p->cur_life;
 		dis.where = PatternWhere_Hand;
-
-
+		snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张手牌:", dis.num);
+		
 		event.discard_card = &dis;
-
 		
-		snprintf(buffer, sizeof(buffer), "请弃[%d]张手牌:", dis.num);
-		
-		ret = cmd_loop(pGame, &event,NO, buffer);
+		ret = cmd_loop(pGame, &event,NO, dis.alter_text);
 		CHECK_RET(ret,ret);
 	}
 
@@ -207,6 +206,102 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 }
 
 
+RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO can_cancel, const char* alter_text)
+{
+	RESULT ret;
+
+	GameEventContext  event;
+	DiscardCard   dis;
+
+	if(!IS_PLAYER_VALID(pGame, player))
+	{
+		if(L) {
+			luaL_error(L, "game_passive_discard: invalid player index - %d", player );
+		} else {
+			MSG_OUT("game_passive_discard: invalid player index - %d\n", player );
+		}
+		return R_E_PARAM;
+	}
+
+	if((where & (PatternWhere_Equip|PatternWhere_Hand|PatternWhere_Judgment)) == 0)
+	{
+		if(L) {
+			luaL_error(L, "game_passive_discard: invalid where - %d", where );
+		} else {
+			MSG_OUT("game_passive_discard: invalid where - %d\n", where );
+		}
+		return R_E_PARAM;
+	}
+
+	if(num <= 0 || num > player_count_card(get_game_player(pGame, player), where))
+	{
+		if(L) {
+			luaL_error(L, "game_passive_discard: invalid num - %d", num );
+		} else {
+			MSG_OUT("game_passive_discard: invalid num - %d\n", num );
+		}
+		return R_E_PARAM;
+
+	}
+	
+
+
+	ST_ZERO(dis);
+	dis.num = num;
+	dis.where = where;
+	if(alter_text != NULL && alter_text[0] != 0)
+	{
+		strncpy(dis.alter_text, alter_text, sizeof(dis.alter_text));
+	}
+	else
+	{
+		// 自动生成一个提示串
+		if(where == PatternWhere_Hand)
+		{
+			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张手牌：", num);
+		}
+		else if(where == PatternWhere_Equip)
+		{
+			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张装备牌：", num);
+		}
+		else if(where == PatternWhere_Judgment)
+		{
+			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张判定牌：", num);
+		}
+		else
+		{
+			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张牌：", num);
+		}
+	}
+
+	INIT_EVENT(&event, GameEvent_PerPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
+	event.discard_card = &dis;
+
+	trigger_game_event(pGame, &event);
+
+	CHECK_BACK_RET(event.result);
+
+
+	INIT_EVENT(&event, GameEvent_PassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
+	event.discard_card = &dis;
+
+	set_game_cur_player(pGame, player);
+	ret = cmd_loop(pGame, &event, can_cancel, alter_text);
+	CHECK_RET(ret,ret);
+
+	CHECK_BACK_RET(event.result);
+
+
+	INIT_EVENT(&event, GameEvent_PostPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
+	event.discard_card = &dis;
+
+	trigger_game_event(pGame, &event);
+
+	CHECK_BACK_RET(event.result);
+
+
+	return R_SUCC;
+}
 
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos)
 {

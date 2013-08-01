@@ -151,6 +151,8 @@ YESNO is_player_show(Player* pPlayer);
 YESNO is_player_perdead(Player* pPlayer);
 YESNO is_player_handfull(Player* player);
 
+int   player_count_card(Player* pPlayer, int where);
+
 int get_player_param(Player* pPlayer, int index);
 void set_player_param(Player* pPlayer, int index, int val);
 
