@@ -1,23 +1,40 @@
+.SUFFIXES: .c .o 
+
 CC=gcc
-CFLAGS=-fPIC  -Wall -O3
-INCL=-I. -I../../include
-LIBS=-llua -lm -ldl -ltolua++   -L../../lib
-OBJS=tolua.o toluabind.o
-OUT=tolua++
+AR=ar rcu
+RANLIB=ranlib
+CP=cp
 
-bin: $(OUT)
+CFLAGS=-g -Wall -ansi -fPIC -DTOLUA_SCRIPT_RUN
+INCL=-I../../include -I../../../lua-5.1/include 
+
+LIB=-L../../lib  -ltolua++ -llua -lm  -ldl -L../../../lua-5.1/lib
+
+SRC=tolua.c
+OBJS=$(SRC:.c=.o)
+
+EXE=tolua++
+
+all: exe
+
+exe:$(EXE)
 
 
-$(OUT): $(OBJS)
-	$(CC) -o $@ $^  $(LIBS) $(CFLAGS)
 
-.c.o: 
-	$(CC) -c -o $@ $< $(INCL) $(CFLAGS)
+.c.o:
+	$(CC) -c -o $@ $(CFLAGS)   $(INCL) $<
+
+$(EXE): $(OBJS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIB)
+	$(CP)  $@  ../../bin
 
 clean:
-	-rm -f *.o $(OUT)
+	-rm -rf $(EXE) $(OBJS)
 
-install:
-	if [ ! -e ../../bin ]; then mkdir -p ../../bin; fi
-	cp $(OUT) ../../bin
-	
+tolua.o: tolua.c ../../include/tolua++.h \
+ ../../../lua-5.1/include/lua.h ../../../lua-5.1/include/luaconf.h \
+ ../../../lua-5.1/include/lauxlib.h ../../../lua-5.1/include/lua.h
+
+
+
+
