@@ -130,7 +130,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 			if(cu)
 			{
-				MSG_OUT("%s 技能[%c]： 【%s】,%s技能\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
+				MSG_OUT("%s 技能[%c]： 【%s】,%s效果\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
 			}
 
 		}
@@ -397,7 +397,12 @@ static void p_out_card(const char* perffix, OutCard* p)
 
 	MSG_OUT("    %s.trigger=%d;\n", perffix, p->trigger);
 	MSG_OUT("    %s.supply=%d;\n", perffix, p->supply);
-	MSG_OUT("    %s.target=%d;\n", perffix, p->target);
+	MSG_OUT("    %s.target_num=%d;\n", perffix, p->target_num);
+	for(n = 0; n < p->target_num; n++)
+	{
+		MSG_OUT("    %s.targets[%d]=%d;\n", perffix, n, p->target_num);
+
+	}
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
 	p_card(s_per, &p->vcard);
@@ -558,6 +563,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PostSupplyCard:
 		game_event_param__pattern_out(pGame, pEvent);
 		break;
+	case GameEvent_PerOutCardPrepare:
 	case GameEvent_OutCardPrepare:
 	case GameEvent_PerOutCard:
 	case GameEvent_OutCard:

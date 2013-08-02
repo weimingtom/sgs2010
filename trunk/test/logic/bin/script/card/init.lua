@@ -9,8 +9,8 @@
 local ss = {
 	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
 	'{shan}h2;{shan}h3;{shan}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
-	'{tao}c2;{tao}c3;{tao}c4;{tao}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
-	'{bgz}d2;{bgz}d3;{bgz}d4;{bgz}d5;{bgz}d6;{bgz}d7;{bgz}d8;{bgz}d9;{bgz}d10;{bgz}dJ;{bgz}dQ;{bgz}dK;{bgz}dA;',
+	'{fthj}c2;{fthj}c3;{fthj}c4;{fthj}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
+	'{cxsgj}d2;{cxsgj}d3;{chitu}d4;{chitu}d5;{chitu}d6;{chitu}d7;{bgz}d8;{bgz}d9;{bgz}d10;{bgz}dJ;{bgz}dQ;{bgz}dK;{bgz}dA;',
 };
 
 

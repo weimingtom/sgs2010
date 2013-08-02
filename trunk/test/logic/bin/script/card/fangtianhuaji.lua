@@ -11,3 +11,113 @@
 [Q]无手牌的刘备装备了【方天画戟】，如果刘备【激将】使用【杀】是否可以发动【方天画戟】的技能？[A]不能，发动【方天画戟】的技能条件必须是使用自己最后一张手牌。
 [Q]夏侯渊发动【神速】，装备了【方天画戟】并且打出自己手中的最后一张手牌是装备牌，能否发动特效？[A]不可以。
 --]]
+
+
+
+import "../global/reg.lua";
+
+
+reg_card {
+	sid = 'fthj',
+	name = '方天画戟',
+	type = CardType_Weapon,
+	
+	desc=[==[【方天画戟】
+攻击范围：４
+武器特效：当你使用的【杀】是你的最后一张手牌时，你可以为这张【杀】指定至多三名目标角色，然后按行动顺序结算之。]==],
+
+	
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+	
+	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+		-- 武器效果触发，在选择目标前触发
+		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player, pos_card)--
+			-- 如果自己出的杀为最后一张手牌。则可以最多指定3个目标，至少指定一个。并按行动顺序结算
+			if  event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是杀
+				and event.out_card.trigger == player  -- 出牌者为自己
+				and event.out_card.supply == player  --- 自己提供的牌
+				and event.out_card.list.num == 1     --- 1张
+				and event.out_card.list.pcards[0].where == CardWhere_PlayerHand  -- 手牌
+				and get_game_player(game, player).hand_card_num == 1     -- 手牌数量也是1
+			then
+				return USE_MANUAL;
+			end
+			return USE_CANNOT;
+		end,
+	},
+	
+	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+		-- 攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+			if(player == event.trigger ) then
+				message('attack base: 4');
+				event.attack_dis.base = 4;
+			end
+			return R_DEF;
+		end,
+		-- 攻击效果
+		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player)
+			-- 让出牌者选择，至多3个目标，如果一个都没选择，则出牌中止
+			local targets = {};
+			
+			for n = 1,3 do
+				local ret, t = game_select_target(game, event, player, 1, NO, YES,
+					'请为【'..get_card_name(event.out_card.vcard.id)..'】指定最多3个目标(第'..n..'个):', -1);
+				if(ret == R_SUCC) then
+					table.insert(targets, t);
+				else
+					break;
+				end
+			end
+			
+			-- 如果一个目标都没指定，则取消出牌
+			if(table.getn(targets) == 0) then
+				return R_CANCEL;
+			end 
+			
+			-- 按行动顺序结算
+			table.sort(targets, 
+				function(a,b) 
+					return get_game_act_order(game, a) < get_game_act_order(game, b); 
+				end);
+			local names = {};
+			for i, v in ipairs(targets) do
+				event.out_card.targets[i-1] = v;
+				event.out_card.target_num = i;
+				names[i] = get_game_player(game, v).name;
+			end
+				
+			message('【'..get_game_player(game, player).name..'】指定了'
+				.. join(names,'【','】','、') .. '作为【'
+				.. get_card_name(event.out_card.vcard.id) ..'】的目标。' );
+			
+			event.result = R_SKIP;
+			event.block = YES;
+			return R_SUCC;  -- 武器效果执行完成，跳过准备阶段，继续执行出牌效果
+		end
+	},
+	
+};
+
+

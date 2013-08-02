@@ -145,6 +145,10 @@ int game_player_dis(GameContext* pGame, int p1, int p2);
 
 Player* get_game_player(GameContext* pGame, int player);
 
+// 计算当前指定玩家的行动顺序。当前玩家为0，下一家为1 ....
+int get_game_act_order(GameContext* pGame, int player);
+
+
 
 
 //}}

@@ -239,7 +239,11 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			game_cur_info(pContext, pEvent);
 		}
 	}
-	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game global info
+	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game event info
+	{
+		game_event_info(pContext, pEvent, 0);
+	}
+	else if(!strcmp(argv[1], "eventfull") || !strcmp(argv[1], "ef")) // game event info
 	{
 		game_event_info(pContext, pEvent, 1);
 	}

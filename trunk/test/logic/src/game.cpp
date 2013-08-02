@@ -88,6 +88,24 @@ Player* get_game_player(GameContext* pGame, int player)
 }
 
 
+// 计算当前指定玩家的行动顺序。当前玩家为0，下一家为1 ....
+int get_game_act_order(GameContext* pGame, int player)
+{
+	if(!IS_PLAYER_VALID(pGame, player))
+		return -1;
+
+	int order = 0;
+	int cp = pGame->cur_player;
+	for(order = 0; order <= pGame->player_count && player !=  cp; order++)
+	{
+		cp = game_next_player(pGame, cp);
+	}
+
+	return order;
+}
+
+
+
 RESULT set_game_cur_player(GameContext* pGame, int player)
 {
 	if(player < 0 || player >= pGame->player_count)

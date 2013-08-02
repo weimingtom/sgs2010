@@ -105,10 +105,10 @@ typedef enum _YESNO
 
 typedef enum _CANUSE
 {
-	USE_CANNOT = 0,
-	USE_MANUAL = 1,
-	USE_AUTO = 2,
-
+	USE_CANNOT = 0,  // 不能使用
+	USE_MANUAL = 1,  // 可选择的发动
+	USE_AUTO = 2,    // 自动触发
+	USE_QUIET = 3,   // auto 自动安静使用
 } CANUSE;
 
 typedef enum _RESULT

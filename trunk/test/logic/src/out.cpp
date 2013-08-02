@@ -11,40 +11,11 @@
 #include "discard.h"
 
 
-static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
-{
-	RESULT  ret;
-	//const CardConfig* pCardConfig;
 
-	GameEventContext  stEvent;
-	
-
-	//pCardConfig = get_card_config(out_card->vcard.id);
-
-	//if(pCardConfig == NULL)
-	//	return R_E_FAIL;
-
-
-	//if(pCardConfig->out)
-	{
-		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
-		stEvent.out_card = out_card;
-		out_card->target = -1;  // for require fill the target
-
-		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
-		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-
-		CHECK_RET(ret, ret);
-	}
-
-	return R_SUCC;
-}
-
-
-static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
+static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
 {
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, target, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PerOutCard, trigger, INVALID_PLAYER, pParentEvent);
 	event.out_card = out_card;
 
 	trigger_game_event(pGame, &event);
@@ -58,7 +29,6 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	RESULT   ret;
 	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
-
 
 	// out procedure
 	//pCardConfig = get_card_config(out_card->vcard.id);
@@ -80,12 +50,16 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	CHECK_BACK_RET(stEvent.result);
 
-	// calc card
-	INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
-	stEvent.out_card = out_card;
+	// some skill can skip the calc of out card
+	if(stEvent.result != R_SKIP)
+	{
+		// calc card
+		INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
+		stEvent.out_card = out_card;
 
-	ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-	CHECK_RET(ret, ret);
+		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+		CHECK_RET(ret, ret);
+	}
 
 	// post calc
 	INIT_EVENT(&stEvent, GameEvent_PostOutCardCalc, trigger, target, pParentEvent);
@@ -99,10 +73,10 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 }
 
 
-static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
+static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
 {
 	GameEventContext  event;
-	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, target, pParentEvent);
+	INIT_EVENT(&event, GameEvent_PostOutCard, trigger, INVALID_PLAYER, pParentEvent);
 	event.out_card = out_card;
 
 	trigger_game_event(pGame, &event);
@@ -306,8 +280,50 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 	return R_SUCC;
 }
 
+static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
+{
+	RESULT  ret;
+	//const CardConfig* pCardConfig;
+
+	GameEventContext  stEvent;
+
+	out_card->target_num = 0;  // for require fill the target
+
+	INIT_EVENT(&stEvent, GameEvent_PerOutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
+	stEvent.out_card = out_card;
+
+	trigger_game_event(pGame, &stEvent);
+
+	CHECK_BACK_RET(stEvent.result);
+
+	// some skill can skip the out card prepare, and set targets directly
+	if(stEvent.result == R_SKIP)
+		return R_SUCC;
+
+	//pCardConfig = get_card_config(out_card->vcard.id);
+
+	//if(pCardConfig == NULL)
+	//	return R_E_FAIL;
+
+
+	//if(pCardConfig->out)
+	{
+		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
+		stEvent.out_card = out_card;
+
+		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
+		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+
+		CHECK_RET(ret, ret);
+	}
+
+	return R_SUCC;
+}
+
+
 RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card)
 {
+	int    n;
 	RESULT ret;
 	//int target;
 	
@@ -318,7 +334,7 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 		return ret;
 
 
-	ret = per_out_card(pGame, pEvent, player, out_card->target, out_card);
+	ret = per_out_card(pGame, pEvent, player, out_card);
 
 	CHECK_BACK_RET(ret);
 
@@ -328,12 +344,22 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 
 	add_out_stack(pGame, out_card);
 
-
-	ret = do_out_card(pGame, pEvent, player, out_card->target, out_card);
-	CHECK_RET(ret,ret);
+	if(out_card->target_num == 0)
+	{
+		ret = do_out_card(pGame, pEvent, player, INVALID_PLAYER, out_card);
+		//CHECK_RET(ret,ret);
+	}
+	else
+	{
+		for(n = 0; n < out_card->target_num; n++)
+		{
+			ret = do_out_card(pGame, pEvent, player, out_card->targets[n], out_card);
+			//CHECK_RET(ret,ret);
+		}
+	}
 
 	// post out maybe modify out cards 
-	ret = post_out_card(pGame, pEvent, player, out_card->target, out_card);
+	ret = post_out_card(pGame, pEvent, player, out_card);
 
 
 	// the out is not effect

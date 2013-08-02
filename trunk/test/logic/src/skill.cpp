@@ -47,18 +47,20 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	if(YES != can_use_skill(pGame, pEvent))
 	{
-		MSG_OUT("你当前不能使用技能！\n");
+		MSG_OUT("你当前不能发动技能！\n");
 		return R_E_STATUS;
 	}
 
 
 	if(USE_MANUAL != call_hero_skill_can_use(p->hero, idx, pGame, pEvent, pGame->cur_player))
 	{
-		MSG_OUT("当前你不能使用技能【%s】!\n", hero_skill_name(p->hero, idx, name, sizeof(name)) );
+		MSG_OUT("当前你不能发动技能【%s】!\n", hero_skill_name(p->hero, idx, name, sizeof(name)) );
 		return R_E_STATUS;
 	}
 
 	// todo: trigger event per use skill
+
+	MSG_OUT("【%s】发动武将技能【%s】。\n", p->name, hero_skill_name(p->hero, idx, name, sizeof(name)));
 
 	call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
 
@@ -76,13 +78,13 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 
 	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Weapon, &pcard.card))
 	{
-		MSG_OUT("你没有装备武器！\n");
+		MSG_OUT("你没有装备%s！\n", equip_idx_str(EquipIdx_Weapon));
 		return R_E_FAIL;
 	}
 
 	if(YES != can_use_skill(pGame, pEvent))
 	{
-		MSG_OUT("你当前不能使用技能！\n");
+		MSG_OUT("你当前不能发动技能！\n");
 		return R_E_STATUS;
 	}
 
@@ -91,13 +93,15 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 
 	if(USE_MANUAL != call_card_can_use(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame), &pcard))
 	{
-		MSG_OUT("你装备的武器【%s】当前不能使用！\n", card_name(pcard.card.id, temp, sizeof(temp)));
+		MSG_OUT("你装备的%s【%s】当前不能发动！\n", equip_idx_str(EquipIdx_Weapon), card_name(pcard.card.id, temp, sizeof(temp)));
 		return R_E_FAIL;
 	}
 
-	return call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Weapon), card_name(pcard.card.id, temp, sizeof(temp)));
 
-	// return R_SUCC;
+	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+
+	return R_BACK;
 }
 
 RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
@@ -108,13 +112,13 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 
 	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Armor, &pcard.card))
 	{
-		MSG_OUT("你没有装备防具！\n");
+		MSG_OUT("你没有装备%s！\n", equip_idx_str(EquipIdx_Armor));
 		return R_E_FAIL;
 	}
 
 	if(YES != can_use_skill(pGame, pEvent))
 	{
-		MSG_OUT("你当前不能使用技能！\n");
+		MSG_OUT("你当前不能发动技能！\n");
 		return R_E_STATUS;
 	}
 
@@ -124,11 +128,15 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 
 	if(USE_MANUAL != call_card_can_use(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame), &pcard))
 	{
-		MSG_OUT("你装备的防具【%s】当前不能使用！\n", card_name(pcard.card.id, temp, sizeof(temp)));
+		MSG_OUT("你装备的%s【%s】当前不能使用！\n", equip_idx_str(EquipIdx_Armor), card_name(pcard.card.id, temp, sizeof(temp)));
 		return R_E_FAIL;
 	}
 
-	return call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Armor), card_name(pcard.card.id, temp, sizeof(temp)));
+
+	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+
+	return R_BACK;
 }
 
 

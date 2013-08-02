@@ -74,6 +74,7 @@ typedef struct tagGameEventContext
 	tolua_readonly ChangeLife* change_life; // when life is changed 
 	tolua_readonly DiscardCard* discard_card; // when life is changed 
 	//};
+	char   ud[MAX_UD_LEN];
 } GameEventContext;
 
 struct OutCard
