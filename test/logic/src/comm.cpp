@@ -391,7 +391,7 @@ void log_text(const char* fmt, ...)
 		time_t  t = time(NULL);
 		get_app_path(path, sizeof(path));
 		sz = strlen(path);
-		sz+=snprintf(path+sz, sizeof(path)-sz, "/log");
+		sz+=snprintf(path+sz, sizeof(path)-sz, "/../log");
 		mkdir(path, 0755);
 		struct tm*  lt = localtime(&t);
 		sz+=snprintf(path+sz, sizeof(path)-sz, "/logic_%04d%02d%02d_%02d%02d%02d.log", 
