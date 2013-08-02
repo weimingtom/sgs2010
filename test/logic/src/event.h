@@ -58,6 +58,7 @@ typedef enum _GameEvent
 	GameEvent_PerGetCard,
 	GameEvent_PostGetCard,
 	GameEvent_PassiveGetCard,
+	GameEvent_PerOutCardPrepare,
 	GameEvent_OutCardPrepare,
 	GameEvent_PerOutCard,
 	GameEvent_OutCard,

@@ -18,24 +18,6 @@
 import "../global/reg.lua";
 
 
-local function cxsgj_can_use(cfg, game, event, player, pos_card)
-	-- 让异性目标角色
-	if(event.pattern_out.pattern.num == 1 and event.pattern_out.pattern.fixed == NO and
-		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan') then
-		return YES;
-	end
-	return NO;
-end
-
-
-local function cxsgj_equip(cfg, game, event, player)
-	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
-		error('invalid out equip card in event OutCardPrepare.');
-		return R_E_FAIL;
-	end
-	game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
-	return R_CANCEL;
-end
 
 reg_card {
 	sid = 'cxsgj',
@@ -55,7 +37,7 @@ reg_card {
 		-- 可以用于修正攻击距离
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
 			if(player == event.trigger ) then
-				return USE_AUTO;
+				return USE_QUIET;
 			end
 			return USE_CANNOT;
 		end,
@@ -65,14 +47,15 @@ reg_card {
 			if  event.out_card.vcard.id == get_card_id_by_sid('sha') 
 				and event.out_card.trigger == player
 			then
-				local  pta = get_game_player(game, event.out_card.target);
-				local  pme = get_game_player(game, event.out_card.trigger);
+				local  pta = get_game_player(game, event.target);
+				local  pme = get_game_player(game, event.trigger);
 				if pta and pme  -- and get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
+					and nil == string.find(event.ud, '{cxsgj}')
 				then
-					return YES;
+					return USE_MANUAL;
 				end
 			end
-			return NO;
+			return USE_CANNOT;
 		end,
 	},
 	
@@ -98,20 +81,21 @@ reg_card {
 		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player)
 			-- 让目标选择 1. 目标自己弃一张手牌， 2。攻击目标者摸一张牌
 			local p = get_game_player(game, player);  -- 应该不会nil;
-			local t = get_game_player(game, event.out_card.target);
+			local t = get_game_player(game, event.target);
 			local sel;
 			if(t.hand_card_num > 0) then
-				sel = game_select_items(game, event, event.out_card.target, 
+				sel = game_select_items(game, event, event.target, 
 					'自己弃一张手牌\n对方摸一张牌', 
 					'【'..p.name..'】向你发动【'..cfg.name..'】武器效果，请做以下选择:');
 			else -- 目标没手牌，则不进行选择，直接摸一张牌
 				sel = 2;
 			end
 			if sel == 1 then
-				game_passive_discard(game, event, event.out_card.target, PatternWhere_Hand, 1, NO, '请弃一张手牌');
+				game_passive_discard(game, event, event.target, PatternWhere_Hand, 1, YES, '请弃一张手牌');
 			elseif(sel == 2) then
-				game_passive_getcard(game, event, player, 1, NO);
+				game_passive_getcard(game, event, player, 1, YES);
 			end
+			event.ud = event.ud .. '{cxsgj}';
 			return R_SUCC;  -- 武器效果执行完成，继续
 		end
 	},

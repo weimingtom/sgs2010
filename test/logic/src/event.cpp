@@ -3,6 +3,7 @@
 
 
 #include "config.h"
+#include "comm.h"
 #include "event.h"
 #include "game.h"
 #include "player.h"
@@ -63,6 +64,7 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 	//const HeroConfig* pHero;
 	//const HeroSkill* pSkill;
 	// const CardConfig* pCardConfig;
+	char buf[128];
 	int skill_num;
 	//int skill_flag;
 	PosCard    pos_card;
@@ -92,15 +94,19 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 				cu = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
 				//skill_flag = hero_skill_flag(pPlayer->hero, n);
 
-				if(cu == USE_AUTO)
+				if(cu == USE_AUTO || cu == USE_QUIET)
 				{
 					if(auto_use)
 					{
-						use_cnt++;
+						if(cu == USE_AUTO) 
+						{
+							MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, hero_skill_name(pPlayer->hero, n, buf, sizeof(buf)));
+						}
 						//(*pSkill->use)(pGame, pEvent, player);
 						call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+						use_cnt++;
 						if(pEvent->block == YES)
-						{
+							{
 							//if(pEvent->result == R_CANCEL)
 							//	return R_CANCEL;
 							return R_BACK;
@@ -156,12 +162,16 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 				pos_card.where = CardWhere_PlayerEquip;
 				pos_card.pos = n;
 				cu = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
-				if(cu == USE_AUTO)
+				if(cu == USE_AUTO || cu == USE_QUIET)
 				{
 					if(auto_use)
 					{
-						use_cnt++;
+						if(cu == USE_AUTO)
+						{
+							MSG_OUT("【%s】的%s效果【%s】被触发。\n", pPlayer->name, equip_idx_str(n), card_name(pos_card.card.id, buf, sizeof(buf)));
+						}
 						call_card_event(pos_card.card.id, pGame, pEvent, player);
+						use_cnt++;
 						if(pEvent->block == YES)
 						{
 							//if(pEvent->result == R_CANCEL)
@@ -225,6 +235,8 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
 		CHECK_RET(ret, ret);
+		if(pEvent->block == YES)
+			return R_BACK;
 		ret = check_player_event(pGame, pEvent, player, 0);
 	}
 

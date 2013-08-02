@@ -187,7 +187,7 @@ function call_card_can_use(id, game, event, player, pos_card)
 	end
 	
 	local ret = cfg.can_use[event.id](cfg, game, event, player, pos_card);
-	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO) then
+	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO and ret ~= USE_QUIET) then
 		error('call_card_can_use return result is invalid: '..tostring(ret));
 	end
 	return ret;
@@ -345,7 +345,7 @@ function call_hero_skill_can_use(id, index, game, event, player)
 	end
 	
 	local ret = skill.can_use[event.id](cfg, game, event, player);
-	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO) then
+	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO and ret ~= USE_QUIET) then
 		error('call_hero_skill_can_use return result is invalid: '..tostring(ret));
 	end
 	return ret;

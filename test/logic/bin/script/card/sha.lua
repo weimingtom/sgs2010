@@ -64,7 +64,12 @@ reg_card {
 			ret, target = game_select_target(game, event, player, 1, NO, YES,
 				"请为【"..cfg.name.."】指定一个目标:", target);
 			if(ret == R_SUCC) then
-				event.out_card.target = target;
+				event.out_card.targets[0] = target;
+				event.out_card.target_num = 1;
+				message('【'..get_game_player(game, player).name..'】指定了【'
+					.. get_game_player(game, target).name .. '】作为【'
+					.. cfg.name ..'】的目标。' );
+
 				return R_SUCC;
 			end
 			return R_CANCEL;

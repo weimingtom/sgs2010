@@ -49,7 +49,7 @@ reg_card {
 	can_use = {
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
 			if(player == event.trigger ) then
-				return USE_AUTO;
+				return USE_QUIET;
 			end
 			return USE_CANNOT;
 		end,

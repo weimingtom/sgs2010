@@ -35,6 +35,19 @@ function select(cond, a, b)
 end
 
 
+function join(t, perfix, suffix, splitter)
+	local s = '';
+	perfix = perfix or '';
+	suffix = suffix or '';
+	splitter = splitter or '';
+	local first = '';
+	for i, v in ipairs(t) do
+		s = s .. first .. perfix .. tostring(v) .. suffix;
+		first = splitter;
+	end
+	return s;
+end
+
 
 
 

@@ -22,8 +22,9 @@ typedef struct tagOutCard
 {
 	int      trigger;
 	int      supply;
-	int      target;
-	Card     vcard;    //  use as card (virtaul) 
+	int      target_num;
+	int      targets[MAX_PLAYER_NUM];
+	Card     vcard;    //  use as card (virtual) real out card in list following
 	PosCardList list;
 } OutCard;
 
