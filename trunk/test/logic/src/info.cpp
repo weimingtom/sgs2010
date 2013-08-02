@@ -281,7 +281,8 @@ static void game_event_param__get_card(GameContext* pGame, GameEventContext* pEv
 	else
 	{
 		MSG_OUT("    get_card.num=%d;\n", pEvent->get_card->num);
-		MSG_OUT("    get_card.can_cancel=%d;\n", YESNO2STR(pEvent->get_card->can_cancel));
+		MSG_OUT("    get_card.force=%d;\n", YESNO2STR(pEvent->get_card->force));
+		MSG_OUT("    get_card.alter_text=\"%s\";\n", pEvent->get_card->alter_text);
 	}
 }
 
@@ -447,6 +448,7 @@ static void game_event_param__pattern_out(GameContext* pGame, GameEventContext* 
 	{
 		p_out_card_pattern("pattern_out.pattern", &pEvent->pattern_out->pattern);
 		p_out_card("pattern_out.out", &pEvent->pattern_out->out);
+		MSG_OUT("    pattern_out.alter_text=\"%s\";\n", pEvent->pattern_out->alter_text);
 	}
 	
 }
@@ -517,6 +519,7 @@ static void game_event_param__discard_card(GameContext* pGame, GameEventContext*
 	{
 		MSG_OUT("    discard_card.num=%d;\n", pEvent->discard_card->num);
 		MSG_OUT("    discard_card.where=%s;\n", card_pattern_where_str(pEvent->discard_card->where, buf, sizeof(buf)));
+		MSG_OUT("    discard_card.force=%s;\n", YESNO2STR(pEvent->discard_card->force));
 		MSG_OUT("    discard_card.alter_text=\"%s\";\n", pEvent->discard_card->alter_text);
 	}
 }
@@ -598,7 +601,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 
 }
 
-RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent)
+RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent, int detail)
 {
 	int deep;
 	GameEventContext* pe;
@@ -612,9 +615,12 @@ RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent)
 		Player* ptr = get_game_player(pGame, pe->trigger);
 		Player* pta = get_game_player(pGame, pe->target);
 
-		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无" );
-		game_event_param(pGame, pe);
-
+		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】;ud=[\"%s\"]\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无",  pe->ud);
+		if(detail)
+		{
+			game_event_param(pGame, pe);
+		}
+		
 		pe = pe->parent_event;
 	}
 	return R_SUCC;

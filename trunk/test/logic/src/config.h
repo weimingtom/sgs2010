@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 
-#define PROJ_NAME    "SGS. Test Logic"
+#define PROJ_NAME    "SGS. 2010 Test Logic"
 #define VERSION_STR  "v0.1.0"
 
 
@@ -67,6 +67,7 @@ extern "C" {
 #define  MAX_PLAYER_NUM  20
 #define  MAX_ALTER_TEXT_LEN    256
 #define  MAX_HERO_NUM    256
+#define  MAX_UD_LEN      256
 
 #ifndef COUNT
 #define COUNT(a)  (sizeof(a)/sizeof((a)[0]))

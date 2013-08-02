@@ -86,7 +86,9 @@ int main(int argc, char** argv)
 
 	ST_ZERO(stGameContext);
 
-	INIT_EVENT(&stEvent, GameEvent_None, INVALID_PLAYER, INVALID_PLAYER, NULL);
+	GameEventContext* pParentEvent = NULL;
+
+	INIT_EVENT(&stEvent, GameEvent_None, INVALID_PLAYER, INVALID_PLAYER, pParentEvent);
 
 	cmd_loop(&stGameContext, &stEvent, YES, NULL);
 

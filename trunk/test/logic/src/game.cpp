@@ -427,15 +427,15 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	RESULT  ret;
-	GetCard num;
+	GetCard stGetCard;
 	GameEventContext  event;
 
 	MSG_OUT("第[%d]回合，摸牌阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 
-
-	num.num = 2;  // in get round init to get 2 card 
+	ST_ZERO(stGetCard);
+	stGetCard.num = 2;  // in get round init to get 2 card 
 	INIT_EVENT(&event, GameEvent_PerRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
-	event.get_card = &num;
+	event.get_card = &stGetCard;
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);
@@ -447,14 +447,14 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 		return R_SUCC;
 	}
 	
-	ret = game_round_do_get(pGame, pEvent, pGame->round_player, num.num);
+	ret = game_round_do_get(pGame, pEvent, pGame->round_player, stGetCard.num);
 	CHECK_RET(ret,ret);
 
 	game_flush_discard_cur(pGame);
 
 
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
-	event.get_card = &num;
+	event.get_card = &stGetCard;
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);

@@ -124,22 +124,21 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 {
 	RESULT ret;
 	GameEventContext  event;
-	char buffer[128];
+	//char buffer[128];
 
 	GetCard    stGetCard;
 
 	stGetCard.num = num;
-	stGetCard.can_cancel = NO;
+	stGetCard.force = YES;
 
-	
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, INVALID_PLAYER, pEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(buffer, sizeof(buffer), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
+	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
 
-	ret = cmd_loop(pGame, &event, stGetCard.can_cancel, buffer);
+	ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
 
 	CHECK_RET(ret,ret);
 
@@ -148,11 +147,11 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 
-RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num, YESNO can_cancel)
+RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num, YESNO force)
 {
 	RESULT ret;
 	GameEventContext  event;
-	char buffer[128];
+	//char buffer[128];
 
 	GetCard    stGetCard;
 
@@ -189,16 +188,16 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	
 	stGetCard.num = num;
-	stGetCard.can_cancel = can_cancel;
+	stGetCard.force = force;
 
 	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pParentEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(buffer, sizeof(buffer), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
+	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
 
-	ret = cmd_loop(pGame, &event, can_cancel, buffer);
+	ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
 
 	CHECK_RET(ret, ret);
 

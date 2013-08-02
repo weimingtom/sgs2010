@@ -357,7 +357,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &stEvent, YES, "请出一张牌或者发动技能:");
+	ret = cmd_loop(pGame, &stEvent, NO, "请出一张牌或者发动技能:");
 
 	CHECK_RET(ret, ret);
 
@@ -884,6 +884,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	ST_ZERO(pattern_out);
 	pattern_out.pattern = *out_pattern;
+	strncpy(pattern_out.alter_text, alter_text, sizeof(pattern_out.alter_text));
 
 
 	if(YES != pattern_out.pattern.fixed)
@@ -903,13 +904,12 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 	}
 
 
-
 	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, target, pParentEvent);
 	event.pattern_out = &pattern_out;
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &event, YES, alter_text);
+	ret = cmd_loop(pGame, &event, NO, pattern_out.alter_text);
 
 	if(ret != R_SUCC)
 		return ret;
@@ -1098,8 +1098,17 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	}
 	*/
 
+	//if(alter_text == NULL)
+	//{
+		//snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out specified card' or 'cancel'", 
+		//	CUR_PLAYER(pGame)->name, card_pattern_str_n(pattern_out.pattern.patterns, pattern_out.pattern.num, temp, sizeof(temp)));
+		//alter_text = text;
+	//}
 	t_pattern_out.pattern = *out_pattern;
-
+	if(alter_text)
+	{
+		strncpy(t_pattern_out.alter_text, alter_text, sizeof(t_pattern_out.alter_text));
+	}
 
 	// ignore fixed flag
 	//if(YES != pattern_out.pattern.fixed) 
@@ -1127,14 +1136,8 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	set_game_cur_player(pGame, player);
 
-	if(alter_text == NULL)
-	{
-		//snprintf(text, sizeof(text), "player [%s] supply card [%s], please 'out specified card' or 'cancel'", 
-		//	CUR_PLAYER(pGame)->name, card_pattern_str_n(pattern_out.pattern.patterns, pattern_out.pattern.num, temp, sizeof(temp)));
-		//alter_text = text;
-	}
 
-	ret = cmd_loop(pGame, &event, YES, alter_text);
+	ret = cmd_loop(pGame, &event, NO, t_pattern_out.alter_text);
 
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 	

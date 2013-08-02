@@ -122,16 +122,17 @@ typedef struct tagNewGameConfig
 // for get card
 typedef struct tagGetCard
 {
-	int num;
-	YESNO  can_cancel;
+	int    num;
+	YESNO  force;
+	char   alter_text[MAX_ALTER_TEXT_LEN];
 } GetCard;
 
 // for passive out, supply out
 typedef struct tagPatternOut
 {
-	//YESNO          may_cancel;
 	OutCardPattern pattern;
-	OutCard        out; 
+	OutCard        out;
+	char           alter_text[MAX_ALTER_TEXT_LEN];
 } PatternOut;
 
 // for before passive out, modify the pattern and alter taxt
@@ -154,9 +155,10 @@ typedef struct tagAttackDis
 
 typedef struct tagDiscardCard
 {
-	int num;
-	int where;
-	char alter_text[MAX_ALTER_TEXT_LEN];
+	int    num;
+	int    where;
+	YESNO  force;
+	char   alter_text[MAX_ALTER_TEXT_LEN];
 } DiscardCard;
 
 // tolua_end
@@ -169,12 +171,12 @@ typedef struct tagGameEventContext GameEventContext;
 
 struct tagGameEventContext
 {
-	GameEvent      id;
-	int      trigger;
-	int      target;
+	GameEvent  id;
+	int        trigger;
+	int        target;
 	GameEventContext* parent_event;
-	RESULT   result;
-	YESNO	 block;
+	RESULT     result;
+	YESNO	   block;
 	union {
 		const NewGameConfig* new_game_config;
 		const char* file_name;
@@ -190,6 +192,7 @@ struct tagGameEventContext
 		ChangeLife* change_life; // when life is changed 
 		DiscardCard* discard_card; // when round discard card, or passive discard card
 	};
+	char ud[MAX_UD_LEN];   // user custom string, used for script
 };
 
 
@@ -202,6 +205,7 @@ struct tagGameEventContext
 	(event)->parent_event = (p); \
 	(event)->block = NO; \
 	(event)->result = R_DEF; \
+	if (p) { strncpy((event)->ud, (p)->ud, sizeof((event)->ud)); } \
 } while(0)
 
 

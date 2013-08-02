@@ -241,7 +241,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "event") || !strcmp(argv[1], "e")) // game global info
 	{
-		game_event_info(pContext, pEvent);
+		game_event_info(pContext, pEvent, 1);
 	}
 	else if(!strcmp(argv[1], "game") || !strcmp(argv[1], "g")) // game global info
 	{
@@ -793,7 +793,7 @@ static void cmd_help_i(const char* cmd)
 }
 
 
-RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cancel, const char* strAlter)
+RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, const char* strAlter)
 {
 	char  prompt[MAX_NAME_LEN + 10];
 	char  cmdline[MAX_CMD_LEN];
@@ -861,7 +861,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO can_cance
 					{
 
 					case R_CANCEL:   // cancel the operator, need return to caller
-						if(can_cancel ==  YES)
+						if(force != YES)
 						{
 							pEvent->result = R_CANCEL;
 							return R_CANCEL;
