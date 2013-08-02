@@ -81,11 +81,12 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 		INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		dis.num = p->hand_card_num - p->cur_life;
 		dis.where = PatternWhere_Hand;
+		dis.force = YES;
 		snprintf(dis.alter_text, sizeof(dis.alter_text), "«Î∆˙[%d]’≈ ÷≈∆:", dis.num);
 		
 		event.discard_card = &dis;
 		
-		ret = cmd_loop(pGame, &event,NO, dis.alter_text);
+		ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
 		CHECK_RET(ret,ret);
 	}
 
@@ -206,7 +207,7 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 }
 
 
-RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO can_cancel, const char* alter_text)
+RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO force, const char* alter_text)
 {
 	RESULT ret;
 
@@ -249,6 +250,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	ST_ZERO(dis);
 	dis.num = num;
 	dis.where = where;
+	dis.force = force;
 	if(alter_text != NULL && alter_text[0] != 0)
 	{
 		strncpy(dis.alter_text, alter_text, sizeof(dis.alter_text));
@@ -286,7 +288,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	event.discard_card = &dis;
 
 	set_game_cur_player(pGame, player);
-	ret = cmd_loop(pGame, &event, can_cancel, alter_text);
+	ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
 	CHECK_RET(ret,ret);
 
 	CHECK_BACK_RET(event.result);

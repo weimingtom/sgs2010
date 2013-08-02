@@ -38,7 +38,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 // tolua_begin
 // {{
 
-RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO can_cancel, const char* alter_text);
+RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO force, const char* alter_text);
 YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);
 RESULT add_cur_card_to_player_hand(GameContext* pGame, CardWhere where, int pos, int player);
 RESULT add_cur_card_to_player_judgment(GameContext* pGame, CardWhere where, int pos, int player);

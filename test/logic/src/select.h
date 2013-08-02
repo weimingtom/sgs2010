@@ -16,7 +16,7 @@ typedef struct tagGameEventContext GameEventContext;
 
 // select target process
 RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, 
-							YESNO self_select, YESNO may_cancel, const char* alter_text, int* out_target = 0);
+							YESNO self_select, YESNO force, const char* alter_text, int* out_target = 0);
 // —°‘Ò «∫Õ∑Ò
 YESNO game_select_yesno(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* alter_text);
 

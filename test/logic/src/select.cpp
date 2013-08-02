@@ -10,7 +10,7 @@
 
 
 
-RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO may_cancel,const char* alter_text, int* out_target)
+RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO force,const char* alter_text, int* out_target)
 {
 	int n;
 	int t;
@@ -51,7 +51,7 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 	}
 
 	// 
-	if(may_cancel == YES)
+	if(force != YES)
 	{
 		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
 		snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
@@ -63,7 +63,7 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 	while(1)
 	{
 
-		ret = select_loop(pGame, pParentEvent, sel_opts, idcnt, alter_text ? alter_text : "Select a target role:", &t);
+		ret = select_loop(pGame, pParentEvent, sel_opts, idcnt, alter_text ? alter_text : "请选择目标角色:", &t);
 
 		if(ret != R_SUCC)
 			return ret;
