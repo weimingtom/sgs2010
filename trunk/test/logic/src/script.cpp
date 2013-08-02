@@ -386,7 +386,7 @@ RESULT  reload_game_script()
 	lua_pushstring(L, base_path);
 	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
 	lua_getglobal(L, "import");
-	lua_pushstring(L, "./script/main.lua");
+	lua_pushstring(L, "../script/main.lua");
 	state = lua_pcall(L, 1, 0, 0);
 	if(state != 0)
 	{

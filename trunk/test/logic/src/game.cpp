@@ -978,7 +978,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	char  path[MAX_PATH];
 
 
-	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+	snprintf(path, sizeof(path), "%s/../sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
 
 	file = fopen(path, "wb");
 
@@ -1296,7 +1296,7 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	char  path[MAX_PATH];
 
 
-	snprintf(path, sizeof(path), "%s/sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+	snprintf(path, sizeof(path), "%s/../sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
 
 	L = get_game_script();
 
