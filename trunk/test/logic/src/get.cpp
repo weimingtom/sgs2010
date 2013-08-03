@@ -70,7 +70,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 
 	if(pEvent->id == GameEvent_RoundGetCard)
 	{
-		// in round get, must get 2 card
+		// in round get, must get 2 card, 2 can modify by skill
 
 		if(pEvent->get_card->num != num)
 		{
@@ -99,6 +99,12 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	}
 	else if(pEvent->id == GameEvent_PassiveGetCard)
 	{
+		// in passive get, get specifyed number cards
+		if(pEvent->get_card->num != num)
+		{
+			MSG_OUT("get card num error! must be %d\n", pEvent->get_card->num);
+			return R_E_PARAM;
+		}
 		// passive get without per/postgetcard event
 		// get event.num cards
 		for(n = 0; n < pEvent->get_card->num; n++)
@@ -189,13 +195,13 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	
 	stGetCard.num = num;
 	stGetCard.force = force;
+	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
 
 	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pParentEvent);
 	event.get_card = &stGetCard;
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
 
 	ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
 
