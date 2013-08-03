@@ -281,7 +281,7 @@ static void game_event_param__get_card(GameContext* pGame, GameEventContext* pEv
 	else
 	{
 		MSG_OUT("    get_card.num=%d;\n", pEvent->get_card->num);
-		MSG_OUT("    get_card.force=%d;\n", YESNO2STR(pEvent->get_card->force));
+		MSG_OUT("    get_card.force=%s;\n", YESNO2STR(pEvent->get_card->force));
 		MSG_OUT("    get_card.alter_text=\"%s\";\n", pEvent->get_card->alter_text);
 	}
 }
