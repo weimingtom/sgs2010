@@ -15,7 +15,7 @@ import "../global/reg.lua";
 
 
 
-local function chitu_equip(cfg, game, event, player)
+local function chitu_equip(cfg, game, event, player, pos_card)
 	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 		error("invalid out equip card in event OutCardPrepare.");
 		return R_E_FAIL;
@@ -24,7 +24,7 @@ local function chitu_equip(cfg, game, event, player)
 	return R_CANCEL;
 end
 
-local function chitu_calc_dis(cfg, game, event, player)
+local function chitu_calc_dis(cfg, game, event, player, pos_card)
 	event.attack_dis.dis = event.attack_dis.dis - 1;
 	return R_DEF;
 end

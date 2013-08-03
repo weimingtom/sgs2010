@@ -22,6 +22,7 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 	int idcnt;
 	int idbegin ;
 	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
+	SelectTarget  select_target;
 
 	ST_ZERO(sel_opts);
 
@@ -80,16 +81,24 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 			return R_E_FAIL;
 		}
 
+		ST_ZERO(select_target);
 
 		// can set target?
 		INIT_EVENT(&event, GameEvent_SelectTarget, player, t, pParentEvent);
-
+		event.select_target = &select_target;
 		trigger_game_event(pGame, &event);
 
 		if(event.result == R_CANCEL)
 		{
 			// cannot select this player as target
-			MSG_OUT("你选择的角色不能成为目标, 请重新选择!\n");
+			if(strlen(select_target.message) > 0)
+			{
+				MSG_OUT("%s\n", select_target.message);
+			}
+			else
+			{
+				MSG_OUT("【%s】不能成为目标, 请重新选择!\n", pTarget->name);
+			}
 			continue;
 		}
 

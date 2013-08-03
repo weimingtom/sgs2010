@@ -867,7 +867,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 					case R_CANCEL:   // cancel the operator, need return to caller
 						if(force != YES)
 						{
-							pEvent->result = R_CANCEL;
+							// pEvent->result = R_CANCEL;
 							return R_CANCEL;
 						}
 						else

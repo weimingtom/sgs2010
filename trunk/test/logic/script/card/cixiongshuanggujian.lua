@@ -61,7 +61,7 @@ reg_card {
 	
 	event = {
 		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
 			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 				error('invalid out equip card in event OutCardPrepare.');
 				return R_E_FAIL;
@@ -70,7 +70,7 @@ reg_card {
 			return R_CANCEL;
 		end,
 		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
 			if(player == event.trigger ) then
 				message('attack base: 2');
 				event.attack_dis.base = 2;
@@ -78,7 +78,7 @@ reg_card {
 			return R_DEF;
 		end,
 		-- 攻击效果
-		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player)
+		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player, pos_card)
 			-- 让目标选择 1. 目标自己弃一张手牌， 2。攻击目标者摸一张牌
 			local p = get_game_player(game, player);  -- 应该不会nil;
 			local t = get_game_player(game, event.target);
