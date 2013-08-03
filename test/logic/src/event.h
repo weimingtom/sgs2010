@@ -162,6 +162,12 @@ typedef struct tagDiscardCard
 	char   alter_text[MAX_ALTER_TEXT_LEN];
 } DiscardCard;
 
+
+typedef struct tagSelectTarget
+{
+	char message[MAX_ALTER_TEXT_LEN];  //  if the player is cannot be set to target, return the alter message from this field;
+} SelectTarget;
+
 // tolua_end
 
 
@@ -192,6 +198,7 @@ struct tagGameEventContext
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
 		DiscardCard* discard_card; // when round discard card, or passive discard card
+		SelectTarget* select_target; // when select target checked
 	};
 	char ud[MAX_UD_LEN];   // user custom string, used for script
 };

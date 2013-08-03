@@ -530,6 +530,20 @@ static void game_event_param__discard_card(GameContext* pGame, GameEventContext*
 }
 
 
+
+static void game_event_param__select_target(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->select_target)
+	{
+		MSG_OUT("    select_target=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    select_target.message=\"%s\";\n", pEvent->select_target->message);
+	}
+}
+
+
 static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 {
 	switch(pEvent->id)
@@ -599,6 +613,9 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_RoundDiscardCard:
 	case GameEvent_PassiveDiscardCard:
 		game_event_param__discard_card(pGame, pEvent);
+		break;
+	case GameEvent_SelectTarget:
+		game_event_param__select_target(pGame, pEvent);
 		break;
 	default:
 		/* do nothing */

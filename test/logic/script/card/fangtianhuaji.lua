@@ -56,11 +56,23 @@ reg_card {
 			end
 			return USE_CANNOT;
 		end,
+		-- 选择目标时需要检测是否重复
+		[GameEvent_SelectTarget] = function(cfg, game, event, player, pos_card)
+			-- 如果选择目标的事件的父事件是出牌准备前, ud检查到武器 {fthj}
+			if event.parent_event.id == GameEvent_PerOutCardPrepare 
+				and event.trigger == player   -- 只在出牌的玩家进行检测
+				and string.find(event.parent_event.ud, '{fthj}$')
+			then
+				-- 默默检查
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
 	},
 	
 	event = {
 		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
 			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 				error('invalid out equip card in event OutCardPrepare.');
 				return R_E_FAIL;
@@ -69,15 +81,42 @@ reg_card {
 			return R_CANCEL;
 		end,
 		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
 			if(player == event.trigger ) then
 				message('attack base: 4');
 				event.attack_dis.base = 4;
 			end
 			return R_DEF;
 		end,
+		
+		-- 选择目标的检查
+		[GameEvent_SelectTarget] = function(cfg, game, event, player, pos_card)
+			local out_card = event.parent_event.out_card;
+			--message('【'..get_game_player(game, player).name..'】检查【方天画戟】的目标【'..get_game_player(game, event.target).name..'】..');
+			if out_card.target_num >= 3  then
+				event.select_target.message = '选择的目标数量已经超出设定！';
+				event.block = YES;
+				event.result = R_CANCEL;
+			else
+				for n = 0, out_card.target_num-1 do
+					if(out_card.targets[n] == event.target) then
+						event.select_target.message = '【'..get_game_player(game, event.target).name..'】已经被选择为目标了！';
+						event.block = YES;
+						event.result = R_CANCEL;
+					end
+				end
+			end
+			-- 继续其它条件的检查
+			return R_DEF;
+		end,
+		
 		-- 攻击效果
-		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player)
+		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player, pos_card)
+			
+			--  设置正在使用 {fthj}
+			event.ud = event.ud .. '{fthj}';
+			event.out_card.target_num = 0;
+			
 			-- 让出牌者选择，至多3个目标，如果一个都没选择，则出牌中止
 			local targets = {};
 			
@@ -86,6 +125,9 @@ reg_card {
 					'请为【'..get_card_name(event.out_card.vcard.id)..'】指定最多3个目标(第'..n..'个):', -1);
 				if(ret == R_SUCC) then
 					table.insert(targets, t);
+					--  先设置一下临时目标，用于检查
+					event.out_card.targets[event.out_card.target_num] = t;
+					event.out_card.target_num = event.out_card.target_num + 1;
 				else
 					break;
 				end
