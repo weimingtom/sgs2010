@@ -69,7 +69,6 @@ enum EquipIdx {
 	EquipIdx_Max,
 };
 
-
 // tolua_end
 
 typedef  struct  tagPlayer
@@ -83,7 +82,7 @@ typedef  struct  tagPlayer
 	int      judgment_card_num;
 	Card     hand_cards[MAX_HAND_CARD];
 	Card     equip_cards[EquipIdx_Max];
-	Card     judgment_cards[MAX_JUDGMENT_CARD];
+	VCard    judgment_cards[MAX_JUDGMENT_CARD];
 	PlayerStatus   status;
 	PlayerFlag     flag;
 	int      params[MAX_PLAYER_PARAM];
@@ -121,19 +120,19 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
-RESULT player_add_judgment_card(Player* pPlayer, Card* pCard);
+RESULT player_add_judgment_card(Player* pPlayer, VCard* pCard);
 
 
 RESULT set_player_card_flag(Player* pPlayer, CardWhere where, int pos, CardFlag flag);
 CardFlag get_player_card_flag(Player* pPlayer, CardWhere where, int pos);
 
 
-RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
-RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);
+RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard);
+RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard);
 
 RESULT player_card_idx_to_pos(Player* pPlayer, int idx, CardWhere* where, int* pos);
 
-RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosCard*  pPosCards);
+RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosVCard*  pPosCards);
 RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num, CardFlag flag);
 
 // tolua_begin
@@ -143,7 +142,7 @@ const char* player_id_str(PlayerID id);
 const char* equip_idx_str(int idx);
 
 Card* get_player_handcard(Player* pPlayer, int index);
-Card* get_player_judgecard(Player* pPlayer, int index);
+VCard* get_player_judgecard(Player* pPlayer, int index);
 Card* get_player_equipcard(Player* pPlayer, int index);
 
 

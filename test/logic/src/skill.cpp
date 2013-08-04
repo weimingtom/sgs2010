@@ -97,7 +97,7 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 		return R_E_FAIL;
 	}
 
-	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Weapon), card_name(pcard.card.id, temp, sizeof(temp)));
+	MSG_OUT("【%s】发动【%s】的%s效果。\n", p->name, card_name(pcard.card.id, temp, sizeof(temp)), equip_idx_str(EquipIdx_Weapon));
 
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
 	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
@@ -134,7 +134,7 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 		return R_E_FAIL;
 	}
 
-	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Armor), card_name(pcard.card.id, temp, sizeof(temp)));
+	MSG_OUT("【%s】发动【%s】的%s效果。\n", p->name, card_name(pcard.card.id, temp, sizeof(temp)), equip_idx_str(EquipIdx_Armor));
 
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
 	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));

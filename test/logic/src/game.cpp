@@ -353,7 +353,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
 	RESULT ret;
 	Player* pPlayer;
-	PosCard stCard;
+	PosVCard stCard;
 	GameEventContext  event;
 
 	MSG_OUT("第[%d]回合，判定阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
@@ -386,7 +386,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		//if(pCardConfig)
 		{
 			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-			event.pos_card = &stCard;
+			event.pos_vcard = &stCard;
 			trigger_game_event(pGame, &event);
 
 			if(event.result != R_CANCEL) // if card calc is cancel .
@@ -394,9 +394,9 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				//if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-					event.pos_card = &stCard;
+					event.pos_vcard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.card.vcard.id, pGame, &event, pGame->cur_player);
 				}
 
 				ret = game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
@@ -404,7 +404,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				stCard.where = CardWhere_CurDiscardStack;
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-				event.pos_card = &stCard;
+				event.pos_vcard = &stCard;
 				trigger_game_event(pGame, &event);
 
 			}
@@ -415,9 +415,9 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 				//if(pCardConfig->out != NULL)
 				{
 					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-					event.pos_card = &stCard;
+					event.pos_vcard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.card.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.card.vcard.id, pGame, &event, pGame->cur_player);
 				}
 				//else
 				//{
@@ -897,6 +897,26 @@ static void game_save_card(Card* pCard, FILE* file, int tabs)
 
 }
 
+static void game_save_vcard(VCard* pCard, FILE* file, int tabs)
+{
+	if(VCARD_IS_REAL(pCard))
+	{
+		game_save_card(&pCard->vcard, file, tabs);
+	}
+	else
+	{
+		fprintf_tab(file, 0, "vcard = { ");
+		game_save_card(&pCard->vcard, file, tabs);
+		fprintf_tab(file, 0, "}, rnum = %d,");
+
+		
+		char  temp[128];
+		fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
+		fprintf_tab(file, 0, "color = %s, ", card_color_id_str(pCard->color));
+		fprintf_tab(file, 0, "value = %s, ", card_value_id_str(pCard->value));
+		fprintf_tab(file, 0, "flag = 0x%x, ", pCard->flag);
+	}	
+}
 
 static void game_save_cardstack(CardStack* pCardStack, FILE* file, int tabs)
 {

@@ -34,3 +34,53 @@
 
 --]]
 
+
+
+import "../global/reg.lua";
+
+
+reg_card {
+	sid = 'jdsr',
+	name = '借刀杀人',
+	type = CardType_Strategy,
+	
+	desc=[==[【借刀杀人】
+出牌时机：出牌阶段。
+使用目标：除你以外，装备区里有武器牌的一名角色A。（你需要在此阶段选择另一个A使用【杀】能攻击到的角色B）。
+作用效果：A需对B使用一张【杀】，否则A必须将其装备的武器牌交给你。
+★A使用【杀】时，角色技能和武器技能可以照常发动。]==],
+
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- 出牌阶段的检测，只会针对回合玩家。这里不用额外检查是不是。
+			-- 出牌阶段总是可以出锦囊牌的。
+			return YES;
+		end,
+	},
+	
+	event = {
+		-- 出牌过程由下列3个事件驱动
+
+
+		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
+		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
+			return R_SUCC;
+		end,
+
+		-- 出牌的过程驱动
+		[GameEvent_OutCard] = function(cfg, game, event, player, pos_card)
+			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
+			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+			return R_SUCC; 
+		end,
+		
+		-- 出牌后的结算（某些技能可以跳过此事件）
+		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
+			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+		end,
+	},
+};
+
+

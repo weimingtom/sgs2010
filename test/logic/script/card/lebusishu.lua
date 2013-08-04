@@ -12,3 +12,69 @@
 [Q]是否可以对自己使用【乐不思蜀】？[A]不可以。
 --]]
 
+
+import "../global/reg.lua";
+
+
+local cfg = {
+	sid = 'lbss',
+	name = '乐不思蜀',
+	type = CardType_DelayStrategy,
+	
+	desc=[==[【乐不思蜀】
+出牌时机：出牌阶段。
+使用目标：除你以外，任意一名角色。
+作用效果：将【乐不思蜀】横置于目标角色判定区里，目标角色回合判定阶段，进行判定；若判定结果不为红桃，则跳过目标角色的出牌结算，将【乐不思蜀】弃置。
+★如判定结果为红桃，则没有事发生。
+★【乐不思蜀】在结算后都将被弃置。]==],
+
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- 出牌阶段的检测，只会针对回合玩家。这里不用额外检查是不是。
+			-- 出牌阶段总是可以出锦囊牌的。
+			return YES;
+		end,
+	},
+	
+	event = {
+		-- 出牌过程由下列3个事件驱动
+
+
+		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
+		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			-- select target
+			local ret;
+			local target = -1;
+			ret, target = game_select_target(game, event, player, -1, NO, NO,
+				"请为【"..cfg.name.."】指定一个目标:", target);
+			if(ret == R_SUCC) then
+				event.out_card.targets[0] = target;
+				event.out_card.target_num = 1;
+				return R_SUCC;
+			end
+			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
+			return R_SUCC;
+		end,
+
+		-- 出牌的过程驱动
+		[GameEvent_OutCard] = function(cfg, game, event, player, pos_card)
+			message('【'..get_game_player(game, player).name..'】将一张【'
+				.. cfg.name ..'】横置于【'.. get_game_player(game, target).name .. '】的判定区。' );
+			-- 将牌加入目标的判定区
+			add_cur_card_to_player_judgment(game, event.out_card.rcard	
+			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
+			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+			return R_SUCC; 
+		end,
+		
+		-- 出牌后的结算（某些技能可以跳过此事件）
+		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
+			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+		end,
+	},
+};
+
+-- register card
+reg_card(cfg);
+

@@ -15,8 +15,8 @@ typedef struct tagGameEventContext GameEventContext;
 
 
 // operator of discard stack
-RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos);
-RESULT game_get_discard_cur(GameContext* pGame, int pos, Card* pCard);
+RESULT game_add_discard_cur(GameContext* pGame, const VCard* pCard, int* pos);
+RESULT game_get_discard_cur(GameContext* pGame, int pos, VCard* pCard);
 RESULT game_clr_discard_cur(GameContext* pGame, int pos);
 void game_flush_discard_cur(GameContext* pGame);
 

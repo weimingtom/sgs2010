@@ -11,3 +11,53 @@
 [Q]是否可以对自己使用【过河拆桥】？[A]不可以。
 --]]
 
+
+import "../global/reg.lua";
+
+
+reg_card {
+	sid = 'ghcq',
+	name = '过河拆桥',
+	type = CardType_Strategy,
+	
+	desc=[==[【过河拆桥】
+出牌时机：出牌阶段。
+使用目标：除你以外，任意一名角色。
+作用效果：你选择并弃掉目标角色手牌（随机选择）、装备区或判定区里的一张牌。
+★尽管目标角色判定区里的牌不属于他/她，你依然可以令他/她弃置那张牌。]==],
+
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- 出牌阶段的检测，只会针对回合玩家。这里不用额外检查是不是。
+			-- 出牌阶段总是可以出锦囊牌的。
+			return YES;
+		end,
+	},
+	
+	event = {
+		-- 出牌过程由下列3个事件驱动
+
+
+		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
+		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
+			return R_SUCC;
+		end,
+
+		-- 出牌的过程驱动
+		[GameEvent_OutCard] = function(cfg, game, event, player, pos_card)
+			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
+			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+			return R_SUCC; 
+		end,
+		
+		-- 出牌后的结算（某些技能可以跳过此事件）
+		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
+			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+		end,
+	},
+};
+
+
+
