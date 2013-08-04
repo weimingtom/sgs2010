@@ -106,6 +106,22 @@ const char* card_value_str(CardValue value)
 }
 
 
+const char* card_flag_str(CardFlag flag)
+{
+	static char buf[64];
+	switch(flag)
+	{
+	case CardFlag_None: return "CardFlag_None";
+	case CardFlag_PrepareOut: return "CardFlag_PrepareOut";   // the card prepare to out, in prepare event, cannot calc the card effect
+	case CardFlag_PrepareDiscard: return "CardFlag_PrepareDiscard";   // the card prepare to discard, in prepare event, cannot calc the card effect
+	case CardFlag_PrepareSupply: return "CardFlag_PrepareSupply";   // the card prepare to give other player, in prepare event, cannot calc the card effect
+	case CardFlag_InUse: return "CardFlag_InUse";
+	case CardFlag_FromHand: return "CardFlag_FromHand";
+	case CardFlag_FromEquip: return "CardFlag_FromEquip";
+	case CardFlag_FromJudge: return "CardFlag_FromJudge";
+	default: snprintf(buf, sizeof(buf), "0x%x", (int)flag); return buf;
+	}
+}
 
 
 

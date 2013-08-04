@@ -373,7 +373,7 @@ static void p_card(const char* perffix, Card* p)
 	MSG_OUT("    %s.id=%d {%s};\n", perffix, p->id, card_sid(p->id, buf, sizeof(buf)));
 	MSG_OUT("    %s.color=%s;\n", perffix, card_color_id_str(p->color));
 	MSG_OUT("    %s.value=%s;\n", perffix, card_value_id_str(p->value));
-	MSG_OUT("    %s.flag=0x%x;\n", perffix, p->flag);
+	MSG_OUT("    %s.flag=%s;\n", perffix, card_flag_str(p->flag));
 }
 
 

@@ -41,12 +41,17 @@ reg_card {
 		end,
 		
 		-- 如果自己的杀造成目标伤害，如果目标没有手牌，则伤害+1
-		[GameEvent_ChangeLife] = function(cfg, game, event, player, pos_card)
-			if event.change_life.delta < 0 -- 造成伤害
-				and event.parent_event.id == GameEvent_OutCard    -- 出牌 
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player, pos_card)
+			-- message('can_use:' .. get_game_player(game, player).name..', card: '..get_card_name(pos_card.card.id));
+			-- game_event_info(game, event, 1);
+			if 
+				event.change_life.delta < 0 -- 造成伤害
+				-- 前一个事件：
+				and event.parent_event.id == GameEvent_OutCardCalc    -- 出牌结算 
 				and event.parent_event.trigger == player          -- 我的出牌 				
-				and event.parent_event.target == event.trigger    -- 目标是出闪的人 
+				and event.parent_event.target == event.trigger    -- 目标是受伤害的人
 				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+				-- 目标条件
 				and get_game_player(game, event.trigger).hand_card_num == 0   -- 目标没有手牌
 			then
 				return USE_AUTO;    -- 自动触发的技能
@@ -75,10 +80,11 @@ reg_card {
 		end,
 		
 		-- 计算技能效果
-		[GameEvent_ChangeLife] = function(cfg, game, event, player, pos_card)
-			messgae('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器效果被触发。目标伤害+1。');
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player, pos_card)
+			message('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器效果被触发。目标伤害+1。');
 			-- 伤害+1
 			event.change_life.delta = event.change_life.delta - 1; 
+			return R_SUCC;
 		end,
 
 	},
