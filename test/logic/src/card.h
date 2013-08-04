@@ -291,6 +291,7 @@ const char* card_type_str(CardType type);
 //const char* card_id_str(CardID id);
 const char* card_color_str(CardColor color);
 const char* card_value_str(CardValue value);
+const char* card_flag_str(CardFlag flag);
 
 
 /*
