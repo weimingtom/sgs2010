@@ -150,7 +150,7 @@ reg_card {
 				names[i] = get_game_player(game, v).name;
 			end
 				
-			message('【'..get_game_player(game, player).name..'】指定了'
+			message('【'..get_game_player(game, player).name..'】发动了【'..cfg.name..'】武器技能，指定了'
 				.. join(names,'【','】','、') .. '作为【'
 				.. get_card_name(event.out_card.vcard.id) ..'】的目标。' );
 			

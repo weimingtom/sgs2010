@@ -83,11 +83,15 @@ reg_card {
 		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
 			-- 弃2张牌，可以放弃，如果不弃，则技能中止，什么也没发生
 			if R_SUCC == game_passive_discard(game, event, player, PatternWhere_Hand + PatternWhere_Equip, 2, NO, 
-				'请弃两张牌，若如此做。则你的【'..get_card_name(event.parent_event.out_card.vcard.id)..'】依然生效:')
+				'请弃两张牌，若如此做。则你的【'..get_card_name(event.parent_event.out_card.vcard.id)..'】依然造成伤害:')
 			then
+			
+				message('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器技能生效，你的【杀】没能被闪避。');
 				event.result = R_CANCEL;
 				event.block = YES;
 				return R_BACK;
+			else
+				message('【'..get_game_player(game,player).name..'】取消了【'..cfg.name..'】武器技能。');
 			end
 			return R_SUCC;
 		end,

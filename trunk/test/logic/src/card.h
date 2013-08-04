@@ -108,7 +108,8 @@ typedef enum _CardFlag
 	CardFlag_None = 0,
 	CardFlag_PrepareOut = 1,   // the card prepare to out, in prepare event, cannot calc the card effect
 	CardFlag_PrepareDiscard = 2,   // the card prepare to discard, in prepare event, cannot calc the card effect
-	CardFlag_PrepareGive = 3,   // the card prepare to give other player, in prepare event, cannot calc the card effect
+	CardFlag_PrepareSupply = 3,   // the card prepare to give other player, in prepare event, cannot calc the card effect
+	CardFlag_InUse = 4,
 	CardFlag_FromHand = 11,
 	CardFlag_FromEquip = 12,
 	CardFlag_FromJudge = 13,

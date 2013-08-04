@@ -434,8 +434,16 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
 			}
+
+			if(get_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos) != CardFlag_None)
+			{
+				MSG_OUT("索引[%d]的牌正在使用中!\n", idx[n]);
+				return R_E_PARAM;
+			}
+
 			// must success
 			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
+
 		}
 
 		// match pattern ?
@@ -503,8 +511,16 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
 			}
+
+			if(get_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos) != CardFlag_None)
+			{
+				MSG_OUT("索引[%d]的牌正在使用中!\n", idx[n]);
+				return R_E_PARAM;
+			}
+
 			// must success
 			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
+
 		}
 
 		// match pattern ?
@@ -563,9 +579,16 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 			return R_E_PARAM;
 		}
 
+		if(get_player_card_flag(pPlayer, stCard[0].where, stCard[0].pos) != CardFlag_None)
+		{
+			MSG_OUT("索引[%d]的牌正在使用中!\n", idx[0]);
+			return R_E_PARAM;
+		}
+
 		// get card
 		//pCard = PLAYER_HANDCARD(CUR_PLAYER(pGame), pos);
 		get_player_card(pPlayer, stCard[0].where, stCard[0].pos, &stCard[0].card);
+
 
 		// check can out?
 		// const CardConfig* pCardConfig = get_card_config(stCard[0].id);

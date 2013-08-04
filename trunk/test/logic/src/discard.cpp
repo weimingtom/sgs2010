@@ -185,6 +185,13 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
 			}
+
+			if(get_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos) != CardFlag_None)
+			{
+				MSG_OUT("索引[%d]的牌正在使用中!\n", idx[n]);
+				return R_E_PARAM;
+			}
+
 			// must success
 			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
 		}
