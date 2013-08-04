@@ -168,7 +168,7 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 					{
 						if(cu == USE_AUTO)
 						{
-							MSG_OUT("【%s】的%s效果【%s】被触发。\n", pPlayer->name, equip_idx_str(n), card_name(pos_card.card.id, buf, sizeof(buf)));
+							MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
 						}
 						set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
 						call_card_event(pos_card.card.id, pGame, pEvent, player);

@@ -274,12 +274,12 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		{
 			int n;
 			char  buffer[128];
-			Card* pCard;
+			VCard* pCard;
 			MSG_OUT("当前弃牌: 共[%d]张\n", pContext->cur_discard_card_num);
 			for(n = 0; n < pContext->cur_discard_card_num; n++)
 			{
 				pCard = &pContext->cur_discard_cards[n];
-				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
+				MSG_OUT(" [%d] %s\n", n, vcard_str(pCard, buffer, sizeof(buffer)));
 			}
 
 			MSG_OUT("弃牌牌堆: 共[%d]张\n", pContext->discard_card_stack.count);		

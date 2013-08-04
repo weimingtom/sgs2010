@@ -21,6 +21,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	char buf[128];
 	Player* pPlayer;
 	EquipCard  equip_cards;
+	VCard   vcard;
 	GameEventContext  event;
 
 	if(!IS_PLAYER_VALID(pGame, player))
@@ -53,7 +54,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	equip_cards.equip_pos = equip_pos;
 
 	// get card from hand
-	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &equip_cards.card.card))
+	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &vcard) || !VCARD_IS_REAL(&vcard))
 	{
 		if(L) {
 			luaL_error(L, "game_player_equip_card: invalid hand card pos - %d", hand_pos );
@@ -62,7 +63,8 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 		}
 		return R_E_PARAM;
 	}
-
+	
+	equip_cards.card.card = vcard.vcard;
 	equip_cards.card.where = CardWhere_PlayerHand;
 	equip_cards.card.pos = hand_pos;
 

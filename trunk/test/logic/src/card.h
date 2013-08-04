@@ -18,10 +18,11 @@ typedef enum _CardType
 	CardType_None = 0,
 	CardType_Normal = 1,      // normal card
 	CardType_Strategy = 2,    // strategy card with a specified skill
-	CardType_Armor = 3,       // used when be attacked
-	CardType_Weapon = 4,      // used when attack a target
-	CardType_HorseInc = 5,    // be attacked the target distance from attack add 1 unit.
-	CardType_HorseDec = 6,    // attack other , target distance from attack  dec 1 unit.
+	CardType_DelayStrategy = 3,    // strategy card with a specified skill it calculated in next round
+	CardType_Armor = 4,       // used when be attacked
+	CardType_Weapon = 5,      // used when attack a target
+	CardType_HorseInc = 6,    // be attacked the target distance from attack add 1 unit.
+	CardType_HorseDec = 7,    // attack other , target distance from attack  dec 1 unit.
 }CardType;
 
 // card identification
@@ -226,6 +227,23 @@ typedef struct tagPosCardList
 	PosCard  pcards[MAX_CARD_LIST_NUM];
 }PosCardList;
 
+// 这里定义，每张虚拟的牌，最多只能由4张真实的牌组成
+#define MAX_RCARD_NUM  4
+
+typedef struct tagVCard {
+	Card  vcard;     // 虚拟牌的属性
+	int   rnum;      // 由几张真实的牌组合而成
+	Card  rcards[MAX_RCARD_NUM];  // 真实的牌组合
+} VCard; 
+
+
+typedef struct tagPosVCard
+{
+	VCard      card;
+	CardWhere  where;
+	int        pos;
+}PosVCard;
+
 
 
 // tolua_end
@@ -238,6 +256,7 @@ typedef struct tagPosCardList
 #define CARD_EQUAL_COLOR(p1, p2)   ((p1)->color == (p2)->color)
 #define CARD_EQUAL_VALUE(p1, p2)   ((p1)->value == (p2)->value)
 
+#define VCARD_IS_REAL(vc)   ((vc)->rnum == 1 && CARD_EQUAL(&(vc)->vcard, &(vc)->rcards[0]))
 
 
 #define INIT_CARDPATTERN_USE_ID(cp, _id)  ((cp)->id=(_id), (cp)->color=CardColor_None, (cp)->value_min=CardValue_None, (cp)->value_max=CardValue_None)
@@ -259,10 +278,14 @@ void card_dump(const Card* pCard);
 #define card_str(pCard, buffer, buflen) card_str_n((pCard),1,(buffer),(buflen))
 char* card_str_n(const Card* pCard, int num, char* buffer, int buflen);
 
+#define vcard_str(pCard, buffer, buflen)  vcard_str_n((pCard),1,(buffer),(buflen))
+char* vcard_str_n(const VCard* pCard, int num, char* buffer, int buflen);
+
 char* card_simple_str(const Card* pCard, char* buffer, int buflen);
 
 #define card_str_def(c, b, l, d) ( ((c)->id == CardID_None) ? d : card_str((c),(b),(l)) )
 
+void set_vcard_from_card(VCard* pVCard, const Card* pCard);
 
 #define card_pattern_str(pattern, buffer, buflen) card_pattern_str_n((pattern),1,(buffer),(buflen))
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);

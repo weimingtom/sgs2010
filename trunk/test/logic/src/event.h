@@ -195,6 +195,7 @@ struct tagGameEventContext
 		PatternOut* pattern_out; // for passive out, supply card etc..
  		OutCard*    out_card;       // real out,  per/post out
 		PosCard*    pos_card;  // lost card,
+		PosVCard*    pos_vcard;  // judgement vcard,
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
 		DiscardCard* discard_card; // when round discard card, or passive discard card

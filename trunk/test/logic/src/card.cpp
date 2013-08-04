@@ -176,15 +176,47 @@ char* card_str_n(const Card* pCard, int num, char* buffer, int buflen)
 	char  name[128];
 	for(n = 0; n < num; n++)
 	{
-		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard->id, name, sizeof(name)), card_color_str(pCard->color), card_value_str(pCard->value));
+		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard[n].id, name, sizeof(name)), card_color_str(pCard[n].color), card_value_str(pCard[n].value));
 	}
 	return buffer;
 }
 
 
+
+
 char* card_simple_str(const Card* pCard, char* buffer, int buflen)
 {
 	buffer[0] = 0;
+	return buffer;
+}
+
+char* vcard_str_n(const VCard* pCard, int num, char* buffer, int buflen)
+{
+	int n, m;
+	int len = 0;
+	// char  name[128];
+	for(n = 0; n < num; n++)
+	{
+		if(pCard->rnum == 1 && CARD_EQUAL(&pCard->vcard, &pCard->rcards[0]))
+		{
+			// 按真实牌，这里不再输出
+			card_str(&pCard[n].vcard, buffer + len, buflen - len);
+			len += strlen(buffer + len);
+		}
+		else
+		{
+			len += snprintf(buffer + len, buflen - len, "[");
+			for(m = 0; m < pCard->rnum; m++)
+			{
+				card_str(&pCard[n].rcards[m], buffer + len, buflen - len);
+				len += strlen(buffer + len);
+			}
+			len += snprintf(buffer + len, buflen - len, "=>");
+			card_str(&pCard[n].vcard, buffer + len, buflen - len);
+			len += strlen(buffer + len);
+			len += snprintf(buffer + len, buflen - len, "]");
+		}
+	}
 	return buffer;
 }
 
@@ -195,6 +227,13 @@ void card_dump(const Card* pCard)
 	MSG_OUT("%s", card_str(pCard, buffer, sizeof(buffer)));	
 }
 
+
+void set_vcard_from_card(VCard* pVCard, const Card* pCard)
+{
+	pVCard->vcard = *pCard;
+	pVCard->rnum = 1;
+	pVCard->rcards[0] = *pCard;
+}
 
 
 RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len)

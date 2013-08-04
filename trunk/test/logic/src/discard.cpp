@@ -9,7 +9,7 @@
 #include "cmd.h"
 
 
-RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos)
+RESULT game_add_discard_cur(GameContext* pGame, const VCard* pCard, int* pos)
 {
 	if(pGame->cur_discard_card_num >= MAX_CUR_DISCARD_NUM)
 		return R_E_FAIL;
@@ -23,9 +23,10 @@ RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos)
 	return R_SUCC;
 }
 
-RESULT game_get_discard_cur(GameContext* pGame, int pos, Card* pCard)
+/*
+RESULT game_get_discard_cur(GameContext* pGame, int pos, VCard* pCard)
 {
-	if(pos < 0 || pos >= pGame->cur_discard_card_num || !CARD_VALID(&pGame->cur_discard_cards[pos]))
+	if(pos < 0 || pos >= pGame->cur_discard_card_num  || !CARD_VALID(&pGame->cur_discard_cards[pos].vcard) )
 		return R_E_FAIL;
 
 	*pCard = pGame->cur_discard_cards[pos];
@@ -37,19 +38,23 @@ RESULT game_clr_discard_cur(GameContext* pGame, int pos)
 {
 	if(pos < 0 || pos >= pGame->cur_discard_card_num)
 		return R_E_FAIL;
-
+ 
 	ST_ZERO(pGame->cur_discard_cards[pos]);
 	return R_SUCC;
 }
+*/
 
 void game_flush_discard_cur(GameContext* pGame)
 {
-	int n;
+	int n, m;
 	for(n = 0; n < pGame->cur_discard_card_num; n++)
 	{
-		if(CARD_VALID(&pGame->cur_discard_cards[n]))
+		//if(CARD_VALID(&pGame->cur_discard_cards[n].vcard))
 		{
-			card_stack_push(&pGame->discard_card_stack, &pGame->cur_discard_cards[n]);
+			for(m = 0; m < pGame->cur_discard_cards[n].rnum; m++)
+			{
+				card_stack_push(&pGame->discard_card_stack, &pGame->cur_discard_cards[n].rcards[m]);
+			}
 		}
 	}
 	pGame->cur_discard_card_num = 0;
@@ -129,7 +134,7 @@ static RESULT remove_discard_cards(GameContext* pGame, GameEventContext* pEvent,
 	// remove judgment discard cards
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
-		if(pPlayer->judgment_cards[n].flag ==  CardFlag_PrepareDiscard)
+		if(pPlayer->judgment_cards[n].vcard.flag ==  CardFlag_PrepareDiscard)
 		{
 			game_player_discard_card(pGame, pEvent, player, CardWhere_PlayerJudgment, n);
 			n--;
@@ -143,7 +148,7 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 {
 	RESULT  ret;
 	int     n, m;
-	PosCard stCard[MAX_CARD_LIST_NUM];
+	PosVCard stCard[MAX_CARD_LIST_NUM];
 
 	Player* pPlayer;
 	
@@ -315,7 +320,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos)
 {
 	GameEventContext    event;
-	PosCard  stCard;
+	PosVCard  stCard;
 	char buf[256];
 	Player* pPlayer = get_game_player(pGame, player);
 
@@ -327,7 +332,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 
 	// event: per discard card 
 	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = &stCard;
+	event.pos_vcard = &stCard;
 
 	trigger_game_event(pGame, &event);
 
@@ -342,12 +347,12 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
 		stCard.where = CardWhere_CurDiscardStack;
 
-		MSG_OUT("【%s】弃牌 %s\n", pPlayer->name, card_str(&stCard.card, buf, sizeof(buf)));
+		MSG_OUT("【%s】弃牌 %s\n", pPlayer->name, vcard_str(&stCard.card, buf, sizeof(buf)));
 
 		// event: post discard card
 		
 		INIT_EVENT(&event, GameEvent_PostDiscardCard, player, INVALID_PLAYER, pParentEvent);
-		event.pos_card = &stCard;
+		event.pos_vcard = &stCard;
 		trigger_game_event(pGame, &event);
 
 		// ignore event result
@@ -362,7 +367,7 @@ YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos)
 	if(where != CardWhere_CurDiscardStack)
 		return NO;
 
-	if(pos >= 0 && pos < pGame->cur_discard_card_num && CARD_VALID(&pGame->cur_discard_cards[pos]))
+	if(pos >= 0 && pos < pGame->cur_discard_card_num && CARD_VALID(&pGame->cur_discard_cards[pos].vcard))
 	{
 		return YES;
 	}
@@ -372,6 +377,7 @@ YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos)
 
 RESULT add_cur_card_to_player_hand(GameContext* pGame, CardWhere where, int pos, int player)
 {
+	int n;
 	Player* p;
 	char buf[128];
 
@@ -387,12 +393,21 @@ RESULT add_cur_card_to_player_hand(GameContext* pGame, CardWhere where, int pos,
 		return R_E_FAIL;
 	}
 
-	if(R_SUCC != player_add_hand_card(p, &pGame->cur_discard_cards[pos]))
+	if(p->hand_card_num + pGame->cur_discard_cards[pos].rnum > MAX_HAND_CARD)
+	{
 		return R_E_FAIL;
+	}
+
+	for(n = 0; n < pGame->cur_discard_cards[pos].rnum; n++)
+	{
+		if(R_SUCC != player_add_hand_card(p, &pGame->cur_discard_cards[pos].rcards[n]))
+			return R_E_FAIL;
+		MSG_OUT("玩家【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos].rcards[n], buf, sizeof(buf)));
+	}
+
+	ST_ZERO(pGame->cur_discard_cards[pos]);
 
 
-	MSG_OUT("玩家【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
-	RESET_CARD(&pGame->cur_discard_cards[pos]);
 
 	return R_SUCC;
 }
@@ -414,12 +429,17 @@ RESULT add_cur_card_to_player_judgment(GameContext* pGame, CardWhere where, int 
 		return R_E_FAIL;
 	}
 
+	if(p->judgment_card_num + 1 > MAX_JUDGMENT_CARD)
+	{
+		return R_E_FAIL;
+	}
+
 	if(R_SUCC != player_add_judgment_card(p, &pGame->cur_discard_cards[pos]))
 		return R_E_FAIL;
 
 
-	MSG_OUT("玩家【%s】获得判定区牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
-	RESET_CARD(&pGame->cur_discard_cards[pos]);
+	MSG_OUT("玩家【%s】获得判定区牌 %s\n", p->name, vcard_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
+	ST_ZERO(pGame->cur_discard_cards[pos]);
 
 
 	return R_SUCC;

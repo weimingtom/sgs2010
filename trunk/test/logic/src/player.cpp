@@ -95,7 +95,7 @@ Card* get_player_handcard(Player* pPlayer, int index)
 	return PLAYER_HANDCARD(pPlayer, index);
 }
 
-Card* get_player_judgecard(Player* pPlayer, int index)
+VCard* get_player_judgecard(Player* pPlayer, int index)
 {
 	if(index < 0 || index>= pPlayer->judgment_card_num)
 		return NULL;
@@ -188,7 +188,7 @@ RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
 }
 
 
-RESULT player_add_judgment_card(Player* pPlayer, Card* pCard)
+RESULT player_add_judgment_card(Player* pPlayer, VCard* pCard)
 {
 	int n;
 	if(pPlayer->judgment_card_num >= MAX_JUDGMENT_CARD)
@@ -199,7 +199,7 @@ RESULT player_add_judgment_card(Player* pPlayer, Card* pCard)
 	// 不能有相同ID的判定牌
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
-		if(pPlayer->judgment_cards[n].id == pCard->id)
+		if(pPlayer->judgment_cards[n].vcard.id == pCard->vcard.id)
 			return R_E_CONFLICT;
 	}
 	
@@ -228,7 +228,7 @@ CardFlag get_player_card_flag(Player* pPlayer, CardWhere where, int pos)
 	case CardWhere_PlayerJudgment:
 		if(0 <= pos && pos < pPlayer->judgment_card_num)
 		{
-			return pPlayer->judgment_cards[pos].flag;
+			return pPlayer->judgment_cards[pos].vcard.flag;
 		}
 		break;
 	default:
@@ -260,7 +260,7 @@ RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag
 	case CardWhere_PlayerJudgment:
 		if(0 <= pos && pos < pPlayer->judgment_card_num)
 		{
-			pPlayer->judgment_cards[pos].flag = flag;
+			pPlayer->judgment_cards[pos].vcard.flag = flag;
 			return R_SUCC;
 		}
 		break;
@@ -272,23 +272,23 @@ RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag
 }
 
 
-RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
+RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 {
 	switch(where)
 	{
 	case CardWhere_PlayerHand:
 		if(0 <= pos && pos < pPlayer->hand_card_num)
 		{
-			*pCard = pPlayer->hand_cards[pos];
-			pCard->flag = CardFlag_FromHand;
+			set_vcard_from_card(pCard, &pPlayer->hand_cards[pos]);
+			pCard->vcard.flag = CardFlag_FromHand;
 			return R_SUCC;
 		}
 		break;
 	case CardWhere_PlayerEquip:
 		if(0 <= pos && pos < EquipIdx_Max && CARD_VALID(&pPlayer->equip_cards[pos]))
 		{
-			*pCard = pPlayer->equip_cards[pos];
-			pCard->flag = CardFlag_FromEquip;
+			set_vcard_from_card(pCard, &pPlayer->equip_cards[pos]);
+			pCard->vcard.flag = CardFlag_FromEquip;
 			return R_SUCC;
 		}
 		break;
@@ -296,7 +296,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 		if(0 <= pos && pos < pPlayer->judgment_card_num)
 		{
 			*pCard = pPlayer->judgment_cards[pos];
-			pCard->flag = CardFlag_FromJudge;
+			pCard->vcard.flag = CardFlag_FromJudge;
 			return R_SUCC;
 		}
 		break;
@@ -309,14 +309,14 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
 }
 
 
-RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard)
+RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 {
 	switch(where)
 	{
 	case CardWhere_PlayerHand:
 		if(0 <= pos && pos < pPlayer->hand_card_num)
 		{
-			if(pCard != NULL) *pCard = pPlayer->hand_cards[pos];
+			if(pCard != NULL) set_vcard_from_card(pCard, &pPlayer->hand_cards[pos]);
 			arrray_remove_t(pPlayer->hand_cards, sizeof(pPlayer->hand_cards[0]), &pPlayer->hand_card_num, pos, NULL);
 			return R_SUCC;
 		}
@@ -325,7 +325,7 @@ RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, Card* pCard
 	case CardWhere_PlayerEquip:
 		if(0 <= pos && pos < EquipIdx_Max && pPlayer->equip_cards[pos].id != CardID_None && CARD_VALID(&pPlayer->equip_cards[pos]))
 		{
-			if(pCard != NULL) *pCard = pPlayer->equip_cards[pos];
+			if(pCard != NULL) set_vcard_from_card(pCard, &pPlayer->equip_cards[pos]);
 			RESET_CARD(&pPlayer->equip_cards[pos]);
 			return R_SUCC;
 		}
@@ -385,7 +385,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* po
 	return R_E_FAIL;
 }
 
-RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosCard*  pPosCards)
+RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosVCard*  pPosCards)
 {
 	int n, m;
 	CardWhere   where;
