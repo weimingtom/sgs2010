@@ -209,6 +209,35 @@ RESULT player_add_judgment_card(Player* pPlayer, Card* pCard)
 	return R_SUCC;
 }
 
+CardFlag get_player_card_flag(Player* pPlayer, CardWhere where, int pos)
+{
+	switch(where)
+	{
+	case CardWhere_PlayerHand:
+		if(0 <= pos && pos < pPlayer->hand_card_num)
+		{
+			return pPlayer->hand_cards[pos].flag;
+		}
+		break;
+	case CardWhere_PlayerEquip:
+		if(0 <= pos && pos < EquipIdx_Max && CARD_VALID(&pPlayer->equip_cards[pos]))
+		{
+			return pPlayer->equip_cards[pos].flag;
+		}
+		break;
+	case CardWhere_PlayerJudgment:
+		if(0 <= pos && pos < pPlayer->judgment_card_num)
+		{
+			return pPlayer->judgment_cards[pos].flag;
+		}
+		break;
+	default:
+		break;
+	}
+	
+	return CardFlag_None;
+}
+
 
 RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag flag)
 {

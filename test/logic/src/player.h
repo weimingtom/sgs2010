@@ -125,6 +125,7 @@ RESULT player_add_judgment_card(Player* pPlayer, Card* pCard);
 
 
 RESULT set_player_card_flag(Player* pPlayer, CardWhere where, int pos, CardFlag flag);
+CardFlag get_player_card_flag(Player* pPlayer, CardWhere where, int pos);
 
 
 RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, Card* pCard);

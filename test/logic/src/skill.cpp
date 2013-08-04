@@ -99,7 +99,9 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 
 	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Weapon), card_name(pcard.card.id, temp, sizeof(temp)));
 
+	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
 	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
 	return R_BACK;
 }
@@ -134,7 +136,9 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 
 	MSG_OUT("【%s】发动%s效果【%s】。\n", p->name, equip_idx_str(EquipIdx_Armor), card_name(pcard.card.id, temp, sizeof(temp)));
 
+	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
 	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
 	return R_BACK;
 }

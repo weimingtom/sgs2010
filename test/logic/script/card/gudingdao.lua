@@ -11,3 +11,78 @@
 
 --]]
 
+import "../global/reg.lua";
+
+
+reg_card {
+	sid = 'gdd',
+	name = '古锭刀',
+	type = CardType_Weapon,
+	
+	desc=[==[【古锭刀】
+攻击范围：２
+武器特效：锁定技，当你使用的【杀】造成伤害时，若指定目标没有手牌，该伤害+1。]==],
+
+	
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+
+	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+		
+		-- 如果自己的杀造成目标伤害，如果目标没有手牌，则伤害+1
+		[GameEvent_ChangeLife] = function(cfg, game, event, player, pos_card)
+			if event.change_life.delta < 0 -- 造成伤害
+				and event.parent_event.id == GameEvent_OutCard    -- 出牌 
+				and event.parent_event.trigger == player          -- 我的出牌 				
+				and event.parent_event.target == event.trigger    -- 目标是出闪的人 
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+				and get_game_player(game, event.trigger).hand_card_num == 0   -- 目标没有手牌
+			then
+				return USE_AUTO;    -- 自动触发的技能
+			end
+			return USE_CANNOT;
+		end,
+	},
+
+	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+		-- 攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				message('attack base: 2');
+				event.attack_dis.base = 2;
+			end
+			return R_DEF;
+		end,
+		
+		-- 计算技能效果
+		[GameEvent_ChangeLife] = function(cfg, game, event, player, pos_card)
+			messgae('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器效果被触发。目标伤害+1。');
+			-- 伤害+1
+			event.change_life.delta = event.change_life.delta - 1; 
+		end,
+
+	},
+};
+
+
+
