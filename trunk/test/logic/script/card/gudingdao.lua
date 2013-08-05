@@ -62,7 +62,7 @@ reg_card {
 
 	event = {
 		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
 			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 				error('invalid out equip card in event OutCardPrepare.');
 				return R_E_FAIL;
@@ -71,7 +71,7 @@ reg_card {
 			return R_CANCEL;
 		end,
 		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				message('attack base: 2');
 				event.attack_dis.base = 2;
@@ -80,7 +80,7 @@ reg_card {
 		end,
 		
 		-- 计算技能效果
-		[GameEvent_PerChangeLife] = function(cfg, game, event, player, pos_card)
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player)
 			message('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器效果被触发。目标伤害+1。');
 			-- 伤害+1
 			event.change_life.delta = event.change_life.delta - 1; 

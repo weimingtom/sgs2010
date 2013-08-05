@@ -45,32 +45,51 @@ local cfg = {
 			-- select target
 			local ret;
 			local target = -1;
-			ret, target = game_select_target(game, event, player, -1, NO, NO,
-				"请为【"..cfg.name.."】指定一个目标:", target);
-			if(ret == R_SUCC) then
-				event.out_card.targets[0] = target;
-				event.out_card.target_num = 1;
-				return R_SUCC;
+			while true do
+				ret, target = game_select_target(game, event, player, -1, NO, NO,
+					"请为【"..cfg.name.."】指定一个目标:", target);
+				if(ret == R_SUCC) then
+					local p = get_game_player(game, target);
+					if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
+						message('【'..p.name..'】的判定区已满。请选择其它玩家！');
+					elseif(find_player_judument(p, get_card_id_by_sid(cfg.sid)) >= 0) then
+						message('【'..p.name..'】的判定区已经有【'..cfg.name..'】。请选择其它玩家！');
+					else
+						event.out_card.targets[0] = target;
+						event.out_card.target_num = 1;
+						return R_SUCC;
+					end
+				else
+					break;
+				end
 			end
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
-			return R_SUCC;
+			return R_CANCEL;
 		end,
 
 		-- 出牌的过程驱动
-		[GameEvent_OutCard] = function(cfg, game, event, player, pos_card)
+		[GameEvent_OutCard] = function(cfg, game, event, player)
 			message('【'..get_game_player(game, player).name..'】将一张【'
 				.. cfg.name ..'】横置于【'.. get_game_player(game, target).name .. '】的判定区。' );
 			-- 将牌加入目标的判定区
-			add_cur_card_to_player_judgment(game, event.out_card.rcard	
+			add_cur_card_to_player_judgment(game, event.out_card.vcard, event.out_card.list, event.target);
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
-			return R_SUCC; 
+			return R_CANCEL; 
 		end,
 		
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			-- 延时锦囊牌的结算在判定阶段。这里不进行结算
+			return R_DEF;
+		end,
+		
+		-- 判定阶段的结算
+		[GameEvent_CardCalc] = function (cfg, game, event, player)
+			
+			return R_SUCC;
 		end,
 	},
 };

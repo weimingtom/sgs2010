@@ -6,9 +6,6 @@
 
 #include "config.h"
 #include "card.h"
-#include "out.h"
-#include "equip.h"
-#include "life.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,59 +117,22 @@ typedef struct tagNewGameConfig
 	int mutineers;
 }NewGameConfig;
 
-// for get card
-typedef struct tagGetCard
-{
-	int    num;
-	YESNO  force;
-	char   alter_text[MAX_ALTER_TEXT_LEN];
-} GetCard;
-
-// for passive out, supply out
-typedef struct tagPatternOut
-{
-	OutCardPattern pattern;
-	OutCard        out;
-	char           alter_text[MAX_ALTER_TEXT_LEN];
-} PatternOut;
-
-// for before passive out, modify the pattern and alter taxt
-
-typedef struct tagBeforePassiveOut
-{
-	OutCardPattern pattern;
-	char alter_text[MAX_ALTER_TEXT_LEN];
-}BeforePassiveOut;
-
-
-typedef struct tagAttackDis
-{
-	int     base;
-	int     inc;
-	int     dis;
-	int     flag;
-}AttackDis;
-
-
-typedef struct tagDiscardCard
-{
-	int    num;
-	int    where;
-	YESNO  force;
-	char   alter_text[MAX_ALTER_TEXT_LEN];
-} DiscardCard;
-
-
-typedef struct tagSelectTarget
-{
-	char message[MAX_ALTER_TEXT_LEN];  //  if the player is cannot be set to target, return the alter message from this field;
-} SelectTarget;
-
 // tolua_end
 
 
 typedef struct tagGameEventContext GameEventContext;
 
+
+typedef struct tagGetCard GetCard;
+typedef struct tagAttackDis AttackDis;
+typedef struct tagBeforePassiveOut BeforePassiveOut;
+typedef struct tagOutCardPattern OutCardPattern;
+typedef struct tagPatternOut PatternOut;
+typedef struct tagOutCard OutCard;
+typedef struct tagDiscardPattern DiscardPattern;
+typedef struct tagEquipCard EquipCard;
+typedef struct tagChangeLife ChangeLife;
+typedef struct tagSelectTarget SelectTarget;
 
 
 
@@ -192,13 +152,14 @@ struct tagGameEventContext
 		AttackDis*  attack_dis; 
 		BeforePassiveOut* before_pout; 
 		OutCardPattern* card_pattern;
-		PatternOut* pattern_out; // for passive out, supply card etc..
- 		OutCard*    out_card;       // real out,  per/post out
-		PosCard*    pos_card;  // lost card,
+		PatternOut*  pattern_out; // for passive out, supply card etc..
+ 		OutCard*     out_card;       // real out,  per/post out
+		DiscardPattern* discard_pattern; // when round discard card, or passive discard card
+		//DiscardCard* discard_card;  // discard card
+		PosCard*     pos_card;  // lost card,
 		PosVCard*    pos_vcard;  // judgement vcard,
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
-		DiscardCard* discard_card; // when round discard card, or passive discard card
 		SelectTarget* select_target; // when select target checked
 	};
 	char ud[MAX_UD_LEN];   // user custom string, used for script

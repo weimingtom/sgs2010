@@ -132,8 +132,8 @@ RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, VCard* pCar
 
 RESULT player_card_idx_to_pos(Player* pPlayer, int idx, CardWhere* where, int* pos);
 
-RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosVCard*  pPosCards);
-RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num, CardFlag flag);
+// RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosVCard*  pPosCards);
+// RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num, CardFlag flag);
 
 // tolua_begin
 // {{
@@ -144,6 +144,10 @@ const char* equip_idx_str(int idx);
 Card* get_player_handcard(Player* pPlayer, int index);
 VCard* get_player_judgecard(Player* pPlayer, int index);
 Card* get_player_equipcard(Player* pPlayer, int index);
+
+// 查找指定ID的牌(返回index,找不到返回-1)
+int find_player_handcard(Player* pPlayer, CardID id);
+int find_player_judgecard(Player* pPlayer, CardID id);
 
 
 YESNO is_player_dead(Player* pPlayer);

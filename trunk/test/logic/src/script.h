@@ -15,6 +15,8 @@ RESULT  reload_game_script();
 lua_State* get_ai_script();
 
 
+#define GL(L)  ((L)?(L): get_game_script())
+
 
 #ifdef __cplusplus
 };

@@ -76,7 +76,7 @@ struct tagGameContext
 	CardStack  get_card_stack;              // card stack for get card from
 	CardStack  discard_card_stack;          // card stack for discard card to
 	int        cur_discard_card_num;          // the current out discard card number
-	VCard      cur_discard_cards[MAX_CUR_DISCARD_NUM];           // ...
+	Card      cur_discard_cards[MAX_CUR_DISCARD_NUM];           // ...
 	int        round_num;
 	int        round_player;
 	int        cur_player;

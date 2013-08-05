@@ -13,6 +13,7 @@ const char* card_type_str(CardType type)
 	case CardType_None: return "任意种类";
 	case CardType_Normal: return "普通";
 	case CardType_Strategy: return "锦囊";
+	case CardType_DelayStrategy: return "延时锦囊";
 	case CardType_Armor: return "防具";
 	case CardType_Weapon: return "武器";
 	case CardType_HorseInc: return "马(+1)";
@@ -116,6 +117,7 @@ const char* card_flag_str(CardFlag flag)
 	case CardFlag_PrepareDiscard: return "CardFlag_PrepareDiscard";   // the card prepare to discard, in prepare event, cannot calc the card effect
 	case CardFlag_PrepareSupply: return "CardFlag_PrepareSupply";   // the card prepare to give other player, in prepare event, cannot calc the card effect
 	case CardFlag_InUse: return "CardFlag_InUse";
+	case CardFlag_FromGetStack: return "CardFlag_FromGetStack";
 	case CardFlag_FromHand: return "CardFlag_FromHand";
 	case CardFlag_FromEquip: return "CardFlag_FromEquip";
 	case CardFlag_FromJudge: return "CardFlag_FromJudge";

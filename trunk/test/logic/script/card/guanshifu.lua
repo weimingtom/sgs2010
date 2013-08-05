@@ -62,7 +62,7 @@ reg_card {
 	
 	event = {
 		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
 			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 				error('invalid out equip card in event OutCardPrepare.');
 				return R_E_FAIL;
@@ -71,7 +71,7 @@ reg_card {
 			return R_CANCEL;
 		end,
 		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				message('attack base: 3');
 				event.attack_dis.base = 3;
@@ -80,7 +80,7 @@ reg_card {
 		end,
 
 		-- 在对方出闪完成时，如果是你出的杀。则你可以弃两张牌，而对方的闪依然无效
-		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
+		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player)
 			-- 弃2张牌，可以放弃，如果不弃，则技能中止，什么也没发生
 			if R_SUCC == game_passive_discard(game, event, player, PatternWhere_Hand + PatternWhere_Equip, 2, NO, 
 				'请弃两张牌，若如此做。则你的【'..get_card_name(event.parent_event.out_card.vcard.id)..'】依然造成伤害:')

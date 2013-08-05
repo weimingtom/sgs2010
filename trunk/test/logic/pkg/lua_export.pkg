@@ -70,10 +70,11 @@ typedef struct tagGameEventContext
 	tolua_readonly BeforePassiveOut* before_pout; 
 	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
 	tolua_readonly OutCard*    out_card;    // real out,  per/post out
+	tolua_readonly DiscardPattern* discard_pattern; // when life is changed 
 	tolua_readonly PosCard*    pos_card;    // lost card,
+	tolua_readonly PosVCard*    pos_vcard;    // judgement vcard,
 	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
 	tolua_readonly ChangeLife* change_life; // when life is changed 
-	tolua_readonly DiscardCard* discard_card; // when life is changed 
 	tolua_readonly 	SelectTarget* select_target;  // when select target checked
 	//};
 	char   ud[MAX_UD_LEN];

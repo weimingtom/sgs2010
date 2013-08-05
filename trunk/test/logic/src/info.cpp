@@ -3,7 +3,12 @@
 #include "info.h"
 #include "comm.h"
 #include "event.h"
-
+#include "get.h"
+#include "out.h"
+#include "discard.h"
+#include "select.h"
+#include "life.h"
+#include "equip.h"
 
 
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
@@ -406,12 +411,17 @@ static void p_vcard(const char* perffix, VCard* p)
 
 static void p_pos_vcard(const char* perffix, PosVCard* p)
 {
+	int n;
 	char s_per[128];
+	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
+	p_card(s_per, &p->vcard);
 
-	snprintf(s_per, sizeof(s_per), "%s.card", perffix);
-	p_vcard(s_per, &p->card);
-	MSG_OUT("    %s.where=%s;\n", perffix, card_where_id_str(p->where));
-	MSG_OUT("    %s.pos=%d;\n", perffix, p->pos);
+	MSG_OUT("    %s.list.num=%d;\n", perffix, p->list.num);
+	for(n = 0; n < p->list.num; n++)
+	{
+		snprintf(s_per, sizeof(s_per), "%s.list.pcards[%d]", perffix, n);
+		p_pos_card(s_per, &p->list.pcards[n]);
+	}
 }
 
 
@@ -552,23 +562,21 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 
 }
 
-static void game_event_param__discard_card(GameContext* pGame, GameEventContext* pEvent)
+static void game_event_param__discard_pattern(GameContext* pGame, GameEventContext* pEvent)
 {
 	char  buf[512];
-	if(NULL == pEvent->change_life)
+	if(NULL == pEvent->discard_pattern)
 	{
-		MSG_OUT("    discard_card=NULL;\n");
+		MSG_OUT("    discard_pattern=NULL;\n");
 	}
 	else
 	{
-		MSG_OUT("    discard_card.num=%d;\n", pEvent->discard_card->num);
-		MSG_OUT("    discard_card.where=%s;\n", card_pattern_where_str(pEvent->discard_card->where, buf, sizeof(buf)));
-		MSG_OUT("    discard_card.force=%s;\n", YESNO2STR(pEvent->discard_card->force));
-		MSG_OUT("    discard_card.alter_text=\"%s\";\n", pEvent->discard_card->alter_text);
+		MSG_OUT("    discard_pattern.num=%d;\n", pEvent->discard_pattern->num);
+		MSG_OUT("    discard_pattern.where=%s;\n", card_pattern_where_str(pEvent->discard_pattern->where, buf, sizeof(buf)));
+		MSG_OUT("    discard_pattern.force=%s;\n", YESNO2STR(pEvent->discard_pattern->force));
+		MSG_OUT("    discard_pattern.alter_text=\"%s\";\n", pEvent->discard_pattern->alter_text);
 	}
 }
-
-
 
 static void game_event_param__select_target(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -634,6 +642,10 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PostLostCard:
 		game_event_param__pos_card(pGame, pEvent);
 		break;
+	case GameEvent_RoundDiscardCard:
+	case GameEvent_PassiveDiscardCard:
+		game_event_param__discard_pattern(pGame, pEvent);
+		break;
 	case GameEvent_PerDiscardCard:
 	case GameEvent_PostDiscardCard:
 	case GameEvent_PerCardCalc:
@@ -650,10 +662,6 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_ChangeLife:
 	case GameEvent_PostChangeLife:
 		game_event_param__change_life(pGame, pEvent);
-		break;
-	case GameEvent_RoundDiscardCard:
-	case GameEvent_PassiveDiscardCard:
-		game_event_param__discard_card(pGame, pEvent);
 		break;
 	case GameEvent_SelectTarget:
 		game_event_param__select_target(pGame, pEvent);

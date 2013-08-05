@@ -113,6 +113,28 @@ Card* get_player_equipcard(Player* pPlayer, int index)
 	return NULL;
 }
 
+int find_player_handcard(Player* pPlayer, CardID id)
+{
+	int n;
+	for(n = 0; n < pPlayer->hand_card_num; n++)
+	{
+		if(PLAYER_HANDCARD(pPlayer, n)->id == id)
+			return n;
+	}
+	return -1;
+}
+
+int find_player_judgecard(Player* pPlayer, CardID id)
+{
+	int n;
+	for(n = 0; n < pPlayer->judgment_card_num; n++)
+	{
+		if(PLAYER_JUDGECARD(pPlayer, n)->vcard.id == id)
+			return n;
+	}
+	return -1;
+}
+
 
 
 YESNO is_player_dead(Player* pPlayer)
@@ -200,10 +222,12 @@ RESULT player_add_judgment_card(Player* pPlayer, VCard* pCard)
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
 		if(pPlayer->judgment_cards[n].vcard.id == pCard->vcard.id)
+		{
+			MSG_OUT("player_add_judgment_card: failed - 不能有相同ID的判定牌！\n");
 			return R_E_CONFLICT;
+		}
 	}
 	
-
 	pPlayer->judgment_cards[pPlayer->judgment_card_num] = *pCard;
 	pPlayer->judgment_card_num++;
 	return R_SUCC;
@@ -271,6 +295,15 @@ RESULT set_player_card_flag(Player* pPlayer,  CardWhere where, int pos, CardFlag
 	return R_E_PARAM;
 }
 
+static void set_vcard_flag(VCard* pCard, CardFlag flag)
+{
+	int n;
+	pCard->vcard.flag = flag;
+	for(n = 0; n < pCard->rnum; n++)
+	{
+		pCard->rcards[n].flag = flag;
+	}
+}
 
 RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 {
@@ -280,7 +313,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 		if(0 <= pos && pos < pPlayer->hand_card_num)
 		{
 			set_vcard_from_card(pCard, &pPlayer->hand_cards[pos]);
-			pCard->vcard.flag = CardFlag_FromHand;
+			set_vcard_flag(pCard, CardFlag_FromHand);
 			return R_SUCC;
 		}
 		break;
@@ -288,7 +321,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 		if(0 <= pos && pos < EquipIdx_Max && CARD_VALID(&pPlayer->equip_cards[pos]))
 		{
 			set_vcard_from_card(pCard, &pPlayer->equip_cards[pos]);
-			pCard->vcard.flag = CardFlag_FromEquip;
+			set_vcard_flag(pCard, CardFlag_FromEquip);
 			return R_SUCC;
 		}
 		break;
@@ -296,7 +329,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 		if(0 <= pos && pos < pPlayer->judgment_card_num)
 		{
 			*pCard = pPlayer->judgment_cards[pos];
-			pCard->vcard.flag = CardFlag_FromJudge;
+			set_vcard_flag(pCard, CardFlag_FromEquip);
 			return R_SUCC;
 		}
 		break;
@@ -385,6 +418,7 @@ RESULT player_card_idx_to_pos(Player* player, int idx, CardWhere* where, int* po
 	return R_E_FAIL;
 }
 
+/*
 RESULT player_get_cards_pos(Player* pPlayer, const int* idx, int num, PosVCard*  pPosCards)
 {
 	int n, m;
@@ -424,3 +458,4 @@ RESULT player_set_cards_flag(Player* pPlayer, const PosCard* pPosCards, int num,
 	return R_SUCC;
 }
 
+*/
