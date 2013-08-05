@@ -899,6 +899,7 @@ static void game_save_card(Card* pCard, FILE* file, int tabs)
 
 static void game_save_vcard(VCard* pCard, FILE* file, int tabs)
 {
+	int n;
 	if(VCARD_IS_REAL(pCard))
 	{
 		game_save_card(&pCard->vcard, file, tabs);
@@ -907,14 +908,16 @@ static void game_save_vcard(VCard* pCard, FILE* file, int tabs)
 	{
 		fprintf_tab(file, 0, "vcard = { ");
 		game_save_card(&pCard->vcard, file, tabs);
-		fprintf_tab(file, 0, "}, rnum = %d,");
-
-		
-		char  temp[128];
-		fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
-		fprintf_tab(file, 0, "color = %s, ", card_color_id_str(pCard->color));
-		fprintf_tab(file, 0, "value = %s, ", card_value_id_str(pCard->value));
-		fprintf_tab(file, 0, "flag = 0x%x, ", pCard->flag);
+		fprintf_tab(file, 0, "}, \n");
+		fprintf_tab(file, tabs, "rnum = %d,\n", pCard->rnum);
+		fprintf_tab(file, tabs, "rcards = { \n");
+		for(n = 0; n < pCard->rnum; n++)
+		{
+			fprintf_tab(file, tabs + 1, "{ ");
+			game_save_card(&pCard->rcards[n], file, tabs+2);
+			fprintf_tab(file,0, "}, \n");
+		}
+		fprintf_tab(file, tabs, "}, ");
 	}	
 }
 
@@ -971,7 +974,7 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
 		fprintf_tab(file, tabs+1, "{ ");
-		game_save_card(&pPlayer->judgment_cards[n], file, 0);
+		game_save_vcard(&pPlayer->judgment_cards[n], file, 0);
 		fprintf_tab(file, 0, "},\n");
 	}
 	fprintf_tab(file, tabs, "},\n");
@@ -1042,7 +1045,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	for(n = 0; n < pGame->cur_discard_card_num; n++)
 	{
 		fprintf_tab(file, tabs+1, "{ ");
-		game_save_card(&pGame->cur_discard_cards[n], file, 0);
+		game_save_vcard(&pGame->cur_discard_cards[n], file, 0);
 		fprintf_tab(file, tabs+1, "},\n");
 	}
 	fprintf_tab(file, tabs, "},\n");
@@ -1100,6 +1103,41 @@ void game_load_card(lua_State* L, Card* pCard)
 	LOAD_INT_CAST(pCard, value, L, CardValue);
 	LOAD_INT_CAST(pCard, flag, L, CardFlag);
 }
+
+void game_load_vcard(lua_State* L, VCard* pVCard)
+{
+	int n;
+	//LOAD_INT_CAST(pCard, id, L, CardID);
+	lua_getfield(L, -1, "vcard");
+	if(lua_istable(L, -1))
+	{
+		game_load_card(L, &pVCard->vcard);
+		lua_pop(L, 1);
+		LOAD_INT(pVCard, rnum, L);
+		if(pVCard->rnum <= 0 || pVCard->rnum > MAX_RCARD_NUM)
+		{
+			luaL_error(L, "error rcard num!");
+		}
+		lua_getfield(L, -1, "rcards"); // ... [cardstack] [cardstack.cards]
+		for(n = 0; n < pVCard->rnum; n++)
+		{
+			lua_pushnumber(L, n+1);
+			lua_gettable(L, -2);
+			game_load_card(L, &pVCard->rcards[n]);
+			lua_pop(L, 1);
+		}
+		lua_pop(L, 1);
+	}
+	else
+	{
+		lua_pop(L, 1);
+		game_load_card(L, &pVCard->vcard);
+		pVCard->rnum = 1;
+		pVCard->rcards[0] = pVCard->vcard;
+
+	}
+}
+
 
 void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 {
@@ -1172,7 +1210,7 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		game_load_card(L, &pPlayer->judgment_cards[n]);		
+		game_load_vcard(L, &pPlayer->judgment_cards[n]);		
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -1288,7 +1326,7 @@ static int lua_game_load(lua_State* L)
 		{
 			lua_pushnumber(L, n+1);
 			lua_gettable(L, -2);   // [t] [t.game] [t.game.cur_discard_cards] [t.game.cur_discard_cards[n+1]]
-			game_load_card(L, &pGame->cur_discard_cards[n]);
+			game_load_vcard(L, &pGame->cur_discard_cards[n]);
 			lua_pop(L, 1);    // [t] [t.game] [t.game.cur_discard_cards]
 		}
 		lua_pop(L, 1);    // [t] [t.game] 
