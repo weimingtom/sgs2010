@@ -73,14 +73,17 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 {
 	Player* p = CUR_PLAYER(pGame);
+	VCard  vcard;
 	PosCard   pcard;
 	char temp[128];
 
-	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Weapon, &pcard.card))
+	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Weapon, &vcard))
 	{
 		MSG_OUT("你没有装备%s！\n", equip_idx_str(EquipIdx_Weapon));
 		return R_E_FAIL;
 	}
+
+	pcard.card = vcard.vcard;
 
 	if(YES != can_use_skill(pGame, pEvent))
 	{
@@ -109,14 +112,17 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 {
 	Player* p = CUR_PLAYER(pGame);
+	VCard     vcard;
 	PosCard   pcard;
 	char temp[128];
 
-	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Armor, &pcard.card))
+	if(R_SUCC != get_player_card(p, CardWhere_PlayerEquip, EquipIdx_Armor, &vcard))
 	{
 		MSG_OUT("你没有装备%s！\n", equip_idx_str(EquipIdx_Armor));
 		return R_E_FAIL;
 	}
+
+	pcard.card = vcard.vcard;
 
 	if(YES != can_use_skill(pGame, pEvent))
 	{

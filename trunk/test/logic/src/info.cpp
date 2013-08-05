@@ -99,7 +99,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		for(n = 0; n < p->judgment_card_num; n++)
 		{
 			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-			MSG_OUT("  [%d] %s;\n", idx++, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
+			MSG_OUT("  [%d] %s;\n", idx++, vcard_str(&p->judgment_cards[n], buf, sizeof(buf)));
 		}
 	}
 
@@ -175,7 +175,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 		for(n = 0; n < pPlayer->judgment_card_num; n++)
 		{
 			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-			MSG_OUT("    [%d] %s;\n", n+1, card_str(&pPlayer->judgment_cards[n], buf, sizeof(buf)));
+			MSG_OUT("    [%d] %s;\n", n+1, vcard_str(&pPlayer->judgment_cards[n], buf, sizeof(buf)));
 		}
 
 	}
@@ -230,7 +230,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 			for(n = 0; n < p->judgment_card_num; n++)
 			{
 				//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-				MSG_OUT("      [%d] %s;\n", n+1, card_str(&p->judgment_cards[n], buf, sizeof(buf)));
+				MSG_OUT("      [%d] %s;\n", n+1, vcard_str(&p->judgment_cards[n], buf, sizeof(buf)));
 			}
 		}
 	}
@@ -388,6 +388,32 @@ static void p_pos_card(const char* perffix, PosCard* p)
 }
 
 
+static void p_vcard(const char* perffix, VCard* p)
+{
+	int  n;
+	char s_per[128];
+	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
+	p_card(s_per, &p->vcard);
+	MSG_OUT("    %s.rnum=%d;\n", perffix, p->rnum);
+	for(n = 0; n < p->rnum; n++)
+	{
+		snprintf(s_per, sizeof(s_per), "%s.rcards[%d]", perffix, n);
+		p_card(s_per, &p->rcards[n]);
+	}
+}
+
+
+
+static void p_pos_vcard(const char* perffix, PosVCard* p)
+{
+	char s_per[128];
+
+	snprintf(s_per, sizeof(s_per), "%s.card", perffix);
+	p_vcard(s_per, &p->card);
+	MSG_OUT("    %s.where=%s;\n", perffix, card_where_id_str(p->where));
+	MSG_OUT("    %s.pos=%d;\n", perffix, p->pos);
+}
+
 
 
 static void p_out_card(const char* perffix, OutCard* p)
@@ -481,6 +507,19 @@ static void game_event_param__pos_card(GameContext* pGame, GameEventContext* pEv
 		p_pos_card("pos_card", pEvent->pos_card);
 	}
 }
+
+static void game_event_param__pos_vcard(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->pos_vcard)
+	{
+		MSG_OUT("    pos_vcard=NULL;\n");
+	}
+	else
+	{
+		p_pos_vcard("pos_vcard", pEvent->pos_vcard);
+	}
+}
+
 
 static void game_event_param__equip_card(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -590,16 +629,18 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PerDecideCard:
 	case GameEvent_PerDecideCardCalc:
 	case GameEvent_PostDecideCard:
+	case GameEvent_PostGetCard:
+	case GameEvent_PerLostCard:
+	case GameEvent_PostLostCard:
+		game_event_param__pos_card(pGame, pEvent);
+		break;
 	case GameEvent_PerDiscardCard:
 	case GameEvent_PostDiscardCard:
 	case GameEvent_PerCardCalc:
 	case GameEvent_CardCalc:
 	case GameEvent_PostCardCalc:
 	case GameEvent_FiniCardCalc:
-	case GameEvent_PostGetCard:
-	case GameEvent_PerLostCard:
-	case GameEvent_PostLostCard:
-		game_event_param__pos_card(pGame, pEvent);
+		game_event_param__pos_vcard(pGame, pEvent);
 		break;
 	case GameEvent_PerEquipCard:
 	case GameEvent_PostEquipCard:

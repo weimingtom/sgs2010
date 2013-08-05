@@ -118,7 +118,8 @@ static RESULT match_out_card_list(Player* pPlayer, PosCardList* pList)
 	k = 0;
 
 	// check hand
-	for(n = pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num - 1; n >= 0; n--)
+	// 不能打出判定区的牌（可能是虚拟牌）
+	for(n = pPlayer->hand_card_num + EquipIdx_Max/* + pPlayer->judgment_card_num*/ - 1; n >= 0; n--)
 	{
 		if(n < pPlayer->hand_card_num)
 		{
@@ -134,8 +135,8 @@ static RESULT match_out_card_list(Player* pPlayer, PosCardList* pList)
 		}
 		else /*if(n < pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num) */
 		{
-			pCard = &pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
-			f = CardFlag_FromJudge;
+			//pCard = &pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
+			//f = CardFlag_FromJudge;
 		}
 
 		if(CARD_VALID(pCard) && pCard->flag == CardFlag_PrepareOut)
@@ -211,7 +212,8 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 		}
 
 		// real remove from supply
-		for(n = pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num - 1; n >= 0; n--)
+		// 不能打出判定区的牌（可能是虚拟牌）
+		for(n = pPlayer->hand_card_num + EquipIdx_Max/* + pPlayer->judgment_card_num*/ - 1; n >= 0; n--)
 		{
 			if(n < pPlayer->hand_card_num)
 			{
@@ -231,9 +233,9 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 			}
 			else /*if(n < pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num) */
 			{
-				stCard.card = pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
-				stCard.where = CardWhere_PlayerJudgment;
-				stCard.pos = n - pPlayer->hand_card_num - EquipIdx_Max;
+				//stCard.card = pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
+				//stCard.where = CardWhere_PlayerJudgment;
+				//stCard.pos = n - pPlayer->hand_card_num - EquipIdx_Max;
 				//f = CardFlag_FromJudge;
 			}
 			
@@ -260,12 +262,15 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 	int n;
 	int  pos;
 	char buf[128];
+	VCard vcard;
+
 	if(out_card->list.num > 0)
 	{
 		for(n = 0; n < out_card->list.num; n++)
 		{
 			// out_card->list.pcards[n].card.flag = CardFlag_None;
-			if(R_SUCC != game_add_discard_cur(pGame, &out_card->list.pcards[n].card, &pos))
+			set_vcard_from_card(&vcard, &out_card->list.pcards[n].card);
+			if(R_SUCC != game_add_discard_cur(pGame, &vcard, &pos))
 			{
 				MSG_OUT("add out card [%s] failed ", card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 				return R_E_FAIL;
@@ -396,6 +401,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx, int num)
 {
 	char buffer[128];
+	VCard vcard;
 	//CardWhere where[MAX_CARD_LIST_NUM];
 	//int pos[MAX_CARD_LIST_NUM];
 	PosCard stCard[MAX_CARD_LIST_NUM];
@@ -442,8 +448,15 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 			}
 
 			// must success
-			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
-
+			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &vcard);
+			
+			// 不能是虚拟牌
+			if(!VCARD_IS_REAL(&vcard))
+			{
+				MSG_OUT("索引[%d]的牌不能打出!\n", idx[n]);
+				return R_E_PARAM;
+			}
+			stCard[n].card = vcard.vcard;
 		}
 
 		// match pattern ?
@@ -519,7 +532,15 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 			}
 
 			// must success
-			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &stCard[n].card);
+			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &vcard);
+
+			// 不能是虚拟牌
+			if(!VCARD_IS_REAL(&vcard))
+			{
+				MSG_OUT("索引[%d]的牌不能打出!\n", idx[n]);
+				return R_E_PARAM;
+			}
+			stCard[n].card = vcard.vcard;
 
 		}
 
@@ -587,8 +608,15 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		// get card
 		//pCard = PLAYER_HANDCARD(CUR_PLAYER(pGame), pos);
-		get_player_card(pPlayer, stCard[0].where, stCard[0].pos, &stCard[0].card);
+		get_player_card(pPlayer, stCard[0].where, stCard[0].pos, &vcard);
 
+		// 不能是虚拟牌
+		if(!VCARD_IS_REAL(&vcard))
+		{
+			MSG_OUT("索引[%d]的牌不能打出!\n", idx[0]);
+			return R_E_PARAM;
+		}
+		stCard[0].card = vcard.vcard;
 
 		// check can out?
 		// const CardConfig* pCardConfig = get_card_config(stCard[0].id);
