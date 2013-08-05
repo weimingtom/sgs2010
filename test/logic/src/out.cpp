@@ -135,8 +135,8 @@ static RESULT match_out_card_list(Player* pPlayer, PosCardList* pList)
 		}
 		else /*if(n < pPlayer->hand_card_num + EquipIdx_Max + pPlayer->judgment_card_num) */
 		{
-			//pCard = &pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max];
-			//f = CardFlag_FromJudge;
+			pCard = &pPlayer->judgment_cards[n - pPlayer->hand_card_num - EquipIdx_Max].vcard;
+			f = CardFlag_FromJudge;
 		}
 
 		if(CARD_VALID(pCard) && pCard->flag == CardFlag_PrepareOut)

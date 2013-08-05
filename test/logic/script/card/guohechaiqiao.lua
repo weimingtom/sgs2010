@@ -15,7 +15,7 @@
 import "../global/reg.lua";
 
 
-reg_card {
+local cfg = {
 	sid = 'ghcq',
 	name = '¹ýºÓ²ðÇÅ',
 	type = CardType_Strategy,
@@ -60,4 +60,7 @@ reg_card {
 };
 
 
+
+-- register
+reg_card(cfg);
 

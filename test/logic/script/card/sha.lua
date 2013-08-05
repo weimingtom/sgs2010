@@ -30,7 +30,7 @@ add_player_event(
 );
 
 
-reg_card {
+local cfg = {
 	sid = "sha",
 	name="ɱ",
 	type=CardType_Normal,
@@ -107,4 +107,7 @@ reg_card {
 		end,
 	},
 };
+
+-- register
+reg_card(cfg);
 

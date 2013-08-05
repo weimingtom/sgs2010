@@ -44,8 +44,8 @@ enum PlayerFlag
 	PlayerFlag_SkipThisRound = 0x2,
 	PlayerFlag_SkipThisRoundJudge = 0x4,
 	PlayerFlag_SkipThisRoundGet = 0x8,
-	PlayerFlag_SkipThisRoundOut = 0xf,
-	PlayerFlag_SkipThisRoundDiscard = 0x10,
+	PlayerFlag_SkipThisRoundOut = 0x10,
+	PlayerFlag_SkipThisRoundDiscard = 0x20,
 	PlayerFlag_AllThisSkipFlag = PlayerFlag_SkipThisRound
 		|PlayerFlag_SkipThisRoundJudge|PlayerFlag_SkipThisRoundGet
 		|PlayerFlag_SkipThisRoundOut|PlayerFlag_SkipThisRoundDiscard,
@@ -84,7 +84,7 @@ typedef  struct  tagPlayer
 	Card     equip_cards[EquipIdx_Max];
 	VCard    judgment_cards[MAX_JUDGMENT_CARD];
 	PlayerStatus   status;
-	PlayerFlag     flag;
+	int      flag;
 	int      params[MAX_PLAYER_PARAM];
 } Player;
 
@@ -94,29 +94,30 @@ typedef  struct  tagPlayer
 //#define PLAYER_CARD_WHERE(pos)     ((pos>>8) & 0xff)
 //#define PLAYER_CARD_INDEX(pos)     ((pos) & 0xff)
 
-#define IS_PLAYER_DEAD(p)   ((p)->status == PlayerStatus_Dead)
-#define IS_PLAYER_SHOW(p)  ((p)->status == PlayerStatus_Show)
+#define IS_PLAYER_DEAD(p)       ((p)->status == PlayerStatus_Dead)
+#define IS_PLAYER_SHOW(p)       ((p)->status == PlayerStatus_Show)
+#define IS_PLAYER_PERDEAD(p)    ((p)->status != PlayerStatus_Dead && (p)->cur_life <= 0)
 
-#define IS_PLAYER_PERDEAD(p)   ((p)->status != PlayerStatus_Dead && (p)->cur_life <= 0)
 
-
-#define PLAYER_CHK_FLAG(p,f)  (((p)->flag & f) == f)
-#define PLAYER_SET_FLAG(p,f)  ((p)->flag |= f)
-#define PLAYER_CLR_FLAG(p,f)  ((p)->flag &= ~f)
+#define PLAYER_CHK_FLAG(p,f)    (((p)->flag & (f)) == (f))
+#define PLAYER_SET_FLAG(p,f)    ((p)->flag |= (f))
+#define PLAYER_CLR_FLAG(p,f)    ((p)->flag &= ~(f))
 #define PLAYER_CLR_ALL_FLAG(p)  ((p)->flag = PlayerFlag_None)
 
 
-#define PLAYER_WEAPON(p)   (&(p)->equip_cards[EquipIdx_Weapon])
-#define PLAYER_ARMOR(p)   (&(p)->equip_cards[EquipIdx_Armor])
-#define PLAYER_HORSEINC(p)   (&(p)->equip_cards[EquipIdx_HorseInc])
-#define PLAYER_HORSEDEC(p)   (&(p)->equip_cards[EquipIdx_HorseDec])
+#define PLAYER_EQUIPCARD(p, idx)   (&(p)->equip_cards[idx])
+#define PLAYER_WEAPON(p)		   PLAYER_EQUIPCARD((p), EquipIdx_Weapon)
+#define PLAYER_ARMOR(p)            PLAYER_EQUIPCARD((p), EquipIdx_Armor)
+#define PLAYER_HORSEINC(p)         PLAYER_EQUIPCARD((p), EquipIdx_HorseInc)
+#define PLAYER_HORSEDEC(p)         PLAYER_EQUIPCARD((p), EquipIdx_HorseDec)
 
-#define PLAYER_HANDCARD(p, idx)   (&(p)->hand_cards[idx])
 
+#define PLAYER_HANDCARD(p, idx)    (&(p)->hand_cards[idx])
 #define PLAYER_JUDGECARD(p, idx)   (&(p)->judgment_cards[idx])
 
-RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
+
+RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
 
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
@@ -160,7 +161,10 @@ int   player_count_card(Player* pPlayer, int where);
 int get_player_param(Player* pPlayer, int index);
 void set_player_param(Player* pPlayer, int index, int val);
 
-
+void player_set_flag(Player* pPlayer, int   flag);
+void player_clear_flag(Player* pPlayer, int   flag);
+void player_clear_all_flag(Player* pPlayer);
+YESNO player_check_flag(Player* pPlayer, int   flag);
 
 // }}
 // tolua_end

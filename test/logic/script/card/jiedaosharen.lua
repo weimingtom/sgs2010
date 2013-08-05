@@ -39,7 +39,7 @@
 import "../global/reg.lua";
 
 
-reg_card {
+local cfg = {
 	sid = 'jdsr',
 	name = 'ΩËµ∂…±»À',
 	type = CardType_Strategy,
@@ -82,5 +82,8 @@ reg_card {
 		end,
 	},
 };
+
+-- register
+reg_card(cfg);
 
 

@@ -392,7 +392,7 @@ static void p_pos_card(const char* perffix, PosCard* p)
 	MSG_OUT("    %s.pos=%d;\n", perffix, p->pos);
 }
 
-
+#if 0
 static void p_vcard(const char* perffix, VCard* p)
 {
 	int  n;
@@ -407,6 +407,7 @@ static void p_vcard(const char* perffix, VCard* p)
 	}
 }
 
+#endif
 
 
 static void p_pos_vcard(const char* perffix, PosVCard* p)
