@@ -419,7 +419,7 @@ RESULT add_cur_card_to_player_hand(lua_State* L, GameContext* pGame, CardWhere w
 		return R_E_FAIL;
 	}
 
-	MSG_OUT("玩家【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
+	MSG_OUT("【%s】获得手牌 %s\n", p->name, card_str(&pGame->cur_discard_cards[pos], buf, sizeof(buf)));
 
 
 	ST_ZERO(pGame->cur_discard_cards[pos]);
@@ -483,7 +483,7 @@ RESULT add_cur_card_to_player_judgment(lua_State* L, GameContext* pGame, Card* v
 	}
 
 
-	MSG_OUT("玩家【%s】获得判定区牌 %s\n", p->name, vcard_str(&vcard, buf, sizeof(buf)));
+	MSG_OUT("【%s】获得判定区牌 %s\n", p->name, vcard_str(&vcard, buf, sizeof(buf)));
 
 	for(n = 0; n < list->num; n++)
 	{

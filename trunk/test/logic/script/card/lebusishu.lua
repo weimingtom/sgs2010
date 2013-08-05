@@ -52,7 +52,7 @@ local cfg = {
 					local p = get_game_player(game, target);
 					if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
 						message('【'..p.name..'】的判定区已满。请选择其它玩家！');
-					elseif(find_player_judument(p, get_card_id_by_sid(cfg.sid)) >= 0) then
+					elseif(find_player_judgecard(p, get_card_id_by_sid(cfg.sid)) >= 0) then
 						message('【'..p.name..'】的判定区已经有【'..cfg.name..'】。请选择其它玩家！');
 					else
 						event.out_card.targets[0] = target;
@@ -71,7 +71,7 @@ local cfg = {
 		-- 出牌的过程驱动
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			message('【'..get_game_player(game, player).name..'】将一张【'
-				.. cfg.name ..'】横置于【'.. get_game_player(game, target).name .. '】的判定区。' );
+				.. cfg.name ..'】横置于【'.. get_game_player(game, event.target).name .. '】的判定区。' );
 			-- 将牌加入目标的判定区
 			add_cur_card_to_player_judgment(game, event.out_card.vcard, event.out_card.list, event.target);
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
