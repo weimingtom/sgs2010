@@ -405,7 +405,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 					event.pos_vcard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.vcard.id, pGame, &event, pGame->round_player);
 				}
 
 				for(n = 0; n < stCard.list.num; n++)

@@ -21,6 +21,7 @@ static void discard_stack_card(GameContext* pGame)
 
 static void refresh_card_stack(GameContext* pGame)
 {
+	int n;
 	while(pGame->get_card_stack.count > 0)
 	{
 		discard_stack_card(pGame);
@@ -28,6 +29,11 @@ static void refresh_card_stack(GameContext* pGame)
 
 	pGame->get_card_stack = pGame->discard_card_stack;
 	card_stack_clear(&pGame->discard_card_stack);
+
+	for(n = 0; n < pGame->get_card_stack.count; n++)
+	{
+		pGame->get_card_stack.cards[n].flag = CardFlag_None;
+	}
 
 	card_stack_random(&pGame->get_card_stack);
 

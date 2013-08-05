@@ -19,7 +19,7 @@ import "../global/reg.lua";
 
 
 
-reg_card {
+local cfg = {
 	sid = 'cxsgj',
 	name = '´ÆÐÛË«¹É½£',
 	type = CardType_Weapon,
@@ -101,5 +101,8 @@ reg_card {
 	},
 };
 
+
+-- register
+reg_card(cfg);
 
 

@@ -14,7 +14,7 @@
 import "../global/reg.lua";
 
 
-reg_card {
+local cfg =  {
 	sid = 'gdd',
 	name = '¹Å¶§µ¶',
 	type = CardType_Weapon,
@@ -90,5 +90,8 @@ reg_card {
 	},
 };
 
+
+-- register
+reg_card(cfg);
 
 

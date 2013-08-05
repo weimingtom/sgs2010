@@ -173,6 +173,27 @@ void set_player_param(Player* pPlayer, int index, int val)
 	}
 }
 
+void player_set_flag(Player* pPlayer, int flag)
+{
+	PLAYER_SET_FLAG(pPlayer, flag);
+}
+
+void player_clear_flag(Player* pPlayer, int flag)
+{
+	PLAYER_CLR_FLAG(pPlayer, flag);
+}
+
+void player_clear_all_flag(Player* pPlayer)
+{
+	PLAYER_CLR_ALL_FLAG(pPlayer);
+}
+
+YESNO player_check_flag(Player* pPlayer, int flag)
+{
+	return B2YESNO(PLAYER_CHK_FLAG(pPlayer, flag));
+}
+
+
 
 int  player_count_card(Player* pPlayer, int where)
 {
@@ -180,20 +201,34 @@ int  player_count_card(Player* pPlayer, int where)
 	int count = 0;
 	if(where | PatternWhere_Hand)
 	{
-		count += pPlayer->hand_card_num;
+		for(n = 0; n < pPlayer->hand_card_num; n++)
+		{
+			if(PLAYER_HANDCARD(pPlayer, n)->flag == CardFlag_None)
+			{
+				count++;
+			}
+		}
 	}
 
 	if(where | PatternWhere_Equip)
 	{
 		for(n = 0; n < EquipIdx_Max; n++)
 		{
-			if(CARD_VALID(&pPlayer->equip_cards[n]))
+			if(CARD_VALID(PLAYER_EQUIPCARD(pPlayer,n)) && PLAYER_EQUIPCARD(pPlayer,n)->flag == CardFlag_None)
+			{
 				count++;
+			}
 		}
 	}
 	if(where | PatternWhere_Judgment)
 	{
-		count += pPlayer->judgment_card_num;
+		for(n = 0; n < pPlayer->judgment_card_num; n++)
+		{
+			if(PLAYER_JUDGECARD(pPlayer, n)->vcard.flag == CardFlag_None)
+			{
+				count++;
+			}
+		}
 	}
 	return count;
 }

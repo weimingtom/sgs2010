@@ -84,6 +84,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 				&& YES != is_player_handfull(CUR_PLAYER(pGame)) 
 				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
 			{
+				stCard.card.flag = CardFlag_None;
 				MSG_OUT("【%s】摸一张牌。\n", CUR_PLAYER(pGame)->name);
 				trigger_postgetcard_event(pGame, pEvent, &stCard);
 
@@ -113,6 +114,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 			if(YES != is_player_handfull(CUR_PLAYER(pGame)) 
 				&& R_SUCC == game_pop_stack_card(pGame, &stCard.card))
 			{
+				stCard.card.flag = CardFlag_None;
 				MSG_OUT("【%s】摸一张牌。\n", CUR_PLAYER(pGame)->name);
 				player_add_hand_card(CUR_PLAYER(pGame), &stCard.card);
 			}
