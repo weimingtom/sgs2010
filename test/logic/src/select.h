@@ -14,6 +14,26 @@ typedef struct tagGameEventContext GameEventContext;
 
 // tolua_begin
 
+typedef struct tagAttackDis
+{
+	int     base;
+	int     inc;
+	int     dis;
+	int     flag;
+}AttackDis;
+
+
+typedef struct tagSelectTarget
+{
+	char message[MAX_ALTER_TEXT_LEN];  //  if the player is cannot be set to target, return the alter message from this field;
+} SelectTarget;
+
+// tolua_end
+
+
+
+// tolua_begin
+
 // select target process
 RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, 
 							YESNO self_select, YESNO force, const char* alter_text, int* out_target = 0);

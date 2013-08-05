@@ -72,7 +72,7 @@ reg_card {
 	
 	event = {
 		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player, pos_card)
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
 			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 				error('invalid out equip card in event OutCardPrepare.');
 				return R_E_FAIL;
@@ -81,7 +81,7 @@ reg_card {
 			return R_CANCEL;
 		end,
 		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				message('attack base: 4');
 				event.attack_dis.base = 4;
@@ -90,7 +90,7 @@ reg_card {
 		end,
 		
 		-- 选择目标的检查
-		[GameEvent_SelectTarget] = function(cfg, game, event, player, pos_card)
+		[GameEvent_SelectTarget] = function(cfg, game, event, player)
 			local out_card = event.parent_event.out_card;
 			--message('【'..get_game_player(game, player).name..'】检查【方天画戟】的目标【'..get_game_player(game, event.target).name..'】..');
 			if out_card.target_num >= 3  then
@@ -111,7 +111,7 @@ reg_card {
 		end,
 		
 		-- 攻击效果
-		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player, pos_card)
+		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player)
 			
 			--  设置正在使用 {fthj}
 			event.ud = event.ud .. '{fthj}';

@@ -12,6 +12,19 @@ extern "C" {
 typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
+// tolua_begin
+
+// for get card
+typedef struct tagGetCard
+{
+	int    num;
+	YESNO  force;
+	char   alter_text[MAX_ALTER_TEXT_LEN];
+} GetCard;
+
+
+// tolua_end
+
 
 RESULT game_first_getcard(GameContext* pGame);
 
@@ -21,6 +34,8 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 // tolua_begin
+
+
 RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num, YESNO force);
 
 // tolua_end

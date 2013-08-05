@@ -111,6 +111,7 @@ typedef enum _CardFlag
 	CardFlag_PrepareDiscard = 2,   // the card prepare to discard, in prepare event, cannot calc the card effect
 	CardFlag_PrepareSupply = 3,   // the card prepare to give other player, in prepare event, cannot calc the card effect
 	CardFlag_InUse = 4,
+	CardFlag_FromGetStack = 10,
 	CardFlag_FromHand = 11,
 	CardFlag_FromEquip = 12,
 	CardFlag_FromJudge = 13,
@@ -227,23 +228,21 @@ typedef struct tagPosCardList
 	PosCard  pcards[MAX_CARD_LIST_NUM];
 }PosCardList;
 
-// 这里定义，每张虚拟的牌，最多只能由4张真实的牌组成
+// each virtual card have max 4 read cards
 #define MAX_RCARD_NUM  4
 
 typedef struct tagVCard {
-	Card  vcard;     // 虚拟牌的属性
-	int   rnum;      // 由几张真实的牌组合而成
-	Card  rcards[MAX_RCARD_NUM];  // 真实的牌组合
+	Card  vcard;     // virtual as a which card
+	int   rnum;      // virtual card contains real cards number
+	Card  rcards[MAX_RCARD_NUM];  // list of real cards
 } VCard; 
 
-
+// virtual card with pos information
 typedef struct tagPosVCard
 {
-	VCard      card;
-	CardWhere  where;
-	int        pos;
-}PosVCard;
-
+	Card     vcard; 
+	PosCardList list;
+} PosVCard;
 
 
 // tolua_end

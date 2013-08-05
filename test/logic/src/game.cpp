@@ -353,8 +353,10 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
 	RESULT ret;
 	Player* pPlayer;
+	VCard    vcard;
 	PosVCard stCard;
 	GameEventContext  event;
+	int n;
 
 	MSG_OUT("第[%d]回合，判定阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -376,9 +378,16 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 	while(pPlayer->judgment_card_num > 0)
 	{
-		stCard.card = pPlayer->judgment_cards[pPlayer->judgment_card_num-1];
-		stCard.where = CardWhere_PlayerJudgment;
-		stCard.pos = pPlayer->judgment_card_num-1;
+		vcard = pPlayer->judgment_cards[pPlayer->judgment_card_num-1];
+		stCard.vcard = vcard.vcard;
+		stCard.list.num = vcard.rnum;
+		for(n = 0; n < vcard.rnum; n++)
+		{
+			stCard.list.pcards[n].card = vcard.rcards[n];
+			stCard.list.pcards[n].where = CardWhere_PlayerJudgment;
+			stCard.list.pcards[n].pos = pPlayer->judgment_card_num-1;
+		}
+
 		pPlayer->judgment_card_num--;
 
 		//pCardConfig = get_card_config(stCard.id);
@@ -396,12 +405,15 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 					event.pos_vcard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.card.vcard.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
 				}
 
-				ret = game_add_discard_cur(pGame, &stCard.card, &stCard.pos);
-				CHECK_RET(ret,ret);
-				stCard.where = CardWhere_CurDiscardStack;
+				for(n = 0; n < stCard.list.num; n++)
+				{
+					ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
+					stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
+					CHECK_RET(ret,ret);
+				}
 
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 				event.pos_vcard = &stCard;
@@ -417,7 +429,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 					event.pos_vcard = &stCard;
 					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.card.vcard.id, pGame, &event, pGame->cur_player);
+					call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
 				}
 				//else
 				//{
@@ -893,7 +905,7 @@ static void game_save_card(Card* pCard, FILE* file, int tabs)
 	fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
 	fprintf_tab(file, 0, "color = %s, ", card_color_id_str(pCard->color));
 	fprintf_tab(file, 0, "value = %s, ", card_value_id_str(pCard->value));
-	fprintf_tab(file, 0, "flag = 0x%x, ", pCard->flag);
+	fprintf_tab(file, 0, "flag = %s, ",  card_flag_str(pCard->flag));
 
 }
 
@@ -1045,7 +1057,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	for(n = 0; n < pGame->cur_discard_card_num; n++)
 	{
 		fprintf_tab(file, tabs+1, "{ ");
-		game_save_vcard(&pGame->cur_discard_cards[n], file, 0);
+		game_save_card(&pGame->cur_discard_cards[n], file, 0);
 		fprintf_tab(file, tabs+1, "},\n");
 	}
 	fprintf_tab(file, tabs, "},\n");
@@ -1326,7 +1338,7 @@ static int lua_game_load(lua_State* L)
 		{
 			lua_pushnumber(L, n+1);
 			lua_gettable(L, -2);   // [t] [t.game] [t.game.cur_discard_cards] [t.game.cur_discard_cards[n+1]]
-			game_load_vcard(L, &pGame->cur_discard_cards[n]);
+			game_load_card(L, &pGame->cur_discard_cards[n]);
 			lua_pop(L, 1);    // [t] [t.game] [t.game.cur_discard_cards]
 		}
 		lua_pop(L, 1);    // [t] [t.game] 

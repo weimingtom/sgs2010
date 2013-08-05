@@ -39,6 +39,24 @@ typedef struct tagOutCardPattern
 	char        ud[MAX_PATTERN_UD_LEN];     // 用于脚本通过pattern在各脚本间传递一些暗示信息
 } OutCardPattern;
 
+
+// for passive out, supply out
+typedef struct tagPatternOut
+{
+	OutCardPattern pattern;
+	OutCard        out;
+	char           alter_text[MAX_ALTER_TEXT_LEN];
+} PatternOut;
+
+// for before passive out, modify the pattern and alter taxt
+
+typedef struct tagBeforePassiveOut
+{
+	OutCardPattern pattern;
+	char alter_text[MAX_ALTER_TEXT_LEN];
+}BeforePassiveOut;
+
+
 // tolua_end
 
 

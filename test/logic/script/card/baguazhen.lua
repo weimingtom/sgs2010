@@ -28,7 +28,7 @@ local function bgz_can_use(cfg, game, event, player, pos_card)
 	return USE_CANNOT;
 end
 
-local function bgz_equip(cfg, game, event, player, pos_card)
+local function bgz_equip(cfg, game, event, player)
 	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
 		error("invalid out equip card in event OutCardPrepare.");
 		return R_E_FAIL;
@@ -38,7 +38,7 @@ local function bgz_equip(cfg, game, event, player, pos_card)
 end
 
 
-local function bgz_use(cfg, game, event, player, pos_card)
+local function bgz_use(cfg, game, event, player)
 	-- 进行一次判定
 	if(game_decide_card(game,event,player, 'r') == YES) then
 		-- 判定成功，则视为你已经出了一张闪，无花色，无点数

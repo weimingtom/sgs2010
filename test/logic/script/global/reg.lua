@@ -16,6 +16,7 @@ local hero_index = {};
 local chk_card_type = {
 	[CardType_Normal] = 1,
 	[CardType_Strategy] = 1,
+	[CardType_DelayStrategy] = 1,
 	[CardType_Armor] = 1,
 	[CardType_Weapon] = 1,
 	[CardType_HorseInc] = 1,
@@ -44,11 +45,11 @@ function reg_card(cfg)
 	end
 
 	if(cfg.name == nil or cfg.name == '') then
-		error('reg_card('..cfg.sid..'): invalid card name');
+		error('reg_card(\''..cfg.sid..'\'): invalid card name');
 	end
 
 	if(cfg.type == nil or chk_card_type[cfg.type] ~= 1) then
-		error('reg_card('..cfg.sid..'): invalid card type');
+		error('reg_card(\''..cfg.sid..'\'): invalid card type');
 	end
 
 	
@@ -72,15 +73,15 @@ function reg_hero(cfg)
 	end
 	
 	if(cfg.name == nil or cfg.name == '') then
-		error('reg_hero('..cfg.sid..'): invalid hero name');
+		error('reg_hero(\''..cfg.sid..'\'): invalid hero name');
 	end
 
 	if(cfg.group == nil or chk_hero_group[cfg.group] ~= 1) then
-		error('reg_hero('..cfg.sid..'): invalid hero group');
+		error('reg_hero(\''..cfg.sid..'\'): invalid hero group');
 	end
 
 	if(cfg.sex == nil or chk_hero_sex[cfg.sex] ~= 1) then
-		error('reg_hero('..cfg.sid..'): invalid hero sex');
+		error('reg_hero(\''..cfg.sid..'\'): invalid hero sex');
 	end
 
 

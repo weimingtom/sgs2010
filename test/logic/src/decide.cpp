@@ -16,7 +16,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	int       pos;
 	PosCard   stCard;
 	CardPattern pattern;
-	VCard   stVCard;
+	//VCard   stVCard;
 	char temp[128];
 	char temp2[128];
 
@@ -62,8 +62,8 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	{
 		ret = game_pop_stack_card(pGame, &stCard.card);
 		CHECK_RET(ret, NO);
-		set_vcard_from_card(&stVCard, &stCard.card);
-		game_add_discard_cur(pGame, &stVCard, &pos);
+		//set_vcard_from_card(&stVCard, &stCard.card);
+		game_add_discard_cur(pGame, &stCard.card, &pos);
 		stCard.where = CardWhere_CurDiscardStack;
 		stCard.pos = pos;
 		MSG_OUT("从摸牌堆顶得到判定牌 %s\n", card_str(&stCard.card, temp, sizeof(temp)));

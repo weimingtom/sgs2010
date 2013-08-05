@@ -70,7 +70,7 @@ reg_card {
 		end,
 
 		-- 出牌的过程驱动
-		[GameEvent_OutCard] = function(cfg, game, event, player, pos_card)
+		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
 			return R_SUCC; 

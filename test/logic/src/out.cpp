@@ -262,15 +262,13 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 	int n;
 	int  pos;
 	char buf[128];
-	VCard vcard;
 
 	if(out_card->list.num > 0)
 	{
 		for(n = 0; n < out_card->list.num; n++)
 		{
 			// out_card->list.pcards[n].card.flag = CardFlag_None;
-			set_vcard_from_card(&vcard, &out_card->list.pcards[n].card);
-			if(R_SUCC != game_add_discard_cur(pGame, &vcard, &pos))
+			if(R_SUCC != game_add_discard_cur(pGame, &out_card->list.pcards[n].card, &pos))
 			{
 				MSG_OUT("add out card [%s] failed ", card_str(&out_card->list.pcards[n].card, buf, sizeof(buf)));
 				return R_E_FAIL;
