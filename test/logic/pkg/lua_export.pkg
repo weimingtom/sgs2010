@@ -15,7 +15,6 @@ $cfile "../src/life.h"
 $cfile "../src/hero.h"
 $cfile "../src/info.h"
 
-
 // void game_import_file @ import(lua_State* L, const char* pattern);
 
 

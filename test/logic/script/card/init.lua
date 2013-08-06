@@ -8,9 +8,14 @@
 
 local ss = {
 	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
-	'{shan}h2;{shan}h3;{shan}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
+	'{lbss}h2;{lbss}h3;{lbss}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
 	'{fthj}c2;{fthj}c3;{fthj}c4;{fthj}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
 	'{cxsgj}d2;{cxsgj}d3;{chitu}d4;{chitu}d5;{chitu}d6;{chitu}d7;{gsf}d8;{gsf}d9;{gdd}d10;{gdd}dJ;{bgz}dQ;{bgz}dK;{bgz}dA;',
+
+	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
+	'{sha}h2;{sha}h3;{sha}h4;{sha}h5;{sha}h6;{sha}h7;{sha}h8;{sha}h9;{sha}h10;{sha}hJ;{sha}hQ;{sha}hK;{sha}hA;',
+	'{sha}c2;{sha}c3;{sha}c4;{sha}c5;{sha}c6;{sha}c7;{sha}c8;{sha}c9;{sha}c10;{sha}cJ;{sha}cQ;{sha}cK;{sha}cA;',
+	'{nmrq}d2;{nmrq}d3;{sha}d4;{sha}d5;{sha}d6;{sha}d7;{sha}d8;{sha}d9;{sha}d10;{sha}dJ;{sha}dQ;{sha}dK;{sha}dA;',
 };
 
 

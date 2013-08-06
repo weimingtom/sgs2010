@@ -14,6 +14,89 @@ static lua_State* g_game_L = NULL;
 static lua_State* g_ai_L = NULL;
 
 
+// some usefull functions
+
+static int luaex_bitor(lua_State* L)
+{
+	unsigned int ret = 0;
+	int  top = lua_gettop(L);
+	int  n;
+	unsigned int  v;
+
+	if(top < 1)
+	{
+		luaL_error(L, "at least 1 parameters for function 'bitor'");
+	}
+
+	for(n = 1; n <= top; n++)
+	{
+		v = (unsigned int)luaL_checkinteger(L, n);
+		ret |= v;
+	}
+
+	lua_pushnumber(L, ret);
+	return 1;
+}
+
+
+static int luaex_bitand(lua_State* L)
+{
+	unsigned int ret = 0xffffffff;
+
+	int  top = lua_gettop(L);
+	int  n;
+	unsigned int  v;
+
+	if(top < 1)
+	{
+		luaL_error(L, "at least 1 parameters for function 'bitand'");
+	}
+
+	for(n = 1; n <= top; n++)
+	{
+		v = (unsigned int)luaL_checkinteger(L, n);
+		ret &= v;
+	}
+
+	lua_pushnumber(L, ret);
+	return 1;
+}
+
+
+static int luaex_bitnot(lua_State* L)
+{
+	unsigned int  v = luaL_checkinteger(L, 1);
+
+	lua_pushnumber(L, ~v);
+	return 1;
+}
+
+static int luaex_bitxor(lua_State* L)
+{
+	unsigned int ret = 0;
+
+	int  top = lua_gettop(L);
+	int  n;
+	unsigned int  v;
+
+	if(top < 2)
+	{
+		luaL_error(L, "at least 2 parameters for function 'bitxor'");
+	}
+
+	for(n = 1; n <= top; n++)
+	{
+		v = (unsigned int)luaL_checkinteger(L, n);
+		ret ^= v;
+	}
+
+	lua_pushnumber(L, ret);
+	return 1;
+}
+
+
+
+
 // for lua replace dofile...
 // export as import(path)
 static int luaex_import_file(lua_State* L);
@@ -309,6 +392,17 @@ static RESULT game_script_prepare(lua_State* L)
 	lua_setglobal(L, "message");
 	lua_pushcfunction(L, luaex_import_file);
 	lua_setglobal(L, "import");
+
+	// common useful functions
+	lua_pushcfunction(L, luaex_bitor);
+	lua_setglobal(L, "bitor");
+	lua_pushcfunction(L, luaex_bitand);
+	lua_setglobal(L, "bitand");
+	lua_pushcfunction(L, luaex_bitnot);
+	lua_setglobal(L, "bitnot");
+	lua_pushcfunction(L, luaex_bitxor);
+	lua_setglobal(L, "bitxor");
+
 
 	// load game core libraries
 	tolua_game_open(L);

@@ -200,8 +200,8 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 			q = p + strlen(p);
 		}
 
-		memcpy(opts[num].text, p, MIN(q-p, sizeof(opts[num].text)-1));
-		opts[num].text[MIN(q-p, sizeof(opts[num].text)-1)] = '\0';
+		memcpy(opts[num].text, p, MIN(q-p, (int)sizeof(opts[num].text)-1));
+		opts[num].text[MIN(q-p, (int)sizeof(opts[num].text)-1)] = '\0';
 		opts[num].input[0] = '\0';
 		opts[num].value = num + 1;
 		num++;
