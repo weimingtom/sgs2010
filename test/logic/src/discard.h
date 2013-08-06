@@ -47,13 +47,14 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 
 
 
-// discard card
-RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos);
 
 
 
 // tolua_begin
 // {{
+
+// discard card
+RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEvent, int player, CardWhere where, int pos);
 
 RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO force, const char* alter_text);
 YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);

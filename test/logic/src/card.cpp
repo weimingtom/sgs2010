@@ -125,6 +125,11 @@ const char* card_flag_str(CardFlag flag)
 	}
 }
 
+const char* get_card_str(Card* card)
+{
+	static char buffer[128];
+	return card_str_n(card, 1, buffer, sizeof(buffer));
+}
 
 
 /*

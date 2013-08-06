@@ -315,6 +315,7 @@ const char* card_color_str(CardColor color);
 const char* card_value_str(CardValue value);
 const char* card_flag_str(CardFlag flag);
 
+const char* get_card_str(Card* card);
 
 /*
 void set_card_id(Card* pCard, CardID id);

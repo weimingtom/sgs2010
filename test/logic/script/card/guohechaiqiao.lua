@@ -51,6 +51,9 @@ local cfg = {
 					if(player_count_card(p, bitor(PatternWhere_Hand,PatternWhere_Equip,PatternWhere_Judgment)) == 0) then
 						message('【'..p.name..'】没有任何牌。请选择其它玩家！');
 					else
+						message('【'..get_game_player(game, player).name..'】指定了【'
+							.. get_game_player(game, target).name .. '】作为【'
+							.. cfg.name ..'】的目标。' );
 						event.out_card.targets[0] = target;
 						event.out_card.target_num = 1;
 						return R_SUCC;
@@ -79,6 +82,37 @@ local cfg = {
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
 			
+			local p = get_game_player(game, event.target);
+			local items = '';
+			local index = 0;
+			local wherepos = {};
+			-- 手牌
+			for n = 0, p.hand_card_num - 1 do
+				items = items..'手牌['..(n+1)..']\n';
+				index = index + 1;
+				wherepos[index] = { where = CardWhere_PlayerHand, pos = n, };
+			end
+			
+			-- 装备
+			for n = 0, EquipIdx_Max-1 do
+				local card = get_player_equipcard(p, n);
+				if(card ~= nil) then
+					items = items..equip_idx_str(n)..': '..get_card_str(card)..'\n';					
+					index = index + 1;
+					wherepos[index] = { where = CardWhere_PlayerEquip, pos = n, };
+				end
+			end
+			
+			-- 判定区
+			for n = 0, p.judgment_card_num - 1 do
+				items = items..'判定牌: '..get_card_str(get_player_judgecard(p, n).vcard)..'\n';
+				index = index + 1;
+				wherepos[index] = { where = CardWhere_PlayerJudgment, pos = n, };
+			end
+			
+			local sel = game_select_items(game, event, player, items, '请选择一张你要弃置的【'..p.name..'】的牌:');
+			
+			return game_player_discard_card(game, event, event.target, wherepos[sel].where, wherepos[sel].pos);
 		end,
 	},
 };
