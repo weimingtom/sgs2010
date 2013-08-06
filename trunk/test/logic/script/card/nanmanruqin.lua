@@ -38,21 +38,45 @@ local cfg = {
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			-- 指定为除出牌者以外的所有现存玩家为目标
+			local p = game_next_player(game, player);
+			
+			while p ~= player do
+				event.out_card.targets[event.out_card.target_num] = p;
+				event.out_card.target_num = event.out_card.target_num + 1;
+				p = game_next_player(game, p);
+			end
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 			return R_SUCC;
 		end,
 
-		-- 出牌的过程驱动
+		-- 出牌的过程驱动(针对每个目标单独驱动)
 		[GameEvent_OutCard] = function(cfg, game, event, player)
+			-- 需要出一张杀来抵消此牌的效果。否则受到伤害
+			
+			local out_pattern  = OutCardPattern();
+			game_load_out_pattern(out_pattern,  'h:{sha}?');
+
+			ret = game_passive_out(game, event, event.target, player, out_pattern,
+				"请出一张【"..card_sid2name('sha').."】:");
+
+			if(ret == R_SUCC) then
+				return R_CANCEL;
+			end
+
+		
+		
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
-			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程	
 			return R_SUCC; 
 		end,
 		
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			-- lost life( from player, out card 'nmrq', skill 0 )
+			return game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
 		end,
 	},
 
