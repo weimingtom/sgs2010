@@ -58,7 +58,7 @@ static const char s_szInitCard[] =
 
 
 // INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE
-#define INIT_CARD_SIZE    COUNT(s_szInitCard)
+// #define INIT_CARD_SIZE    COUNT(s_szInitCard)
 
 //#if (INIT_CARD_SIZE > CARD_STACK_SIZE)
 //#error "INIT_CARD_SIZE must BE NOT great than CARD_STACK_SIZE!"

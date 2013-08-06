@@ -14,27 +14,12 @@
 import "../global/reg.lua";
 
 
-
-local function chitu_equip(cfg, game, event, player)
-	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
-		error("invalid out equip card in event OutCardPrepare.");
-		return R_E_FAIL;
-	end
-	game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_HorseDec);
-	return R_CANCEL;
-end
-
-local function chitu_calc_dis(cfg, game, event, player)
-	event.attack_dis.dis = event.attack_dis.dis - 1;
-	return R_DEF;
-end
-
-
-reg_card {
+local cfg = {
 	sid = 'chitu',
 	name = '赤兔',
 	type = CardType_HorseDec,
-	desc = [==[你计算与其他角色的距离时，始终-1。（你可以理解为一种进攻上的优势）
+	desc = [==[【-1马】
+你计算与其他角色的距离时，始终-1。（你可以理解为一种进攻上的优势）
 不同名称的-1马，其效果是相同的。]==],
 
 	can_out = {
@@ -57,10 +42,24 @@ reg_card {
 	
 	
 	event = {
-		[GameEvent_OutCardPrepare] = chitu_equip,
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error("invalid out equip card in event OutCardPrepare.");
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_HorseDec);
+			return R_CANCEL;
+		end,
 		
-		[GameEvent_CalcAttackDis] = chitu_calc_dis, 
+		[GameEvent_CalcAttackDis] = function (cfg, game, event, player)
+			event.attack_dis.dis = event.attack_dis.dis - 1;
+			return R_DEF;
+		end,
 	},
 	
 };
+
+-- register card
+reg_card(cfg);
+
 

@@ -12,3 +12,69 @@
 [Q]对装备区里仅有一张牌的孙尚香发动【寒冰剑】的技能时，如何结算？[A]可以先弃掉对方的一个装备，等孙尚香发动【枭姬】技能后，再弃掉对方的一张手牌。
 [Q]对仅有一张手牌的陆逊发动【寒冰剑】的技能弃掉其手牌时，如何结算？[A] 当发动【寒冰剑】技能弃掉陆逊最后一张手牌后，如果陆逊发动【连营】，则攻击者需要再选择弃掉陆逊装备区的一张牌或者一张手牌；如果陆逊放弃发动【连营】，攻击者需要再选择弃掉陆逊装备区的一张牌，如果陆逊装备区无牌，则结算结束。
 --]]
+
+
+import "../global/reg.lua";
+
+
+local cfg =  {
+	sid = 'hbj',
+	name = '寒冰剑',
+	type = CardType_Weapon,
+	
+	desc=[==[【寒冰剑】
+攻击范围：２
+武器特效：当你使用【杀】造成伤害时，你可以防止此伤害，改为弃置该目标角色的两张牌（弃完第一张再弃第二张）。]==],
+
+	
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+
+	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+		
+		-- 触发武器技能
+		
+		
+	},
+
+	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+
+		-- 攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+			if(player == event.trigger ) then
+				--message('attack base: 2');
+				event.attack_dis.base = 2;
+			end
+			return R_DEF;
+		end,
+
+		-- 结算武器技能效果
+
+	},
+};
+
+
+-- register
+reg_card(cfg);
+
+

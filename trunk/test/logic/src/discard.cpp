@@ -357,8 +357,15 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 			game_add_discard_cur(pGame, &disCard.list.pcards[n].card, &disCard.list.pcards[n].pos);
 			disCard.list.pcards[n].where = CardWhere_CurDiscardStack;
 		}
+		const char* swhere = "";
+		if(where == CardWhere_PlayerHand)
+			swhere = "手";
+		else if(where == CardWhere_PlayerEquip)
+			swhere = "装备";
+		else if(where == CardWhere_PlayerJudgment)
+			swhere = "判定区";
 
-		MSG_OUT("【%s】弃牌 %s\n", pPlayer->name, vcard_str(&stCard, buf, sizeof(buf)));
+		MSG_OUT("【%s】弃%s牌 %s\n", pPlayer->name, swhere, vcard_str(&stCard, buf, sizeof(buf)));
 
 		// event: post discard card
 		

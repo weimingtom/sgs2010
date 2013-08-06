@@ -22,3 +22,67 @@
 --]]
 
 
+import "../global/reg.lua";
+
+
+local cfg =  {
+	sid = 'qlyyd',
+	name = '青龙偃月刀',
+	type = CardType_Weapon,
+	
+	desc=[==[【青龙偃月刀】
+攻击范围：３
+武器特效：当你使用的【杀】被【闪】抵消时，你可以立即对相同的目标再使用一张【杀】直到【杀】生效或你不愿意出了为止。]==],
+
+	
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+
+	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+		
+		-- 触发武器技能
+		
+		
+	},
+
+	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+
+		-- 攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+			if(player == event.trigger ) then
+				--message('attack base: 3');
+				event.attack_dis.base = 3;
+			end
+			return R_DEF;
+		end,
+
+		-- 结算武器技能效果
+
+	},
+};
+
+
+-- register
+reg_card(cfg);
+
+

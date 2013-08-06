@@ -20,3 +20,70 @@
 [Q]太史慈装备青釭剑，杀主公曹操和带八卦阵的郭嘉，曹操发动护驾，郭嘉能否判定八卦阵？[A]不能。
 [Q]张角装备青釭剑，杀主公曹操，曹操装备八卦阵。曹操发动护驾，魏将A判定八卦阵为红色，张角发动鬼道用青釭剑改判定，改为黑色，魏将不再出闪。此时曹操还能否再判定八卦阵？[A]不能。
 --]]
+
+
+import "../global/reg.lua";
+
+
+local cfg =  {
+	sid = 'qgj',
+	name = '青釭剑',
+	type = CardType_Weapon,
+	
+	desc=[==[【青釭剑】
+攻击范围：２
+武器特效：锁定技，当你使用【杀】攻击时，无视该角色的防具。
+★对方的防具没有任何效果，直到目标角色对【杀】的响应结束。]==],
+
+	
+	can_out = {
+		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+			return YES;
+		end,
+	},
+
+	can_use = {
+		-- 可以用于修正攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+			if(player == event.trigger ) then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+		
+		-- 触发武器技能
+		
+		
+	},
+
+	event = {
+		-- 装备
+		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+				error('invalid out equip card in event OutCardPrepare.');
+				return R_E_FAIL;
+			end
+			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+			return R_CANCEL;
+		end,
+
+		-- 攻击距离
+		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+			if(player == event.trigger ) then
+				--message('attack base: 2');
+				event.attack_dis.base = 2;
+			end
+			return R_DEF;
+		end,
+
+		-- 结算武器技能效果
+
+	},
+};
+
+
+-- register
+reg_card(cfg);
+
+
