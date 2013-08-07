@@ -689,6 +689,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PerOutCardPrepare:
 	case GameEvent_OutCardPrepare:
 	case GameEvent_PerOutCard:
+	case GameEvent_BeforeOutCardEffect:
 	case GameEvent_OutCard:
 	case GameEvent_PerOutCardCalc:
 	case GameEvent_OutCardCalc:

@@ -70,6 +70,8 @@ local cfg = {
 					.. get_game_player(game, target).name .. '】作为【'
 					.. cfg.name ..'】的目标。' );
 
+				local p = get_game_player(game, player);
+				p.params[0] = p.params[0] + 1;
 				return R_SUCC;
 			end
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
@@ -80,8 +82,7 @@ local cfg = {
 		-- 出牌的过程驱动
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			local ret;
-			local p = get_game_player(game, player);
-			p.params[0] = p.params[0] + 1;
+			-- local p = get_game_player(game, player);
 			-- target passive shan
 			
 			local out_pattern  = OutCardPattern();

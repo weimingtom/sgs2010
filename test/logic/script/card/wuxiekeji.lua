@@ -16,3 +16,119 @@
 [Q]是否可以在没有人使用锦囊的时候凭空使用【无懈可击】？[A]不可以。【无懈可击】必须用来响应某个锦囊，不能凭空使用。
 [Q]无懈可击是否可以对自己使用？[A]无懈可击的对象是目标锦囊，与角色无关。
 --]]
+
+
+local cfg = {
+	sid = 'wxkj',
+	name = '无懈可击',
+	type = CardType_Strategy,
+	
+	desc=[==[【无懈可击】
+出牌时机：目标锦囊对目标角色生效前。
+使用目标：目标锦囊。
+作用效果：抵消该锦囊对其指定的一名目标角色产生的效果。
+★【无懈可击】是1张可以在其他锦囊开始结算时使用的锦囊，它只能抵消目标锦囊对一名指定角色产生的效果。
+★【无懈可击】本身也是锦囊，所以也可以被抵消。
+★当【无懈可击】抵消【闪电】的效果后，【闪电】不会被弃置，而是继续传递给下家（见【闪电】段落）。
+]==],
+
+
+	can_out = {
+		-- 在打出的锦囊牌生效之前
+		[GameEvent_BeforeOutCardEffect] = function (cfg, game, event, player, pos_card)
+			if  get_card_type(event.out_card.vcard.id) == CardType_Strategy  -- 出的牌是锦囊
+			then
+				return YES;
+			end
+			return NO;
+		end,
+
+		-- 在判定区的锦囊牌生效之前
+		[GameEvent_PerCardCalc] = function (cfg, game, event, player, pos_card)
+			if 
+				true -- 一定是延时锦囊，这里就不用再判断了
+			then
+				return YES;
+			end
+			return NO;
+		end,
+
+	},
+
+	event = {
+		-- 请注意，这不是一个技能，而是一张牌，所以下面的两个事件是不会工作的，can_out 检测通过的，要走出牌标准流程
+		-- 只有通过can_use检测的牌或者技能才可以直接响应被检测的当前事件。
+		--[[  
+		      
+		-- 在打出的锦囊牌生效之前
+		[GameEvent_BeforeOutCardEffect] = function (cfg, game, event, player)
+			event.result = R_CANCEL;
+			event.block = YES;
+			return R_SUCC;
+		end,
+		
+		-- 在判定区的锦囊牌生效之前
+		[GameEvent_PerCardCalc] = function (cfg, game, event, player)
+			event.result = R_CANCEL;
+			event.block = YES;
+			return R_SUCC;
+		end,
+		--]]
+
+		
+		-- 出牌过程由下列3个事件驱动
+
+		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
+		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			--  目标是父事件的锦囊，这里就不用选择了。
+	
+			
+			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
+			return R_SUCC;
+		end,
+		
+		-- 出牌的过程驱动
+		[GameEvent_OutCard] = function(cfg, game, event, player)
+			-- 此牌没有驱动过程，直接执行效果
+			
+			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
+			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+			return R_SUCC; 
+		end,
+		
+		-- 出牌后的结算（某些技能可以跳过此事件）
+		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
+			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
+			
+			if(event.parent_event.id == GameEvent_BeforeOutCardEffect) then
+				local tr = get_game_player(game, event.parent_event.out_card.trigger);
+				local me = get_game_player(game, player);
+				local trcard = event.parent_event.out_card.vcard;
+				local mecard = event.out_card.vcard;
+				message('【'..tr.name..'】的出牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
+				event.result = R_CANCEL;
+				event.block = YES;
+			elseif(event.parent_event.id == GameEvent_PerCardCalc) then
+				local tr = get_game_player(game, event.parent_event.trigger);
+				local me = get_game_player(game, player);
+				local trcard = event.parent_event.pos_vcard.vcard;
+				local mecard = event.out_card.vcard;
+				message('【'..tr.name..'】的判定牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
+				event.result = R_CANCEL;
+				event.block = YES;
+			else
+				game_event_info(game, event, 1);
+				error('在非正常的事件内响应【'..cfg.name..'】');
+			end
+			return R_SUCC;
+		end,
+	},
+};
+
+
+-- register
+reg_card(cfg);
+
+
