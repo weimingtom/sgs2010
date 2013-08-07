@@ -34,11 +34,11 @@ local cfg = {
 	},
 	can_use = {
 		-- 跳过出闪
-		[GameEvent_BeforePassiveOut] = function (cfg, game, event, player, pos_card)
-			if event.trigger == player   -- 是我的
-				and event.parent_event.id == GameEvent_OutCard  -- 出牌
-				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 杀的被动出牌
-				and is_wide_black(event.parent_event.out_card.vcard.color )   -- 广义的黑色牌
+		[GameEvent_BeforeOutCardEffect] = function (cfg, game, event, player, pos_card)
+			--game_event_info(game, event, 1);
+			if event.target == player   -- 目标是我
+				and event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 杀的结算
+				and is_wide_black(event.out_card.vcard.color )   -- 广义的黑色牌
 			then
 				return USE_QUIET;
 			end
@@ -71,8 +71,9 @@ local cfg = {
 		end,
 		
 		-- 跳过出闪
-		[GameEvent_BeforePassiveOut] = function (cfg, game, event, player)
-			event.result = R_CANCEL;
+		[GameEvent_BeforeOutCardEffect] = function (cfg, game, event, player)
+			--message('===========================');
+			event.result = R_SKIP;   -- 跳过杀的驱动，直接执行结算（实际结算也是跳过的，这里这么做是因为杀需要正常完成）
 			event.block = YES;
 			return R_SUCC;
 		end,

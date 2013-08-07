@@ -30,15 +30,26 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
-	// out procedure
-	//pCardConfig = get_card_config(out_card->vcard.id);
-	//if(pCardConfig != NULL && pCardConfig->out != NULL)
+
+	// before out card effect (to each target)
+	INIT_EVENT(&stEvent, GameEvent_BeforeOutCardEffect, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+
+	trigger_game_event(pGame, &stEvent);
+
+	CHECK_BACK_RET(stEvent.result);	
+
+	// out procedure (start do effect)
+
+	// result is skip means skip the out card drive , calc card directly. (disable the chance of target response the out card)
+	if(stEvent.result != R_SKIP)  
 	{
 		// out card drive
 		INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
 		stEvent.out_card = out_card;
-		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+
+		// response the out card , if event return R_CANCEL, out card is broken
 		CHECK_RET(ret, ret);
 	}
 

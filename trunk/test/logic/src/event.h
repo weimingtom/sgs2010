@@ -58,6 +58,7 @@ typedef enum _GameEvent
 	GameEvent_PerOutCardPrepare,
 	GameEvent_OutCardPrepare,
 	GameEvent_PerOutCard,
+	GameEvent_BeforeOutCardEffect,
 	GameEvent_OutCard,
 	GameEvent_PostOutCard,
 	GameEvent_PerOutCardCalc,

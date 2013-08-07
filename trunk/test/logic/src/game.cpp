@@ -390,9 +390,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 		pPlayer->judgment_card_num--;
 
-		//pCardConfig = get_card_config(stCard.id);
-
-		//if(pCardConfig)
+		if(1)
 		{
 			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 			event.pos_vcard = &stCard;
@@ -400,48 +398,34 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 			if(event.result != R_CANCEL) // if card calc is cancel .
 			{
-				//if(pCardConfig->out != NULL)
-				{
-					INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-					event.pos_vcard = &stCard;
-					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.vcard.id, pGame, &event, pGame->round_player);
-				}
+				INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
+				event.pos_vcard = &stCard;
+				//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
+				call_card_event(stCard.vcard.id, pGame, &event, pGame->round_player);
 
-				for(n = 0; n < stCard.list.num; n++)
-				{
-					ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
-					stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
-					CHECK_RET(ret,ret);
-				}
-
+				// post calc , before discard
 				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 				event.pos_vcard = &stCard;
 				trigger_game_event(pGame, &event);
 
 			}
 
-			// after calc
-			//if(stCard.card.id != CardID_None)
+			// discard card 
+			for(n = 0; n < stCard.list.num; n++)
 			{
-				//if(pCardConfig->out != NULL)
-				{
-					INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-					event.pos_vcard = &stCard;
-					//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-					call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
-				}
-				//else
-				//{
-				//	// after calc discard card (default fini action)?
-				//	game_add_discard_cur(pGame, &stCard);
-				//}
+				ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
+				stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
+				CHECK_RET(ret,ret);
 			}
+
+			// after calc
+
+			INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
+			event.pos_vcard = &stCard;
+
+			call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
+
 		}
-		//else
-		//{
-		//	MSG_OUT("card config [%d] not found!\n", stCard.id);
-		//}
 		
 		game_flush_discard_cur(pGame);
 	}
