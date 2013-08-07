@@ -69,7 +69,7 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int player);
 
 
-
+YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard);
 
 
 

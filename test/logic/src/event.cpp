@@ -11,6 +11,8 @@
 #include "hero.h"
 #include "cmd.h"
 #include "script.h"
+#include "skill.h"
+#include "out.h"
 
 
 // begin lua interface implements
@@ -106,7 +108,7 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 						call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
 						use_cnt++;
 						if(pEvent->block == YES)
-							{
+						{
 							//if(pEvent->result == R_CANCEL)
 							//	return R_CANCEL;
 							return R_BACK;
@@ -137,7 +139,7 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 			pos_card.card = pPlayer->hand_cards[n];
 			pos_card.where = CardWhere_PlayerHand;
 			pos_card.pos = n;
-			ret = call_card_can_out(pPlayer->hand_cards[n].id, pGame, pEvent, player, &pos_card);
+			ret = game_card_can_out(pGame, pEvent, player, &pos_card);
 			if(ret == YES)
 				may_cards++;
 		}
@@ -161,7 +163,7 @@ static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, i
 				pos_card.card = pPlayer->equip_cards[n];
 				pos_card.where = CardWhere_PlayerEquip;
 				pos_card.pos = n;
-				cu = call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card);
+				cu = game_card_can_use(pGame, pEvent, player, &pos_card);
 				if(cu == USE_AUTO || cu == USE_QUIET)
 				{
 					if(auto_use)
@@ -244,6 +246,71 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	return R_SUCC;
 }
+
+
+
+RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent)
+{
+	int n;
+	int m = pEvent->trigger;
+
+	for(n = 0; n < pGame->player_count; n++)
+	{
+		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
+		{
+			call_player_event(pGame, pEvent, m);
+			if(pEvent->block == YES)
+				break;
+		}
+		m = (m + 1) % pGame->player_count;
+	}
+
+	return R_SUCC;
+}
+
+RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int player)
+{
+	Player* pPlayer;
+	int skill_num;
+	int n;
+	PosCard   pos_card;
+
+
+	pPlayer = get_game_player(pGame, player);
+	skill_num = hero_skill_num(pPlayer->hero);
+
+	for(n = 1; n <=  skill_num; n++)
+	{
+		call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+		if(pEvent->block == YES)
+		{
+			//if(pEvent->result == R_CANCEL)
+			//	return R_CANCEL;
+			return R_BACK;
+		}
+	}
+
+
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&pPlayer->equip_cards[n]))
+		{
+			pos_card.card = pPlayer->equip_cards[n];
+			pos_card.where = CardWhere_PlayerEquip;
+			pos_card.pos = n;
+
+			call_card_event(pos_card.card.id, pGame, pEvent, player);
+			if(pEvent->block == YES)
+			{
+				//if(pEvent->result == R_CANCEL)
+				//	return R_CANCEL;
+				return R_BACK;
+			}
+		}
+	}
+	return R_SUCC;
+}
+
 
 char* get_event_str(GameEvent eid, char* buf, int buflen)
 {

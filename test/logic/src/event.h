@@ -90,6 +90,9 @@ typedef enum _GameEvent
 	GameEvent_PerDecideCard,
 	GameEvent_PerDecideCardCalc,
 	GameEvent_PostDecideCard,
+	GameEvent_CheckCardCanOut,
+	GameEvent_CheckCardCanUse,
+	GameEvent_CheckSkillCanUse,
 } GameEvent;
 
 
@@ -133,6 +136,8 @@ typedef struct tagDiscardPattern DiscardPattern;
 typedef struct tagEquipCard EquipCard;
 typedef struct tagChangeLife ChangeLife;
 typedef struct tagSelectTarget SelectTarget;
+typedef struct tagSkillCanUse SkillCanUse;
+typedef struct tagCardCanUse CardCanUse;
 
 
 
@@ -161,6 +166,8 @@ struct tagGameEventContext
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
 		SelectTarget* select_target; // when select target checked
+		SkillCanUse*  skill_canuse;
+		CardCanUse*   card_canuse;
 	};
 	char ud[MAX_UD_LEN];   // user custom string, used for script
 };
@@ -183,6 +190,12 @@ struct tagGameEventContext
 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
+
+
+RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent);
+RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
+
+
 
 // tolua_begin
 

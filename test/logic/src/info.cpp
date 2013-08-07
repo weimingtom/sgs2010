@@ -9,6 +9,7 @@
 #include "select.h"
 #include "life.h"
 #include "equip.h"
+#include "skill.h"
 
 
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
@@ -59,7 +60,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		}
 		else
 		{
-			cu = (YES == call_card_can_out(pos_card.card.id, pGame, pEvent, player, &pos_card));
+			cu = (YES == game_card_can_out(pGame, pEvent, player, &pos_card));
 		}
 
 		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
@@ -131,7 +132,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			pos_card.where = CardWhere_PlayerEquip;
 			pos_card.pos = n;
 
-			cu = (USE_MANUAL == call_card_can_use(pos_card.card.id, pGame, pEvent, player, &pos_card));
+			cu = (USE_MANUAL == game_card_can_use(pGame, pEvent, player, &pos_card));
 
 			if(cu)
 			{
@@ -591,6 +592,50 @@ static void game_event_param__select_target(GameContext* pGame, GameEventContext
 	}
 }
 
+static const char* can_use_str(CANUSE can_use)
+{
+	static char temp[16];
+	switch(can_use)
+	{
+	case USE_CANNOT: return "USE_CANNOT";
+	case USE_MANUAL: return "USE_MANUAL";
+	case USE_AUTO:   return "USE_AUTO";
+	case USE_QUIET:  return "USE_QUIET";
+	default: 
+		snprintf(temp, sizeof(temp), "\? (%d)", can_use);
+		return temp;
+	}
+}
+
+static void game_event_param__card_canuse(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->card_canuse)
+	{
+		MSG_OUT("    card_canuse=NULL;\n");
+	}
+	else
+	{
+		p_pos_card("card_canuse", &pEvent->card_canuse->pos_card);
+		MSG_OUT("    card_canuse.can_use=%s;\n", can_use_str(pEvent->card_canuse->can_use));
+	}
+}
+
+
+static void game_event_param__skill_canuse(GameContext* pGame, GameEventContext* pEvent)
+{
+	char buf[128];
+	if(NULL == pEvent->skill_canuse)
+	{
+		MSG_OUT("    skill_canuse=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    skill_canuse.hero_id=%d {%s};\n", pEvent->skill_canuse->hero_id, hero_sid(pEvent->skill_canuse->hero_id, buf, sizeof(buf)));
+		MSG_OUT("    skill_canuse.skill_index=%d;\n", pEvent->skill_canuse->skill_index);
+		MSG_OUT("    skill_canuse.can_use=%s;\n", can_use_str(pEvent->skill_canuse->can_use));
+	}
+}
+
 
 static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -641,6 +686,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PostGetCard:
 	case GameEvent_PerLostCard:
 	case GameEvent_PostLostCard:
+	case GameEvent_CheckCardCanOut:
 		game_event_param__pos_card(pGame, pEvent);
 		break;
 	case GameEvent_RoundDiscardCard:
@@ -666,6 +712,12 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 		break;
 	case GameEvent_SelectTarget:
 		game_event_param__select_target(pGame, pEvent);
+		break;
+	case GameEvent_CheckCardCanUse:
+		game_event_param__card_canuse(pGame, pEvent);
+		break;
+	case GameEvent_CheckSkillCanUse:
+		game_event_param__skill_canuse(pGame, pEvent);
 		break;
 	default:
 		/* do nothing */
