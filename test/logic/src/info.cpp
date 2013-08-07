@@ -68,6 +68,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	}
 
 	// equiped cards
+	MSG_OUT("装备区:\n");
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
 		if(CARD_VALID(&p->equip_cards[n]))
@@ -94,7 +95,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			//	cu = call_card_can_out(pos_card.card.id, pGame, pEvent, pGame->cur_player, &pos_card);
 				cu = 0;
 			}
-			MSG_OUT("%s :%s [%d] %s\n", equip_idx_str(n), cu ? "*":" ", idx++, card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+			MSG_OUT("%s [%d] %s: %s\n", cu ? "*":" ", idx++, equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
 		}
 	}
 
@@ -118,7 +119,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	{
 		cu = (USE_MANUAL == call_hero_skill_can_use(p->hero, n, pGame, pEvent, player));
 		skill_flag = hero_skill_flag(p->hero, n);
-		MSG_OUT("%s 技能[%d]： 【%s】%s%s\n", cu ? "*":" ", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
+		MSG_OUT("%s 技能[%d]: 【%s】%s%s\n", cu ? "*":" ", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
 			(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
 	
 	}
@@ -136,7 +137,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 			if(cu)
 			{
-				MSG_OUT("%s 技能[%c]： 【%s】,%s效果\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
+				MSG_OUT("%s 技能[%c]: 【%s】,%s效果\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
 			}
 
 		}
@@ -150,6 +151,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 	int n;
 	char buf[128];
 	Player* pPlayer;
+	int f;
 
 	if(get_game_status(pGame) == Status_None)
 	{
@@ -165,12 +167,18 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 		pPlayer->name, player_id_str( (player == pGame->cur_player || IS_PLAYER_SHOW(pPlayer) ) ? pPlayer->id : PlayerID_Unknown),
 		pPlayer->cur_life, pPlayer->max_life, pPlayer->hand_card_num);
 
+	f = 0;
 	// equiped cards
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
 		if(CARD_VALID(&pPlayer->equip_cards[n]))
 		{
-			MSG_OUT("    %s : %s\n",  equip_idx_str(n), card_str(&pPlayer->equip_cards[n], buf, sizeof(buf)) );
+			if(f == 0)
+			{
+				MSG_OUT("装备区:\n");
+				f = 1;
+			}
+			MSG_OUT("    %s: %s\n",  equip_idx_str(n), card_str(&pPlayer->equip_cards[n], buf, sizeof(buf)) );
 		}
 	}
 
@@ -194,7 +202,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	int n, k;
 	char buf[128];
 	Player* p;
-
+	int f;
 
 	if(get_game_status(pGame) == Status_None)
 	{
@@ -223,10 +231,18 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 			p->cur_life, p->max_life, p->hand_card_num);
 
 		// equiped cards
+		f = 0;
 		for(n = 0; n < EquipIdx_Max; n++)
 		{
 			if(CARD_VALID(&p->equip_cards[n]))
-				MSG_OUT("    %s : %s\n",  equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+			{
+				if(f == 0)
+				{
+					MSG_OUT("    装备区:\n");
+					f = 1;
+				}
+				MSG_OUT("      %s: %s\n",  equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+			}
 		}
 
 		// judgment cards

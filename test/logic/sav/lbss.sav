@@ -95,7 +95,7 @@ game = {
 			},
 			equip_cards = {
 				{ sid = 'fthj', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
-				{ sid = 'bgz', color = CardColor_Diamond, value = CardValue_10, flag = CardFlag_None, },
+				{ sid = 'rwd', color = CardColor_Diamond, value = CardValue_10, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
 				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
 			},

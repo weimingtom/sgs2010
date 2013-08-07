@@ -13,7 +13,7 @@
 import "../global/reg.lua";
 
 
-local is_wide_black(c)
+local function is_wide_black(c)
 	return c == CardColor_Spade or c == CardColor_Club or c == CardColor_GeneralBlack;
 end
 
@@ -33,6 +33,18 @@ local cfg = {
 		end,
 	},
 	can_use = {
+		-- 跳过出闪
+		[GameEvent_BeforePassiveOut] = function (cfg, game, event, player, pos_card)
+			if event.trigger == player   -- 是我的
+				and event.parent_event.id == GameEvent_OutCard  -- 出牌
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 杀的被动出牌
+				and is_wide_black(event.parent_event.out_card.vcard.color )   -- 广义的黑色牌
+			then
+				return USE_QUIET;
+			end
+			return USE_CANNOT;
+		end,
+
 		-- 产生效果
 		[GameEvent_PerOutCardCalc] = function (cfg, game, event, player, pos_card)
 			-- 如果是黑色的杀。则触发效果
@@ -58,6 +70,13 @@ local cfg = {
 			return R_CANCEL;
 		end,
 		
+		-- 跳过出闪
+		[GameEvent_BeforePassiveOut] = function (cfg, game, event, player)
+			event.result = R_CANCEL;
+			event.block = YES;
+			return R_SUCC;
+		end,
+
 		-- 防具效果
 		[GameEvent_PerOutCardCalc] = function (cfg, game, event, player)
 			event.result = R_SKIP;   -- 跳过结算、
