@@ -94,7 +94,7 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 	pcard.where = CardWhere_PlayerEquip;
 	pcard.pos = EquipIdx_Weapon;
 
-	if(USE_MANUAL != call_card_can_use(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame), &pcard))
+	if(USE_MANUAL != game_card_can_use(pGame, pEvent, get_game_cur_player(pGame), &pcard))
 	{
 		MSG_OUT("你装备的%s【%s】当前不能发动！\n", equip_idx_str(EquipIdx_Weapon), card_name(pcard.card.id, temp, sizeof(temp)));
 		return R_E_FAIL;
@@ -134,7 +134,7 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 	pcard.where = CardWhere_PlayerEquip;
 	pcard.pos = EquipIdx_Armor;
 
-	if(USE_MANUAL != call_card_can_use(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame), &pcard))
+	if(USE_MANUAL != game_card_can_use(pGame, pEvent, get_game_cur_player(pGame), &pcard))
 	{
 		MSG_OUT("你装备的%s【%s】当前不能使用！\n", equip_idx_str(EquipIdx_Armor), card_name(pcard.card.id, temp, sizeof(temp)));
 		return R_E_FAIL;
@@ -153,6 +153,42 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 RESULT game_cmd_cancelskill(GameContext* pGame, GameEventContext* pEvent)
 {
 	return R_CANCEL;
+}
+
+
+CANUSE game_card_can_use(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard)
+{
+	GameEventContext   event;
+	CardCanUse   stCanUse;
+	INIT_EVENT(&event, GameEvent_CheckCardCanUse, player, INVALID_PLAYER, pEvent);
+	stCanUse.pos_card = *pPosCard;
+	stCanUse.can_use = USE_CANNOT;
+	event.card_canuse = &stCanUse;
+
+	call_game_event(pGame, &event);
+
+	if(event.result == R_BACK)
+		return stCanUse.can_use;
+	return call_card_can_use(stCanUse.pos_card.card.id, pGame, pEvent, player, pPosCard);
+}
+
+
+CANUSE game_skill_can_use(GameContext* pGame, GameEventContext* pEvent, int player, HeroID heroid, int skillindex)
+{
+	GameEventContext   event;
+	SkillCanUse     stCanUse;
+	INIT_EVENT(&event, GameEvent_CheckSkillCanUse, player, INVALID_PLAYER, pEvent);
+	stCanUse.hero_id = heroid;
+	stCanUse.skill_index = skillindex;
+	stCanUse.can_use = USE_CANNOT;
+	event.skill_canuse = &stCanUse;
+
+	call_game_event(pGame, &event);
+
+	if(event.result == R_BACK)
+		return stCanUse.can_use;
+
+	return call_hero_skill_can_use(stCanUse.hero_id, stCanUse.skill_index, pGame, pEvent, player);
 }
 
 

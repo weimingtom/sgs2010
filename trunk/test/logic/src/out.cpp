@@ -622,7 +622,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		//if(pCardConfig == NULL || pCardConfig->check == NULL
 		//	|| YES != (*pCardConfig->check)(pGame, pEvent, pGame->cur_player))
-		if(YES != call_card_can_out(stCard[0].card.id, pGame, pEvent, pGame->cur_player, &stCard[0]))
+		if(YES != game_card_can_out(pGame, pEvent, pGame->cur_player, &stCard[0]))
 		{
 			MSG_OUT("你当前不能出这张牌 %s!\n", card_str(&stCard[0].card, buffer, sizeof(buffer)));
 			return R_E_PARAM;
@@ -677,6 +677,25 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 
 	return R_CANCEL;
 }
+
+
+YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard)
+{
+	GameEventContext   event;
+
+	INIT_EVENT(&event, GameEvent_CheckCardCanOut, player, INVALID_PLAYER, pEvent);
+	event.pos_card = pPosCard;
+
+	call_game_event(pGame, &event);
+	
+	if(event.result == R_CANCEL || event.result == R_ABORT)
+		return NO;
+	else if(event.result == R_BACK || event.result == R_SKIP || event.result == R_SUCC)
+		return YES;
+	
+	return call_card_can_out(pPosCard->card.id, pGame, pEvent, player, pPosCard);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////

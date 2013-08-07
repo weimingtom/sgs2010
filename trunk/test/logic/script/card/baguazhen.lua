@@ -19,7 +19,7 @@ import "../global/reg.lua";
 
 local function bgz_can_use(cfg, game, event, player, pos_card)
 	-- 当需要出一张闪的时候
-	if(event.pattern_out.pattern.num == 1 and
+	if(event.trigger == player and event.pattern_out.pattern.num == 1 and
 		get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan' and
 		not string.find(event.pattern_out.pattern.ud, '{bgz}') ) 
 	then
@@ -68,12 +68,12 @@ local function bgz_use(cfg, game, event, player)
 	end
 end
 
-reg_card {
+local cfg = {
 	sid = 'bgz',
 	name = '八卦阵',
 	type = CardType_Armor,
-	desc = [==[防具效果：每当你需要使用（或打出）一张【闪】时，你可以进行一次判定：若结果为红色，则视为你使用（或打出）了一张【闪】；若为黑色，则你仍可从手牌里使用（或打出）。
-
+	desc = [==[【八卦阵】
+防具效果：每当你需要使用（或打出）一张【闪】时，你可以进行一次判定：若结果为红色，则视为你使用（或打出）了一张【闪】；若为黑色，则你仍可从手牌里使用（或打出）。
 ★由八卦使用或打出的【闪】，并非从你的手牌中使用或打出。]==],
 
 	can_out = {
@@ -98,5 +98,8 @@ reg_card {
 		[GameEvent_SupplyCard] = bgz_use,
 	},
 };
+
+-- register 
+reg_card(cfg);
 
 

@@ -105,13 +105,22 @@ local cfg = {
 			
 			-- 判定区
 			for n = 0, p.judgment_card_num - 1 do
-				items = items..'判定牌: '..get_card_str(get_player_judgecard(p, n).vcard)..'\n';
+				items = items..'判定区牌: '..get_card_str(get_player_judgecard(p, n).vcard)..'\n';
 				index = index + 1;
 				wherepos[index] = { where = CardWhere_PlayerJudgment, pos = n, };
 			end
 			
 			local sel = game_select_items(game, event, player, items, '请选择一张你要弃置的【'..p.name..'】的牌:');
 			
+			local me = get_game_player(game, player);
+			
+			if wherepos[sel].where == CardWhere_PlayerHand then
+				message('【'..me.name..'】令【'..p.name..'】弃置手牌['..(wherepos[sel].pos+1)..']');
+			elseif wherepos[sel].where == CardWhere_PlayerEquip then
+				message('【'..me.name..'】令【'..p.name..'】弃置'..equip_idx_str(wherepos[sel].pos)..': '..get_card_str(get_player_equipcard(p, wherepos[sel].pos))..'');
+			else
+				message('【'..me.name..'】令【'..p.name..'】弃置判定区牌: '..get_card_str(get_player_judgecard(p, wherepos[sel].pos).vcard)..'');
+			end
 			return game_player_discard_card(game, event, event.target, wherepos[sel].where, wherepos[sel].pos);
 		end,
 	},

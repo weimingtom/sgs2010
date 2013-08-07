@@ -74,7 +74,9 @@ typedef struct tagGameEventContext
 	tolua_readonly PosVCard*    pos_vcard;    // judgement vcard,
 	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
 	tolua_readonly ChangeLife* change_life; // when life is changed 
-	tolua_readonly 	SelectTarget* select_target;  // when select target checked
+	tolua_readonly SelectTarget* select_target;  // when select target checked
+	tolua_readonly SkillCanUse*  skill_canuse;
+	tolua_readonly CardCanUse*   card_canuse;
 	//};
 	char   ud[MAX_UD_LEN];
 } GameEventContext;
