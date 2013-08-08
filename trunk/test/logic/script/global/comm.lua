@@ -5,26 +5,28 @@
 --]]
 
 
--- 辅助函数。将GameEvent——* 转换为常数
+-- 辅助函数。将GameEvent_* 转换为常数
 
-
-local event_tb = nil;
-
-function get_event_str(eid)
-
-	-- 先要建立一张表
-	if(event_tb == nil) then
-	
-		event_tb = {};
-		for name, val in pairs(_G) do
-			if(type(val) == 'number' and string.find(name, "^GameEvent_")) then
-				event_tb[val] = name;
-			end
+local function num2enum(pattern)
+	local enum_tb = {};
+	for name, val in pairs(_G) do
+		if(type(val) == 'number' and string.find(name,  pattern)) then
+			enum_tb[val] = name;
 		end
 	end
-	
-	return event_tb[eid] or "";
+	return function (eid) 
+		return enum_tb[eid] or tostring(eid);
+	end
 end
+
+get_event_str = num2enum('^GameEvent_');
+get_RESULT_str = num2enum('^R_');
+get_CANUSE_str = num2enum('^UES_');
+get_CardType_str = num2enum('^CardType_');
+get_CardColor_str = num2enum('^CardColor_');
+get_CardValue_str = num2enum('^CardValue_');
+
+
 
 function select(cond, a, b)
 	if(cond) then

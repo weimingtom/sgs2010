@@ -59,7 +59,7 @@ reg_card {
 		-- 有玩家处于濒死状态，则可以对它使用桃
 		[GameEvent_PerDead] = function(cfg, game, event, player, pos_card)
 			local p = get_game_player(game, event.trigger);
-			if(p.cur_life < 0) then
+			if(p.cur_life <= 0) then
 				return YES;
 			end
 			return NO;
@@ -80,7 +80,15 @@ reg_card {
 		end,
 
 		[GameEvent_PerDead] = function(cfg, game, event, player)
-			return game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
+			local p = get_game_player(game, event.trigger);
+			game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
+			if(p.cur_life > 0) then
+				event.result = R_ABORT;
+				event.block = YES;
+			end
+			return R_SUCC;
 		end,
 	},
 };
+
+
