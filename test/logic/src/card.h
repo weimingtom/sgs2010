@@ -87,19 +87,19 @@ typedef enum _CardValue
 	CardValue_Unknown = -1,
 	CardValue_None = 0,
 
-	CardValue_2 = 1,
-	CardValue_3 = 2,
-	CardValue_4 = 3,
-	CardValue_5 = 4,
-	CardValue_6 = 5,
-	CardValue_7 = 6,
-	CardValue_8 = 7,
-	CardValue_9 = 8,
-	CardValue_10 = 9,
-	CardValue_J = 10,
-	CardValue_Q = 11,
-	CardValue_K = 12,
-	CardValue_A = 13,
+	CardValue_A = 1,
+	CardValue_2 = 2,
+	CardValue_3 = 3,
+	CardValue_4 = 4,
+	CardValue_5 = 5,
+	CardValue_6 = 6,
+	CardValue_7 = 7,
+	CardValue_8 = 8,
+	CardValue_9 = 9,
+	CardValue_10 = 10,
+	CardValue_J = 11,
+	CardValue_Q = 12,
+	CardValue_K = 13,
 }CardValue;
 
 
@@ -301,7 +301,7 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 //             b  : black (spade or club)
 //             r  : red (heart or diamond)
 //             n  : none (any color)
-//        <val> : one of '2 - 10, J, Q, K, A' , can use [from-to] format, if it is empty, means any value.
+//        <val> : one of 'A,2 - 10, J, Q, K' , can use [from-to] format, if it is empty, means any value.
 RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len);
 
 RESULT card_match(const Card* pCard, size_t offset, int nCardNum, const CardPattern* pPattern, int nPatternNum);

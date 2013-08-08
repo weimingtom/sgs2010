@@ -847,6 +847,7 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 __v_parse:
 		switch(*p)
 		{
+		case 'A': pcp->value_min = CardValue_A; break;
 		case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 			pcp->value_min = (CardValue)(CardValue_2 + (*p - '2'));
 			break;
@@ -863,9 +864,8 @@ __v_parse:
 			}
 			break;
 		case 'J': pcp->value_min = CardValue_J; break;
-		case 'Q': pcp->value_min = CardValue_J; break;
-		case 'K': pcp->value_min = CardValue_J; break;
-		case 'A': pcp->value_min = CardValue_J; break;
+		case 'Q': pcp->value_min = CardValue_Q; break;
+		case 'K': pcp->value_min = CardValue_K; break;
 		case 'N': pcp->value_min = CardValue_None; break;
 		default: goto __fini_parse;
 		}
@@ -877,6 +877,7 @@ __v_parse:
 
 			switch(*p)
 			{
+			case 'A': pcp->value_max = CardValue_A; break;
 			case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 				pcp->value_max = (CardValue)(CardValue_2 + (*p - '2'));
 				break;
@@ -893,9 +894,8 @@ __v_parse:
 				}
 				break;
 			case 'J': pcp->value_max = CardValue_J; break;
-			case 'Q': pcp->value_max = CardValue_J; break;
-			case 'K': pcp->value_max = CardValue_J; break;
-			case 'A': pcp->value_max = CardValue_J; break;
+			case 'Q': pcp->value_max = CardValue_Q; break;
+			case 'K': pcp->value_max = CardValue_K; break;
 			case 'N': pcp->value_max = CardValue_None; break;
 			default: return R_E_FAIL;
 			}

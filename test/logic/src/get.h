@@ -38,6 +38,9 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int num, YESNO force);
 
+RESULT game_player_getcard_from_player(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int from_player, CardWhere where, int pos);
+
+
 // tolua_end
 
 #ifdef __cplusplus

@@ -43,9 +43,11 @@ local cfg =  {
 	},
 
 	can_use = {
-		-- 可以用于修正攻击距离
+		-- 可以用于修正攻击距离(只对杀有效)
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
-			if(player == event.trigger ) then
+			if (player == event.trigger and event.parent_event.id == GameEvent_OutCardPrepare
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')) 
+			then
 				return USE_QUIET;
 			end
 			return USE_CANNOT;
