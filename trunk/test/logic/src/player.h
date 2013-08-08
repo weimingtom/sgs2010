@@ -166,6 +166,7 @@ void player_clear_flag(Player* pPlayer, int   flag);
 void player_clear_all_flag(Player* pPlayer);
 YESNO player_check_flag(Player* pPlayer, int   flag);
 
+
 // }}
 // tolua_end
 

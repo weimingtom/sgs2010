@@ -9,6 +9,7 @@
 #include "get.h"
 #include "cmd.h"
 #include "stack.h"
+#include "script.h"
 
 
 // the new game first step , all player get 4 cards
@@ -214,4 +215,54 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	return R_SUCC;
 }
 
+// 从另一个玩那里得到牌（不能是自己）
+RESULT game_player_getcard_from_player(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int from_player, CardWhere where, int pos)
+{
+	RESULT  ret;
+	Player* pPlayer;
+	Player* pFromPlayer;
+	VCard   vcard;
+	int     n;
+	
+	if(player == from_player && where == CardWhere_PlayerHand)
+		return R_SUCC;
 
+	pPlayer = get_game_player(pGame, player);
+	pFromPlayer = get_game_player(pGame, from_player);
+
+	if(pPlayer == NULL || pFromPlayer == NULL)
+	{
+		luaL_error(GL(L), "gamr_player_getcard_from_player: input invalid %s", pPlayer==NULL? "player" : "from_player");
+		return R_E_PARAM;
+	}
+
+
+	ret = get_player_card(pFromPlayer, where, pos, &vcard);
+
+	if(ret != R_SUCC)
+	{
+		luaL_error(GL(L), "game_player_getcard_from_player: invalid card where/pos.");
+		return R_E_PARAM;
+	}
+	
+	if(get_player_card_flag(pPlayer, where, pos) !=  CardFlag_None)
+	{
+		luaL_error(GL(L), "game_player_getcard_from_player: can not  get this card from player.");
+		return R_E_PARAM;
+	}
+
+	if(pPlayer->hand_card_num + vcard.rnum > MAX_HAND_CARD)
+	{
+		luaL_error(GL(L), "game_player_getcard_from_player:  player hand card overflow.");
+		return R_E_OVERFLOW;
+	}
+
+	player_remove_card(pFromPlayer, where, pos, NULL);
+
+	for(n = 0; n < vcard.rnum; n++)
+	{
+		player_add_hand_card(pPlayer, &vcard.rcards[n]);
+	}
+
+	return R_SUCC;
+}

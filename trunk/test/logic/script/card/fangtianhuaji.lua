@@ -35,13 +35,16 @@ local cfg = {
 	},
 	
 	can_use = {
-		-- 可以用于修正攻击距离
+		-- 可以用于修正攻击距离(只对杀有效)
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
-			if(player == event.trigger ) then
+			if (player == event.trigger and event.parent_event.id == GameEvent_OutCardPrepare
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')) 
+			then
 				return USE_QUIET;
 			end
 			return USE_CANNOT;
 		end,
+
 		-- 武器效果触发，在选择目标前触发
 		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player, pos_card)--
 			-- 如果自己出的杀为最后一张手牌。则可以最多指定3个目标，至少指定一个。并按行动顺序结算
