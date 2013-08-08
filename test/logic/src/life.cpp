@@ -90,15 +90,21 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	stChgLife.after_life = pPlayer->cur_life;
 
-	if(pPlayer->cur_life <= 0)
+	// 只有在扣减体力的时候才需要触发濒死。回复体力时如果当前体力<=0则说明是在濒死状态下有人给该玩家回体力
+	if(stChgLife.delta <= 0 && pPlayer->cur_life <= 0)
 	{
 		game_player_dead(L, pGame, &event, player );
 	}
 
-	INIT_EVENT(&event, GameEvent_PostChangeLife, player, INVALID_PLAYER, pParentEvent);
-	event.change_life = &stChgLife;
 
-	trigger_game_event(pGame, &event);
+	if(!IS_PLAYER_DEAD(pPlayer))
+	{
+		// 死亡的玩家不再触发事件。
+		INIT_EVENT(&event, GameEvent_PostChangeLife, player, INVALID_PLAYER, pParentEvent);
+		event.change_life = &stChgLife;
+
+		trigger_game_event(pGame, &event);
+	}
 
 	return R_SUCC;
 }

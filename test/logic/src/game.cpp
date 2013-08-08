@@ -1379,7 +1379,7 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 // if the game is over, this function do not return.
 void game_check_gameover(GameContext* pGame, int player)
 {
-
+	
 	// TODO: not yet implements
 }
 
