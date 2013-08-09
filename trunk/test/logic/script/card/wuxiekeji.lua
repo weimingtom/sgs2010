@@ -108,16 +108,16 @@ local cfg = {
 				local trcard = event.parent_event.out_card.vcard;
 				local mecard = event.out_card.vcard;
 				message('【'..tr.name..'】的出牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
-				event.result = R_CANCEL;
-				event.block = YES;
+				event.parent_event.result = R_CANCEL;
+				event.parent_event.block = YES;
 			elseif(event.parent_event.id == GameEvent_PerCardCalc) then
 				local tr = get_game_player(game, event.parent_event.trigger);
 				local me = get_game_player(game, player);
 				local trcard = event.parent_event.pos_vcard.vcard;
 				local mecard = event.out_card.vcard;
 				message('【'..tr.name..'】的判定牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
-				event.result = R_CANCEL;
-				event.block = YES;
+				event.parent_event.result = R_CANCEL;
+				event.parent_event.block = YES;
 			else
 				game_event_info(game, event, 1);
 				error('在非正常的事件内响应【'..cfg.name..'】');
