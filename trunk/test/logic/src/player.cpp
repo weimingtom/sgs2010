@@ -403,6 +403,11 @@ RESULT player_remove_card(Player* pPlayer, CardWhere where, int pos, VCard* pCar
 		{
 			if(pCard != NULL) *pCard = pPlayer->judgment_cards[pos];
 			arrray_remove_t(pPlayer->judgment_cards, sizeof(pPlayer->judgment_cards[0]), &pPlayer->judgment_card_num, pos, NULL);
+			// the number of card in judging, if pos in it, decrease it
+			if(pPlayer->card_in_judge_num > pos)
+			{
+				pPlayer->card_in_judge_num--;
+			}
 			return R_SUCC;
 		}
 		break;

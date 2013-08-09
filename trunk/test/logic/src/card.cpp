@@ -117,6 +117,7 @@ const char* card_flag_str(CardFlag flag)
 	case CardFlag_PrepareDiscard: return "CardFlag_PrepareDiscard";   // the card prepare to discard, in prepare event, cannot calc the card effect
 	case CardFlag_PrepareSupply: return "CardFlag_PrepareSupply";   // the card prepare to give other player, in prepare event, cannot calc the card effect
 	case CardFlag_InUse: return "CardFlag_InUse";
+	case CardFlag_InJudge: return "CardFlag_InJudge";
 	case CardFlag_FromGetStack: return "CardFlag_FromGetStack";
 	case CardFlag_FromHand: return "CardFlag_FromHand";
 	case CardFlag_FromEquip: return "CardFlag_FromEquip";

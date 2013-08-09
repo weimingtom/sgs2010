@@ -395,6 +395,12 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, INVALID_PLAYER, pEvent);
 	//stEvent.out_card = &out_card;
 
+	if(R_SUCC != check_player_event(pGame, &stEvent, player, 0))
+	{
+		// 没有可出的牌和可使用的技能，进入下一阶段
+		return R_CANCEL;
+	}
+
 	set_game_cur_player(pGame, player);
 
 	ret = cmd_loop(pGame, &stEvent, NO, "请出一张牌或者发动技能:");

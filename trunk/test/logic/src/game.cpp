@@ -356,6 +356,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	VCard    vcard;
 	PosVCard stCard;
 	GameEventContext  event;
+	int pos;
 	int n;
 
 	MSG_OUT("第[%d]回合，判定阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
@@ -376,19 +377,44 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 	//const CardConfig* pCardConfig;
 
 
-	while(pPlayer->judgment_card_num > 0)
+	pPlayer->card_in_judge_num = pPlayer->judgment_card_num;
+
+
+	while(pPlayer->card_in_judge_num > 0)
 	{
-		vcard = pPlayer->judgment_cards[pPlayer->judgment_card_num-1];
+		pos = pPlayer->card_in_judge_num - 1;
+		//vcard = pPlayer->judgment_cards[pPlayer->judgment_card_num-1];
+		if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerJudgment,  pos, &vcard))
+		{
+			pPlayer->card_in_judge_num-- ;
+			continue; // next judgment card
+		}
+
+
 		stCard.vcard = vcard.vcard;
 		stCard.list.num = vcard.rnum;
 		for(n = 0; n < vcard.rnum; n++)
 		{
 			stCard.list.pcards[n].card = vcard.rcards[n];
 			stCard.list.pcards[n].where = CardWhere_PlayerJudgment;
-			stCard.list.pcards[n].pos = pPlayer->judgment_card_num-1;
+			stCard.list.pcards[n].pos = pos;
 		}
 
-		pPlayer->judgment_card_num--;
+		// 先放入当前弃牌堆
+		pPlayer->card_in_judge_num--;
+
+		// remove from judgment list
+		player_remove_card(pPlayer, CardWhere_PlayerJudgment, pos, NULL);
+
+		// discard card 
+		for(n = 0; n < stCard.list.num; n++)
+		{
+			ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
+			stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
+			// CHECK_RET(ret,ret); // must be succes
+		}
+
+		// calc
 
 		if(1)
 		{
@@ -410,13 +436,6 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 			}
 
-			// discard card 
-			for(n = 0; n < stCard.list.num; n++)
-			{
-				ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
-				stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
-				CHECK_RET(ret,ret);
-			}
 
 			// after calc
 
@@ -426,6 +445,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 			call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
 
 		}
+
 		
 		game_flush_discard_cur(pGame);
 	}
@@ -983,6 +1003,8 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	{
 		fprintf_tab(file, 0, " %d,", pPlayer->params[n]);
 	}
+	fprintf_tab(file, tabs, "card_in_judge_num = %d,\n", pPlayer->card_in_judge_num);
+
 	fprintf_tab(file, 0, " },\n");
 }
 
