@@ -103,11 +103,16 @@ local cfg = {
 			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
 			
 			if(event.parent_event.id == GameEvent_BeforeOutCardEffect) then
-				local tr = get_game_player(game, event.parent_event.out_card.trigger);
+				local tr = get_game_player(game, event.parent_event.trigger);
+				local tg = get_game_player(game, event.parent_event.target);
 				local me = get_game_player(game, player);
 				local trcard = event.parent_event.out_card.vcard;
 				local mecard = event.out_card.vcard;
-				message('【'..tr.name..'】的出牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
+				if(tg) then
+					message('【'..me.name..'】使用'..get_card_str(mecard)..'抵消了锦囊'..get_card_str(trcard)..'对目标【'..tg.name..'】的效果。');
+				else
+					message('【'..me.name..'】使用'..get_card_str(mecard)..'抵消了'..'【'..tr.name..'】的锦囊'..get_card_str(trcard)..'的效果。');
+				end
 				event.parent_event.result = R_CANCEL;
 				event.parent_event.block = YES;
 			elseif(event.parent_event.id == GameEvent_PerCardCalc) then
@@ -115,7 +120,7 @@ local cfg = {
 				local me = get_game_player(game, player);
 				local trcard = event.parent_event.pos_vcard.vcard;
 				local mecard = event.out_card.vcard;
-				message('【'..tr.name..'】的判定牌'..get_card_str(trcard)..'被【'..me.name..'】的'..get_card_str(mecard)..'抵消。');
+				message('【'..me.name..'】使用'..get_card_str(mecard)..'抵消了【'..tr.name..'】的判定牌'..get_card_str(trcard)..'的效果。');
 				event.parent_event.result = R_CANCEL;
 				event.parent_event.block = YES;
 			else
