@@ -86,6 +86,7 @@ typedef  struct  tagPlayer
 	PlayerStatus   status;
 	int      flag;
 	int      params[MAX_PLAYER_PARAM];
+	int      card_in_judge_num;
 } Player;
 
 

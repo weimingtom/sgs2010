@@ -188,6 +188,7 @@ struct tagGameEventContext
 
 
 
+RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use);
 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);

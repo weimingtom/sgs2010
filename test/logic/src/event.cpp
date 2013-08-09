@@ -59,7 +59,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 }
 
 
-static RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use)
+RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use)
 {
 	// check player skills
 	Player* pPlayer;
