@@ -5,6 +5,7 @@
 #include "cmd.h"
 #include "event.h"
 #include "get.h"
+#include "judge.h"
 #include "stack.h"
 #include "discard.h"
 #include "script.h"
@@ -352,12 +353,7 @@ static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 {
 	RESULT ret;
-	Player* pPlayer;
-	VCard    vcard;
-	PosVCard stCard;
 	GameEventContext  event;
-	int pos;
-	int n;
 
 	MSG_OUT("第[%d]回合，判定阶段，当前回合玩家是【%s】。\n", pGame->round_num, ROUND_PLAYER(pGame)->name);
 	INIT_EVENT(&event, GameEvent_PerRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -370,85 +366,13 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 		// skip this step
 		return R_SUCC;
 	}
-	
-	// judge cards
-	pPlayer = ROUND_PLAYER(pGame);
 
-	//const CardConfig* pCardConfig;
+	ret = game_round_do_judge(pGame, pEvent, pGame->round_player);
 
+	CHECK_RET(ret,ret);
 
-	pPlayer->card_in_judge_num = pPlayer->judgment_card_num;
+	game_flush_discard_cur(pGame);
 
-
-	while(pPlayer->card_in_judge_num > 0)
-	{
-		pos = pPlayer->card_in_judge_num - 1;
-		//vcard = pPlayer->judgment_cards[pPlayer->judgment_card_num-1];
-		if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerJudgment,  pos, &vcard))
-		{
-			pPlayer->card_in_judge_num-- ;
-			continue; // next judgment card
-		}
-
-
-		stCard.vcard = vcard.vcard;
-		stCard.list.num = vcard.rnum;
-		for(n = 0; n < vcard.rnum; n++)
-		{
-			stCard.list.pcards[n].card = vcard.rcards[n];
-			stCard.list.pcards[n].where = CardWhere_PlayerJudgment;
-			stCard.list.pcards[n].pos = pos;
-		}
-
-		// 先放入当前弃牌堆
-		pPlayer->card_in_judge_num--;
-
-		// remove from judgment list
-		player_remove_card(pPlayer, CardWhere_PlayerJudgment, pos, NULL);
-
-		// discard card 
-		for(n = 0; n < stCard.list.num; n++)
-		{
-			ret = game_add_discard_cur(pGame, &stCard.list.pcards[n].card, &stCard.list.pcards[n].pos);
-			stCard.list.pcards[n].where = CardWhere_CurDiscardStack;
-			// CHECK_RET(ret,ret); // must be succes
-		}
-
-		// calc
-
-		if(1)
-		{
-			INIT_EVENT(&event, GameEvent_PerCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-			event.pos_vcard = &stCard;
-			trigger_game_event(pGame, &event);
-
-			if(event.result != R_CANCEL) // if card calc is cancel .
-			{
-				INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-				event.pos_vcard = &stCard;
-				//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
-				call_card_event(stCard.vcard.id, pGame, &event, pGame->round_player);
-
-				// post calc , before discard
-				INIT_EVENT(&event, GameEvent_PostCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-				event.pos_vcard = &stCard;
-				trigger_game_event(pGame, &event);
-
-			}
-
-
-			// after calc
-
-			INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
-			event.pos_vcard = &stCard;
-
-			call_card_event(stCard.vcard.id, pGame, &event, pGame->cur_player);
-
-		}
-
-		
-		game_flush_discard_cur(pGame);
-	}
 
 	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);

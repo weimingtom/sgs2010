@@ -10,6 +10,10 @@ extern "C" {
 
 
 
+RESULT game_round_do_judge(GameContext* pGame, GameEventContext* pEvent, int player);
+
+
+
 #ifdef __cplusplus
 }
 #endif

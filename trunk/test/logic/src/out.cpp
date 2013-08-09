@@ -9,7 +9,7 @@
 //#include "hero.h"
 #include "player.h"
 #include "discard.h"
-
+#include "script.h"
 
 
 static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
@@ -27,9 +27,15 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	RESULT   ret;
+	char     buf[128];
 	//const CardConfig* pCardConfig;
 	GameEventContext  stEvent;
 
+	if(target != INVALID_PLAYER)
+	{
+
+		MSG_OUT("%s 的目标设置为【%s】\n", card_str(&out_card->vcard, buf, sizeof(buf)), GAME_PLAYER(pGame, target)->name);
+	}
 
 	// before out card effect (to each target)
 	INIT_EVENT(&stEvent, GameEvent_BeforeOutCardEffect, trigger, target, pParentEvent);
@@ -367,8 +373,15 @@ RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int play
 	{
 		for(n = 0; n < out_card->target_num; n++)
 		{
-			ret = do_out_card(pGame, pEvent, player, out_card->targets[n], out_card);
-			//CHECK_RET(ret,ret);
+			if(IS_PLAYER_VALID(pGame, out_card->targets[n]))
+			{
+				ret = do_out_card(pGame, pEvent, player, out_card->targets[n], out_card);
+				//CHECK_RET(ret,ret);
+			}
+			else
+			{
+				luaL_error(GL(NULL), "%s: Invalid target %d", __FUNCTION__, out_card->targets[n]);
+			}
 		}
 	}
 
