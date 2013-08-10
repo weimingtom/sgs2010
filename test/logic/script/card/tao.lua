@@ -76,18 +76,37 @@ reg_card {
 		end,
 
 		[GameEvent_OutCardCalc] = function(cfg, game, event, player)
-			return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
+			if(event.parent_event.id == GameEvent_PerDead) then
+				-- 在濒死时出桃，则给濒死者加一点体力
+				local p = get_game_player(game, event.parent_event.trigger);
+				game_player_add_life(game, event, event.parent_event.trigger, 1, player, event.out_card, 0);
+				if(p.cur_life > 0) then
+					event.result = R_ABORT;
+					event.block = YES;
+				end
+				return R_SUCC;
+			elseif(event.parent_event.id == GameEvent_RoundOutCard) then
+				-- 在出牌阶段的出桃，则给出牌者自己加一点体力
+				return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
+			else
+				game_event_info(game, event, 1);
+				error('在非正常的事件内响应【'..cfg.name..'】');
+			end
+			return R_DEF;
 		end,
-
+		
+		-- 出牌的流程和技能不同，不会直接在响应事件内调用。应按出牌流程在OutCardCalc内结算效果
+		--[[
 		[GameEvent_PerDead] = function(cfg, game, event, player)
 			local p = get_game_player(game, event.trigger);
-			game_player_add_life(game, event, event.trigger, 1, player, event.out_card, 0);
+			game_player_add_life(game, event, event.trigger, 1, event.trigger, event.out_card, 0);
 			if(p.cur_life > 0) then
 				event.result = R_ABORT;
 				event.block = YES;
 			end
 			return R_SUCC;
 		end,
+		--]]
 	},
 };
 

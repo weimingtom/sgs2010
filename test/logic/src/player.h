@@ -18,7 +18,7 @@ enum PlayerID
 	PlayerID_Unknown = -1,
 	PlayerID_None = 0,
 	PlayerID_Master = 1,
-	PlayerID_Minster = 2,
+	PlayerID_Minister = 2,
 	PlayerID_Spy = 3,
 	PlayerID_Mutineer = 4,
 

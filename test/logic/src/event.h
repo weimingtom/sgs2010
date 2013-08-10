@@ -116,7 +116,7 @@ typedef struct tagNewGameConfig
 {
 	int players;
 	int masters;
-	int minsters;
+	int ministers;
 	int spies;
 	int mutineers;
 }NewGameConfig;

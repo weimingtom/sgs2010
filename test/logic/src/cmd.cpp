@@ -148,6 +148,7 @@ static RESULT cmd_quit(const char** argv, int argc, GameContext* pContext, GameE
 	if(pContext->status != Status_None)
 	{
 		//longjmp(pContext->__jb__, R_EXIT);
+		pContext->status = Status_GameAbort;
 		luaL_error(get_game_script(), "User Quit");
 	}
 
@@ -213,7 +214,7 @@ static RESULT cmd_start(const char** argv, int argc, GameContext* pContext, Game
 	event.new_game_config = pConfig;
 
 
-	//ret = init_game_context(pContext, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+	//ret = init_game_context(pContext, pConfig->ministers, pConfig->spies, pConfig->mutineers);
 
 	//if(ret != R_SUCC)
 	//{
@@ -704,9 +705,9 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 	{ "start", "s", cmd_start, 
 		"start/s <cfg_num>\n\tstart a new game with <cfg_num> players config." , 
 		"\tthe cfg_num can be one of 6,7 or 8:\n"
-		"\t* 6 players: 1 master, 1 minster, 1 spy, 3 mutineers;\n"
-		"\t* 7 players: 1 master, 2 minsters, 1 spy, 3 mutineers;\n"
-		"\t* 8 players: 1 master, 2 minsters, 1 spy, 4 mutineers."},
+		"\t* 6 players: 1 master, 1 minister, 1 spy, 3 mutineers;\n"
+		"\t* 7 players: 1 master, 2 ministers, 1 spy, 3 mutineers;\n"
+		"\t* 8 players: 1 master, 2 ministers, 1 spy, 4 mutineers."},
 	{ "info", "i",	cmd_info, 
 		"info/i\n\tshow current player info, handle cards, aromo card, etc.\n"
 		"info/i game/g\n\t show the game current global info\n"

@@ -14,7 +14,7 @@ typedef struct tagPlayerConfig
 {
 	int players;
 	int masters;
-	int minsters;
+	int ministers;
 	int spies;
 	int mutineers;
 }PlayerConfig;
@@ -41,8 +41,8 @@ static const PlayerConfig* select_config()
 		for(n = 0; n < CONFIG_SIZE; n++)
 		{
 			pConfig = &s_configs[n];
-			MSG_OUT("  (%d) Total %d: %d masters, %d minsters, %d spies, %d mutineers;\n", n+1, 
-				pConfig->players, pConfig->masters, pConfig->minsters, pConfig->spies, pConfig->mutineers);
+			MSG_OUT("  (%d) Total %d: %d masters, %d ministers, %d spies, %d mutineers;\n", n+1, 
+				pConfig->players, pConfig->masters, pConfig->ministers, pConfig->spies, pConfig->mutineers);
 		}
 		MSG_OUT("$ ");
 

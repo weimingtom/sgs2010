@@ -38,6 +38,8 @@ typedef enum _Status
 	Status_Round_Out,
 	Status_Round_Discard,
 	Status_Round_End,
+	Status_GameAbort,   // game abort
+	Status_GameOver,   // game over
 }Status;
 
 
@@ -69,14 +71,14 @@ typedef struct tagGameContext GameContext;
 struct tagGameContext
 {
 	int        player_count;
-	int        minster_count;
+	int        minister_count;
 	int        spy_count;
 	int        mutineer_count;
 	Player     players[MAX_PLAYER_NUM];
 	CardStack  get_card_stack;              // card stack for get card from
 	CardStack  discard_card_stack;          // card stack for discard card to
 	int        cur_discard_card_num;          // the current out discard card number
-	Card      cur_discard_cards[MAX_CUR_DISCARD_NUM];           // ...
+	Card       cur_discard_cards[MAX_CUR_DISCARD_NUM];           // ...
 	int        round_num;
 	int        round_player;
 	int        cur_player;
@@ -107,7 +109,7 @@ typedef enum _GameResult
 
 // game process base funs
 
-RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers);
+RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutineers);
 //RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_main(GameContext* pGame, GameEventContext* pEvent);
 

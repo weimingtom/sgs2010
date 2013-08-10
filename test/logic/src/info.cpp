@@ -215,7 +215,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("»ØºÏ[%d],¡¾%s¡¿,½×¶Î¡¾%s¡¿\n", pGame->round_num, ROUND_PLAYER(pGame)->name, game_status_str(get_game_status(pGame)));
 
 	// all players
-	MSG_OUT("(*) %d players (%d+%d+%d+%d): \n", pGame->player_count, 1, pGame->minster_count, pGame->spy_count, pGame->mutineer_count);
+	MSG_OUT("(*) %d players (%d+%d+%d+%d): \n", pGame->player_count, 1, pGame->minister_count, pGame->spy_count, pGame->mutineer_count);
 
 	for(k = 0; k < pGame->player_count; k++)
 	{
@@ -276,7 +276,7 @@ static void game_event_param__new_game_config(GameContext* pGame, GameEventConte
 	{
 		MSG_OUT("    new_game_config.players=%d;\n", pEvent->new_game_config->players);
 		MSG_OUT("    new_game_config.masters=%d;\n", pEvent->new_game_config->masters);
-		MSG_OUT("    new_game_config.minsters=%d;\n", pEvent->new_game_config->minsters);
+		MSG_OUT("    new_game_config.ministers=%d;\n", pEvent->new_game_config->ministers);
 		MSG_OUT("    new_game_config.spies=%d;\n", pEvent->new_game_config->spies);
 		MSG_OUT("    new_game_config.mutineers=%d;\n", pEvent->new_game_config->mutineers);
 	}
