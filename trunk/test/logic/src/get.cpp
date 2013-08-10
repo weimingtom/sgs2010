@@ -147,9 +147,18 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	set_game_cur_player(pGame, player);
 
-	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
+	// if get card force and no more skill can be used. do get directly
+	if(YES == stGetCard.force && R_SUCC != check_player_event(pGame, &event, player, 0))
+	{
+		game_cmd_getcard(pGame, &event, stGetCard.num);
+		ret = R_SUCC;
+	}
+	else
+	{
 
-	ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+		snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
+		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+	}
 
 	CHECK_RET(ret,ret);
 
@@ -207,8 +216,17 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	set_game_cur_player(pGame, player);
 
+	// if get card force and no more skill can be used. do get directly
+	if(YES == stGetCard.force && R_SUCC != check_player_event(pGame, &event, player, 0))
+	{
+		game_cmd_getcard(pGame, &event, stGetCard.num);
+		ret = R_SUCC;
+	}
+	else
+	{
+		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+	}
 
-	ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
 
 	CHECK_RET(ret, ret);
 

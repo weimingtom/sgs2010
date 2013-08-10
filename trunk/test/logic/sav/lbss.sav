@@ -1,6 +1,6 @@
 game = {
 	player_count = 6,
-	minster_count = 1,
+	minister_count = 1,
 	spy_count = 1,
 	mutineer_count = 3,
 	players = {
@@ -106,7 +106,7 @@ game = {
 			params = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
 		},
 		{
-			id = PlayerID_Minster,
+			id = PlayerID_Minister,
 			hero = 'none',
 			max_life = 3,
 			cur_life = 3,

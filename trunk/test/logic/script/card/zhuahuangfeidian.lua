@@ -16,7 +16,7 @@ import "../global/reg.lua";
 
 
 local cfg = {
-	sid = 'dhfd',
+	sid = 'zhfd',
 	name = '×¦»Æ·Éµç',
 	type = CardType_HorseInc,
 	desc = [==[¡¾+1Âí¡¿

@@ -37,7 +37,7 @@ typedef struct  tagPlayer
 typedef struct tagGameContext
 {
 	tolua_readonly int        player_count;
-	tolua_readonly int        minster_count;
+	tolua_readonly int        minister_count;
 	tolua_readonly int        spy_count;
 	tolua_readonly int        mutineer_count;
 	//Player     players[MAX_PLAYER_NUM];

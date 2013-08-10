@@ -153,7 +153,7 @@ static void game_init_getstack(CardStack* pCardStack)
 }
 
 
-RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutineers)
+RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutineers)
 {
 	int n, c;
 	int pids[MAX_PLAYER_NUM];
@@ -169,7 +169,7 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 	int         sel_n;
 
 
-	if(minsters < 1 || spies < 1 || mutineers < 1 || minsters + spies + mutineers + 1 > MAX_PLAYER_NUM)
+	if(ministers < 1 || spies < 1 || mutineers < 1 || ministers + spies + mutineers + 1 > MAX_PLAYER_NUM)
 	{
 		MSG_OUT("error player config num!\n");
 		return R_E_PARAM;
@@ -213,18 +213,18 @@ RESULT init_game_context(GameContext* pGame, int minsters, int spies, int mutine
 
 	//memset(pGame, 0, sizeof(*pGame));
 
-	pGame->player_count = minsters + spies + mutineers + 1;
-	pGame->minster_count = minsters;
+	pGame->player_count = ministers + spies + mutineers + 1;
+	pGame->minister_count = ministers;
 	pGame->spy_count = spies;
 	pGame->mutineer_count = mutineers;
 	
 	MSG_OUT("开始新游戏: 配置为【%d】玩家 - (%d 主公, %d 忠臣, %d 内奸, %d 反贼)\n", 
-		pGame->player_count, 1, pGame->minster_count, pGame->spy_count, pGame->mutineer_count);
+		pGame->player_count, 1, pGame->minister_count, pGame->spy_count, pGame->mutineer_count);
 
 	// init players
 	c = 0;
 	pids[c++] = PlayerID_Master;
-	for(n = 0; n < minsters; n++) pids[c++] = PlayerID_Minster;
+	for(n = 0; n < ministers; n++) pids[c++] = PlayerID_Minister;
 	for(n = 0; n < spies; n++) pids[c++] = PlayerID_Spy;
 	for(n = 0; n < mutineers; n++) pids[c++] = PlayerID_Mutineer;
 
@@ -654,7 +654,7 @@ static int lua_game_init(lua_State* L)
 	switch(pEvent->id)
 	{
 	case GameEvent_NewGame:
-		ret = init_game_context(pGame, pEvent->new_game_config->minsters, pEvent->new_game_config->spies, pEvent->new_game_config->mutineers);
+		ret = init_game_context(pGame, pEvent->new_game_config->ministers, pEvent->new_game_config->spies, pEvent->new_game_config->mutineers);
 		break;
 	case GameEvent_LoadGame:
 		ret = game_load(pGame, pEvent->file_name);
@@ -714,7 +714,18 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 
 		if(state != 0)
 		{
-			MSG_OUT("Game Abort: %s\n", lua_tostring(L, -1));
+			if(pGame->status == Status_GameOver)
+			{
+				MSG_OUT("游戏结束。\n");
+			}
+			else if(pGame->status == Status_GameAbort)
+			{
+				MSG_OUT("游戏退出：%s\n", lua_tostring(L, -1));
+			}
+			else
+			{
+				MSG_OUT("ERROR: %s\n", lua_tostring(L, -1));
+			}
 			lua_pop(L, 1);
 			ret = R_SUCC;
 			break;
@@ -780,7 +791,7 @@ const char* player_id_id_str(PlayerID id)
 	case PlayerID_Unknown: return "PlayerID_Unknown";
 	case PlayerID_None: return "PlayerID_None";
 	case PlayerID_Master: return "PlayerID_Master";
-	case PlayerID_Minster: return "PlayerID_Minster";
+	case PlayerID_Minister: return "PlayerID_Minister";
 	case PlayerID_Spy: return "PlayerID_Spy";
 	case PlayerID_Mutineer: return "PlayerID_Mutineer";
 	default: return "PlayerID_Unknown";
@@ -957,7 +968,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 
 	fprintf_tab(file, 0, "game = {\n");
 	fprintf_tab(file, tabs, "player_count = %d,\n", pGame->player_count);
-	fprintf_tab(file, tabs, "minster_count = %d,\n", pGame->minster_count);
+	fprintf_tab(file, tabs, "minister_count = %d,\n", pGame->minister_count);
 	fprintf_tab(file, tabs, "spy_count = %d,\n", pGame->spy_count);
 	fprintf_tab(file ,tabs, "mutineer_count = %d,\n", pGame->mutineer_count);
 	fprintf_tab(file, tabs, "players = {\n");
@@ -1218,7 +1229,7 @@ static int lua_game_load(lua_State* L)
 
 		// start load...
 		LOAD_INT(pGame, player_count, L);
-		LOAD_INT(pGame, minster_count, L);
+		LOAD_INT(pGame, minister_count, L);
 		LOAD_INT(pGame, spy_count, L);
 		LOAD_INT(pGame, mutineer_count, L);
 
@@ -1327,6 +1338,103 @@ void game_check_gameover(GameContext* pGame, int player)
 {
 	
 	// TODO: not yet implements
+	// calc the live players of each actor
+
+	int n;
+	int cnt_master;
+	int cnt_minister;
+	int cnt_spy;
+	int cnt_mutineer;
+	Player* p;
+
+	char buf[256];
+	int  len;
+
+	GameResult  result = GameResult_InPlaying;
+
+	cnt_master = 0;
+	cnt_minister = 0;
+	cnt_spy = 0;
+	cnt_mutineer = 0;
+
+	for(n = 0; n < pGame->player_count; n++)
+	{
+		p = GAME_PLAYER(pGame, n);
+		if(!IS_PLAYER_DEAD(p))
+		{
+			switch(p->id)
+			{
+			case PlayerID_Master: cnt_master++; break;
+			case PlayerID_Minister: cnt_minister++; break;
+			case PlayerID_Spy: cnt_spy++; break;
+			case PlayerID_Mutineer: cnt_mutineer++;break;
+			default: break;
+			}
+		}
+	}
+
+	// when master is dead. 
+	if(cnt_master == 0)
+	{	
+		if(cnt_spy == 1 && cnt_minister == 0 && cnt_mutineer == 0)
+		{
+			// lived spy win
+			result = GameResult_SpyWin;
+			len = 0;
+
+			for(n = 0; n < pGame->player_count; n++)
+			{
+				p = GAME_PLAYER(pGame, n);
+				if(!IS_PLAYER_DEAD(p) && p->id == PlayerID_Spy)
+				{
+					snprintf(buf+len,sizeof(buf)-len,"【%s】",p->name);
+				}
+			}
+
+
+			MSG_OUT("内奸获得胜利：%s\n", buf);			
+		}
+		else
+		{
+			// all mutineers win
+			result = GameResult_MutineerWin;
+			len = 0;
+
+			for(n = 0; n < pGame->player_count; n++)
+			{
+				p = GAME_PLAYER(pGame, n);
+				if(p->id == PlayerID_Mutineer)
+				{
+					snprintf(buf+len,sizeof(buf)-len,"【%s】",p->name);
+				}
+			}
+
+			MSG_OUT("反贼获得胜利：%s\n", buf);			
+		}
+	}
+	else if(cnt_spy == 0 && cnt_mutineer == 0)
+	{
+		// master and all ministers win
+		result = GameResult_MasterWin;
+		len = 0;
+
+		for(n = 0; n < pGame->player_count; n++)
+		{
+			p = GAME_PLAYER(pGame, n);
+			if(p->id == PlayerID_Master || p->id == PlayerID_Minister)
+			{
+				snprintf(buf+len,sizeof(buf)-len,"【%s】",p->name);
+			}
+		}
+		MSG_OUT("主公和忠臣获得胜利：%s\n", buf);
+	}
+
+	// not yet game over
+	if(result != GameResult_InPlaying)
+	{
+		pGame->status = Status_GameOver;
+		luaL_error(get_game_script(), "Game Over");
+	}
 }
 
 

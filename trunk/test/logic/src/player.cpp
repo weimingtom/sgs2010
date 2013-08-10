@@ -69,7 +69,7 @@ const char* player_id_str(PlayerID id)
 	case PlayerID_Unknown: return "身份未知";
 	case PlayerID_None: return "无";
 	case PlayerID_Master: return "主公";
-	case PlayerID_Minster: return "忠臣";
+	case PlayerID_Minister: return "忠臣";
 	case PlayerID_Spy: return "内奸";
 	case PlayerID_Mutineer: return "反贼";
 	default: return "Invalid";
