@@ -11,6 +11,7 @@
 #include "info.h"
 #include "discard.h"
 #include "script.h"
+#include "save.h"
 
 
 #define MAX_PARAM_NUM   64

@@ -294,6 +294,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\load.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\load.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\main.cpp"
 				>
 			</File>
@@ -319,6 +327,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\player.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\save.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\save.h"
 				>
 			</File>
 			<File
