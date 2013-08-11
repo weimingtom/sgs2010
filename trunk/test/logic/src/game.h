@@ -113,8 +113,6 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 //RESULT game_loop(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_main(GameContext* pGame, GameEventContext* pEvent);
 
-RESULT game_save(GameContext* pGame, const char* file_name);
-RESULT game_load(GameContext* pGame, const char* file_name);
 
 
 RESULT set_game_cur_player(GameContext* pGame, int player);

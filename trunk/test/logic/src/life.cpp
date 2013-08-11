@@ -23,14 +23,15 @@ static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContex
 
 	if(pPlayer->cur_life <= 0)
 	{
-		// set the player to dead
-		pPlayer->status = PlayerStatus_Dead;
 
 		// check the game over?
 		game_check_gameover(pGame, player);
 
 		INIT_EVENT(&event, GameEvent_Dead, player, INVALID_PLAYER, pParentEvent);
 		trigger_game_event(pGame, &event);
+
+		// set the player to dead
+		pPlayer->status = PlayerStatus_Dead;
 	}
 	return R_SUCC;
 }
