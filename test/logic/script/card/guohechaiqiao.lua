@@ -13,6 +13,7 @@
 
 
 import "../global/reg.lua";
+import "../global/discard.lua";
 
 
 local cfg = {
@@ -82,46 +83,8 @@ local cfg = {
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
 			
-			local p = get_game_player(game, event.target);
-			local items = '';
-			local index = 0;
-			local wherepos = {};
-			-- 手牌
-			for n = 0, p.hand_card_num - 1 do
-				items = items..'手牌['..(n+1)..']\n';
-				index = index + 1;
-				wherepos[index] = { where = CardWhere_PlayerHand, pos = n, };
-			end
+			return discard_other_card(game, event, player, event.target, 'hej');
 			
-			-- 装备
-			for n = 0, EquipIdx_Max-1 do
-				local card = get_player_equipcard(p, n);
-				if(card ~= nil) then
-					items = items..equip_idx_str(n)..': '..get_card_str(card)..'\n';					
-					index = index + 1;
-					wherepos[index] = { where = CardWhere_PlayerEquip, pos = n, };
-				end
-			end
-			
-			-- 判定区
-			for n = 0, p.judgment_card_num - 1 do
-				items = items..'判定区牌: '..get_card_str(get_player_judgecard(p, n).vcard)..'\n';
-				index = index + 1;
-				wherepos[index] = { where = CardWhere_PlayerJudgment, pos = n, };
-			end
-			
-			local sel = game_select_items(game, event, player, items, '请选择一张你要弃置的【'..p.name..'】的牌:');
-			
-			local me = get_game_player(game, player);
-			
-			if wherepos[sel].where == CardWhere_PlayerHand then
-				message('【'..me.name..'】令【'..p.name..'】弃置手牌['..(wherepos[sel].pos+1)..']');
-			elseif wherepos[sel].where == CardWhere_PlayerEquip then
-				message('【'..me.name..'】令【'..p.name..'】弃置'..equip_idx_str(wherepos[sel].pos)..': '..get_card_str(get_player_equipcard(p, wherepos[sel].pos))..'');
-			else
-				message('【'..me.name..'】令【'..p.name..'】弃置判定区牌: '..get_card_str(get_player_judgecard(p, wherepos[sel].pos).vcard)..'');
-			end
-			return game_player_discard_card(game, event, event.target, wherepos[sel].where, wherepos[sel].pos);
 		end,
 	},
 };

@@ -14,6 +14,7 @@
 
 
 import "../global/reg.lua";
+import "../global/select.lua";
 
 
 local cfg = {
@@ -43,26 +44,26 @@ local cfg = {
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- select target
-			local ret;
-			local target = -1;
-			while true do
-				ret, target = game_select_target(game, event, player, -1, NO, NO,
-					"请为【"..cfg.name.."】指定一个目标:", target);
-				if(ret == R_SUCC) then
-					local p = get_game_player(game, target);
-					if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
-						message('【'..p.name..'】的判定区已满。请选择其它玩家！');
-					elseif(find_player_judgecard(p, get_card_id_by_sid(cfg.sid)) >= 0) then
-						message('【'..p.name..'】的判定区已经有【'..cfg.name..'】。请选择其它玩家！');
-					else
-						event.out_card.targets[0] = target;
-						event.out_card.target_num = 1;
-						return R_SUCC;
-					end
-				else
-					break;
-				end
+			local target = select_target_check(game, event, player, -1, NO,  NO,  
+					'请为【'..cfg.name..'】指定一个目标:', 
+					function (t) 
+						local p = get_game_player(game, t);
+						if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
+							message('【'..p.name..'】的判定区已满。请选择其它玩家！');
+							return false;
+						elseif(find_player_judgecard(p, get_card_id_by_sid(cfg.sid)) >= 0) then
+							message('【'..p.name..'】的判定区已经有【'..cfg.name..'】。请选择其它玩家！');
+							return false;
+						end
+						return true;
+					end);
+						
+			if (target ~= nil) then
+				event.out_card.targets[0] = target;
+				event.out_card.target_num = 1;
+				return R_SUCC;
 			end
+				
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 			return R_CANCEL;

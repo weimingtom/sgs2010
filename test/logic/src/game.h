@@ -148,7 +148,7 @@ Player* get_game_player(GameContext* pGame, int player);
 // 计算当前指定玩家的行动顺序。当前玩家为0，下一家为1 ....
 int get_game_act_order(GameContext* pGame, int player);
 
-
+RESULT game_check_attack(GameContext* pGame, GameEventContext* pEvent, int player, int target, CardID  cid);
 
 
 //}}

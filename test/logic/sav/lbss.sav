@@ -70,7 +70,7 @@ game = {
 				{ sid = 'wjqf', color = CardColor_Club, value = CardValue_9, flag = CardFlag_None, },
 			},
 			equip_cards = {
-				{ sid = 'cxsgj', color = CardColor_Diamond, value = CardValue_2, flag = CardFlag_None, },
+				{ sid = 'hbj', color = CardColor_Diamond, value = CardValue_2, flag = CardFlag_None, },
 				{ sid = 'bgz', color = CardColor_Diamond, value = CardValue_8, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
 				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_7, flag = CardFlag_None, },

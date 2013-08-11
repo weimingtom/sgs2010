@@ -27,6 +27,8 @@ const char* game_status_str(Status s)
 	case Status_Round_Out: return  "³öÅÆ½×¶Î";
 	case Status_Round_Discard: return  "ÆúÅÆ½×¶Î";
 	case Status_Round_End: return  "»ØºÏ½áÊø½×¶Î";
+	case Status_GameAbort: return  "ÓÎÏ·ÖĞ¶Ï";
+	case Status_GameOver: return  "ÓÎÏ·½áÊø";
 	default: return "";
 	}
 }

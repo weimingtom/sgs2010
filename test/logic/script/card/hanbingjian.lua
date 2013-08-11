@@ -15,6 +15,7 @@
 
 
 import "../global/reg.lua";
+import "../global/discard.lua";
 
 
 local cfg =  {
@@ -46,7 +47,25 @@ local cfg =  {
 		end,
 		
 		-- 触发武器技能
-		
+		-- 【杀】造成伤害
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player, pos_card)
+			if  
+				event.change_life.delta < 0 -- 造成伤害
+				-- 前一个事件：
+				and event.parent_event.id == GameEvent_OutCardCalc    -- 出牌结算 
+				and event.parent_event.trigger == player          -- 我的出牌 				
+				and event.parent_event.target == event.trigger    -- 目标是受伤害的人
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+				-- 目标条件
+				and player_count_card(
+						get_game_player(game, event.trigger), 
+						bitor(PatternWhere_Hand,PatternWhere_Equip)) > 0   -- 目标至少有一张牌
+			then
+				return USE_MANUAL;    
+			end
+			return USE_CANNOT;
+
+		end,
 		
 	},
 
@@ -71,7 +90,27 @@ local cfg =  {
 		end,
 
 		-- 结算武器技能效果
-
+		-- 可以选择不伤害
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player)
+			local n = 0;
+			local p = get_game_player(game, event.trigger);
+			
+			-- 最多弃两张（有的话，是必须要弃的)
+			while(n < 2 and player_count_card(p, bitor(PatternWhere_Hand,PatternWhere_Equip)) > 0) do
+				if(R_SUCC == discard_other_card(game, event, player, event.trigger, 'he'..(n==0 and 'c' or '')  , nil)) then
+					n = n + 1;
+				else
+					break;
+				end
+			end
+			
+			-- 如果弃牌成功 ，则防止此伤害
+			if(n > 0) then
+				event.result = R_CANCEL;
+				event.block = YES;
+			end
+			return R_SUCC;
+		end,
 	},
 };
 
