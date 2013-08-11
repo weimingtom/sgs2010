@@ -205,6 +205,14 @@ SOURCE=..\..\src\life.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\load.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\load.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\main.cpp
 # End Source File
 # Begin Source File
@@ -230,6 +238,14 @@ SOURCE=..\..\src\player.cpp
 # Begin Source File
 
 SOURCE=..\..\src\player.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\save.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\save.h
 # End Source File
 # Begin Source File
 
@@ -288,6 +304,24 @@ SOURCE=..\..\pkg\lua_export.h
 SOURCE=..\..\pkg\lua_export.pkg
 
 !IF  "$(CFG)" == "logic - Win32 Release"
+
+# Begin Custom Build
+InputPath=..\..\pkg\lua_export.pkg
+
+BuildCmds= \
+	set DD=%cd% \
+	echo %DD% \
+	cd  ..\..\pkg \
+	"..\..\..\3p\tolua++-1.0.93/bin/toluapp.exe" -o "lua_export.cpp" -H "lua_export.h" -n game  lua_export.pkg \
+	cd %DD% \
+	
+
+"..\..\pkg\lua_export.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"..\..\pkg\lua_export.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "logic - Win32 Debug"
 
