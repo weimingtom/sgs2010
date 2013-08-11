@@ -64,6 +64,38 @@ local cfg = {
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
+			-- 需要选择一名装备区有武器的玩家A（使用杀者）
+			local target = select_target_check(game, event, player, -1, NO, NO, 
+					'请为【'..cfg.name..'】的一个装备有武器的目标玩家：', 
+					function (t)
+						local p = get_game_player(game, t);
+						if(get_player_equipcard(p, EquipIdx_Weapon) == nil) then
+							return false;
+						end
+						return true;
+					end);
+			-- 取消出牌
+			if target == nil then
+				return R_CANCEL;
+			end
+			
+			local pt = get_game_player(game, target);
+			
+			-- 再指定杀的目标B（A能攻击的B）
+			local sha_target = select_target_check(game, event, target, -1, NO, NO, 
+					'再为【'..pt.name..'】的【'..card_sid2name('sha')..'】指定一个目标：',
+					function (t)
+						if(game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'))) then
+							return true;
+						end
+						return false;
+					end);
+					
+			-- 取消出牌
+			if sha_target == nil then
+				return R_CANCEL;
+			end
+
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 			return R_SUCC;
@@ -71,6 +103,10 @@ local cfg = {
 
 		-- 出牌的过程驱动
 		[GameEvent_OutCard] = function(cfg, game, event, player)
+			-- 玩家A出杀，如果不出，则结算效果
+			-- （如果此时玩家A无法攻击B,则直接结算效果，视为A不出杀）
+			
+			
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
 			return R_SUCC; 
@@ -79,6 +115,8 @@ local cfg = {
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			-- 得到玩家A的武器牌
+			
 		end,
 	},
 };

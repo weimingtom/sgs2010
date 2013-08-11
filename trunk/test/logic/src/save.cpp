@@ -38,6 +38,8 @@ static const char* game_status_id_str(Status s)
 	case Status_Round_Out: return  "Status_Round_Out";
 	case Status_Round_Discard: return  "Status_Round_Discard";
 	case Status_Round_End: return  "Status_Round_End";
+	case Status_GameAbort: return  "Status_GameAbort";
+	case Status_GameOver: return  "Status_GameOver";
 	default: return "-1";
 	}
 }

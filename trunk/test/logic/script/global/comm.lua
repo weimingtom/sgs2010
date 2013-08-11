@@ -50,7 +50,9 @@ function join(t, perfix, suffix, splitter)
 	return s;
 end
 
+--- debug output
 
+debug_print = print;
 
 
 
