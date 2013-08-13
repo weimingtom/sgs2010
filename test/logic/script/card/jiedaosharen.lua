@@ -78,7 +78,7 @@ local cfg = {
 			if target == nil then
 				return R_CANCEL;
 			end
-			
+		
 			local pt = get_game_player(game, target);
 			
 			-- 再指定杀的目标B（A能攻击的B）
@@ -95,7 +95,14 @@ local cfg = {
 			if sha_target == nil then
 				return R_CANCEL;
 			end
-
+			
+			--  return target
+			event.out_card.targets[0] = target;
+			event.out_card.target_num = 1;
+			
+			-- store sha's target...
+			event.out_card.targets[1] = sha_target;
+			
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 			return R_SUCC;
@@ -105,7 +112,21 @@ local cfg = {
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- 玩家A出杀，如果不出，则结算效果
 			-- （如果此时玩家A无法攻击B,则直接结算效果，视为A不出杀）
-			
+			local p = get_game_player(game, player)
+			local q = get_game_player(game, event.oput_card.targets[1]);
+			local items =  '对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】\n'
+						.. '将装备的武器牌交给【'.. p.name ..'】\n';
+			local ret = game_select_items(game, event, event.target, items,
+					'【'..p.name..'】向你使用【'..cfg.name..'】，请做以下选择:');
+					
+			if ret == 1 then
+				local out_pattern  = OutCardPattern();
+				game_load_out_pattern(out_pattern,  'h:{sha}?');
+
+				if R_SUCC == game_spec_outcard(game, event, event.target, out_pattern, event.oput_card.targets[1]) then
+					return R_CANCEL;
+				end
+			end
 			
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
@@ -117,6 +138,7 @@ local cfg = {
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 得到玩家A的武器牌
 			
+			return game_player_getcard_from_player(game, event, player, event.target, CardWhere_PlayerEquip, EquipIdx_Weapon);
 		end,
 	},
 };

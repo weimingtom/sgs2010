@@ -14,6 +14,10 @@
 --]]
 
 
+import "../global/reg.lua";
+import "../global/select.lua";
+
+
 local cfg = {
 	sid = 'ssqy',
 	name = '顺手牵羊',
@@ -42,24 +46,26 @@ local cfg = {
 			-- select target
 			local ret;
 			local target = -1;
-			while true do
-				ret, target = game_select_target(game, event, player, 1, NO, NO,
-					"请为【"..cfg.name.."】指定一个目标:", target);
-				if(ret == R_SUCC) then
-					local p = get_game_player(game, target);
-					if(player_count_card(p, bitor(PatternWhere_Hand,PatternWhere_Equip,PatternWhere_Judgment)) == 0) then
-						message('【'..p.name..'】没有任何牌。请选择其它玩家！');
-					else
-						message('【'..get_game_player(game, player).name..'】指定了【'
-							.. get_game_player(game, target).name .. '】作为【'
-							.. cfg.name ..'】的目标。' );
-						event.out_card.targets[0] = target;
-						event.out_card.target_num = 1;
-						return R_SUCC;
-					end
-				else
-					break;
-				end
+			
+			target = select_target_check(game, event, player, 1, NO, NO, 
+					"请为【"..cfg.name.."】指定一个目标:", 
+					function (t)
+						local p = get_game_player(game, t);
+						if(player_count_card(p, bitor(PatternWhere_Hand,PatternWhere_Equip,PatternWhere_Judgment)) == 0) then
+							message('【'..p.name..'】没有任何牌。请选择其它玩家！');
+							return false;
+						else
+							return true;
+						end
+					end);
+
+			if target ~= nil then
+				message('【'..get_game_player(game, player).name..'】指定了【'
+					.. get_game_player(game, target).name .. '】作为【'
+					.. cfg.name ..'】的目标。' );
+				event.out_card.targets[0] = target;
+				event.out_card.target_num = 1;
+				return R_SUCC;
 			end
 
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
@@ -81,46 +87,7 @@ local cfg = {
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
 			
-			local p = get_game_player(game, event.target);
-			local items = '';
-			local index = 0;
-			local wherepos = {};
-			-- 手牌
-			for n = 0, p.hand_card_num - 1 do
-				items = items..'手牌['..(n+1)..']\n';
-				index = index + 1;
-				wherepos[index] = { where = CardWhere_PlayerHand, pos = n, };
-			end
-			
-			-- 装备
-			for n = 0, EquipIdx_Max-1 do
-				local card = get_player_equipcard(p, n);
-				if(card ~= nil) then
-					items = items..equip_idx_str(n)..': '..get_card_str(card)..'\n';					
-					index = index + 1;
-					wherepos[index] = { where = CardWhere_PlayerEquip, pos = n, };
-				end
-			end
-			
-			-- 判定区
-			for n = 0, p.judgment_card_num - 1 do
-				items = items..'判定区牌: '..get_card_str(get_player_judgecard(p, n).vcard)..'\n';
-				index = index + 1;
-				wherepos[index] = { where = CardWhere_PlayerJudgment, pos = n, };
-			end
-			
-			local sel = game_select_items(game, event, player, items, '请选择一张你希望获得的【'..p.name..'】的牌:');
-			
-			local me = get_game_player(game, player);
-			
-			if wherepos[sel].where == CardWhere_PlayerHand then
-				message('【'..me.name..'】获得【'..p.name..'】的手牌['..(wherepos[sel].pos+1)..']');
-			elseif wherepos[sel].where == CardWhere_PlayerEquip then
-				message('【'..me.name..'】获得【'..p.name..'】的'..equip_idx_str(wherepos[sel].pos)..': '..get_card_str(get_player_equipcard(p, wherepos[sel].pos))..'');
-			else
-				message('【'..me.name..'】获得【'..p.name..'】的判定区牌: '..get_card_str(get_player_judgecard(p, wherepos[sel].pos).vcard)..'');
-			end
-			return game_player_getcard_from_player(game, event, player, event.target, wherepos[sel].where, wherepos[sel].pos);
+			return get_other_card(game, event, event.target, 'hej');
 		end,
 	},
 };

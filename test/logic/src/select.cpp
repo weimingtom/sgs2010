@@ -222,3 +222,9 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 
 	return result;
 }
+
+
+RESULT game_check_attack(GameContext* pGame, GameEventContext* pEvent, int player, int target, CardID  cid)
+{
+	return R_SUCC;
+}
