@@ -1289,3 +1289,13 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 
+RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
+					 , OutCardPattern* out_pattern, const char* alter_text)
+{
+
+
+	return R_SUCC;
+}
+
+
+

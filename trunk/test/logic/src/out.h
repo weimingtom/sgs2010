@@ -61,6 +61,9 @@ typedef struct tagBeforePassiveOut
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+// c interface
+
 // out card command process
 RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent, int* idx, int num);
 // pass command process
@@ -73,7 +76,12 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+// lua interface
+
 // tolua_begin
+
+
 void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char* s_pattern);
 
 
@@ -87,6 +95,8 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
 						, OutCardPattern* out_pattern, const char* alter_text);
 
+RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
+						, OutCardPattern* out_pattern, const char* alter_text);
 
 
 // tolua_end

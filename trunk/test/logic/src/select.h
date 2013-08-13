@@ -16,6 +16,7 @@ typedef struct tagGameEventContext GameEventContext;
 
 typedef struct tagAttackDis
 {
+	Card    ocard;
 	int     base;
 	int     inc;
 	int     dis;
@@ -25,7 +26,8 @@ typedef struct tagAttackDis
 
 typedef struct tagSelectTarget
 {
-	char message[MAX_ALTER_TEXT_LEN];  //  if the player is cannot be set to target, return the alter message from this field;
+	Card   card;
+	char   message[MAX_ALTER_TEXT_LEN];  //  if the player is cannot be set to target, return the alter message from this field;
 } SelectTarget;
 
 // tolua_end
@@ -43,6 +45,7 @@ YESNO game_select_yesno(lua_State* L, GameContext* pGame, GameEventContext* pPar
 // 多项选择(选项串为多行文本，每行一个选项。 返回 1~n 行号。)(如果有放弃的需要，把这个选项也要通过items给出)
 int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, const char* items, const char* alter_text);
 
+RESULT game_check_attack(GameContext* pGame, GameEventContext* pEvent, int player, int target, CardID  cid);
 
 // tolua_end
 

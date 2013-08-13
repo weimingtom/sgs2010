@@ -457,30 +457,17 @@ void  close_game_script()
 }
 
 
-RESULT  reload_game_script()
+RESULT lua_import(lua_State* L,  const char* luafile_path)
 {
 	int   state;
 	char  base_path[MAX_PATH];
-
-	lua_State* L = g_game_L;
-
-	if(L == NULL)
-		return R_E_FAIL;
-
-	// clear import table
-	lua_newtable(L);
-	lua_setfield(L, LUA_REGISTRYINDEX, "__imported_table");
-	lua_newtable(L);
-	lua_setfield(L, LUA_REGISTRYINDEX, "__importing_table");
-
-	// load lua files
 
 	get_app_path(base_path, sizeof(base_path));
 	set_cur_path(base_path);
 	lua_pushstring(L, base_path);
 	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
 	lua_getglobal(L, "import");
-	lua_pushstring(L, "../script/main.lua");
+	lua_pushstring(L, luafile_path);
 	state = lua_pcall(L, 1, 0, 0);
 	if(state != 0)
 	{
@@ -493,6 +480,27 @@ RESULT  reload_game_script()
 	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
 
 	return R_SUCC;
+}
+
+
+RESULT  reload_game_script()
+{
+	RESULT ret;
+	lua_State* L = g_game_L;
+
+	if(L == NULL)
+		return R_E_FAIL;
+
+	// clear import table
+	lua_newtable(L);
+	lua_setfield(L, LUA_REGISTRYINDEX, "__imported_table");
+	lua_newtable(L);
+	lua_setfield(L, LUA_REGISTRYINDEX, "__importing_table");
+
+	// load lua files
+	ret = lua_import(L, "../script/main.lua");
+
+	return ret;
 }
 
 
