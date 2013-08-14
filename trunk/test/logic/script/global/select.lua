@@ -131,6 +131,7 @@ function get_other_card(game , event, player, target, pattern, alter)
 	end
 
 	local me = get_game_player(game, player);
+	local p = get_game_player(game, target);
 	
 	if where == CardWhere_PlayerHand then
 		message('【'..me.name..'】获得【'..p.name..'】的手牌['..(pos+1)..']');
@@ -140,5 +141,5 @@ function get_other_card(game , event, player, target, pattern, alter)
 		message('【'..me.name..'】获得【'..p.name..'】的判定区牌: '..get_card_str(get_player_judgecard(p, pos).vcard)..'');
 	end
 
-	return game_player_getcard_from_player(game, event, target, where, pos);
+	return game_player_getcard_from_player(game, event, player, target, where, pos);
 end
