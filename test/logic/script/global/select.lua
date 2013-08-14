@@ -9,7 +9,7 @@
 --]]
 function select_target_check(game, event, player, base_dist, self, force, alter, funchk)
 	while true do
-		local ret, target = game_select_target(game, event, player, base_dist, self, force, alter, -1);
+		local ret, target = game_select_target(game, event, player, CardID_None, base_dist, self, force, alter, -1);
 		if ret ~= R_SUCC  then 
 			return nil;
 		end

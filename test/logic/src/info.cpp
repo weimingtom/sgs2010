@@ -294,36 +294,6 @@ static void game_event_param__file_name(GameContext* pGame, GameEventContext* pE
 	}
 }
 
-static void game_event_param__get_card(GameContext* pGame, GameEventContext* pEvent)
-{
-	if(NULL == pEvent->get_card)
-	{
-		MSG_OUT("    get_card=NULL;\n");
-	}
-	else
-	{
-		MSG_OUT("    get_card.num=%d;\n", pEvent->get_card->num);
-		MSG_OUT("    get_card.force=%s;\n", YESNO2STR(pEvent->get_card->force));
-		MSG_OUT("    get_card.alter_text=\"%s\";\n", pEvent->get_card->alter_text);
-	}
-}
-
-static void game_event_param__attack_dis(GameContext* pGame, GameEventContext* pEvent)
-{
-	if(NULL == pEvent->attack_dis)
-	{
-		MSG_OUT("    attack_dis=NULL;\n");
-	}
-	else
-	{
-		MSG_OUT("    attack_dis.base=%d;\n", pEvent->attack_dis->base);
-		MSG_OUT("    attack_dis.inc=%d;\n", pEvent->attack_dis->inc);
-		MSG_OUT("    attack_dis.dis=%d;\n", pEvent->attack_dis->dis);
-		MSG_OUT("    attack_dis.flag=%d;\n", pEvent->attack_dis->flag);
-	}
-
-}
-
 // from game.cpp
 extern const char* card_value_id_str(CardValue value);
 extern const char* card_color_id_str(CardColor color);
@@ -470,6 +440,39 @@ static void p_out_card(const char* perffix, OutCard* p)
 
 }
 
+
+static void game_event_param__get_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->get_card)
+	{
+		MSG_OUT("    get_card=NULL;\n");
+	}
+	else
+	{
+		MSG_OUT("    get_card.num=%d;\n", pEvent->get_card->num);
+		MSG_OUT("    get_card.force=%s;\n", YESNO2STR(pEvent->get_card->force));
+		MSG_OUT("    get_card.alter_text=\"%s\";\n", pEvent->get_card->alter_text);
+	}
+}
+
+static void game_event_param__attack_dis(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->attack_dis)
+	{
+		MSG_OUT("    attack_dis=NULL;\n");
+	}
+	else
+	{
+		p_card("attack_dis", &pEvent->attack_dis->card);
+		MSG_OUT("    attack_dis.base=%d;\n", pEvent->attack_dis->base);
+		MSG_OUT("    attack_dis.inc=%d;\n", pEvent->attack_dis->inc);
+		MSG_OUT("    attack_dis.dis=%d;\n", pEvent->attack_dis->dis);
+		MSG_OUT("    attack_dis.flag=%d;\n", pEvent->attack_dis->flag);
+	}
+
+}
+
+
 static void game_event_param__before_pout(GameContext* pGame, GameEventContext* pEvent)
 {
 	if(NULL == pEvent->before_pout)
@@ -604,6 +607,7 @@ static void game_event_param__select_target(GameContext* pGame, GameEventContext
 	}
 	else
 	{
+		p_card("select_target", &pEvent->select_target->card);
 		MSG_OUT("    select_target.message=\"%s\";\n", pEvent->select_target->message);
 	}
 }

@@ -162,8 +162,7 @@ int luaex_import_file(lua_State* L )
 
 	if(lua_isnil(L, -1))
 	{
-		lua_pushstring(L, "import call only while importing lua files");
-		lua_error(L);
+		luaL_error(L, "import call only while importing lua files");
 		return 0;
 	}
 
@@ -184,8 +183,7 @@ int luaex_import_file(lua_State* L )
 
 		if(0 != set_cur_path(rel_path))
 		{
-			lua_pushfstring(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
-			lua_error(L);
+			luaL_error(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
 			return 0;
 		}
 	}
@@ -210,8 +208,7 @@ int luaex_import_file(lua_State* L )
 #endif
 	{
 		set_cur_path(cwd_path);
-		lua_pushfstring(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
-		lua_error(L);
+		luaL_error(L, "import \"%s\" error: (%d) %s", pattern, errno, strerror(errno));
 		return 0;
 	}
 
@@ -326,9 +323,8 @@ int luaex_import_file(lua_State* L )
 		{
 			// is in importing
 			lua_pop(L, 2);
-			lua_pushfstring(L, "import file \"%s\" is circular dependency.", full_path);
 			set_cur_path(cwd_path);
-			lua_error(L);
+			luaL_error(L, "import file \"%s\" is circular dependency.", full_path);
 		}
 
 		lua_pop(L, 1);  // ... [t] 

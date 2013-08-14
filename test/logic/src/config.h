@@ -135,6 +135,8 @@ typedef enum _RESULT
 	R_E_POS = -9, // invalid card pos
 	R_E_WHERE = -10, // card where not match
 	R_E_PATTERN = -11, // card pattern not match
+	R_E_DISTANCE = -12, // out of distance
+	R_E_TARGET = -13, // invalid target
 
 } RESULT;
 

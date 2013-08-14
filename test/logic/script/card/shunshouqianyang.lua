@@ -87,7 +87,7 @@ local cfg = {
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 选择牌属于生效后的执行，所以放在这里，且不可取消。
 			
-			return get_other_card(game, event, event.target, 'hej');
+			return get_other_card(game, event, player, event.target, 'hej');
 		end,
 	},
 };

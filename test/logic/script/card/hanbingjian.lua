@@ -15,7 +15,7 @@
 
 
 import "../global/reg.lua";
-import "../global/discard.lua";
+import "../global/select.lua";
 
 
 local cfg =  {
