@@ -65,7 +65,7 @@ local cfg = {
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- 需要选择一名装备区有武器的玩家A（使用杀者）
-			local target = select_target_check(game, event, player, -1, NO, NO, 
+			local target = select_target_check(game, event, player, event.out_card.vcrd.id, -1, NO, NO, 
 					'请为【'..cfg.name..'】的一个装备有武器的目标玩家：', 
 					function (t)
 						local p = get_game_player(game, t);
@@ -82,10 +82,10 @@ local cfg = {
 			local pt = get_game_player(game, target);
 			
 			-- 再指定杀的目标B（A能攻击的B）
-			local sha_target = select_target_check(game, event, target, -1, NO, NO, 
+			local sha_target = select_target_check(game, event, player, CardID_None, -1, NO, NO, 
 					'再为【'..pt.name..'】的【'..card_sid2name('sha')..'】指定一个目标：',
 					function (t)
-						if(game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'))) then
+						if(game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'), 1)) then
 							return true;
 						end
 						return false;
@@ -112,8 +112,9 @@ local cfg = {
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- 玩家A出杀，如果不出，则结算效果
 			-- （如果此时玩家A无法攻击B,则直接结算效果，视为A不出杀）
+			local target = event.oput_card.targets[1];
 			local p = get_game_player(game, player)
-			local q = get_game_player(game, event.oput_card.targets[1]);
+			local q = get_game_player(game, target);
 			local items =  '对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】\n'
 						.. '将装备的武器牌交给【'.. p.name ..'】\n';
 			local ret = game_select_items(game, event, event.target, items,
@@ -122,7 +123,7 @@ local cfg = {
 			if ret == 1 then
 				local out_pattern  = OutCardPattern();
 				game_load_out_pattern(out_pattern,  'h:{sha}?');
-
+				
 				if R_SUCC == game_spec_outcard(game, event, event.target, out_pattern, event.oput_card.targets[1]) then
 					return R_CANCEL;
 				end
