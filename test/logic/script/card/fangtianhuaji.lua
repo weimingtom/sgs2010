@@ -37,8 +37,7 @@ local cfg = {
 	can_use = {
 		-- 可以用于修正攻击距离(只对杀有效)
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
-			if (player == event.trigger and event.parent_event.id == GameEvent_OutCardPrepare
-				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')) 
+			if (player == event.trigger and event.attack_dis.card.id == get_card_id_by_sid('sha')) 
 			then
 				return USE_QUIET;
 			end
@@ -60,6 +59,7 @@ local cfg = {
 			return USE_CANNOT;
 		end,
 		-- 选择目标时需要检测是否重复
+		--[[
 		[GameEvent_SelectTarget] = function(cfg, game, event, player, pos_card)
 			-- 如果选择目标的事件的父事件是出牌准备前, ud检查到武器 {fthj}
 			if event.parent_event.id == GameEvent_PerOutCardPrepare 
@@ -71,6 +71,7 @@ local cfg = {
 			end
 			return USE_CANNOT;
 		end,
+		--]]
 	},
 	
 	event = {
@@ -93,6 +94,7 @@ local cfg = {
 		end,
 		
 		-- 选择目标的检查
+		--[[
 		[GameEvent_SelectTarget] = function(cfg, game, event, player)
 			local out_card = event.parent_event.out_card;
 			--message('【'..get_game_player(game, player).name..'】检查【方天画戟】的目标【'..get_game_player(game, event.target).name..'】..');
@@ -112,40 +114,55 @@ local cfg = {
 			-- 继续其它条件的检查
 			return R_DEF;
 		end,
+		--]]
 		
 		-- 攻击效果
 		[GameEvent_PerOutCardPrepare] = function(cfg, game, event, player)
 			
 			--  设置正在使用 {fthj}
 			event.ud = event.ud .. '{fthj}';
-			event.out_card.target_num = 0;
+			--event.out_card.target_num = 0; -- 可能在出牌前已经设定了目标，这里不能清除
 			
 			-- 让出牌者选择，至多3个目标，如果一个都没选择，则出牌中止
-			local targets = {};
+			-- local targets = {};
 			
-			for n = 1,3 do
-				local ret, t = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), 1, NO, YES,
-					'请为【'..get_card_name(event.out_card.vcard.id)..'】指定最多3个目标(第'..n..'个):', -1);
-				if(ret == R_SUCC) then
-					table.insert(targets, t);
-					--  先设置一下临时目标，用于检查
-					event.out_card.targets[event.out_card.target_num] = t;
-					event.out_card.target_num = event.out_card.target_num + 1;
-				else
+			while event.out_card.target_num <= 3 do
+				local t = select_target_check(game, event, player, event.out_card.vcard.id, 1, NO, NO, 
+					'请为【'..get_card_name(event.out_card.vcard.id)..'】指定最多3个目标(第'..(event.out_card.target_num+1)..'个):',
+					function (t) 
+						for n = 0, event.out_card.target_num - 1 do
+							if event.out_card.targets[n] == t then
+								message('【'..get_game_player(game, t).name..'】已经被选择为目标了！');
+								return false;
+							end
+						end
+						return true;
+					end);
+				if(t == nil) then
 					break;
 				end
+				
+				event.out_card.targets[event.out_card.target_num] = t;
+				event.out_card.target_num = event.out_card.target_num + 1;
 			end
 			
 			-- 如果一个目标都没指定，则取消出牌
-			if(table.getn(targets) == 0) then
+			if(event.out_card.target_num == 0) then
 				return R_CANCEL;
 			end 
 			
+			
 			-- 按行动顺序结算
+			local targets = {};
+			for n = 0, event.out_card.target_num - 1 do
+				targets[n+1] = event.out_card.targets[n];
+			end
+			
 			table.sort(targets, 
 				function(a,b) 
 					return get_game_act_order(game, a) < get_game_act_order(game, b); 
 				end);
+				
 			local names = {};
 			for i, v in ipairs(targets) do
 				event.out_card.targets[i-1] = v;

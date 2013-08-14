@@ -1292,7 +1292,18 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
 					 , OutCardPattern* out_pattern, const char* alter_text)
 {
+	RESULT ret;
+	OutCard out;
 
+	ret = game_supply_card(L, pGame, pParentEvent, player, player, out_pattern, alter_text, &out);
+
+	CHECK_RET(ret, ret);
+
+	// 指定目标
+	out.target_num = 1;
+	out.targets[0] = target;
+
+	ret = game_real_out_card(pGame, pParentEvent, player, out);
 
 	return R_SUCC;
 }
