@@ -10,19 +10,17 @@
 
 
 
-RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int base_dist, YESNO self_select, YESNO force,const char* alter_text, int* out_target)
+RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,CardID cid, int base_dist, 
+							YESNO self_select, YESNO force,const char* alter_text, int* out_target)
 {
 	int n;
 	int t;
 	RESULT  ret;
-	AttackDis   dis;
-	GameEventContext  event;
 	Player* pPlayer; 
 	Player* pTarget;
 	int idcnt;
 	int idbegin ;
 	SelOption   sel_opts[MAX_PLAYER_NUM + 1];
-	SelectTarget  select_target;
 
 	ST_ZERO(sel_opts);
 
@@ -81,54 +79,10 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 			return R_E_FAIL;
 		}
 
-		ST_ZERO(select_target);
-
-		// can set target?
-		INIT_EVENT(&event, GameEvent_SelectTarget, player, t, pParentEvent);
-		event.select_target = &select_target;
-		trigger_game_event(pGame, &event);
-
-		if(event.result == R_CANCEL)
-		{
-			// cannot select this player as target
-			if(strlen(select_target.message) > 0)
-			{
-				MSG_OUT("%s\n", select_target.message);
-			}
-			else
-			{
-				MSG_OUT("【%s】不能成为目标, 请重新选择!\n", pTarget->name);
-			}
+		if(R_SUCC != game_check_attack(pGame, pParentEvent, player, t, cid, base_dist))
 			continue;
-		}
 
-		// need check dis ?  check dist 
-		if(base_dist >= 0)
-		{
-			// calc final dist, if base_distancc is -1, means ignore distance to target
-			dis.base = base_dist;   // calc the attack range
-			dis.inc = 0;            // calc the attack range append increase
-			dis.dis = game_player_dis(pGame, player, t);   // calc the player to target's distance
-			dis.flag = 0;
 
-			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, t, pParentEvent);
-			event.attack_dis = &dis;
-
-			// calc the skill and equip effect to target distance or attack range
-			// target effect
-			//trigger_player_event(pGame, &event, t);
-			// attacker effect
-			//trigger_player_event(pGame, &event, player);
-
-			trigger_game_event(pGame, &event);
-
-			if(dis.base + dis.inc < dis.dis)
-			{
-				// Attack range less the distance to taget
-				MSG_OUT("你选择的角色不在你的攻击范围内, 请重新选择!\n");
-				continue;
-			}
-		}
 		*out_target = t;
 		return R_SUCC;
 	}
@@ -224,7 +178,67 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 }
 
 
-RESULT game_check_attack(GameContext* pGame, GameEventContext* pEvent, int player, int target, CardID  cid)
+RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int player, int target, CardID  cid, int base_dist)
 {
+	//RESULT  ret;
+	SelectTarget  select_target;
+	AttackDis   dis;
+	GameEventContext  event;
+	Player* pTarget;
+
+	pTarget = get_game_player(pGame, target);
+
+
+	ST_ZERO(select_target);
+
+	// can set target?
+	INIT_EVENT(&event, GameEvent_SelectTarget, player, target, pParentEvent);
+	event.select_target = &select_target;
+	trigger_game_event(pGame, &event);
+
+	if(event.result == R_CANCEL)
+	{
+		// cannot select this player as target
+		if(strlen(select_target.message) > 0)
+		{
+			MSG_OUT("%s\n", select_target.message);
+		}
+		else
+		{
+			MSG_OUT("【%s】不能成为目标, 请重新选择!\n", pTarget->name);
+		}
+		return R_E_TARGET;
+	}
+
+	// need check dis ?  check dist 
+	if(base_dist >= 0)
+	{
+		// calc final dist, if base_distancc is -1, means ignore distance to target
+		ST_ZERO(dis);
+		dis.card.id = CardID_None;
+		dis.base = base_dist;   // calc the attack range
+		dis.inc = 0;            // calc the attack range append increase
+		dis.dis = game_player_dis(pGame, player, target);   // calc the player to target's distance
+		dis.flag = 0;
+
+		INIT_EVENT(&event, GameEvent_CalcAttackDis, player, target, pParentEvent);
+		event.attack_dis = &dis;
+
+		// calc the skill and equip effect to target distance or attack range
+		// target effect
+		//trigger_player_event(pGame, &event, t);
+		// attacker effect
+		//trigger_player_event(pGame, &event, player);
+
+		trigger_game_event(pGame, &event);
+
+		if(dis.base + dis.inc < dis.dis)
+		{
+			// Attack range less the distance to taget
+			MSG_OUT("你选择的角色不在你的攻击范围内, 请重新选择!\n");
+			return R_E_DISTANCE;
+		}
+	}
+
 	return R_SUCC;
 }

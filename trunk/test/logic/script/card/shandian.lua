@@ -50,7 +50,7 @@ local cfg = {
 			local ret;
 			local target = -1;
 			while true do
-				ret, target = game_select_target(game, event, player, -1, NO, NO,
+				ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), -1, NO, NO,
 					"请为【"..cfg.name.."】指定一个目标:", target);
 				if(ret == R_SUCC) then
 					local p = get_game_player(game, target);

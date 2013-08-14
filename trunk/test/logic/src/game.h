@@ -149,7 +149,6 @@ Player* get_game_player(GameContext* pGame, int player);
 int get_game_act_order(GameContext* pGame, int player);
 
 
-
 //}}
 // tolua_end
 

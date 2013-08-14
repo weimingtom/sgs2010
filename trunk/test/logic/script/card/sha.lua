@@ -61,8 +61,8 @@ local cfg = {
 			-- select target
 			local ret;
 			local target = -1;
-			ret, target = game_select_target(game, event, player, 1, NO, NO,
-				"请为【"..cfg.name.."】指定一个目标:", target);
+			ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), 1, NO, NO,
+				"请为【"..cfg.name.."】指定一个目标:");
 			if(ret == R_SUCC) then
 				event.out_card.targets[0] = target;
 				event.out_card.target_num = 1;
