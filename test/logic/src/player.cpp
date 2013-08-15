@@ -237,10 +237,13 @@ int  player_count_card(Player* pPlayer, int where)
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard)
 {
+	int pos; 
+
 	if(is_player_handfull(pPlayer))
 		return R_E_OVERFLOW;
 
-	arrray_insert_t(pPlayer->hand_cards, sizeof(pPlayer->hand_cards[0]), &pPlayer->hand_card_num, -1, pCard);
+	pos = arrray_insert_t(pPlayer->hand_cards, sizeof(pPlayer->hand_cards[0]), &pPlayer->hand_card_num, -1, pCard);
+	PLAYER_HANDCARD(pPlayer, pos)->flag = CardFlag_None;
 	return R_SUCC;
 }
 
@@ -264,6 +267,7 @@ RESULT player_add_judgment_card(Player* pPlayer, VCard* pCard)
 	}
 	
 	pPlayer->judgment_cards[pPlayer->judgment_card_num] = *pCard;
+	pPlayer->judgment_cards[pPlayer->judgment_card_num].vcard.flag = CardFlag_None;
 	pPlayer->judgment_card_num++;
 	return R_SUCC;
 }

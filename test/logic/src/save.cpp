@@ -259,7 +259,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	{
 		fprintf_tab(file, tabs+1, "{ ");
 		game_save_card(&pGame->cur_discard_cards[n], file, 0);
-		fprintf_tab(file, tabs+1, "},\n");
+		fprintf_tab(file, 0, "},\n");
 	}
 	fprintf_tab(file, tabs, "},\n");
 

@@ -41,7 +41,7 @@ char* fgetln(char* buffer, int len, FILE* file);
 char* strtrim(char* buffer);
 
 // fmt contian a multi-string, splitted with single 0, and end of twice 0.
-int multi_snprintf(char* buffer, int len, const char* fmt, ...);
+// int multi_snprintf(char* buffer, int len, const char* fmt, ...);
 
 
 RESULT to_int(const char* text, int* pv);
@@ -49,9 +49,9 @@ RESULT to_uint(const char* text, unsigned int* pv);
 RESULT to_float(const char* text, float* pv);
 
 
-void log_text(const char* fmt, ...);
+void log_text(const char* fmt, ...) __ATTR_FMT__(printf,1,2);
 
-int message_printf(const char* fmt, ...);
+int message_printf(const char* fmt, ...) __ATTR_FMT__(printf,1,2);
 
 #define MSG_OUT   message_printf
 

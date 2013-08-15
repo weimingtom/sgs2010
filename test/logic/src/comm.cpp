@@ -298,7 +298,7 @@ char* strtrim(char* buffer)
 }
 
 
-
+/*
 int multi_snprintf(char* buffer, int len, const char* fmt, ...)
 {
 	int n;
@@ -331,7 +331,7 @@ int multi_snprintf(char* buffer, int len, const char* fmt, ...)
 
 	return n;
 }
-
+*/
 
 
 RESULT to_int(const char* text, int* pv)
