@@ -65,7 +65,7 @@ local cfg = {
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- 需要选择一名装备区有武器的玩家A（使用杀者）
-			local target = select_target_check(game, event, player, event.out_card.vcrd.id, -1, NO, NO, 
+			local target = select_target_check(game, event, player, event.out_card.vcard.id, -1, NO, NO, 
 					'请为【'..cfg.name..'】的一个装备有武器的目标玩家：', 
 					function (t)
 						local p = get_game_player(game, t);

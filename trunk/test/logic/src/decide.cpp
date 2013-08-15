@@ -35,9 +35,9 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	if(R_SUCC != load_card_pattern(&pattern, szPattern, -1))
 	{
 		if(L) {
-			luaL_error(L, "game_decide_card: error card pattern \"%s\"", pattern);
+			luaL_error(L, "game_decide_card: error card pattern \"%s\"", szPattern);
 		} else {
-			MSG_OUT("game_decide_card: error card pattern \"%s\"\n", pattern);
+			MSG_OUT("game_decide_card: error card pattern \"%s\"\n", szPattern);
 		}
 		return NO;
 	}

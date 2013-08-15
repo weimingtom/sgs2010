@@ -277,6 +277,7 @@ RESULT game_player_getcard_from_player(lua_State* L, GameContext* pGame, GameEve
 
 	player_remove_card(pFromPlayer, where, pos, NULL);
 
+
 	for(n = 0; n < vcard.rnum; n++)
 	{
 		player_add_hand_card(pPlayer, &vcard.rcards[n]);
