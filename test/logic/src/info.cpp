@@ -10,6 +10,7 @@
 #include "life.h"
 #include "equip.h"
 #include "skill.h"
+#include "script.h"
 
 
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
@@ -294,6 +295,7 @@ static void game_event_param__file_name(GameContext* pGame, GameEventContext* pE
 	}
 }
 
+/*
 // from game.cpp
 extern const char* card_value_id_str(CardValue value);
 extern const char* card_color_id_str(CardColor color);
@@ -339,21 +341,22 @@ static char* card_pattern_where_str(int where, char* buf, int buflen)
 	}
 	return buf;
 }
+*/
 
 static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 {
 	int n;
 	char  buf[512];
 
-	MSG_OUT("    %s.where=%s;\n", perffix, card_pattern_where_str(p->where, buf, sizeof(buf)));
+	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STR(PatternWhere, p->where));
 	MSG_OUT("    %s.fixed=%s;\n", perffix, YESNO2STR(p->fixed));
 	MSG_OUT("    %s.num=%d;\n", perffix, p->num);
 	for(n = 0; n < p->num; n++)
 	{
 		MSG_OUT("    %s.patterns[%d].id=%d {%s};\n", perffix, n, p->patterns[n].id, card_sid(p->patterns[n].id, buf, sizeof(buf)));
-		MSG_OUT("    %s.patterns[%d].color=%s;\n", perffix, n, card_color_id_str(p->patterns[n].color));
-		MSG_OUT("    %s.patterns[%d].value_min=%s;\n", perffix, n, card_value_id_str(p->patterns[n].value_min));
-		MSG_OUT("    %s.patterns[%d].value_max=%s;\n", perffix, n, card_value_id_str(p->patterns[n].value_max));
+		MSG_OUT("    %s.patterns[%d].color=%s;\n", perffix, n, ENUM2STR(CardColor, p->patterns[n].color));
+		MSG_OUT("    %s.patterns[%d].value_min=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_min));
+		MSG_OUT("    %s.patterns[%d].value_max=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_max));
 	}
 	MSG_OUT("    %s.ud=\"%s\";\n", perffix, p->ud);
 
@@ -363,9 +366,9 @@ static void p_card(const char* perffix, Card* p)
 {
 	char  buf[512];
 	MSG_OUT("    %s.id=%d {%s};\n", perffix, p->id, card_sid(p->id, buf, sizeof(buf)));
-	MSG_OUT("    %s.color=%s;\n", perffix, card_color_id_str(p->color));
-	MSG_OUT("    %s.value=%s;\n", perffix, card_value_id_str(p->value));
-	MSG_OUT("    %s.flag=%s;\n", perffix, card_flag_str(p->flag));
+	MSG_OUT("    %s.color=%s;\n", perffix, ENUM2STR(CardColor, p->color));
+	MSG_OUT("    %s.value=%s;\n", perffix, ENUM2STR(CardValue, p->value));
+	MSG_OUT("    %s.flag=%s;\n", perffix, ENUM2STR(CardFlag, p->flag));
 }
 
 
@@ -375,7 +378,7 @@ static void p_pos_card(const char* perffix, PosCard* p)
 
 	snprintf(s_per, sizeof(s_per), "%s.card", perffix);
 	p_card(s_per, &p->card);
-	MSG_OUT("    %s.where=%s;\n", perffix, card_where_id_str(p->where));
+	MSG_OUT("    %s.where=%s;\n", perffix, ENUM2STR(CardWhere, p->where));
 	MSG_OUT("    %s.pos=%d;\n", perffix, p->pos);
 }
 
@@ -585,7 +588,7 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 
 static void game_event_param__discard_pattern(GameContext* pGame, GameEventContext* pEvent)
 {
-	char  buf[512];
+	//char  buf[512];
 	if(NULL == pEvent->discard_pattern)
 	{
 		MSG_OUT("    discard_pattern=NULL;\n");
@@ -593,7 +596,7 @@ static void game_event_param__discard_pattern(GameContext* pGame, GameEventConte
 	else
 	{
 		MSG_OUT("    discard_pattern.num=%d;\n", pEvent->discard_pattern->num);
-		MSG_OUT("    discard_pattern.where=%s;\n", card_pattern_where_str(pEvent->discard_pattern->where, buf, sizeof(buf)));
+		MSG_OUT("    discard_pattern.where=%s;\n", BITOR2STR(PatternWhere, pEvent->discard_pattern->where));
 		MSG_OUT("    discard_pattern.force=%s;\n", YESNO2STR(pEvent->discard_pattern->force));
 		MSG_OUT("    discard_pattern.alter_text=\"%s\";\n", pEvent->discard_pattern->alter_text);
 	}
@@ -612,6 +615,7 @@ static void game_event_param__select_target(GameContext* pGame, GameEventContext
 	}
 }
 
+/*
 static const char* can_use_str(CANUSE can_use)
 {
 	static char temp[16];
@@ -626,6 +630,8 @@ static const char* can_use_str(CANUSE can_use)
 		return temp;
 	}
 }
+*/
+
 
 static void game_event_param__card_canuse(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -636,7 +642,7 @@ static void game_event_param__card_canuse(GameContext* pGame, GameEventContext* 
 	else
 	{
 		p_pos_card("card_canuse", &pEvent->card_canuse->pos_card);
-		MSG_OUT("    card_canuse.can_use=%s;\n", can_use_str(pEvent->card_canuse->can_use));
+		MSG_OUT("    card_canuse.can_use=%s;\n", ENUM2STR(USE, pEvent->card_canuse->can_use));
 	}
 }
 
@@ -652,7 +658,7 @@ static void game_event_param__skill_canuse(GameContext* pGame, GameEventContext*
 	{
 		MSG_OUT("    skill_canuse.hero_id=%d {%s};\n", pEvent->skill_canuse->hero_id, hero_sid(pEvent->skill_canuse->hero_id, buf, sizeof(buf)));
 		MSG_OUT("    skill_canuse.skill_index=%d;\n", pEvent->skill_canuse->skill_index);
-		MSG_OUT("    skill_canuse.can_use=%s;\n", can_use_str(pEvent->skill_canuse->can_use));
+		MSG_OUT("    skill_canuse.can_use=%s;\n", ENUM2STR(USE, pEvent->skill_canuse->can_use));
 	}
 }
 
@@ -757,7 +763,7 @@ RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent, int detail)
 
 	for(deep = 0; pe != NULL; deep++)
 	{
-		get_event_str(pe->id, buf, sizeof(buf));
+		get_enumt_str("GameEvent", pe->id, 0,  buf, sizeof(buf));
 		Player* ptr = get_game_player(pGame, pe->trigger);
 		Player* pta = get_game_player(pGame, pe->target);
 

@@ -47,7 +47,7 @@ local cfg = {
 			local ret;
 			local target = -1;
 			
-			target = select_target_check(game, event, player, event.out_card.vcrd.id, 1, NO, NO, 
+			target = select_target_check(game, event, player, event.out_card.vcard.id, 1, NO, NO, 
 					"请为【"..cfg.name.."】指定一个目标:", 
 					function (t)
 						local p = get_game_player(game, t);

@@ -24,6 +24,7 @@ typedef struct tagOutCard
 	int      supply;
 	int      target_num;
 	int      targets[MAX_PLAYER_NUM];
+	int      flag;
 	Card     vcard;    //  use as card (virtual) real out card in list following
 	PosCardList list;
 } OutCard;
@@ -56,6 +57,12 @@ typedef struct tagBeforePassiveOut
 	char alter_text[MAX_ALTER_TEXT_LEN];
 }BeforePassiveOut;
 
+
+typedef enum enOutCardFlag
+{
+	OutCardFlag_None = 0,
+	OutCardFlag_SpecOut = 1,   // 指定的出牌
+}OutCardFlag;
 
 // tolua_end
 

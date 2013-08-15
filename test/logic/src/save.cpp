@@ -5,6 +5,7 @@
 #include "card_stack.h"
 #include "comm.h"
 #include "save.h"
+#include "script.h"
 
 
 
@@ -25,7 +26,7 @@ static int fprintf_tab(FILE* pf, int tabs, const char* fmt, ...)
 	return n + tabs;
 }
 
-
+/*
 static const char* game_status_id_str(Status s)
 {
 	switch(s)
@@ -96,15 +97,15 @@ const char* card_value_id_str(CardValue value)
 	default: return "CardValue_Unknown";
 	}
 }
-
+*/
 
 static void game_save_card(Card* pCard, FILE* file, int tabs)
 {
 	char  temp[128];
 	fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
-	fprintf_tab(file, 0, "color = %s, ", card_color_id_str(pCard->color));
-	fprintf_tab(file, 0, "value = %s, ", card_value_id_str(pCard->value));
-	fprintf_tab(file, 0, "flag = %s, ",  card_flag_str(pCard->flag));
+	fprintf_tab(file, 0, "color = %s, ", ENUM2STR(CardColor, pCard->color));
+	fprintf_tab(file, 0, "value = %s, ", ENUM2STR(CardValue, pCard->value));
+	fprintf_tab(file, 0, "flag = %s, ",  ENUM2STR(CardFlag, pCard->flag));
 
 }
 
@@ -154,7 +155,7 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	int n;
 	char sid[128];
 
-	fprintf_tab(file, tabs, "id = %s,\n", player_id_id_str(pPlayer->id));
+	fprintf_tab(file, tabs, "id = %s,\n", ENUM2STR(PlayerID, pPlayer->id));
 	fprintf_tab(file, tabs, "hero = \'%s\',\n", hero_sid(pPlayer->hero, sid, sizeof(sid)));
 	fprintf_tab(file, tabs, "max_life = %d,\n", pPlayer->max_life);
 	fprintf_tab(file, tabs, "cur_life = %d,\n", pPlayer->cur_life);
@@ -190,8 +191,8 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	}
 	fprintf_tab(file, tabs, "},\n");
 
-	fprintf_tab(file, tabs, "status = %d,\n", (pPlayer->status));
-	fprintf_tab(file, tabs, "flag = %d,\n", pPlayer->flag);
+	fprintf_tab(file, tabs, "status = %s,\n", ENUM2STR(PlayerStatus, pPlayer->status));
+	fprintf_tab(file, tabs, "flag = %s,\n", BITOR2STR(PlayerFlag, pPlayer->flag));
 
 	fprintf_tab(file, tabs, "params = {");
 	for(n = 0; n < MAX_PLAYER_PARAM; n++)
@@ -265,7 +266,7 @@ RESULT game_save(GameContext* pGame, const char* file_name)
 	fprintf_tab(file, tabs, "round_num = %d,\n", pGame->round_num);
 	fprintf_tab(file, tabs, "round_player = %d,\n", pGame->round_player);
 	fprintf_tab(file, tabs, "cur_player = %d,\n", pGame->cur_player);
-	fprintf_tab(file, tabs, "status = %s,\n", game_status_id_str(pGame->status));
+	fprintf_tab(file, tabs, "status = %s,\n", ENUM2STR(Status, pGame->status));
 
 	fprintf_tab(file, 0, "};\n");
 

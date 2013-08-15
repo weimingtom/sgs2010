@@ -311,23 +311,3 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 	return R_SUCC;
 }
 
-
-char* get_event_str(GameEvent eid, char* buf, int buflen)
-{
-	lua_State* L = get_game_script();
-	lua_getglobal(L, "get_event_str");
-	lua_pushnumber(L, eid);	
-	lua_call(L, 1, 1);
-	if(lua_isstring(L, -1))
-	{
-		strncpy(buf, lua_tostring(L, -1), buflen);
-	}
-	else
-	{
-		buf[0] = 0;
-	}
-	lua_pop(L, 1);
-	return buf;
-
-}
-

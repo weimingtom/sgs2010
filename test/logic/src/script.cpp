@@ -504,3 +504,39 @@ lua_State* get_ai_script()
 {
 	return g_ai_L;
 }
+
+
+
+char* get_enumt_str(const char* enum_type, int val, int is_bit_or, char* buf, int buflen)
+{
+	static  char s_tmp[1024];
+
+	lua_State* L = get_game_script();
+
+	lua_getglobal(L, "get_enum_str");
+
+	lua_pushstring(L, enum_type);	
+	lua_pushnumber(L, val);	
+	lua_pushboolean(L, is_bit_or);	
+	lua_call(L, 3, 1);
+
+	if(buf == NULL) 
+	{
+		buf = s_tmp;
+		buflen = sizeof(s_tmp);
+	}
+			
+	if(lua_isstring(L, -1))
+	{
+		strncpy(buf, lua_tostring(L, -1), buflen);
+	}
+	else
+	{
+		buf[0] = 0;
+	}
+
+	lua_pop(L, 1);
+	return buf;
+
+}
+
