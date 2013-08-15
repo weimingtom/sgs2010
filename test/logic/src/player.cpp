@@ -368,7 +368,7 @@ RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard)
 		if(0 <= pos && pos < pPlayer->judgment_card_num)
 		{
 			*pCard = pPlayer->judgment_cards[pos];
-			set_vcard_flag(pCard, CardFlag_FromEquip);
+			set_vcard_flag(pCard, CardFlag_FromJudge);
 			return R_SUCC;
 		}
 		break;

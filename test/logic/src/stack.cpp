@@ -57,6 +57,8 @@ RESULT game_pop_stack_card(GameContext* pGame, Card* pCard)
 		return R_E_FAIL;
 	}
 
+	pCard->flag = CardFlag_FromGetStack;
+
 	//MSG_OUT("player [%d] [%s] get a card, hand card count [%d].\n", pGame->cur_player, pPlayer->name, pPlayer->hand_card_num);
 
 	return R_SUCC;
