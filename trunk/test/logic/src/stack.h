@@ -16,6 +16,7 @@ RESULT game_pop_stack_card(GameContext* pGame, Card* pCard);
 RESULT game_push_stack_card(GameContext* pGame, const Card* pCard, YESNO  top);
 
 
+
 #ifdef __cplusplus
 }
 #endif

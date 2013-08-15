@@ -427,10 +427,10 @@ static void p_out_card(const char* perffix, OutCard* p)
 	MSG_OUT("    %s.target_num=%d;\n", perffix, p->target_num);
 	for(n = 0; n < p->target_num; n++)
 	{
-		MSG_OUT("    %s.targets[%d]=%d;\n", perffix, n, p->target_num);
+		MSG_OUT("    %s.targets[%d]=%d;\n", perffix, n, p->targets[n]);
 
 	}
-	MSG_OUT("    %s.flag=%d;\n", perffix, ENUM2STR(OutCardFlag, p->flag));
+	MSG_OUT("    %s.flag=%s;\n", perffix, ENUM2STR(OutCardFlag, p->flag));
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
 	p_card(s_per, &p->vcard);
@@ -441,6 +441,7 @@ static void p_out_card(const char* perffix, OutCard* p)
 		snprintf(s_per, sizeof(s_per), "%s.list.pcards[%d]", perffix, n);
 		p_pos_card(s_per, &p->list.pcards[n]);
 	}
+	MSG_OUT("    %s.ud=\"%s\";\n", perffix, p->ud);
 
 }
 
@@ -680,6 +681,7 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PassiveGetCard:
 		game_event_param__get_card(pGame, pEvent);
 		break;
+	case GameEvent_GetBaseAttackDis:
 	case GameEvent_CalcAttackDis:
 		game_event_param__attack_dis(pGame, pEvent);
 		break;

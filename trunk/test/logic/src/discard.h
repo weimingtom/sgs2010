@@ -33,8 +33,8 @@ typedef struct tagDiscardPattern
 
 // operator of discard stack
 RESULT game_add_discard_cur(GameContext* pGame, const Card* pCard, int* pos);
-RESULT game_get_discard_cur(GameContext* pGame, int pos, Card* pCard);
-RESULT game_clr_discard_cur(GameContext* pGame, int pos);
+//RESULT game_get_discard_cur(GameContext* pGame, int pos, Card* pCard);
+//RESULT game_clr_discard_cur(GameContext* pGame, int pos);
 void   game_flush_discard_cur(GameContext* pGame);
 
 
@@ -60,6 +60,11 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);
 RESULT add_cur_card_to_player_hand(lua_State* L, GameContext* pGame, CardWhere where, int pos, int player);
 RESULT add_cur_card_to_player_judgment(lua_State* L, GameContext* pGame, Card* v, PosCardList* list, int player);
+
+// 从摸牌堆获得一张牌并放在curdiscard顶，返回pos
+int  game_pop_stack_card_dis(GameContext* pGame);
+
+Card*  game_get_discard_cur(GameContext* pGame, int pos);
 
 // }}
 // tolua_end

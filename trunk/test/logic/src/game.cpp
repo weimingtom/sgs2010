@@ -108,6 +108,20 @@ int get_game_act_order(GameContext* pGame, int player)
 	return order;
 }
 
+int get_live_player_num(GameContext* pGame)
+{
+	int n;
+	int cnt = 0;
+	for(n = 0; n < pGame->player_count; n++)
+	{
+		if(IS_PLAYER_VALID(pGame, n))
+		{
+			cnt++;
+		}
+	}
+	return cnt;
+}
+
 
 
 RESULT set_game_cur_player(GameContext* pGame, int player)

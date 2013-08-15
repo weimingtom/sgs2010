@@ -501,3 +501,24 @@ RESULT add_cur_card_to_player_judgment(lua_State* L, GameContext* pGame, Card* v
 }
 
 
+int  game_pop_stack_card_dis(GameContext* pGame)
+{
+	int pos;
+	Card  card;
+	if(R_SUCC != game_pop_stack_card(pGame, &card)  || R_SUCC != game_add_discard_cur(pGame, &card, &pos))
+	{
+		return -1;
+	}
+	return pos;
+}
+
+
+
+Card*  game_get_discard_cur(GameContext* pGame, int pos)
+{
+	if(pos < 0 || pos >= pGame->cur_discard_card_num  || !CARD_VALID(&pGame->cur_discard_cards[pos]) )
+		return NULL;
+
+	return &pGame->cur_discard_cards[pos];
+
+}

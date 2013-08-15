@@ -86,6 +86,7 @@ typedef enum _GameEvent
 	GameEvent_CardCalc,
 	GameEvent_PostCardCalc,
 	GameEvent_FiniCardCalc,
+	GameEvent_GetBaseAttackDis,
 	GameEvent_CalcAttackDis,
 	GameEvent_SelectTarget,
 	GameEvent_PerDecideCard,

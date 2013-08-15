@@ -69,3 +69,4 @@ RESULT game_push_stack_card(GameContext* pGame, const Card* pCard, YESNO  top)
 {
 	return R_SUCC;
 }
+

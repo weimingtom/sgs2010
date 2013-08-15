@@ -10,6 +10,7 @@
 #include "player.h"
 #include "discard.h"
 #include "script.h"
+#include "select.h"
 
 
 static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
@@ -303,6 +304,7 @@ static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEvent, int trigger, OutCard* out_card)
 {
 	RESULT  ret;
+	int     n;
 	//const CardConfig* pCardConfig;
 
 	GameEventContext  stEvent;
@@ -323,7 +325,13 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	// 如果是指定目标的出牌，则不再调用OutCardPrepare事件,但是需要检查目标是否合法，不合法则出牌失败
 	if(out_card->flag == OutCardFlag_SpecOut)
 	{
-		//game_check_attack(pGame, pParentEvent, trigger, out_card->targets[n], out_card->vcard.id, 1);
+		for(n = 0;  n< out_card->target_num; n++)
+		{
+			if(R_SUCC != game_check_attack(pGame, pParentEvent, trigger, out_card->targets[n], out_card->vcard.id, 1))
+			{
+				return R_CANCEL;
+			}
+		}
 	}
 	else
 	{
@@ -1297,6 +1305,8 @@ RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParent
 {
 	RESULT ret;
 	OutCard out;
+
+	ST_ZERO(out);
 
 	ret = game_supply_card(L, pGame, pParentEvent, player, player, out_pattern, alter_text, &out);
 

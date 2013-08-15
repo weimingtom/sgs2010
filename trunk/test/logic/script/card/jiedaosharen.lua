@@ -59,13 +59,21 @@ local cfg = {
 	},
 	
 	event = {
-		-- 出牌过程由下列3个事件驱动
+		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
+			event.atack_dis.base = -1; 
+			return R_SUCC;
+		end,
+
+
+	-- 出牌过程由下列3个事件驱动
 
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- 需要选择一名装备区有武器的玩家A（使用杀者）
-			local target = select_target_check(game, event, player, event.out_card.vcard.id, -1, NO, NO, 
+			local target = select_target_check(game, event, player, event.out_card.vcard.id, NO, NO, 
 					'请为【'..cfg.name..'】的一个装备有武器的目标玩家：', 
 					function (t)
 						local p = get_game_player(game, t);
@@ -82,10 +90,10 @@ local cfg = {
 			local pt = get_game_player(game, target);
 			
 			-- 再指定杀的目标B（A能攻击的B）
-			local sha_target = select_target_check(game, event, player, CardID_None, -1, NO, NO, 
+			local sha_target = select_target_check(game, event, player, get_card_by_id_by_sid('sha'), NO, NO, 
 					'再为【'..pt.name..'】的【'..card_sid2name('sha')..'】指定一个目标：',
 					function (t)
-						if(game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'), 1)) then
+						if(R_SUCC == game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'), 1)) then
 							return true;
 						end
 						return false;

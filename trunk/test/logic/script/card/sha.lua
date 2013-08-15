@@ -34,6 +34,7 @@ local cfg = {
 	sid = "sha",
 	name="杀",
 	type=CardType_Normal,
+	
 	desc=[==[你的出牌阶段，对除你外，你攻击范围内的一名角色使用，效果是对该角色造成1点伤害。
 ★游戏开始时你的攻击范围是1，关于攻击范围的解释请看“用语集”。
 ★每个出牌阶段你只能使用一张杀。]==],
@@ -54,14 +55,23 @@ local cfg = {
 	},
 	
 	event = {	
-		-- 出牌过程由下列3个事件驱动
+		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
+			event.atack_dis.base = 1; 
+			return R_SUCC;
+		end,
+
+
+
+	-- 出牌过程由下列3个事件驱动
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- select target
 			local ret;
 			local target = -1;
-			ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), 1, NO, NO,
+			ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), NO, NO,
 				"请为【"..cfg.name.."】指定一个目标:");
 			if(ret == R_SUCC) then
 				event.out_card.targets[0] = target;

@@ -147,6 +147,8 @@ Player* get_game_player(GameContext* pGame, int player);
 
 // 计算当前指定玩家的行动顺序。当前玩家为0，下一家为1 ....
 int get_game_act_order(GameContext* pGame, int player);
+// 现存玩家的数量
+int get_live_player_num(GameContext* pGame);
 
 
 //}}
