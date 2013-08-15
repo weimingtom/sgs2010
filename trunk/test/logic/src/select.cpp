@@ -193,6 +193,8 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 
 	// can set target?
 	INIT_EVENT(&event, GameEvent_SelectTarget, player, target, pParentEvent);
+
+	select_target.card.id = cid;
 	event.select_target = &select_target;
 	trigger_game_event(pGame, &event);
 
@@ -215,7 +217,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 	{
 		// calc final dist, if base_distancc is -1, means ignore distance to target
 		ST_ZERO(dis);
-		dis.card.id = CardID_None;
+		dis.card.id = cid;
 		dis.base = base_dist;   // calc the attack range
 		dis.inc = 0;            // calc the attack range append increase
 		dis.dis = game_player_dis(pGame, player, target);   // calc the player to target's distance

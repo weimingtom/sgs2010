@@ -320,13 +320,12 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	if(stEvent.result == R_SKIP)
 		return R_SUCC;
 
-	//pCardConfig = get_card_config(out_card->vcard.id);
-
-	//if(pCardConfig == NULL)
-	//	return R_E_FAIL;
-
-
-	//if(pCardConfig->out)
+	// 如果是指定目标的出牌，则不再调用OutCardPrepare事件,但是需要检查目标是否合法，不合法则出牌失败
+	if(out_card->flag == OutCardFlag_SpecOut)
+	{
+		//game_check_attack(pGame, pParentEvent, trigger, out_card->targets[n], out_card->vcard.id, 1);
+	}
+	else
 	{
 		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
 		stEvent.out_card = out_card;
@@ -662,11 +661,15 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		OutCard   out_card;
 
+		ST_ZERO(out_card);
+
 		out_card.list.pcards[0] = stCard[0];
 		out_card.list.num = 1;
 		out_card.vcard = out_card.list.pcards[0].card;
 		out_card.trigger = pGame->cur_player;
 		out_card.supply = pGame->cur_player;
+		out_card.flag = OutCardFlag_None;
+		out_card.target_num = 0;
 
 		game_real_out_card(pGame, pEvent, pGame->cur_player, &out_card);
 
@@ -1302,6 +1305,7 @@ RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParent
 	// 指定目标
 	out.target_num = 1;
 	out.targets[0] = target;
+	out.flag = OutCardFlag_SpecOut;
 
 	ret = game_real_out_card(pGame, pParentEvent, player, &out);
 

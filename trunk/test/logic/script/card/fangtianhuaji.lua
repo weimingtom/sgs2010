@@ -126,7 +126,7 @@ local cfg = {
 			-- 让出牌者选择，至多3个目标，如果一个都没选择，则出牌中止
 			-- local targets = {};
 			
-			while event.out_card.target_num <= 3 do
+			while event.out_card.target_num < 3 do
 				local t = select_target_check(game, event, player, event.out_card.vcard.id, 1, NO, NO, 
 					'请为【'..get_card_name(event.out_card.vcard.id)..'】指定最多3个目标(第'..(event.out_card.target_num+1)..'个):',
 					function (t) 

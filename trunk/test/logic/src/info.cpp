@@ -430,6 +430,7 @@ static void p_out_card(const char* perffix, OutCard* p)
 		MSG_OUT("    %s.targets[%d]=%d;\n", perffix, n, p->target_num);
 
 	}
+	MSG_OUT("    %s.flag=%d;\n", perffix, ENUM2STR(OutCardFlag, p->flag));
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
 	p_card(s_per, &p->vcard);
