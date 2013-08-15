@@ -41,6 +41,14 @@ local cfg = {
 	},
 	
 	event = {
+		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
+			event.atack_dis.base = 0; 
+			return R_SUCC;
+		end,
+
+
 		-- 出牌过程由下列3个事件驱动
 
 
@@ -50,7 +58,7 @@ local cfg = {
 			local ret;
 			local target = -1;
 			while true do
-				ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), -1, NO, NO,
+				ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), NO, NO,
 					"请为【"..cfg.name.."】指定一个目标:", target);
 				if(ret == R_SUCC) then
 					local p = get_game_player(game, target);

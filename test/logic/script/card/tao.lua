@@ -70,6 +70,14 @@ reg_card {
 	},
 	
 	event = {
+		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
+			event.atack_dis.base = -1; 
+			return R_SUCC;
+		end,
+	
+	
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- out process is directly succss.
 			return R_SUCC;

@@ -7,9 +7,9 @@
 	选择玩家，带check函数检查目标是否符合要求
 	
 --]]
-function select_target_check(game, event, player, cid, base_dist, self, force, alter, funchk)
+function select_target_check(game, event, player, cid, self, force, alter, funchk)
 	while true do
-		local ret, target = game_select_target(game, event, player, cid, base_dist, self, force, alter, -1);
+		local ret, target = game_select_target(game, event, player, cid, self, force, alter);
 		if ret ~= R_SUCC  then 
 			return nil;
 		end
