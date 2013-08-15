@@ -1303,7 +1303,7 @@ RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParent
 	out.target_num = 1;
 	out.targets[0] = target;
 
-	ret = game_real_out_card(pGame, pParentEvent, player, out);
+	ret = game_real_out_card(pGame, pParentEvent, player, &out);
 
 	return R_SUCC;
 }

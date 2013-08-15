@@ -23,8 +23,8 @@ enum PlayerID
 	PlayerID_Mutineer = 4,
 
 
-	PlayerID_Valid_Min = PlayerID_Master,
-	PlayerID_Valid_Max = PlayerID_Mutineer,
+	_PlayerID_Valid_Min = PlayerID_Master,
+	_PlayerID_Valid_Max = PlayerID_Mutineer,
 
 };
 

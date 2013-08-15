@@ -7,7 +7,7 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 {
 	//const HeroConfig*  pHeroConfig = get_hero_config(hero);
 
-	if(id < PlayerID_Valid_Min || id > PlayerID_Valid_Max)
+	if(id < _PlayerID_Valid_Min || id > _PlayerID_Valid_Max)
 	{
 		MSG_OUT("init player: invalid player ID %d\n", id);
 		return R_E_PARAM;
