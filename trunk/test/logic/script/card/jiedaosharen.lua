@@ -88,10 +88,11 @@ local cfg = {
 				return R_CANCEL;
 			end
 		
+			local me = get_game_player(game, player);
 			local pt = get_game_player(game, target);
 			
-			-- 再指定杀的目标B（A能攻击的B）
-			local sha_target = select_target_check(game, event, player, get_card_id_by_sid('sha'), YES, NO, 
+			-- 再指定杀的目标B（A能攻击的B）   (这里不指定卡牌，所以不检查牌的攻击距离
+			local sha_target = select_target_check(game, event, player, CardID_None, YES, NO, 
 					'再为【'..pt.name..'】的【'..card_sid2name('sha')..'】指定一个目标：',
 					function (t)
 						if(t == target) then
@@ -108,6 +109,8 @@ local cfg = {
 			if sha_target == nil then
 				return R_CANCEL;
 			end
+
+			local st = get_game_player(game, sha_target);
 			
 			--  return target
 			event.out_card.targets[0] = target;
@@ -115,6 +118,8 @@ local cfg = {
 			
 			-- store sha's target...
 			event.out_card.targets[1] = sha_target;
+			
+			event.out_card.message = '【'..me.name..'】指定【'..pt.name..'】对【'..st.name..'】使用一张【'..card_sid2name('sha')..'】。';
 			
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
@@ -125,7 +130,7 @@ local cfg = {
 		[GameEvent_OutCard] = function(cfg, game, event, player)
 			-- 玩家A出杀，如果不出，则结算效果
 			-- （如果此时玩家A无法攻击B,则直接结算效果，视为A不出杀）
-			local target = event.oput_card.targets[1];
+			local target = event.out_card.targets[1];
 			local p = get_game_player(game, player)
 			local q = get_game_player(game, target);
 			--[[
@@ -140,8 +145,8 @@ local cfg = {
 				
 				local out_card = OutCard();
 				game_init_outcard(out_card);
-				if R_SUCC ~= game_supply_card(game, event, event.target, event.target, out_pattern, out_card, 
-						'请对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】')  
+				if R_SUCC ~= game_supply_card(game, event, event.target, event.target, out_pattern
+						, '请对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】', out_card)  
 				then
 					-- 返回成功 结算借刀杀人的得到目标武器
 					return R_SUCC;
@@ -153,7 +158,7 @@ local cfg = {
 				out_card.targets[0] = target;
 				out_card.flag = OutCardFlag_SpecOutWithTarget;
 				
-				if R_SUCC ~= game_real_out(game, event, event.target, out_pattern) then
+				if R_SUCC ~= game_real_out(game, event, event.target, out_card) then
 					-- 返回成功 结算借刀杀人的得到目标武器
 					return R_SUCC;
 				end

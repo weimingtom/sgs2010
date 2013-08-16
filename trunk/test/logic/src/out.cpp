@@ -309,7 +309,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 
 	GameEventContext  stEvent;
 
-	out_card->target_num = 0;  // for require fill the target
+	// out_card->target_num = 0;  // for require fill the target
 
 	INIT_EVENT(&stEvent, GameEvent_PerOutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
 	stEvent.out_card = out_card;
@@ -377,6 +377,13 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	CHECK_RET(ret,ret);
 
 	add_out_stack(pGame, out_card);
+
+	if(out_card->message[0] != '\0')
+	{
+		out_card->message[sizeof(out_card->message)-1] = 0;
+		MSG_OUT("%s\n", out_card->message);
+		ST_ZERO(out_card->message);
+	}
 
 	if(out_card->target_num == 0)
 	{

@@ -184,7 +184,14 @@ char* card_str_n(const Card* pCard, int num, char* buffer, int buflen)
 	char  name[128];
 	for(n = 0; n < num; n++)
 	{
-		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard[n].id, name, sizeof(name)), card_color_str(pCard[n].color), card_value_str(pCard[n].value));
+		if(CARD_VALID(&pCard[n]))
+		{
+			len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard[n].id, name, sizeof(name)), card_color_str(pCard[n].color), card_value_str(pCard[n].value));
+		}
+		else
+		{
+			len += snprintf(buffer + len, buflen - len, "(Пе)");
+		}
 	}
 	return buffer;
 }
