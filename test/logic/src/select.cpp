@@ -79,8 +79,11 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 			return R_E_FAIL;
 		}
 
-		if(R_SUCC != game_check_attack(pGame, pParentEvent, player, t, cid, 1))
-			continue;
+		// if(cid != CardID_None)
+		{
+			if(R_SUCC != game_check_attack(pGame, pParentEvent, player, t, cid, 1))
+				continue;
+		}
 
 
 		*out_target = t;
@@ -190,40 +193,46 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 	pTarget = get_game_player(pGame, target);
 
 
-	ST_ZERO(dis);
-	dis.card.id = cid;
-	dis.base = 1;           // calc the attack range
-	dis.inc = 0;            // calc the attack range append increase
-	dis.dis = game_player_dis(pGame, player, target);   // calc the player to target's distance
-	dis.flag = 0;
-
-	INIT_EVENT(&event, GameEvent_GetBaseAttackDis, player, target, pParentEvent);
-	event.attack_dis = &dis;
-
-	call_card_event(cid, pGame, &event, player);
-
-
-	// need check dis ?  check dist 
-	// calc final dist, if base_distancc is -1, means ignore distance to target
-	if(dis.base >= 0)
+	if(cid != CardID_None)
 	{
 
-		// calc the skill and equip effect to target distance or attack range
-		// target effect
-		//trigger_player_event(pGame, &event, t);
-		// attacker effect
-		//trigger_player_event(pGame, &event, player);
+		ST_ZERO(dis);
+		dis.card.id = cid;
+		dis.base = -1;           // calc the attack range
+		dis.inc = 0;            // calc the attack range append increase
+		dis.dis = game_player_dis(pGame, player, target);   // calc the player to target's distance
+		dis.flag = 0;
 
-		trigger_game_event(pGame, &event);
+		INIT_EVENT(&event, GameEvent_GetBaseAttackDis, player, target, pParentEvent);
+		event.attack_dis = &dis;
 
-		if(dis.base + dis.inc < dis.dis)
+		call_card_event(cid, pGame, &event, player);
+
+
+		// need check dis ?  check dist 
+		// calc final dist, if base_distancc is -1, means ignore distance to target
+		if(dis.base >= 0)
 		{
-			// Attack range less the distance to taget
-			if(tip)
+
+			// calc the skill and equip effect to target distance or attack range
+			// target effect
+			//trigger_player_event(pGame, &event, t);
+			// attacker effect
+			//trigger_player_event(pGame, &event, player);
+			INIT_EVENT(&event, GameEvent_CalcAttackDis, player, target, pParentEvent);
+			event.attack_dis = &dis;
+
+			trigger_game_event(pGame, &event);
+
+			if(dis.base + dis.inc < dis.dis)
 			{
-				MSG_OUT("选择的角色不在攻击范围内!\n");
+				// Attack range less the distance to taget
+				if(tip)
+				{
+					MSG_OUT("选择的角色不在攻击范围内!\n");
+				}
+				return R_E_DISTANCE;
 			}
-			return R_E_DISTANCE;
 		}
 	}
 

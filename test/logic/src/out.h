@@ -27,6 +27,7 @@ typedef struct tagOutCard
 	int      flag;
 	Card     vcard;    //  use as card (virtual) real out card in list following
 	PosCardList list;
+	char     message[MAX_ALTER_TEXT_LEN];
 	char     ud[MAX_UD_LEN];    // 出牌的时候些可能需要在各事件之间传递一些参数
 } OutCard;
 

@@ -275,6 +275,23 @@ RESULT game_player_getcard_from_player(lua_State* L, GameContext* pGame, GameEve
 		return R_E_OVERFLOW;
 	}
 
+
+	if (where == CardWhere_PlayerHand)
+	{
+		MSG_OUT("【%s】获得【%s】的第[%d]手牌。\n", pPlayer->name, pFromPlayer->name, pos);
+	
+	}
+	else if (where == CardWhere_PlayerEquip)
+	{
+		MSG_OUT("【%s】获得【%s】的%s: %s.\n", pPlayer->name, pFromPlayer->name, equip_idx_str(pos), get_card_str(&vcard.vcard));
+	}
+	else
+	{
+		MSG_OUT("【%s】获得【%s】的判定区牌: %s。\n", pPlayer->name, pFromPlayer->name, get_card_str(&vcard.vcard));
+	}
+
+
+
 	player_remove_card(pFromPlayer, where, pos, NULL);
 
 
