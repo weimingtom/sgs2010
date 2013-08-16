@@ -173,13 +173,13 @@ local cfg = {
 			message('【'..get_game_player(game, player).name..'】发动了【'..cfg.name..'】武器技能，指定了'
 				.. join(names,'【','】','、') .. '作为【'
 				.. get_card_name(event.out_card.vcard.id) ..'】的目标。' );
-			
+			 
+			-- 武器效果执行完成，跳过准备阶段，继续执行出牌效果
 			event.result = R_SKIP;
 			event.block = YES;
-			return R_SUCC;  -- 武器效果执行完成，跳过准备阶段，继续执行出牌效果
+			return R_SUCC;
 		end
 	},
-	
 };
 
 

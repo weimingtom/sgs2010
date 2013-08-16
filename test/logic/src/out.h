@@ -63,6 +63,7 @@ typedef enum enOutCardFlag
 {
 	OutCardFlag_None = 0,
 	OutCardFlag_SpecOut = 1,   // 指定的出牌
+	OutCardFlag_SpecOutWithTarget= 2,   // 指定的出牌,指定目标
 }OutCardFlag;
 
 // tolua_end
@@ -93,7 +94,7 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char* s_pattern);
 
 
-RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card);
+RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card);
 
 // trigger supply from player the card match the  pattern, return through out_card
 RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player
@@ -103,8 +104,17 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
 						, OutCardPattern* out_pattern, const char* alter_text);
 
-RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
-						, OutCardPattern* out_pattern, const char* alter_text);
+void game_init_outcard(OutCard* out_card);
+
+/*
+ 特殊出牌需要2步完成，这里不再提供函数方式
+ 1、使用game_supply_card 打出指定格式的牌组合
+ 2、修正虚拟牌或者指定目标，设置Flag
+ 3、调用game_real_out，走正常的出牌流程
+*/
+
+//RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int targets[10]
+//						, OutCardPattern* out_pattern, const char* alter_text);
 
 
 // tolua_end
