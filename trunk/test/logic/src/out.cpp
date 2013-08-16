@@ -323,7 +323,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 		return R_SUCC;
 
 	// 如果是指定目标的出牌，则不再调用OutCardPrepare事件,但是需要检查目标是否合法，不合法则出牌失败
-	if(out_card->flag == OutCardFlag_SpecOut)
+	if(out_card->flag == OutCardFlag_SpecOutWithTarget)
 	{
 		for(n = 0;  n< out_card->target_num; n++)
 		{
@@ -348,11 +348,18 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 }
 
 
-RESULT game_real_out_card(GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card)
+RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card)
 {
 	int    n;
 	RESULT ret;
 	//int target;
+
+	if(!IS_PLAYER_VALID(pGame, player))
+	{
+		luaL_error(GL(L), "game_passive_out: invalid player index - %d", player );
+		return R_E_PARAM;
+	}
+
 	
 	// prepare out card
 	ret = out_card_prepare(pGame, pEvent, player, out_card);
@@ -679,7 +686,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		out_card.flag = OutCardFlag_None;
 		out_card.target_num = 0;
 
-		game_real_out_card(pGame, pEvent, pGame->cur_player, &out_card);
+		game_real_out(NULL, pGame, pEvent, pGame->cur_player, &out_card);
 
 
 		//pEvent->result = R_SUCC;
@@ -1084,21 +1091,13 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	if(pGame == NULL || pParentEvent == NULL)
 	{
-		if(L) {
-			luaL_error(L, "game_passive_out: invalid null param");
-		} else {
-			MSG_OUT("game_passive_out: invalid null param\n");
-		}
+		luaL_error(GL(L), "game_passive_out: invalid null param");
 		return R_E_PARAM;
 	}
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_passive_out: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_passive_out: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_passive_out: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 
@@ -1298,8 +1297,13 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	return R_SUCC;
 }
 
+void game_init_outcard(OutCard* out_card)
+{
+	ST_ZERO(out_card);
+}
 
 
+/*
 RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
 					 , OutCardPattern* out_pattern, const char* alter_text)
 {
@@ -1317,10 +1321,12 @@ RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParent
 	out.targets[0] = target;
 	out.flag = OutCardFlag_SpecOut;
 
-	ret = game_real_out_card(pGame, pParentEvent, player, &out);
+	ret = game_real_out(pGame, pParentEvent, player, &out);
 
 	return R_SUCC;
 }
+*/
+
 
 
 

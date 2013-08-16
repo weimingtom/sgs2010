@@ -221,7 +221,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 			// Attack range less the distance to taget
 			if(tip)
 			{
-				MSG_OUT("你选择的角色不在你的攻击范围内!\n");
+				MSG_OUT("选择的角色不在攻击范围内!\n");
 			}
 			return R_E_DISTANCE;
 		}

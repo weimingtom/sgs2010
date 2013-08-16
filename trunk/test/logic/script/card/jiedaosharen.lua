@@ -62,7 +62,7 @@ local cfg = {
 		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
 		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
 		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
-			event.atack_dis.base = -1; 
+			event.attack_dis.base = -1; 
 			return R_SUCC;
 		end,
 
@@ -78,6 +78,7 @@ local cfg = {
 					function (t)
 						local p = get_game_player(game, t);
 						if(get_player_equipcard(p, EquipIdx_Weapon) == nil) then
+							message('需要指定一个装备有武器的玩家。');
 							return false;
 						end
 						return true;
@@ -90,10 +91,14 @@ local cfg = {
 			local pt = get_game_player(game, target);
 			
 			-- 再指定杀的目标B（A能攻击的B）
-			local sha_target = select_target_check(game, event, player, get_card_by_id_by_sid('sha'), NO, NO, 
+			local sha_target = select_target_check(game, event, player, get_card_id_by_sid('sha'), YES, NO, 
 					'再为【'..pt.name..'】的【'..card_sid2name('sha')..'】指定一个目标：',
 					function (t)
-						if(R_SUCC == game_check_attack(game, event, target, sha_target, get_card_id_by_sid('sha'), 1)) then
+						if(t == target) then
+							message('【'..card_sid2name('sha')..'】的目标不能是使用杀的玩家。');
+							return false;
+						end
+						if(R_SUCC == game_check_attack(game, event, target, t, get_card_id_by_sid('sha'), 1)) then
 							return true;
 						end
 						return false;
@@ -123,30 +128,47 @@ local cfg = {
 			local target = event.oput_card.targets[1];
 			local p = get_game_player(game, player)
 			local q = get_game_player(game, target);
+			--[[
 			local items =  '对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】\n'
 						.. '将装备的武器牌交给【'.. p.name ..'】\n';
 			local ret = game_select_items(game, event, event.target, items,
 					'【'..p.name..'】向你使用【'..cfg.name..'】，请做以下选择:');
-					
-			if ret == 1 then
+			--]]	
+			--if ret == 1 then
 				local out_pattern  = OutCardPattern();
 				game_load_out_pattern(out_pattern,  'h:{sha}?');
 				
-				if R_SUCC == game_spec_outcard(game, event, event.target, out_pattern, event.oput_card.targets[1]) then
-					return R_CANCEL;
+				local out_card = OutCard();
+				game_init_outcard(out_card);
+				if R_SUCC ~= game_supply_card(game, event, event.target, event.target, out_pattern, out_card, 
+						'请对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】')  
+				then
+					-- 返回成功 结算借刀杀人的得到目标武器
+					return R_SUCC;
 				end
-			end
+				
+				
+				-- 设置目标
+				out_card.target_num = 1;
+				out_card.targets[0] = target;
+				out_card.flag = OutCardFlag_SpecOutWithTarget;
+				
+				if R_SUCC ~= game_real_out(game, event, event.target, out_pattern) then
+					-- 返回成功 结算借刀杀人的得到目标武器
+					return R_SUCC;
+				end
+			--end
 			
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
-			return R_SUCC; 
+			return R_CANCEL; 
 		end,
 		
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
 			-- 得到玩家A的武器牌
-			
+
 			return game_player_getcard_from_player(game, event, player, event.target, CardWhere_PlayerEquip, EquipIdx_Weapon);
 		end,
 	},
