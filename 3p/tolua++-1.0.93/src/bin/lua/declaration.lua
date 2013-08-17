@@ -185,6 +185,9 @@ function classDeclaration:print (ident,close)
  print(ident.." dim  = '"..self.dim.."',")
  print(ident.." def  = '"..self.def.."',")
  print(ident.." ret  = '"..self.ret.."',")
+ if(self.not_null) then
+  print(ident.." not_null  = ".."true"..",") 
+ end
  print(ident.."}"..close)
 end
 
@@ -223,8 +226,12 @@ function classDeclaration:outchecktype (narg)
  end
  if self.dim ~= '' then
 	-- 2013/7/31 by jerrykong : char array check as normal c string
-	if self.type == 'char*' then
-		return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
+	if self.type == 'char*' or self.type == 'const char*' then
+		if(self.not_null) then 
+			return '(tolua_isvaluenil(tolua_S,'..narg..',&tolua_err) || !tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err))'
+		else
+			return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
+		end
 	else
 		--if t=='string' then
 		--	return 'tolua_isstringarray(tolua_S,'..narg..','..def..',&tolua_err)'
@@ -233,10 +240,14 @@ function classDeclaration:outchecktype (narg)
 		--end
 	end
  elseif t then
-	return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
+	if (self.type == 'char*' or self.type == 'const char*') and self.not_null then
+		return '(tolua_isvaluenil(tolua_S,'..narg..',&tolua_err) || !tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err))'
+	else
+		return '!tolua_is'..t..'(tolua_S,'..narg..','..def..',&tolua_err)'
+	end
  else
   local is_func = get_is_function(self.type)
-  if self.ptr == '&' or self.ptr == '' then
+  if self.ptr == '&' or self.ptr == '' or self.not_null then
   	return '(tolua_isvaluenil(tolua_S,'..narg..',&tolua_err) || !'..is_func..'(tolua_S,'..narg..',"'..self.type..'",'..def..',&tolua_err))'
   else
 	return '!'..is_func..'(tolua_S,'..narg..',"'..self.type..'",'..def..',&tolua_err)'
@@ -440,8 +451,12 @@ function _Declaration (t)
 	t.mod, t.type = applytypedef(t.mod, ft)
  end
 
+ print("mod", t.mod);
  if t.kind=="var" and (string.find(t.mod, "tolua_property%s") or string.find(t.mod, "tolua_property$")) then
  	t.mod = string.gsub(t.mod, "tolua_property", "tolua_property__"..get_property_type())
+ elseif t.kind=='var' and t.is_parameter and (string.find(t.mod, "tolua_notnull%s") or string.find(t.mod, "tolua_notnull$")) then
+	t.mod = string.gsub(t.mod, "tolua_notnull", "")
+	t.not_null = true;
  end
 
  return t

@@ -92,20 +92,20 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 // tolua_begin
 
 
-void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char* s_pattern);
+void game_load_out_pattern(lua_State* L, tolua_notnull OutCardPattern* out_pattern, tolua_notnull const char* s_pattern);
 
 
-RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent, int player, OutCard* out_card);
+RESULT game_real_out(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player, tolua_notnull OutCard* out_card);
 
 // trigger supply from player the card match the  pattern, return through out_card
-RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int trigger, int player
-						, OutCardPattern* out_pattern, const char* alter_text, OutCard* out_card);
+RESULT game_supply_card(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent, int trigger, int player
+						, tolua_notnull OutCardPattern* out_pattern, const char* alter_text, tolua_notnull OutCard* out_card);
 
 // passive out process
-RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
-						, OutCardPattern* out_pattern, const char* alter_text);
+RESULT game_passive_out(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent, int player,  int target
+						, tolua_notnull OutCardPattern* out_pattern, const char* alter_text);
 
-void game_init_outcard(OutCard* out_card);
+void game_init_outcard(tolua_notnull OutCard* out_card);
 
 /*
  特殊出牌需要2步完成，这里不再提供函数方式

@@ -15,11 +15,11 @@ typedef struct tagGameEventContext GameEventContext;
 
 // tolua_begin
 
-RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent);
-RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent);
-RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int player);
+RESULT game_cur_info(tolua_notnull GameContext* pGame,tolua_notnull  GameEventContext* pEvent);
+RESULT game_global_info(tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent);
+RESULT game_other_player_info(tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player);
 
-RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent, int detail);
+RESULT game_event_info(tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int detail);
 // tolua_end
 
 #ifdef __cplusplus

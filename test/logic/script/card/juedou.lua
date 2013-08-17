@@ -52,13 +52,49 @@ reg_card {
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
-			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+			local ret;
+			local target = -1;
+			
+			target = select_target_check(game, event, player, event.out_card.vcard.id, NO, NO, 
+					"请为【"..cfg.name.."】指定一个目标:", 
+					function (t)
+						return true;  -- 任意目标都行
+					end);
+					
+			if target ~= nil then
+				event.out_card.message = '【'..get_game_player(game, player).name..'】指定了【'
+					.. get_game_player(game, target).name .. '】作为【'
+					.. cfg.name ..'】的目标。' ;
+				event.out_card.targets[0] = target;
+				event.out_card.target_num = 1;
+				return R_SUCC;
+			end
+
+
+
+		-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 			return R_SUCC;
 		end,
 
 		-- 出牌的过程驱动
 		[GameEvent_OutCard] = function(cfg, game, event, player)
+			-- 从目标开始，轮流打出‘杀’首先不出杀的一方为负，另一方胜。
+			local flag = 1;
+			local p = { event.target, player } ; 
+			local pattern = OutCardPattern();
+			while true do
+				game_load_out_pattern(pattern, 'h:{sha}?');
+				if(R_SUCC ~= game_passive_out(game, event, p[flag], p[3-flag], pattern, 
+					'请出一张【'..card_sid2name('sha')..'】。')) 
+				then
+					-- ud保存的为 1： target 负， 2：player负
+					event.out_card.ud = tostring(flag);
+					break;
+				end
+				flag = 3-flag;
+			end
+			
 			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
 			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
 			return R_SUCC; 
@@ -67,6 +103,11 @@ reg_card {
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			-- 负方体力减一，伤害来源为决斗的胜方
+			local flag = tonumber(event.out_card.ud);
+			local p = { event.target, player } ; 
+			return game_player_add_life(game, event, p[flag], -1, p[3-flag], event.out_card, 0);
+			-- return R_SUCC;
 		end,
 	},
 };

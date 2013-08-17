@@ -180,7 +180,7 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 	int hscnt;
 
 	//const HeroConfig* pHero;
-	char        temp[128];
+	//char        temp[128];
 	char        title[512];
 	SelOption   sel_opts[5];
 	int         sel_n;
@@ -291,7 +291,7 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 				{
 					//pHero = get_hero_config((HeroID)hids[c]);
 					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %s最大体力: %d", 
-						hero_name((HeroID)hids[c], temp, sizeof(temp)), hero_master((HeroID)hids[c])==YES ? "[主公], ":"", hero_life((HeroID)hids[c]));
+						get_hero_name((HeroID)hids[c]), hero_master((HeroID)hids[c])==YES ? "[主公], ":"", hero_life((HeroID)hids[c]));
 					sel_opts[sel_n].value = c+1;
 					sel_n++;
 				}

@@ -143,29 +143,29 @@ RESULT player_card_idx_to_pos(Player* pPlayer, int idx, CardWhere* where, int* p
 const char* player_id_str(PlayerID id);
 const char* equip_idx_str(int idx);
 
-Card* get_player_handcard(Player* pPlayer, int index);
-VCard* get_player_judgecard(Player* pPlayer, int index);
-Card* get_player_equipcard(Player* pPlayer, int index);
+Card* get_player_handcard(tolua_notnull Player* pPlayer, int index);
+VCard* get_player_judgecard(tolua_notnull Player* pPlayer, int index);
+Card* get_player_equipcard(tolua_notnull Player* pPlayer, int index);
 
 // 查找指定ID的牌(返回index,找不到返回-1)
-int find_player_handcard(Player* pPlayer, CardID id);
-int find_player_judgecard(Player* pPlayer, CardID id);
+int find_player_handcard(tolua_notnull Player* pPlayer, CardID id);
+int find_player_judgecard(tolua_notnull Player* pPlayer, CardID id);
 
 
-YESNO is_player_dead(Player* pPlayer);
-YESNO is_player_show(Player* pPlayer);
-YESNO is_player_perdead(Player* pPlayer);
-YESNO is_player_handfull(Player* player);
+YESNO is_player_dead(tolua_notnull Player* pPlayer);
+YESNO is_player_show(tolua_notnull Player* pPlayer);
+YESNO is_player_perdead(tolua_notnull Player* pPlayer);
+YESNO is_player_handfull(tolua_notnull Player* player);
 
-int   player_count_card(Player* pPlayer, int where);
+int   player_count_card(tolua_notnull Player* pPlayer, int where);
 
-int get_player_param(Player* pPlayer, int index);
-void set_player_param(Player* pPlayer, int index, int val);
+int get_player_param(tolua_notnull Player* pPlayer, int index);
+void set_player_param(tolua_notnull Player* pPlayer, int index, int val);
 
-void player_set_flag(Player* pPlayer, int   flag);
-void player_clear_flag(Player* pPlayer, int   flag);
-void player_clear_all_flag(Player* pPlayer);
-YESNO player_check_flag(Player* pPlayer, int   flag);
+void player_set_flag(tolua_notnull Player* pPlayer, int   flag);
+void player_clear_flag(tolua_notnull Player* pPlayer, int   flag);
+void player_clear_all_flag(tolua_notnull Player* pPlayer);
+YESNO player_check_flag(tolua_notnull Player* pPlayer, int   flag);
 
 
 // }}

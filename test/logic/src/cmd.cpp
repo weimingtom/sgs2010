@@ -356,9 +356,9 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		int maxid;
 		int id;
 		//const CardConfig *pCardCfg;
-		char  sid[128];
-		char  name[128];
-		char  desc[1024];
+		//char  sid[128];
+		//char  name[128];
+		//char  desc[1024];
 		if(argc < 3)
 		{
 			maxid = card_maxid();
@@ -371,8 +371,8 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
 				//}
 
-				MSG_OUT("(%d) {%s}: %s, %s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
-					card_name((CardID)id, name, sizeof(name)), card_type_str(card_type((CardID)id)));
+				MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid((CardID)id),
+					get_card_name((CardID)id), card_type_str(card_type((CardID)id)));
 			}
 		}
 		else
@@ -388,9 +388,9 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			}
 			else
 			{
-				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, card_sid((CardID)id, sid, sizeof(sid)),
-					card_name((CardID)id, name, sizeof(name)), card_type_str(card_type((CardID)id)), 
-					card_desc((CardID)id, desc, sizeof(desc)));
+				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, get_card_sid((CardID)id),
+					get_card_name((CardID)id), card_type_str(card_type((CardID)id)), 
+					get_card_desc((CardID)id));
 			}
 		}				
 	}
@@ -399,9 +399,9 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		int maxid;
 		int id;
 		int n;
-		char  sid[128];
-		char  name[128];
-		char  desc[1024];
+		//char  sid[128];
+		//char  name[128];
+		//char  desc[1024];
 		int  skill_num;
 		int  skill_flag;
 		//const HeroConfig *pHero;
@@ -416,8 +416,8 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 				//{
 				//	MSG_OUT("(%d) %s, %s, %s, life %d%s\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
 				//}
-				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, hero_sid((HeroID)id, sid, sizeof(sid)), 
-					hero_name((HeroID)id, name, sizeof(name)), hero_group_str(hero_group((HeroID)id)), 
+				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid((HeroID)id), 
+					get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
 					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"");
 			}
 		}
@@ -433,15 +433,15 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			}
 			else
 			{
-				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, hero_sid((HeroID)id, sid, sizeof(sid)), 
-					hero_name((HeroID)id, name, sizeof(name)), hero_group_str(hero_group((HeroID)id)), 
+				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, get_hero_sid((HeroID)id), 
+					get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
 					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"", 
-					hero_desc((HeroID)id, desc, sizeof(desc)));
+					get_hero_desc((HeroID)id));
 				skill_num = hero_skill_num((HeroID)id);
 				for(n = 1; n <= skill_num; n++)
 				{
 					skill_flag = hero_skill_flag((HeroID)id, n);
-					MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  hero_skill_name((HeroID)id, n, name, sizeof(name)), 
+					MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  get_hero_skill_name((HeroID)id, n), 
 						(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
 				}
 			}

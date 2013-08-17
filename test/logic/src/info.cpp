@@ -16,7 +16,7 @@
 RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n;
-	char buf[128];
+	//char buf[128];
 	int player;
 	Player* p;
 	//const HeroConfig*  pHero;
@@ -65,7 +65,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		}
 
 		//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-		MSG_OUT("%s [%d] %s;\n", cu ? "*":" ", idx++, card_str(&p->hand_cards[n], buf, sizeof(buf)));
+		MSG_OUT("%s [%d] %s;\n", cu ? "*":" ", idx++, get_card_str(&p->hand_cards[n]));
 	}
 
 	// equiped cards
@@ -96,7 +96,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			//	cu = call_card_can_out(pos_card.card.id, pGame, pEvent, pGame->cur_player, &pos_card);
 				cu = 0;
 			}
-			MSG_OUT("%s [%d] %s: %s\n", cu ? "*":" ", idx++, equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+			MSG_OUT("%s [%d] %s: %s\n", cu ? "*":" ", idx++, equip_idx_str(n), get_card_str(&p->equip_cards[n]) );
 		}
 	}
 
@@ -107,7 +107,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		for(n = 0; n < p->judgment_card_num; n++)
 		{
 			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-			MSG_OUT("  [%d] %s;\n", idx++, vcard_str(&p->judgment_cards[n], buf, sizeof(buf)));
+			MSG_OUT("  [%d] %s;\n", idx++, get_vcard_str(&p->judgment_cards[n]));
 		}
 	}
 
@@ -120,7 +120,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 	{
 		cu = (USE_MANUAL == call_hero_skill_can_use(p->hero, n, pGame, pEvent, player));
 		skill_flag = hero_skill_flag(p->hero, n);
-		MSG_OUT("%s 技能[%d]: 【%s】%s%s\n", cu ? "*":" ", n,  hero_skill_name(p->hero, n, buf, sizeof(buf)), 
+		MSG_OUT("%s 技能[%d]: 【%s】%s%s\n", cu ? "*":" ", n,  get_hero_skill_name(p->hero, n), 
 			(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
 	
 	}
@@ -138,9 +138,8 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 			if(cu)
 			{
-				MSG_OUT("%s 技能[%c]: 【%s】,%s效果\n", cu ? "*":" ", "waid"[n],  card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
+				MSG_OUT("%s 技能[%c]: 【%s】,%s效果\n", cu ? "*":" ", "waid"[n],  get_card_name(pos_card.card.id), equip_idx_str(n));
 			}
-
 		}
 	}
 
@@ -150,7 +149,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	int n;
-	char buf[128];
+	//char buf[128];
 	Player* pPlayer;
 	int f;
 
@@ -179,7 +178,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 				MSG_OUT("装备区:\n");
 				f = 1;
 			}
-			MSG_OUT("    %s: %s\n",  equip_idx_str(n), card_str(&pPlayer->equip_cards[n], buf, sizeof(buf)) );
+			MSG_OUT("    %s: %s\n",  equip_idx_str(n), get_card_str(&pPlayer->equip_cards[n]) );
 		}
 	}
 
@@ -190,7 +189,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 		for(n = 0; n < pPlayer->judgment_card_num; n++)
 		{
 			//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-			MSG_OUT("    [%d] %s;\n", n+1, vcard_str(&pPlayer->judgment_cards[n], buf, sizeof(buf)));
+			MSG_OUT("    [%d] %s;\n", n+1, get_vcard_str(&pPlayer->judgment_cards[n]));
 		}
 
 	}
@@ -201,7 +200,7 @@ RESULT game_other_player_info(GameContext* pGame, GameEventContext* pEvent, int 
 RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n, k;
-	char buf[128];
+	//char buf[128];
 	Player* p;
 	int f;
 
@@ -242,7 +241,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 					MSG_OUT("    装备区:\n");
 					f = 1;
 				}
-				MSG_OUT("      %s: %s\n",  equip_idx_str(n), card_str(&p->equip_cards[n], buf, sizeof(buf)) );
+				MSG_OUT("      %s: %s\n",  equip_idx_str(n), get_card_str(&p->equip_cards[n]) );
 			}
 		}
 
@@ -253,7 +252,7 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 			for(n = 0; n < p->judgment_card_num; n++)
 			{
 				//if(n > 0 && n % 4 == 0) MSG_OUT("\n           ");
-				MSG_OUT("      [%d] %s;\n", n+1, vcard_str(&p->judgment_cards[n], buf, sizeof(buf)));
+				MSG_OUT("      [%d] %s;\n", n+1, get_vcard_str(&p->judgment_cards[n]));
 			}
 		}
 	}
@@ -346,14 +345,14 @@ static char* card_pattern_where_str(int where, char* buf, int buflen)
 static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 {
 	int n;
-	char  buf[512];
+	//char  buf[512];
 
 	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STR(PatternWhere, p->where));
 	MSG_OUT("    %s.fixed=%s;\n", perffix, YESNO2STR(p->fixed));
 	MSG_OUT("    %s.num=%d;\n", perffix, p->num);
 	for(n = 0; n < p->num; n++)
 	{
-		MSG_OUT("    %s.patterns[%d].id=%d {%s};\n", perffix, n, p->patterns[n].id, card_sid(p->patterns[n].id, buf, sizeof(buf)));
+		MSG_OUT("    %s.patterns[%d].id=%d {%s};\n", perffix, n, p->patterns[n].id, get_card_sid(p->patterns[n].id));
 		MSG_OUT("    %s.patterns[%d].color=%s;\n", perffix, n, ENUM2STR(CardColor, p->patterns[n].color));
 		MSG_OUT("    %s.patterns[%d].value_min=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_min));
 		MSG_OUT("    %s.patterns[%d].value_max=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_max));
@@ -364,8 +363,8 @@ static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 
 static void p_card(const char* perffix, Card* p)
 {
-	char  buf[512];
-	MSG_OUT("    %s.id=%d {%s};\n", perffix, p->id, card_sid(p->id, buf, sizeof(buf)));
+	//char  buf[512];
+	MSG_OUT("    %s.id=%d {%s};\n", perffix, p->id, get_card_sid(p->id));
 	MSG_OUT("    %s.color=%s;\n", perffix, ENUM2STR(CardColor, p->color));
 	MSG_OUT("    %s.value=%s;\n", perffix, ENUM2STR(CardValue, p->value));
 	MSG_OUT("    %s.flag=%s;\n", perffix, ENUM2STR(CardFlag, p->flag));
@@ -415,19 +414,25 @@ static void p_pos_vcard(const char* perffix, PosVCard* p)
 	}
 }
 
+static const char*  player_name(GameContext* pGame, int player)
+{
+	Player* p = get_game_player(pGame, player);
+	if(!p) return "";
 
+	return p->name;
+}
 
-static void p_out_card(const char* perffix, OutCard* p)
+static void p_out_card(GameContext* pGame, const char* perffix, OutCard* p)
 {
 	int    n;
 	char s_per[128];
 
-	MSG_OUT("    %s.trigger=%d;\n", perffix, p->trigger);
-	MSG_OUT("    %s.supply=%d;\n", perffix, p->supply);
+	MSG_OUT("    %s.trigger=%d \"%s\";\n", perffix, p->trigger, player_name(pGame, p->trigger));
+	MSG_OUT("    %s.supply=%d \"%s\";\n", perffix, p->supply, player_name(pGame, p->supply));
 	MSG_OUT("    %s.target_num=%d;\n", perffix, p->target_num);
 	for(n = 0; n < p->target_num; n++)
 	{
-		MSG_OUT("    %s.targets[%d]=%d;\n", perffix, n, p->targets[n]);
+		MSG_OUT("    %s.targets[%d]=%d \"%s\";\n", perffix, n, p->targets[n], player_name(pGame, p->targets[n]));
 
 	}
 	MSG_OUT("    %s.flag=%s;\n", perffix, ENUM2STR(OutCardFlag, p->flag));
@@ -514,7 +519,7 @@ static void game_event_param__pattern_out(GameContext* pGame, GameEventContext* 
 	else
 	{
 		p_out_card_pattern("pattern_out.pattern", &pEvent->pattern_out->pattern);
-		p_out_card("pattern_out.out", &pEvent->pattern_out->out);
+		p_out_card(pGame, "pattern_out.out", &pEvent->pattern_out->out);
 		MSG_OUT("    pattern_out.alter_text=\"%s\";\n", pEvent->pattern_out->alter_text);
 	}
 	
@@ -528,7 +533,7 @@ static void game_event_param__out_card(GameContext* pGame, GameEventContext* pEv
 	}
 	else
 	{
-		p_out_card("out_card", pEvent->out_card);
+		p_out_card(pGame, "out_card", pEvent->out_card);
 	}
 }
 
@@ -566,7 +571,7 @@ static void game_event_param__equip_card(GameContext* pGame, GameEventContext* p
 	else
 	{
 		MSG_OUT("    equip_card.equip_pos=%s;\n", equip_idx_str(pEvent->equip_card->equip_pos));
-		MSG_OUT("    equip_card.supply=%d;\n", pEvent->equip_card->supply);
+		MSG_OUT("    equip_card.supply=%d \"%s\";\n", pEvent->equip_card->supply, player_name(pGame, pEvent->equip_card->supply));
 		p_pos_card("equip_card.card", &pEvent->equip_card->card);
 	}
 }
@@ -581,8 +586,8 @@ static void game_event_param__change_life(GameContext* pGame, GameEventContext* 
 	{
 		MSG_OUT("    change_life.delta=%d;\n", pEvent->change_life->delta);
 		MSG_OUT("    change_life.after_life=%d;\n", pEvent->change_life->after_life);
-		MSG_OUT("    change_life.src_player=%d;\n", pEvent->change_life->src_player);
-		p_out_card("change_life.src_cards", &pEvent->change_life->src_cards);
+		MSG_OUT("    change_life.src_player=%d \"%s\";\n", pEvent->change_life->src_player, player_name(pGame, pEvent->change_life->src_player));
+		p_out_card(pGame, "change_life.src_cards", &pEvent->change_life->src_cards);
 		MSG_OUT("    change_life.src_skill=%d;\n", pEvent->change_life->src_skill);
 	}
 

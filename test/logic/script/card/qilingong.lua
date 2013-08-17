@@ -42,7 +42,26 @@ local cfg =  {
 		end,
 		
 		-- 触发武器技能
-		
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player, pos_card)
+			-- 你使用的杀造成了伤害。可选择弃目标角色的马
+			-- game_event_info(game, event, 1);
+			if 
+				event.change_life.delta < 0 -- 造成伤害
+				-- 前一个事件：
+				and event.parent_event.id == GameEvent_OutCardCalc    -- 出牌结算 
+				and event.parent_event.trigger == player          -- 我的出牌 				
+				and event.parent_event.target == event.trigger    -- 目标是受伤害的人
+				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+			then
+				local pta = get_game_player(game, event.parent_event.target);
+				-- 目标玩家装备了马
+				if get_player_equipcard(pta, EquipIdx_HorseDec) or get_player_equipcard(pta, EquipIdx_HorseInc) then
+					return USE_MANUAL;    -- 自动触发的技能
+				end
+			end
+			return USE_CANNOT;
+			
+		end,
 		
 	},
 
@@ -61,13 +80,37 @@ local cfg =  {
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				--message('attack base: 5');
-				event.attack_dis.base = 5;
+				event.attack_dis.base = 5;	
 			end
 			return R_DEF;
 		end,
 
 		-- 结算武器技能效果
-
+		[GameEvent_PerChangeLife] = function(cfg, game, event, player)
+			-- 选择弃目标的马
+			local pta = get_game_player(game, event.parent_event.target);
+			-- 目标玩家装备了马
+			local horse1 = get_player_equipcard(pta, EquipIdx_HorseInc);
+			local horse2 = get_player_equipcard(pta, EquipIdx_HorseDec);
+			local pos = nil;
+			if(horse1 and horse2) then
+				local items = equip_idx_str(EquipIdx_HorseInc)..': '.. get_card_str(horse1) .. '\n'
+							.. equip_idx_str(EquipIdx_HorseDec)..': '..get_card_str(horse2) .. '\n';
+				local sel = game_select_items(game, event, player, items, '请选择要弃置【'..pta.name..'】的装备马：');
+				pos = sel == 1 and EquipIdx_HorseInc or EquipIdx_HorseDec;
+			elseif(horse1) then
+				pos = EquipIdx_HorseInc;
+			elseif(horse2) then
+				pos = EquipIdx_HorseInc;
+			end
+			
+			if(pos) then
+				local me = get_game_player(game, player);
+				message('【'..me.name..'】令【'..pta.name..'】弃置'..equip_idx_str(pos)..': '..get_card_str(get_player_equipcard(pta, pos))..'');
+				return game_player_discard_card(game, event, event.parent_event.target, CardWhere_PlayerEquip, pos);
+			end	
+			return R_SUCC;
+		end,
 	},
 };
 

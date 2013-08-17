@@ -401,7 +401,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluappd.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
+						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluappd.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game -L hook.lua lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
 						AdditionalDependencies="..\..\src\card.h;..\..\src\cmd.h;..\..\src\comm.h;..\..\src\config.h;..\..\src\decide.h;..\..\src\discard.h;..\..\src\equip.h;..\..\src\event.h;..\..\src\game.h;..\..\src\get.h;..\..\src\life.h;..\..\src\stack.h;..\..\src\out.h;..\..\src\script.h;..\..\src\select.h;..\..\src\player.h;..\..\src\platform.h;..\..\src\skill.h;..\..\src\judge.h;..\..\src\info.h;..\..\src\card_stack.h"
 						Outputs="..\..\pkg\lua_export.cpp;..\..\pkg\lua_export.h;"
 					/>
@@ -411,7 +411,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluapp.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
+						CommandLine="set DD=%cd%&#x0D;&#x0A;set toluapp=&quot;..\..\..\3p\tolua++-1.0.93\bin\toluapp.exe&quot;&#x0D;&#x0A;cd ..\..\pkg&#x0D;&#x0A;%toluapp%  -o lua_export.cpp -H lua_export.h -n game -L hook.lua lua_export.pkg&#x0D;&#x0A;cd %DD%&#x0D;&#x0A;"
 						AdditionalDependencies="..\..\src\*.h"
 						Outputs="..\..\pkg\lua_export.cpp;..\..\pkg\lua_export.h;"
 					/>

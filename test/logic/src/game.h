@@ -127,28 +127,28 @@ void game_check_gameover(GameContext* pGame, int player);
 //{{
 
 // get game base status
-int get_game_cur_player(GameContext* pGame);
-int get_game_round_player(GameContext* pGame);
-int get_game_master_player(GameContext* pGame);
+int get_game_cur_player(tolua_notnull GameContext* pGame);
+int get_game_round_player(tolua_notnull GameContext* pGame);
+int get_game_master_player(tolua_notnull GameContext* pGame);
 
-int game_next_player(GameContext* pGame, int player);
-int game_prev_player(GameContext* pGame, int player);
+int game_next_player(tolua_notnull GameContext* pGame, int player);
+int game_prev_player(tolua_notnull GameContext* pGame, int player);
 
-Status get_game_status(GameContext* pGame);
+Status get_game_status(tolua_notnull GameContext* pGame);
 
 const char* game_status_str(Status s);
 
 
 /// calc player distance to other
 
-int game_player_dis(GameContext* pGame, int p1, int p2);
+int game_player_dis(tolua_notnull GameContext* pGame, int p1, int p2);
 
-Player* get_game_player(GameContext* pGame, int player);
+Player* get_game_player(tolua_notnull GameContext* pGame, int player);
 
 // 计算当前指定玩家的行动顺序。当前玩家为0，下一家为1 ....
-int get_game_act_order(GameContext* pGame, int player);
+int get_game_act_order(tolua_notnull GameContext* pGame, int player);
 // 现存玩家的数量
-int get_live_player_num(GameContext* pGame);
+int get_live_player_num(tolua_notnull GameContext* pGame);
 
 
 //}}

@@ -65,9 +65,9 @@ local cfg = {
 					end);
 					
 			if target ~= nil then
-				message('【'..get_game_player(game, player).name..'】指定了【'
+				event.out_card.message = '【'..get_game_player(game, player).name..'】指定了【'
 					.. get_game_player(game, target).name .. '】作为【'
-					.. cfg.name ..'】的目标。' );
+					.. cfg.name ..'】的目标。' ;
 				event.out_card.targets[0] = target;
 				event.out_card.target_num = 1;
 				return R_SUCC;
