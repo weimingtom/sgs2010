@@ -145,12 +145,12 @@ typedef enum _CardWhere
 
 
 // need or bits
-typedef enum _PatternCardWhere{
+typedef enum _PatternWhere{
 	PatternWhere_None = 0,
 	PatternWhere_Hand = (1<<CardWhere_PlayerHand),
 	PatternWhere_Equip = (1<<CardWhere_PlayerEquip),
 	PatternWhere_Judgment = (1<<CardWhere_PlayerJudgment),
-} PatternCardWhere;
+} PatternWhere;
 
 
 // tolua_end
@@ -314,9 +314,10 @@ const char* card_type_str(CardType type);
 //const char* card_id_str(CardID id);
 const char* card_color_str(CardColor color);
 const char* card_value_str(CardValue value);
-const char* card_flag_str(CardFlag flag);
+//const char* card_flag_str(CardFlag flag);
 
-const char* get_card_str(Card* card);
+const char* get_card_str(tolua_notnull Card* card);
+const char* get_vcard_str(tolua_notnull VCard* vcard);
 
 /*
 void set_card_id(Card* pCard, CardID id);
@@ -341,6 +342,9 @@ YESNO  call_card_can_out(CardID  id, GameContext* pGame, GameEventContext* pEven
 CANUSE  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
 RESULT  call_card_event(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 
+const char* get_card_sid(CardID  id);
+const char* get_card_name(CardID  id);
+const char* get_card_desc(CardID  id);
 
 
 #ifdef __cplusplus

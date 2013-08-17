@@ -188,7 +188,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 	AttackDis   dis;
 	GameEventContext  event;
 	Player* pTarget;
-	char  temp[128];
+	//char  temp[128];
 
 	pTarget = get_game_player(pGame, target);
 
@@ -257,7 +257,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 			}
 			else
 			{
-				MSG_OUT("【%s】当前不能成为【%s】的目标!\n", pTarget->name, card_name(cid, temp, sizeof(temp)));
+				MSG_OUT("【%s】当前不能成为【%s】的目标!\n", pTarget->name, get_card_name(cid));
 			}
 		}
 		return R_E_TARGET;

@@ -106,7 +106,7 @@ const char* card_value_str(CardValue value)
 	}
 }
 
-
+/*
 const char* card_flag_str(CardFlag flag)
 {
 	static char buf[64];
@@ -125,6 +125,7 @@ const char* card_flag_str(CardFlag flag)
 	default: snprintf(buf, sizeof(buf), "0x%x", (int)flag); return buf;
 	}
 }
+*/
 
 const char* get_card_str(Card* card)
 {
@@ -132,6 +133,11 @@ const char* get_card_str(Card* card)
 	return card_str_n(card, 1, buffer, sizeof(buffer));
 }
 
+const char* get_vcard_str(VCard* vcard)
+{
+	static char buffer[256];
+	return vcard_str_n(vcard, 1, buffer, sizeof(buffer));
+}
 
 /*
 const CardConfig* get_card_config(CardID id)
@@ -181,12 +187,12 @@ char* card_str_n(const Card* pCard, int num, char* buffer, int buflen)
 {
 	int n;
 	int len = 0;
-	char  name[128];
+	//char  name[128];
 	for(n = 0; n < num; n++)
 	{
 		if(CARD_VALID(&pCard[n]))
 		{
-			len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", card_name(pCard[n].id, name, sizeof(name)), card_color_str(pCard[n].color), card_value_str(pCard[n].value));
+			len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", get_card_name(pCard[n].id), card_color_str(pCard[n].color), card_value_str(pCard[n].value));
 		}
 		else
 		{
@@ -416,7 +422,7 @@ __fini_parse:
 
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen)
 {
-	char name[128];
+	//char name[128];
 	char tmp[128];
 	int  len = 0;
 	int n;
@@ -445,7 +451,7 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 		}
 
 		len += snprintf(buffer + len, buflen - len, "(%s, %s %s)", 
-			patterns[n].id >= CardID_None ? card_name(patterns[n].id, name, sizeof(name)) : card_type_str((CardType)-patterns[n].id), 
+			patterns[n].id >= CardID_None ? get_card_name(patterns[n].id) : card_type_str((CardType)-patterns[n].id), 
 			card_color_str(patterns[n].color), tmp);
 	}
 	return buffer;
@@ -779,4 +785,22 @@ RESULT  call_card_event(CardID  id, GameContext* pGame, GameEventContext* pEvent
 }
 
 
+
+const char* get_card_sid(CardID  id)
+{
+	static char buf[128];
+	return card_sid(id, buf, sizeof(buf));
+}
+
+const char* get_card_name(CardID  id)
+{
+	static char buf[128];
+	return card_name(id, buf, sizeof(buf));
+}
+
+const char* get_card_desc(CardID  id)
+{
+	static char buf[1024];
+	return card_desc(id, buf, sizeof(buf));
+}
 

@@ -32,7 +32,7 @@ typedef struct tagEquipCard
 // read equipcard struct for script
 
 // do equip a card 
-RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int hand_pos, int equip_pos);
+RESULT game_player_equip_card(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent, int player, int hand_pos, int equip_pos);
 
 
 // tolua_end

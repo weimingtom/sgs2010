@@ -36,7 +36,7 @@ typedef struct tagChangeLife
 
 
 
-RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int life_inc, int src_player, OutCard* src_cards, int src_skill);
+RESULT game_player_add_life(lua_State* L,tolua_notnull  GameContext* pGame, tolua_notnull GameEventContext* pParentEvent, int player, int life_inc, int src_player, OutCard* src_cards, int src_skill);
 
 
 

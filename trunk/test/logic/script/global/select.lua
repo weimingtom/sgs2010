@@ -100,7 +100,7 @@ function discard_other_card(game , event, player, target, pattern, alter)
 	end
 
 	local me = get_game_player(game, player);
-	local p = get_game_player(game, player);
+	local p = get_game_player(game, target);
 	
 	if where == CardWhere_PlayerHand then
 		message('°æ'..me.name..'°ø¡Ó°æ'..p.name..'°ø∆˙÷√ ÷≈∆['..(pos+1)..']');

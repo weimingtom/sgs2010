@@ -295,3 +295,29 @@ RESULT call_hero_skill_event(HeroID id, int index, GameContext* pGame, GameEvent
 	return ret;
 }
 
+char* get_hero_sid(HeroID id)
+{
+	static char buf[128];
+	return hero_sid(id, buf, sizeof(buf));
+}
+
+char* get_hero_name(HeroID id)
+{
+	static char buf[128];
+	return hero_name(id, buf, sizeof(buf));
+}
+
+char* get_hero_desc(HeroID id)
+{
+	static char buf[1024];
+	return hero_desc(id, buf, sizeof(buf));
+}
+
+char* get_hero_skill_name(HeroID id, int index)
+{
+	static char buf[128];
+	return hero_skill_name(id, index, buf, sizeof(buf));
+}
+
+
+

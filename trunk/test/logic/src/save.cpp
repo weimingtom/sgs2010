@@ -101,8 +101,8 @@ const char* card_value_id_str(CardValue value)
 
 static void game_save_card(Card* pCard, FILE* file, int tabs)
 {
-	char  temp[128];
-	fprintf_tab(file, 0, "sid = \'%s\', ", card_sid(pCard->id, temp, sizeof(temp)));
+	//char  temp[128];
+	fprintf_tab(file, 0, "sid = \'%s\', ", get_card_sid(pCard->id));
 	fprintf_tab(file, 0, "color = %s, ", ENUM2STR(CardColor, pCard->color));
 	fprintf_tab(file, 0, "value = %s, ", ENUM2STR(CardValue, pCard->value));
 	fprintf_tab(file, 0, "flag = %s, ",  ENUM2STR(CardFlag, pCard->flag));

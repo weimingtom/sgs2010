@@ -131,6 +131,12 @@ CANUSE call_hero_skill_can_use(HeroID id, int index, GameContext* pGame, GameEve
 RESULT call_hero_skill_event(HeroID id, int index, GameContext* pGame, GameEventContext* pEvent, int player);
 
 
+char* get_hero_sid(HeroID id);
+char* get_hero_name(HeroID id);
+char* get_hero_desc(HeroID id);
+char* get_hero_skill_name(HeroID id, int index);
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -66,7 +66,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 	//const HeroConfig* pHero;
 	//const HeroSkill* pSkill;
 	// const CardConfig* pCardConfig;
-	char buf[128];
+	//char buf[128];
 	int skill_num;
 	//int skill_flag;
 	PosCard    pos_card;
@@ -102,7 +102,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 					{
 						if(cu == USE_AUTO) 
 						{
-							MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, hero_skill_name(pPlayer->hero, n, buf, sizeof(buf)));
+							MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, get_hero_skill_name(pPlayer->hero, n));
 						}
 						//(*pSkill->use)(pGame, pEvent, player);
 						call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
@@ -170,7 +170,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 					{
 						if(cu == USE_AUTO)
 						{
-							MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, card_name(pos_card.card.id, buf, sizeof(buf)), equip_idx_str(n));
+							MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, get_card_name(pos_card.card.id), equip_idx_str(n));
 						}
 						set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
 						call_card_event(pos_card.card.id, pGame, pEvent, player);

@@ -60,7 +60,10 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	stChgLife.delta = life_inc;
 	stChgLife.after_life = 0;
 	stChgLife.src_player = src_player;
-	stChgLife.src_cards = *src_cards;
+	if(src_cards)
+	{
+		stChgLife.src_cards = *src_cards;
+	}
 	stChgLife.src_skill = src_skill;
 
 	// event per change life

@@ -10,7 +10,7 @@ extern "C" {
 // tolua_begin
 
 // get a card from stack and dicide it
-YESNO game_decide_card(lua_State* L,  GameContext* pGame, GameEventContext* pParentEvent, int player, const char* szPattern);
+YESNO game_decide_card(lua_State* L,  tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent, int player, tolua_notnull const char* szPattern);
 
 
 // tolua_end
