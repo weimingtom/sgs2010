@@ -23,7 +23,7 @@ add_player_event(
 			local p = get_game_player(game, player);
 			-- reset the sha out counter
 			message('reset sha counter for ['..p.name..']')
-			p.params[0] = 0;
+			p.params[PLAYER_PARAM_SHA_COUNTER] = 0;
 		end
 		return R_DEF;
 	end
@@ -43,7 +43,7 @@ local cfg = {
 		
 		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
 			local p = get_game_player(game, player);
-			if(p.params[0] == 0) then
+			if(p.params[PLAYER_PARAM_SHA_COUNTER] == 0) then
 				return YES;
 			end	
 			return NO;
@@ -76,12 +76,12 @@ local cfg = {
 			if(ret == R_SUCC) then
 				event.out_card.targets[0] = target;
 				event.out_card.target_num = 1;
-				message('【'..get_game_player(game, player).name..'】指定了【'
+				event.out_card.message = '【'..get_game_player(game, player).name..'】指定了【'
 					.. get_game_player(game, target).name .. '】作为【'
-					.. cfg.name ..'】的目标。' );
+					.. cfg.name ..'】的目标。';
 
 				local p = get_game_player(game, player);
-				p.params[0] = p.params[0] + 1;
+				p.params[PLAYER_PARAM_SHA_COUNTER] = p.params[PLAYER_PARAM_SHA_COUNTER] + 1;
 				return R_SUCC;
 			end
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。

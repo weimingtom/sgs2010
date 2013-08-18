@@ -23,6 +23,7 @@
 
 
 import "../global/reg.lua";
+import "../global/player.lua";
 
 
 local cfg =  {
@@ -54,8 +55,26 @@ local cfg =  {
 		end,
 		
 		-- 触发武器技能
+		-- ‘杀’指定目标后，开始驱动前，所有‘杀’的目标都禁止防具效果，直到杀结算完成
+		[GameEvent_PerOutCard] = function(cfg, game, event, player, pos_card)
+			--game_event_info(game, event, 1);
+			if  event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+				and event.trigger == player  -- 出牌者是自己
+			 then
+				return USE_AUTO;
+			 end
+			return USE_CANNOT;
+		end,
 		
-		
+		-- ‘杀’指定目标后，开始驱动前，所有‘杀’的目标都禁止防具效果，直到杀结算完成
+		[GameEvent_PostOutCard] = function(cfg, game, event, player, pos_card)
+			if  event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+				and event.trigger == player  -- 出牌者是自己
+			 then
+				return USE_AUTO;
+			 end
+			return USE_CANNOT;
+		end,
 	},
 
 	event = {
@@ -79,6 +98,62 @@ local cfg =  {
 		end,
 
 		-- 结算武器技能效果
+		-- ‘杀’指定目标后，开始驱动前，所有‘杀’的目标都禁止防具效果，直到杀结算完成
+		[GameEvent_PerOutCard] = function(cfg, game, event, player)
+			-- 	杀指定的所有目标，设置防具禁用标志
+			local ta = '';
+			for n = 0, event.out_card.target_num - 1 do
+				local p = get_game_player(game, event.out_card.targets[n]);
+				if p then
+					-- 置标记
+					p.params[PLAYER_PARAM_QGJ_EFFECT] = 1;
+					if(ta ~= '') then
+						ta = ta .. '、';
+					end
+					ta = ta..'【'..p.name..'】';
+				end
+			end
+			message('【'..cfg.name..'】效果开始生效，目标角色'..ta..'的防具不再起作用。');
+			return R_SUCC;
+		end,
+
+		-- ‘杀’指定目标后，开始驱动前，所有‘杀’的目标都禁止防具效果，直到杀结算完成
+		[GameEvent_PostOutCard] = function(cfg, game, event, player)
+			-- 	杀指定的所有目标，复位防具禁用标志
+			local ta = '';
+			for n = 0, event.out_card.target_num - 1 do
+				local p = get_game_player(game, event.out_card.targets[n]);
+				if p then
+					-- 复位标记
+					p.params[PLAYER_PARAM_QGJ_EFFECT] = 0;
+					if(ta ~= '') then
+						ta = ta .. '、';
+					end
+					ta = ta..'【'..p.name..'】';
+				end
+			end
+			message('【'.. cfg.name ..'】效果解除，目标角色'..ta..'的防具恢复正常作用。');
+			return R_SUCC;
+		end,
+		
+		-- 这个事件用于测试准备是否可以使用，不会先通过can_use事件来判断（否则就是死循环），所以直接响应
+		[GameEvent_CheckCardCanUse] = function(cfg, game, event, player)
+			-- game_event_info(game, event);
+			local p = get_game_player(game, event.trigger);
+			if  p.params[PLAYER_PARAM_QGJ_EFFECT] == 1
+				and event.card_canuse.pos_card.where == CardWhere_PlayerEquip 
+				and event.card_canuse.pos_card.pos == EquipIdx_Armor 
+			then
+
+				-- 效果被触发。无视防具
+				
+				event.card_canuse.can_use = USE_CANNOT;
+				event.result = R_BACK;
+				event.block = YES;
+			end
+
+			return R_SUCC;
+		end
 
 	},
 };

@@ -7,6 +7,14 @@
 --]]
 
 
+--[[
+  这里定义用于分配玩家自定义参数的用途
+--]]
+
+-- 本回合玩家出杀的计数器
+PLAYER_PARAM_SHA_COUNTER = 0; 
+-- 玩家触发青钢剑效果（无视防具）
+PLAYER_PARAM_QGJ_EFFECT  = 1;
 
 local player_event = {};
 
