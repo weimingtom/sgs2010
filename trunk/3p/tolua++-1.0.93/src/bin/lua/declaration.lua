@@ -451,7 +451,6 @@ function _Declaration (t)
 	t.mod, t.type = applytypedef(t.mod, ft)
  end
 
- print("mod", t.mod);
  if t.kind=="var" and (string.find(t.mod, "tolua_property%s") or string.find(t.mod, "tolua_property$")) then
  	t.mod = string.gsub(t.mod, "tolua_property", "tolua_property__"..get_property_type())
  elseif t.kind=='var' and t.is_parameter and (string.find(t.mod, "tolua_notnull%s") or string.find(t.mod, "tolua_notnull$")) then
