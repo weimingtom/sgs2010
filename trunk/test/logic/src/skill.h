@@ -15,6 +15,7 @@ extern "C" {
 typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
+// tolua_begin
 
 typedef struct tagSkillCanUse
 {
@@ -32,15 +33,20 @@ typedef struct tagCardCanUse
 }CardCanUse;
 
 
+// tolua_end
+
 RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx);
 RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent);
 
 RESULT game_cmd_cancelskill(GameContext* pGame, GameEventContext* pEvent);
 
+// tolua_begin
 
 CANUSE game_card_can_use(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard);
 CANUSE game_skill_can_use(GameContext* pGame, GameEventContext* pEvent, int player, HeroID heroid, int skillindex);
+
+// tolua_end
 
 #ifdef __cplusplus
 }

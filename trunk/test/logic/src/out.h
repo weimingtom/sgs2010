@@ -64,7 +64,9 @@ typedef enum enOutCardFlag
 {
 	OutCardFlag_None = 0,
 	OutCardFlag_SpecOut = 1,   // 指定的出牌
-	OutCardFlag_SpecOutWithTarget= 2,   // 指定的出牌,指定目标
+	OutCardFlag_WithTarget= 2,   // 指定目标
+	OutCardFlag_NoCheckDis= 4,   // 忽略攻击距离
+	OutCardFlag_NoCheckTarget= 8,   // 忽略攻击目标条件检查
 }OutCardFlag;
 
 // tolua_end
@@ -82,7 +84,6 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent);
 RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int player);
 
 
-YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard);
 
 
 
@@ -90,6 +91,8 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 // lua interface
 
 // tolua_begin
+
+YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard);
 
 
 void game_load_out_pattern(lua_State* L, tolua_notnull OutCardPattern* out_pattern, tolua_notnull const char* s_pattern);

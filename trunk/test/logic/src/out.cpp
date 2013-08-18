@@ -25,6 +25,7 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 }
 
 
+
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	RESULT   ret;
@@ -323,7 +324,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 		return R_SUCC;
 
 	// 如果是指定目标的出牌，则不再调用OutCardPrepare事件,但是需要检查目标是否合法，不合法则出牌失败
-	if(out_card->flag == OutCardFlag_SpecOutWithTarget)
+	if(IS_FLAG_SET(out_card->flag, OutCardFlag_WithTarget))
 	{
 		for(n = 0;  n< out_card->target_num; n++)
 		{
@@ -368,10 +369,6 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 		return ret;
 
 
-	ret = per_out_card(pGame, pEvent, player, out_card);
-
-	CHECK_BACK_RET(ret);
-
 
 	ret = remove_out_card(pGame, pEvent, out_card);
 	CHECK_RET(ret,ret);
@@ -385,6 +382,12 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 		ST_ZERO(out_card->message);
 	}
 
+
+	ret = per_out_card(pGame, pEvent, player, out_card);
+
+	// 到了这里不应该被打断了
+	// CHECK_BACK_RET(ret);
+	
 	if(out_card->target_num == 0)
 	{
 		ret = do_out_card(pGame, pEvent, player, INVALID_PLAYER, out_card);

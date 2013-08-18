@@ -154,6 +154,17 @@ typedef enum _RESULT
 #define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
 #define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_SKIP || (r)==R_BACK) { return R_SUCC; } */  }while(0)
 
+
+// bit operator
+#define FLAG_SET(f, b)   ((f)|=(b))
+#define FLAG_CLR(f, b)   ((f)&=~(b))
+#define IS_FLAG_SET(f, b)   (((f)&(b))==(b))
+
+
+#define BIT_SET_N(f, n)      FLAG_SET((f),(1<<(n)))
+#define BIT_CLR_N(f, n)      FLAG_CLR((f), (1<<(n)))
+#define IS_BIT_SET_N(f, n)   IS_FLAG_SET((f), (1<<(n)))
+
 #ifdef __cplusplus
 }
 #endif

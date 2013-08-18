@@ -46,6 +46,10 @@ enum PlayerFlag
 	PlayerFlag_SkipThisRoundGet = 0x8,
 	PlayerFlag_SkipThisRoundOut = 0x10,
 	PlayerFlag_SkipThisRoundDiscard = 0x20,
+	//PlayerFlag_DiasbleWapon = 0x100,
+	//PlayerFlag_DiasbleArmor = 0x200,
+	//PlayerFlag_DiasbleHroseInc = 0x400,
+	//PlayerFlag_DiasbleHorseDec = 0x800,
 	PlayerFlag_AllThisSkipFlag = PlayerFlag_SkipThisRound
 		|PlayerFlag_SkipThisRoundJudge|PlayerFlag_SkipThisRoundGet
 		|PlayerFlag_SkipThisRoundOut|PlayerFlag_SkipThisRoundDiscard,

@@ -435,7 +435,7 @@ static void p_out_card(GameContext* pGame, const char* perffix, OutCard* p)
 		MSG_OUT("    %s.targets[%d]=%d \"%s\";\n", perffix, n, p->targets[n], player_name(pGame, p->targets[n]));
 
 	}
-	MSG_OUT("    %s.flag=%s;\n", perffix, ENUM2STR(OutCardFlag, p->flag));
+	MSG_OUT("    %s.flag=%s;\n", perffix, BITOR2STR(OutCardFlag, p->flag));
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
 	p_card(s_per, &p->vcard);
