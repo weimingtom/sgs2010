@@ -62,8 +62,16 @@ local cfg =  {
 				and event.parent_event.trigger == player          -- 我的出牌 				
 				and event.parent_event.target == event.trigger          -- 目标是出闪的人 
 				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
-				-- and string.find(event.ud, '{gsf}')    -- 只能使用一次
+				and string.find(event.ud, '{qlyyd}')
 			then
+				-- 在 {qlyyd} 技能内不再重复发动 
+				if event.parent_event.id == GameEvent_OutCard 
+					and event.parent_event.parent_event.id == GameEvent_AfterPassiveOut
+					and string.find(event.parent_event.parent_event.ud, '{qlyyd}')
+				then 
+					return USE_CANNOT;
+				end
+				
 				return USE_MANUAL;
 			end
 			return USE_CANNOT;
@@ -86,7 +94,17 @@ local cfg =  {
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
 				--message('attack base: 3');
-				event.attack_dis.base = 3;
+				if event.parent_event.id == GameEvent_AfterPassiveOut 
+					and string.find(event.parent_event.ud, '{qlyyd}')
+				then
+					-- 如果是在qlyyd技能追杀，则无视攻击距离
+					message(' * ['..cfg.name..']技能发动时无视攻击距离');
+					event.attack_dis.base = -1;
+					event.result = R_SKIP;
+					event.block = YES;
+				else
+					event.attack_dis.base = 3;
+				end
 			end
 			return R_DEF;
 		end,
@@ -95,28 +113,42 @@ local cfg =  {
 		-- 在对方出闪完成时，如果是你出的杀。则你可以继续对同一个目标使用一张杀
 		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
 			
-				local out_pattern  = OutCardPattern();
+
+			event.ud = event.ud .. '{qlyyd}';
+			local out_pattern  = OutCardPattern();
+			local out_card = OutCard();
+
+			while true do
+				local target = event.trigger;	
+				local pta = get_game_player(game, target);
+				
+				
 				game_load_out_pattern(out_pattern,  'h:{sha}?');
 				
-				local out_card = OutCard();
 				game_init_outcard(out_card);
-				if R_SUCC ~= game_supply_card(game, event, event.target, event.target, out_pattern
-						, '请对【'.. q.name ..'】使用一张【'..card_sid2name('sha')..'】', out_card)  
+				
+				if R_SUCC ~= game_supply_card(game, event, player, player, out_pattern
+						, '你可以对【'.. pta.name ..'】继续使用一张【'..card_sid2name('sha')..'】：', out_card)  
 				then
-					-- 返回成功 结算借刀杀人的得到目标武器
-					return R_SUCC;
+					-- 放弃继续出杀
+					message('放弃杀,武器技能结束');
+					break;
 				end
 				
 				
 				-- 设置目标
 				out_card.target_num = 1;
 				out_card.targets[0] = target;
-				out_card.flag = OutCardFlag_SpecOutWithTarget;
+				out_card.flag = bitor(OutCardFlag_WithTarget, OutCardFlag_WithTarget);
 				
-				if R_SUCC ~= game_real_out(game, event, event.target, out_card) then
-					-- 返回成功 结算借刀杀人的得到目标武器
-					return R_SUCC;
+				if R_SUCC == game_real_out(game, event, player, out_card) then
+					-- 杀已经生效也结束武器技能
+					message('杀已经生效,武器技能结束');
+					break;
 				end
+			end
+			
+			return R_SUCC;
 		end,
 
 	},
