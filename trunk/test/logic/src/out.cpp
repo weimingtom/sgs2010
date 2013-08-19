@@ -410,7 +410,7 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	}
 
 	// post out maybe modify out cards 
-	ret = post_out_card(pGame, pEvent, player, out_card);
+	post_out_card(pGame, pEvent, player, out_card);
 
 
 	// the out is not effect

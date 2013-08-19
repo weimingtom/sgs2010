@@ -156,7 +156,7 @@ local cfg = {
 				-- 设置目标
 				out_card.target_num = 1;
 				out_card.targets[0] = target;
-				out_card.flag = OutCardFlag_SpecOutWithTarget;
+				out_card.flag = OutCardFlag_WithTarget;
 				
 				if R_SUCC ~= game_real_out(game, event, event.target, out_card) then
 					-- 返回成功 结算借刀杀人的得到目标武器

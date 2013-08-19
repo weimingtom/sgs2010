@@ -224,14 +224,23 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 
 			trigger_game_event(pGame, &event);
 
-			if(dis.base + dis.inc < dis.dis)
+			if(event.result == R_CANCEL)
 			{
-				// Attack range less the distance to taget
-				if(tip)
+				return R_CANCEL;
+			}
+
+			// some skill can set attack no check distance...  set base to -1
+			if(event.result != R_SKIP && dis.base >= 0)
+			{
+				if(dis.base + dis.inc < dis.dis)
 				{
-					MSG_OUT("选择的角色不在攻击范围内!\n");
+					// Attack range less the distance to taget
+					if(tip)
+					{
+						MSG_OUT("选择的角色不在攻击范围内!\n");
+					}
+					return R_E_DISTANCE;
 				}
-				return R_E_DISTANCE;
 			}
 		}
 	}
