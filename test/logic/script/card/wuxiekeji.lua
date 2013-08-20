@@ -125,7 +125,7 @@ local cfg = {
 			elseif(event.parent_event.id == GameEvent_PerCardCalc) then
 				local tr = get_game_player(game, event.parent_event.trigger);
 				local me = get_game_player(game, player);
-				local trcard = event.parent_event.pos_vcard.vcard;
+				local trcard = event.parent_event.judge_card.pos_vcard.vcard;
 				local mecard = event.out_card.vcard;
 				message('【'..me.name..'】使用'..get_card_str(mecard)..'抵消了【'..tr.name..'】的判定牌'..get_card_str(trcard)..'的效果。');
 				event.parent_event.result = R_CANCEL;

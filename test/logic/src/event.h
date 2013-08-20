@@ -140,7 +140,7 @@ typedef struct tagChangeLife ChangeLife;
 typedef struct tagSelectTarget SelectTarget;
 typedef struct tagSkillCanUse SkillCanUse;
 typedef struct tagCardCanUse CardCanUse;
-
+typedef struct tagJudgeCard  JudgeCard;
 
 
 struct tagGameEventContext
@@ -164,7 +164,8 @@ struct tagGameEventContext
 		DiscardPattern* discard_pattern; // when round discard card, or passive discard card
 		//DiscardCard* discard_card;  // discard card
 		PosCard*     pos_card;  // lost card,
-		PosVCard*    pos_vcard;  // judgement vcard,
+		PosVCard*     pos_vcard;  // discard card,
+		JudgeCard*   judge_card;  // judgement vcard,
 		EquipCard*  equip_card; // for per/post equip card
 		ChangeLife* change_life; // when life is changed 
 		SelectTarget* select_target; // when select target checked

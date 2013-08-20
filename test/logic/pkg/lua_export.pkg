@@ -14,6 +14,7 @@ $cfile "../src/decide.h"
 $cfile "../src/discard.h"
 $cfile "../src/life.h"
 $cfile "../src/info.h"
+$cfile "../src/judge.h"
 
 // void game_import_file @ import(lua_State* L, const char* pattern);
 
@@ -63,20 +64,21 @@ typedef struct tagGameEventContext
 	RESULT   result;
 	YESNO	 block;
 	//union {
-	tolua_readonly GetCard*    get_card;        // num for get card, discard card. etc
+	tolua_readonly GetCard*    get_card;         // num for get card, discard card. etc
 	tolua_readonly AttackDis*  attack_dis; 
 	tolua_readonly OutCardPattern* card_pattern;
 	tolua_readonly BeforePassiveOut* before_pout; 
-	tolua_readonly PatternOut* pattern_out; // for passive out, supply card etc..
-	tolua_readonly OutCard*    out_card;    // real out,  per/post out
+	tolua_readonly PatternOut* pattern_out;      // for passive out, supply card etc..
+	tolua_readonly OutCard*    out_card;         // real out,  per/post out
 	tolua_readonly DiscardPattern* discard_pattern; // when life is changed 
-	tolua_readonly PosCard*    pos_card;    // lost card,
-	tolua_readonly PosVCard*    pos_vcard;    // judgement vcard,
-	tolua_readonly EquipCard*  equip_card;  // for per/post equip card
-	tolua_readonly ChangeLife* change_life; // when life is changed 
+	tolua_readonly PosCard*    pos_card;         // lost card,
+	tolua_readonly PosVCard*   pos_vcard;        // pos vcard,
+	tolua_readonly JudgeCard*  judge_card;       // judgement card
+	tolua_readonly EquipCard*  equip_card;       // for per/post equip card
+	tolua_readonly ChangeLife* change_life;      // when life is changed 
 	tolua_readonly SelectTarget* select_target;  // when select target checked
-	tolua_readonly SkillCanUse*  skill_canuse;
-	tolua_readonly CardCanUse*   card_canuse;
+	tolua_readonly SkillCanUse*  skill_canuse;   // check skill can use
+	tolua_readonly CardCanUse*   card_canuse;    // check card can use
 	//};
 	char   ud[MAX_UD_LEN];
 } GameEventContext;

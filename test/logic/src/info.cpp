@@ -8,6 +8,7 @@
 #include "discard.h"
 #include "select.h"
 #include "life.h"
+#include "judge.h"
 #include "equip.h"
 #include "skill.h"
 #include "script.h"
@@ -561,6 +562,20 @@ static void game_event_param__pos_vcard(GameContext* pGame, GameEventContext* pE
 	}
 }
 
+static void game_event_param__judge_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->judge_card)
+	{
+		MSG_OUT("    judge_card=NULL;\n");
+	}
+	else
+	{
+		p_pos_vcard("judge_card.pos_vcard", pEvent->pos_vcard);
+		MSG_OUT("    judge_card.judge_result=%d;\n", pEvent->judge_card->judge_result);
+		MSG_OUT("    judge_card.ud=\"%s\";\n", pEvent->judge_card->ud);
+	}
+}
+
 
 static void game_event_param__equip_card(GameContext* pGame, GameEventContext* pEvent)
 {
@@ -730,11 +745,13 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 		break;
 	case GameEvent_PerDiscardCard:
 	case GameEvent_PostDiscardCard:
+		game_event_param__pos_vcard(pGame, pEvent);
+		break;
 	case GameEvent_PerCardCalc:
 	case GameEvent_CardCalc:
 	case GameEvent_PostCardCalc:
 	case GameEvent_FiniCardCalc:
-		game_event_param__pos_vcard(pGame, pEvent);
+		game_event_param__judge_card(pGame, pEvent);
 		break;
 	case GameEvent_PerEquipCard:
 	case GameEvent_PostEquipCard:

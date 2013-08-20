@@ -9,6 +9,18 @@ extern "C" {
 #endif
 
 
+// tolua_begin
+
+typedef struct tagJudgeCard
+{
+	PosVCard  pos_vcard;
+	int       judge_result;
+	char      ud[MAX_UD_LEN];
+
+} JudgeCard ;
+
+// tolua_end
+
 
 RESULT game_round_do_judge(GameContext* pGame, GameEventContext* pEvent, int player);
 
