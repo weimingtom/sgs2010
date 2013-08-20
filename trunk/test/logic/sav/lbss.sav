@@ -59,14 +59,13 @@ game = {
 			max_life = 5,
 			cur_life = 5,
 			name = '²Ü²Ù',
-			hand_card_num = 8,
+			hand_card_num = 7,
 			judgment_card_num = 0,
 			hand_cards = {
 				{ sid = 'tao', color = CardColor_Club, value = CardValue_10, flag = CardFlag_None, },
 				{ sid = 'sha', color = CardColor_Spade, value = CardValue_J, flag = CardFlag_None, },
 				{ sid = 'sd', color = CardColor_Heart, value = CardValue_8, flag = CardFlag_None, },
 				{ sid = 'lbss', color = CardColor_Heart, value = CardValue_10, flag = CardFlag_None, },
-				{ sid = 'sd', color = CardColor_Diamond, value = CardValue_4, flag = CardFlag_None, },
 				{ sid = 'jdsr', color = CardColor_Club, value = CardValue_Q, flag = CardFlag_None, },
 				{ sid = 'nmrq', color = CardColor_Spade, value = CardValue_8, flag = CardFlag_None, },
 				{ sid = 'jd', color = CardColor_Club, value = CardValue_9, flag = CardFlag_None, },
@@ -91,7 +90,7 @@ game = {
 			cur_life = 3,
 			name = 'Íæ¼Ò4',
 			hand_card_num = 2,
-			judgment_card_num = 0,
+			judgment_card_num = 1,
 			hand_cards = {
 				{ sid = 'shan', color = CardColor_Heart, value = CardValue_5, flag = CardFlag_None, },
 				{ sid = 'bgz', color = CardColor_Diamond, value = CardValue_9, flag = CardFlag_None, },
@@ -103,6 +102,7 @@ game = {
 				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
 			},
 			judgment_cards = {
+				{ sid = 'sd', color = CardColor_Diamond, value = CardValue_4, flag = CardFlag_None, },
 			},
 			status = PlayerStatus_Hide,
 			flag = PlayerFlag_None,

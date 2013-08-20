@@ -116,7 +116,7 @@ function(cfg, game, event, player, pos_card)--
 		return USE_MANUAL;
 	end
 	return USE_CANNOT;
-end,
+end
 
 -- 出牌时使用
 cfg.event[GameEvent_RoundOutCard] = 

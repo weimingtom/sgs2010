@@ -145,15 +145,15 @@ function calc_card_color_by_pos_card_list(list)
 	for n = 0, list.num - 1 do
 		if list.pcards[n].card.color == CardColor_Spade then
 			s = s + 1;
-		else if list.pcards[n].card.color == CardColor_Heart then 
+		elseif list.pcards[n].card.color == CardColor_Heart then 
 			h = h + 1;
-		else if list.pcards[n].card.color == CardColor_Diamond then 
+		elseif list.pcards[n].card.color == CardColor_Diamond then 
 			d = d + 1;
-		else if list.pcards[n].card.color == CardColor_Club then 
+		elseif list.pcards[n].card.color == CardColor_Club then 
 			c = c + 1;
-		else if list.pcards[n].card.color == CardColor_GeneralBlack then 
+		elseif list.pcards[n].card.color == CardColor_GeneralBlack then 
 			b = b + 1;
-		else if list.pcards[n].card.color == CardColor_GeneralRed then 
+		elseif list.pcards[n].card.color == CardColor_GeneralRed then 
 			r = r + 1;
 		else
 			o = o + 1;
