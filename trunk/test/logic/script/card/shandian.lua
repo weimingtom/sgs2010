@@ -35,7 +35,17 @@ local cfg = {
 	can_out = {
 		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
 			-- 出牌阶段的检测，只会针对回合玩家。这里不用额外检查是不是。
-			-- 出牌阶段总是可以出锦囊牌的。
+			-- 对于闪电来说，自己的判定区需要没有闪电。
+
+			local p = get_game_player(game, player);
+			if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
+				-- 判定区已满。
+				return NO;
+			elseif(find_player_judgecard(p, get_card_id_by_sid(cfg.sid)) >= 0) then
+				-- 判定区已经有闪电。
+				return NO;
+			end			
+			
 			return YES;
 		end,
 	},
@@ -54,30 +64,15 @@ local cfg = {
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
-			-- select target
-			local ret;
-			local target = -1;
-			while true do
-				ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), NO, NO,
-					"请为【"..cfg.name.."】指定一个目标:", target);
-				if(ret == R_SUCC) then
-					local p = get_game_player(game, target);
-					if(p.judgment_card_num >= MAX_JUDGMENT_CARD) then
-						message('【'..p.name..'】的判定区已满。请选择其它玩家！');
-					elseif(find_player_judgecard(p, get_card_id_by_sid(cfg.sid)) >= 0) then
-						message('【'..p.name..'】的判定区已经有【'..cfg.name..'】。请选择其它玩家！');
-					else
-						event.out_card.targets[0] = target;
-						event.out_card.target_num = 1;
-						return R_SUCC;
-					end
-				else
-					break;
-				end
-			end
+			-- 闪电不用指定目标，只能给自己
+
+			event.out_card.targets[0] = player;
+			event.out_card.target_num = 1;
+			
+			
 			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
-			return R_CANCEL;
+			return R_SUCC;
 		end,
 
 		-- 出牌的过程驱动
@@ -101,12 +96,16 @@ local cfg = {
 		-- 判定阶段的结算
 		[GameEvent_CardCalc] = function (cfg, game, event, player)
 			-- 判定(需要红桃)
-			local ret = game_decide_card(game, event, player, 'h');
-			if(ret ~= YES) then
-				-- 生效， 跳过出牌阶段
+			local ret = game_decide_card(game, event, player, 's2-9');
+			if(ret == YES) then
+				-- 生效， 受到伤害
 				local p = get_game_player(game, player);
-				message('【'..p.name..'】的判定牌【'..cfg.name..'】生效，将被跳过出牌阶段。');
-				player_set_flag(get_game_player(game, player), PlayerFlag_SkipThisRoundOut);
+				message('【'..p.name..'】的判定牌【'..cfg.name..'】生效，玩家受到【'..cfg.name..'】的伤害。');
+				return game_player_add_life(game, event, event.target, -3, INVALID_PLAYER, nil, 0)
+			else
+				-- 移动到下家
+				local np = game_next_player(game, player);
+				return add_cur_card_to_player_judgment(game, event.pos_vcard.vcard, event.pos_vcard.list, np);
 				
 			end
 			return R_SUCC;

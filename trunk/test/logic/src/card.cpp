@@ -127,17 +127,24 @@ const char* card_flag_str(CardFlag flag)
 }
 */
 
-const char* get_card_str(Card* card)
+const char* get_card_str(const Card* card)
 {
 	static char buffer[128];
 	return card_str_n(card, 1, buffer, sizeof(buffer));
 }
 
-const char* get_vcard_str(VCard* vcard)
+const char* get_vcard_str(const VCard* vcard)
 {
 	static char buffer[256];
 	return vcard_str_n(vcard, 1, buffer, sizeof(buffer));
 }
+
+const char* get_pattern_str(const CardPattern* cardp)
+{
+	static char buffer[256];
+	return card_pattern_str_n(cardp, 1, buffer, sizeof(buffer));
+}
+
 
 /*
 const CardConfig* get_card_config(CardID id)

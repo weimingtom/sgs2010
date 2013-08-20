@@ -291,6 +291,30 @@ void set_vcard_from_card(VCard* pVCard, const Card* pCard);
 char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int buflen);
 
 
+RESULT card_match(const Card* pCard, size_t offset, int nCardNum, const CardPattern* pPattern, int nPatternNum);
+
+
+// tolua_begin
+
+const char* card_type_str(CardType type);
+//const char* card_id_str(CardID id);
+const char* card_color_str(CardColor color);
+const char* card_value_str(CardValue value);
+//const char* card_flag_str(CardFlag flag);
+
+const char* get_card_str(tolua_notnull const Card* card);
+const char* get_vcard_str(tolua_notnull const VCard* vcard);
+const char* get_pattern_str(tolua_notnull const CardPattern* cardp);
+
+/*
+void set_card_id(Card* pCard, CardID id);
+void set_card_color(Card* pCard, CardColor cl);
+void set_card_value(Card* pCard, CardValue val);
+void set_card_flag(Card* pCard, CardFlag flag);
+*/
+
+
+
 // card  pattern: <{sid}><color><val>
 //         each <...> can be [<from>-<to>] or [<p1><p2><p3>] ...
 //        <{sid}> : the card sid name. can be empty, that means any sid is valid, equal to {none}
@@ -304,29 +328,6 @@ char* card_pattern_str_n(const CardPattern* patterns, int num, char* buffer, int
 //             n  : none (any color)
 //        <val> : one of 'A,2 - 10, J, Q, K' , can use [from-to] format, if it is empty, means any value.
 RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len);
-
-RESULT card_match(const Card* pCard, size_t offset, int nCardNum, const CardPattern* pPattern, int nPatternNum);
-
-
-// tolua_begin
-
-const char* card_type_str(CardType type);
-//const char* card_id_str(CardID id);
-const char* card_color_str(CardColor color);
-const char* card_value_str(CardValue value);
-//const char* card_flag_str(CardFlag flag);
-
-const char* get_card_str(tolua_notnull Card* card);
-const char* get_vcard_str(tolua_notnull VCard* vcard);
-
-/*
-void set_card_id(Card* pCard, CardID id);
-void set_card_color(Card* pCard, CardColor cl);
-void set_card_value(Card* pCard, CardValue val);
-void set_card_flag(Card* pCard, CardFlag flag);
-*/
-
-
 
 // tolua_end
 

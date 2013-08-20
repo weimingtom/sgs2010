@@ -43,16 +43,16 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	Player* pPlayer;
 	ChangeLife   stChgLife;
 
-
-	if(!IS_PLAYER_VALID(pGame, player))
-	{
-		if(L) {
-			luaL_error(L, "game_player_add_life: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_player_add_life: invalid player index - %d\n", player );
-		}
-		return R_E_FAIL;
-	}
+//  这里的player可以是空的 INVALID_PLAYER
+// 	if(!IS_PLAYER_VALID(pGame, player))
+// 	{
+// 		if(L) {
+// 			luaL_error(L, "game_player_add_life: invalid player index - %d", player );
+// 		} else {
+// 			MSG_OUT("game_player_add_life: invalid player index - %d\n", player );
+// 		}
+// 		return R_E_FAIL;
+// 	}
 
 
 	ST_ZERO(stChgLife);

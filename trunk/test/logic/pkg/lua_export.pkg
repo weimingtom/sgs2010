@@ -91,3 +91,37 @@ struct OutCardPattern
 	OutCardPattern();
 };
 
+struct PosCard
+{
+	PosCard();
+};
+
+struct PosVCard
+{
+	PosVCard();
+};
+
+struct VCard
+{
+	VCard();
+};
+
+struct Card
+{
+	Card();
+};
+
+struct CardPattern
+{
+	CardPattern();
+};
+
+struct CardList
+{
+	CardList();
+};
+
+struct PosCardList
+{
+	PosCardList();
+};

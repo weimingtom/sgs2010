@@ -229,6 +229,13 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 				return R_CANCEL;
 			}
 
+			// 和自己的距离始终是0
+			if(player == target)
+			{
+				dis.inc = 0;
+				dis.dis = 0;
+			}
+
 			// some skill can set attack no check distance...  set base to -1
 			if(event.result != R_SKIP && dis.base >= 0)
 			{
