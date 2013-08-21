@@ -106,7 +106,7 @@ local cfg = {
 			else
 				-- 移动到下家(下家有闪电就再下家)
 				local np = game_next_player(game, player);
-				while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 then
+				while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 do
 					np = game_next_player(game, np);
 				end
 				
@@ -126,7 +126,7 @@ local cfg = {
 					message("valid");
 					local np = game_next_player(game, player);
 
-					while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 then
+					while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 do
 						np = game_next_player(game, np);
 					end
 					return add_cur_card_to_player_judgment(game, event.judge_card.pos_vcard.vcard, event.judge_card.pos_vcard.list, np);
