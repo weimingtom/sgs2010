@@ -308,18 +308,18 @@ RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int l
 
 		p++;
 
-		if(0 == strcmp(tmp, "none"))
+		if(0 == strcmp(tmp, "any"))
 		{
 			pCardPattern->id = CardID_None;
 		}
 		else
 		{
 			pCardPattern->id = card_sid2id(tmp);
-			if(pCardPattern->id == (CardID_None))
-			{
-				// invalid card sid
-				return R_E_FAIL;
-			}
+			//if(pCardPattern->id == (CardID_None))
+			//{
+			//	// invalid card sid
+			//	return R_E_FAIL;
+			//}
 		}
 	}
 
@@ -644,6 +644,30 @@ CardID  card_maxid()
 	}
 	lua_pop(L, 1);
 	return id;
+}
+
+int card_id_valid(CardID  id)
+{
+	int r = 0;
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "is_card_id_valid");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	r = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return r;
+}
+
+int card_sid_valid(const char* sid)
+{
+	int r = 0;
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "is_card_sid_valid");
+	lua_pushstring(L, sid);	
+	lua_call(L, 1, 1);
+	r = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return r;
 }
 
 

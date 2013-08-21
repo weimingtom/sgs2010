@@ -3,7 +3,7 @@
 #include "hero.h"
 #include "comm.h"
 
-RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
+RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero, int index)
 {
 	//const HeroConfig*  pHeroConfig = get_hero_config(hero);
 
@@ -33,11 +33,24 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	pPlayer->id = id;
 	pPlayer->hero = hero;
-	pPlayer->max_life = hero_life(hero);
+
+	if(hero != HeroID_None)
+	{
+		pPlayer->max_life = hero_life(hero);
+		hero_name(hero, pPlayer->name, sizeof(pPlayer->name));
+	}
+	else
+	{
+		pPlayer->max_life = 3;
+		snprintf(pPlayer->name, sizeof(pPlayer->name), "Íæ¼Ò%d", index + 1);
+	}
+
 	pPlayer->status = PlayerStatus_Hide;
 
-	if(pPlayer->max_life == 0)
+	if(pPlayer->max_life <= 0)
+	{
 		pPlayer->max_life = 3;
+	}
 
 	// master
 	if(id == PlayerID_Master)
@@ -48,13 +61,10 @@ RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero)
 
 	pPlayer->cur_life = pPlayer->max_life;
 
-	//strncpy(pPlayer->name, pHeroConfig->name, MAX_NAME_LEN);
-	hero_name(hero, pPlayer->name, sizeof(pPlayer->name));
-
 	pPlayer->hand_card_num = 0;
 	pPlayer->judgment_card_num = 0;
 
-	MSG_OUT("init player: id [%s] hero [%s] life [%d]\n", player_id_str(pPlayer->id), pPlayer->name, pPlayer->max_life);
+	MSG_OUT("init player: id [%s] hero [%s] name [%s] life [%d]\n", player_id_str(pPlayer->id), get_hero_sid(hero), pPlayer->name, pPlayer->max_life);
 
 	return R_SUCC;
 }

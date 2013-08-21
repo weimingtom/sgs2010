@@ -306,7 +306,7 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 					return R_E_FAIL;
 
 			}
-			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], (HeroID)hids[c-1]);
+			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], (HeroID)hids[c-1], pGame->cur_player);
 			if(c < hcnt)
 			{
 				hids[c-1] = hids[hcnt-1];
@@ -315,8 +315,8 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 		}
 		else
 		{
-			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], HeroID_None);
-			snprintf(pGame->players[pGame->cur_player].name, MAX_NAME_LEN, "Íæ¼Ò%d", pGame->cur_player+1);
+			init_player(&pGame->players[pGame->cur_player], (PlayerID)pids[pGame->cur_player], HeroID_None, pGame->cur_player);
+			//snprintf(pGame->players[pGame->cur_player].name, MAX_NAME_LEN, "Íæ¼Ò%d", pGame->cur_player+1);
 		}
 
 		pGame->cur_player = (pGame->cur_player + 1) % pGame->player_count;

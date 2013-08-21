@@ -75,7 +75,7 @@ game = {
 				{ sid = 'hbj', color = CardColor_Diamond, value = CardValue_2, flag = CardFlag_None, },
 				{ sid = 'bgz', color = CardColor_Diamond, value = CardValue_8, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_7, flag = CardFlag_None, },
+				{ sid = 'ct', color = CardColor_Diamond, value = CardValue_7, flag = CardFlag_None, },
 			},
 			judgment_cards = {
 			},
@@ -100,7 +100,7 @@ game = {
 				{ sid = 'fthj', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
 				{ sid = 'rwd', color = CardColor_Diamond, value = CardValue_10, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
+				{ sid = 'ct', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
 			},
 			judgment_cards = {
 			},
@@ -126,7 +126,7 @@ game = {
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
 				{ sid = 'bgz', color = CardColor_Diamond, value = CardValue_Q, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'chitu', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
+				{ sid = 'ct', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
 			},
 			judgment_cards = {
 			},

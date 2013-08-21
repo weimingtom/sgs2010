@@ -38,25 +38,29 @@
 } while(0)
 
 
-void game_load_card(lua_State* L, Card* pCard)
+static void game_load_card(lua_State* L, Card* pCard, int not_none)
 {
 	//LOAD_INT_CAST(pCard, id, L, CardID);
 	lua_getfield(L, -1, "sid");
 	pCard->id = card_sid2id(lua_tostring(L, -1));
 	lua_pop(L, 1);
+	if(not_none && pCard->id == CardID_None)
+	{
+		luaL_error(L, "expected a valid card id!");
+	}
 	LOAD_INT_CAST(pCard, color, L, CardColor);
 	LOAD_INT_CAST(pCard, value, L, CardValue);
 	LOAD_INT_CAST(pCard, flag, L, CardFlag);
 }
 
-void game_load_vcard(lua_State* L, VCard* pVCard)
+static void game_load_vcard(lua_State* L, VCard* pVCard, int not_none)
 {
 	int n;
 	//LOAD_INT_CAST(pCard, id, L, CardID);
 	lua_getfield(L, -1, "vcard");
 	if(lua_istable(L, -1))
 	{
-		game_load_card(L, &pVCard->vcard);
+		game_load_card(L, &pVCard->vcard, 1);
 		lua_pop(L, 1);
 		LOAD_INT(pVCard, rnum, L);
 		if(pVCard->rnum <= 0 || pVCard->rnum > MAX_RCARD_NUM)
@@ -68,7 +72,7 @@ void game_load_vcard(lua_State* L, VCard* pVCard)
 		{
 			lua_pushnumber(L, n+1);
 			lua_gettable(L, -2);
-			game_load_card(L, &pVCard->rcards[n]);
+			game_load_card(L, &pVCard->rcards[n], 1);
 			lua_pop(L, 1);
 		}
 		lua_pop(L, 1);
@@ -76,7 +80,7 @@ void game_load_vcard(lua_State* L, VCard* pVCard)
 	else
 	{
 		lua_pop(L, 1);
-		game_load_card(L, &pVCard->vcard);
+		game_load_card(L, &pVCard->vcard, not_none);
 		pVCard->rnum = 1;
 		pVCard->rcards[0] = pVCard->vcard;
 
@@ -84,7 +88,7 @@ void game_load_vcard(lua_State* L, VCard* pVCard)
 }
 
 
-void game_load_cardstack(lua_State* L, CardStack* pCardStack)
+static void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 {
 	int n;
 	LOAD_INT(pCardStack, count, L);
@@ -99,14 +103,14 @@ void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		game_load_card(L, &pCardStack->cards[n]);
+		game_load_card(L, &pCardStack->cards[n], 1);
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
 }
 
 
-void game_load_player(lua_State* L, Player* pPlayer)
+static void game_load_player(lua_State* L, Player* pPlayer)
 {
 	int n;
 
@@ -135,7 +139,7 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		game_load_card(L, &pPlayer->hand_cards[n]);		
+		game_load_card(L, &pPlayer->hand_cards[n], 1);		
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -145,7 +149,7 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		game_load_card(L, &pPlayer->equip_cards[n]);
+		game_load_card(L, &pPlayer->equip_cards[n], 0);
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -155,7 +159,7 @@ void game_load_player(lua_State* L, Player* pPlayer)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);
-		game_load_vcard(L, &pPlayer->judgment_cards[n]);		
+		game_load_vcard(L, &pPlayer->judgment_cards[n], 1);		
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -271,7 +275,7 @@ static int lua_game_load(lua_State* L)
 	{
 		lua_pushnumber(L, n+1);
 		lua_gettable(L, -2);   // [t] [t.game] [t.game.cur_discard_cards] [t.game.cur_discard_cards[n+1]]
-		game_load_card(L, &pGame->cur_discard_cards[n]);
+		game_load_card(L, &pGame->cur_discard_cards[n], 0);
 		lua_pop(L, 1);    // [t] [t.game] [t.game.cur_discard_cards]
 	}
 	lua_pop(L, 1);    // [t] [t.game] 

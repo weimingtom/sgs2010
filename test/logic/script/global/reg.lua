@@ -105,6 +105,13 @@ function get_card_maxid()
 	return table.getn(card_list);
 end
 
+function is_card_id_valid(id)
+	return card_list[id] ~= nil;
+end
+
+function is_card_sid_valid(sid)
+	return card_index[sid] ~= nil;
+end
 
 function get_card_name(id)
 
@@ -115,17 +122,17 @@ function get_card_name(id)
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then
-		return nil;
+		error('get_card_name('..tostring(id)..'): unknown card id.');
 	end
 	
-	return cfg.name or cfg.sid;
+	return cfg.name;
 end
 
 function get_card_type(id)
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then
-		return nil;
+		error('get_card_type('..tostring(id)..'): unknown card id.');
 	end
 	
 	return cfg.type;
@@ -136,7 +143,7 @@ function get_card_desc(id)
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then
-		return nil;
+		error('get_card_desc('..tostring(id)..'): unknown card id.');
 	end
 	
 	return cfg.desc or "";
@@ -150,7 +157,7 @@ function get_card_sid(id)
 	local cfg = card_list[id];
 	
 	if(cfg == nil) then
-		return nil;
+		error('get_card_sid('..tostring(id)..'): unknown card id.');
 	end
 	
 	return cfg.sid;
@@ -158,7 +165,13 @@ end
 
 
 function get_card_id_by_sid(sid)
-	return card_index[sid] or 0;
+	if(sid == 'none') then
+		return CardID_None;
+	end
+	if not card_index[sid] then
+		error('get_card_id_by_sid('..tostring(sid)..'): unknown card sid.');
+	end
+	return card_index[sid];
 end
 
 
@@ -168,7 +181,10 @@ end
 
 function call_card_can_out(id, game, event, player, pos_card)
 	local cfg = card_list[id];
-	if(cfg == nil or cfg.can_out == nil or cfg.can_out[event.id] == nil) then
+	if(cfg == nil) then
+		error('call_card_can_out('..tostring(id)..', ...): unknown card id.');
+	end
+	if(cfg.can_out == nil or cfg.can_out[event.id] == nil) then
 		return NO;
 	end
 	
@@ -183,7 +199,12 @@ end
 
 function call_card_can_use(id, game, event, player, pos_card)
 	local cfg = card_list[id];
-	if(cfg == nil or cfg.can_use == nil or cfg.can_use[event.id] == nil) then
+	
+	if(cfg == nil) then
+		error('call_card_can_use('..tostring(id)..', ...): unknown card id.');
+	end
+
+	if(cfg.can_use == nil or cfg.can_use[event.id] == nil) then
 		return USE_CANNOT;
 	end
 	
@@ -197,7 +218,12 @@ end
 
 function call_card_event(id, game, event, player)
 	local cfg = card_list[id];
-	if(cfg == nil or cfg.event == nil or cfg.event[event.id] ==nil ) then
+	
+	if(cfg == nil) then
+		error('call_card_event('..tostring(id)..', ...): unknown card id.');
+	end
+	
+	if(cfg.event == nil or cfg.event[event.id] ==nil ) then
 		return R_DEF; 
 	end
 	
@@ -219,6 +245,13 @@ function get_hero_maxid()
 	return table.getn(hero_list);
 end
 
+function is_hero_id_valid(id)
+	return hero_list[id] ~= nil;
+end
+
+function is_hero_sid_valid(sid)
+	return hero_index[sid] ~= nil;
+end
 
 function get_hero_sid(id)
 	if (id == HeroID_None) then
@@ -228,7 +261,7 @@ function get_hero_sid(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_sid('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.sid;
@@ -241,17 +274,17 @@ function get_hero_name(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_name('..tostring(id)..') : unknown hero id.');
 	end
 	
-	return cfg.name or cfg.sid;
+	return cfg.name;
 end
 
 function get_hero_desc(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_desc('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.desc or '';
@@ -261,7 +294,7 @@ function get_hero_master(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_master('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.master;
@@ -271,7 +304,7 @@ function get_hero_life(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_life('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.life;
@@ -282,7 +315,7 @@ function get_hero_group(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_group('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.group;
@@ -292,7 +325,7 @@ function get_hero_sex(id)
 	local cfg = hero_list[id];
 	
 	if (cfg == nil) then
-		return nil;
+		error('get_hero_six('..tostring(id)..') : unknown hero id.');
 	end
 	
 	return cfg.sex;
@@ -301,7 +334,11 @@ end
 function get_hero_skill_num(id)
 	local cfg = hero_list[id];
 	
-	if (cfg == nil or cfg.skills == nil) then
+	if (cfg == nil) then
+		error('get_hero_skill_num('..tostring(id)..') : unknown hero id.');
+	end
+	
+	if (cfg.skills == nil) then
 		return 0;
 	end
 	
@@ -310,9 +347,13 @@ end
 
 function get_hero_skill_name(id, index)
 	local cfg = hero_list[id];
+
+	if (cfg == nil) then
+		error('get_hero_skill_name('..tostring(id)..', '..tostring(index)..') : unknown hero id.');
+	end
 	
-	if (cfg == nil or cfg.skills == nil or cfg.skills[index] == nil) then
-		return nil;
+	if (cfg.skills == nil or cfg.skills[index] == nil) then
+		error('get_hero_skill_name('..tostring(id)..', '..tostring(index)..') : invalid skill index.');
 	end
 	
 	return cfg.skills[index].name;
@@ -321,27 +362,43 @@ end
 function get_hero_skill_flag(id, index)
 	local cfg = hero_list[id];
 	
-	if (cfg == nil or cfg.skills == nil or cfg.skills[index] == nil) then
-		return nil;
+	if (cfg == nil) then
+		error('get_hero_skill_flag('..tostring(id)..', '..tostring(index)..') : unknown hero id.');
+	end
+	
+	if (cfg.skills == nil or cfg.skills[index] == nil) then
+		error('get_hero_skill_flag('..tostring(id)..', '..tostring(index)..') : invalid skill index.');
 	end
 	
 	return cfg.skills[index].flag;
 end
 
 function get_hero_id_by_sid(sid)
-	return hero_index[sid] or HeroID_None;
+	if(sid == 'none') then
+		return HeroID_None;
+	end
+	
+	if(hero_index[sid] == nil) then
+		error('get_hero_id_by_sid('..tostring(sid)..') : unknown hero sid.');
+	end
+	
+	return hero_index[sid];
 end
 
 function call_hero_skill_can_use(id, index, game, event, player)
 	local cfg = hero_list[id];
 	
-	if(cfg == nil or cfg.skills == nil) then
-		return USE_CANNOT;
+	if (cfg == nil) then
+		error('call_hero_skill_can_use('..tostring(id)..', '..tostring(index)..', ...) : unknown hero id.');
+	end
+	
+	if (cfg.skills == nil or cfg.skills[index] == nil) then
+		error('call_hero_skill_can_use('..tostring(id)..', '..tostring(index)..', ...) : invalid skill index.');
 	end
 	
 	local skill = cfg.skills[index];
 	
-	if(skill == nil or skill.can_use == nil or skill.can_use[event.id] == nil) then
+	if(skill.can_use == nil or skill.can_use[event.id] == nil) then
 		return USE_CANNOT;
 	end
 	
@@ -356,13 +413,17 @@ end
 function call_hero_skill_event(id, index, game, event, player)
 	local cfg = hero_list[id];
 	
-	if(cfg == nil or cfg.skills == nil) then
-		return R_DEF;
+	if (cfg == nil) then
+		error('call_hero_skill_event('..tostring(id)..', '..tostring(index)..', ...) : unknown hero id.');
+	end
+	
+	if (cfg.skills == nil or cfg.skills[index] == nil) then
+		error('call_hero_skill_event('..tostring(id)..', '..tostring(index)..', ...) : invalid skill index.');
 	end
 	
 	local skill = cfg.skills[index];
 	
-	if(skill == nil or skill.event == nil or skill.event[event.id] == nil) then
+	if(skill.event == nil or skill.event[event.id] == nil) then
 		return R_DEF;
 	end
 	

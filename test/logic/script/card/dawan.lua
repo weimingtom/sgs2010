@@ -15,7 +15,7 @@ import "../global/reg.lua";
 
 
 local cfg = {
-	sid = 'dawan',
+	sid = 'dw',
 	name = '´óÍð',
 	type = CardType_HorseDec,
 	desc = [==[¡¾-1Âí¡¿

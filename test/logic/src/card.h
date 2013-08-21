@@ -334,6 +334,8 @@ RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int l
 
 // wrapper from lua to c
 CardID  card_maxid();
+int card_id_valid(CardID  id);
+int card_sid_valid(const char* sid);
 CardID  card_sid2id(const char* sid);
 CardType card_type(CardID  id);
 char* card_sid(CardID  id, char* buf, int buflen);

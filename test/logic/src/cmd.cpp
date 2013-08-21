@@ -371,23 +371,24 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
 				//}
 
-				MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid((CardID)id),
-					get_card_name((CardID)id), card_type_str(card_type((CardID)id)));
+				if(card_id_valid((CardID)id))
+				{
+					MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid((CardID)id),
+						get_card_name((CardID)id), card_type_str(card_type((CardID)id)));
+				}
 			}
 		}
 		else
 		{
-			id = card_sid2id(argv[2]);
-			
-			//pCardCfg = get_card_config((CardID)id);
-			//if(pCardCfg == NULL)
-			if(id == CardID_None)
+			if(!card_sid_valid(argv[2]))
 			{
 				MSG_OUT("没找到sid为\'%s\'的卡牌!\n", argv[2]);
 				return R_E_PARAM;
 			}
 			else
 			{
+				id = card_sid2id(argv[2]);
+			
 				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, get_card_sid((CardID)id),
 					get_card_name((CardID)id), card_type_str(card_type((CardID)id)), 
 					get_card_desc((CardID)id));
@@ -410,29 +411,24 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 			maxid = hero_maxid();
 			for(id = 1; id <= maxid; id++)
 			{
-				//pHero = get_hero_config((HeroID)id);
-
-				//if(pHero)
-				//{
-				//	MSG_OUT("(%d) %s, %s, %s, life %d%s\n", pHero->id, pHero->name, hero_group_str(pHero->group), hero_sex_str(pHero->sex), pHero->life);
-				//}
-				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid((HeroID)id), 
-					get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
-					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"");
+				if(hero_id_valid((HeroID)id))
+				{
+					MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid((HeroID)id), 
+						get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
+						hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"");
+				}
 			}
 		}
 		else
 		{
-			id = hero_sid2id(argv[2]);
-			//pHero = get_hero_config((HeroID)id);
-			//if(pHero == NULL)
-			if(id == HeroID_None)
+			if(!hero_sid_valid(argv[2]))
 			{
 				MSG_OUT("没找到sid为'%s'的武将!\n", argv[2]);
 				return R_E_PARAM;
 			}
 			else
 			{
+				id = hero_sid2id(argv[2]);
 				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, get_hero_sid((HeroID)id), 
 					get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
 					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"", 
