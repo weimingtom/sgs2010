@@ -992,11 +992,7 @@ void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char
 {
 	if(R_SUCC != load_out_pattern(out_pattern, s_pattern))
 	{
-		if(L) {
-			luaL_error(L, "game_passive_out: error card pattern \"%s\"", s_pattern);
-		} else {
-			MSG_OUT("game_passive_out: error card pattern \"%s\"\n", s_pattern);
-		}
+		luaL_error(GL(L), "game_passive_out: error card pattern \"%s\"", s_pattern);
 	}
 }
 
@@ -1208,24 +1204,16 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	PatternOut   t_pattern_out;
 	RESULT ret;
 
-	if(pGame == NULL || pParentEvent == NULL)
-	{
-		if(L) {
-			luaL_error(L, "game_supply_card: invalid null param");
-		} else {
-			MSG_OUT("game_supply_card: invalid null param\n");
-		}
-		return R_E_PARAM;
-	}
+// 	if(pGame == NULL || pParentEvent == NULL)
+// 	{
+// 		luaL_error(GL(L), "game_supply_card: invalid null param");
+// 		return R_E_PARAM;
+// 	}
 
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_supply_card: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_supply_card: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_supply_card: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 
@@ -1254,7 +1242,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		strncpy(t_pattern_out.alter_text, alter_text, sizeof(t_pattern_out.alter_text));
 	}
 
-	// ignore fixed flag
+	// ignore fixed flag, supply is always fixed
 	//if(YES != pattern_out.pattern.fixed) 
 	{
 
@@ -1313,29 +1301,6 @@ void game_init_outcard(OutCard* out_card)
 }
 
 
-/*
-RESULT game_spec_out(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player,  int target
-					 , OutCardPattern* out_pattern, const char* alter_text)
-{
-	RESULT ret;
-	OutCard out;
-
-	ST_ZERO(out);
-
-	ret = game_supply_card(L, pGame, pParentEvent, player, player, out_pattern, alter_text, &out);
-
-	CHECK_RET(ret, ret);
-
-	// 指定目标
-	out.target_num = 1;
-	out.targets[0] = target;
-	out.flag = OutCardFlag_SpecOut;
-
-	ret = game_real_out(pGame, pParentEvent, player, &out);
-
-	return R_SUCC;
-}
-*/
 
 
 

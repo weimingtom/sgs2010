@@ -5,6 +5,7 @@
 #include "equip.h"
 #include "card.h"
 #include "player.h"
+#include "script.h"
 #include "comm.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -26,21 +27,13 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_player_equip_card: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_player_equip_card: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_player_equip_card: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 
 	if(equip_pos < 0 || equip_pos >= EquipIdx_Max)
 	{
-		if(L) {
-			luaL_error(L, "game_player_equip_card: invalid equip pos - %d", equip_pos );
-		} else {
-			MSG_OUT("game_player_equip_card: invalid equip pos - %d\n", equip_pos );
-		}
+		luaL_error(GL(L), "game_player_equip_card: invalid equip pos - %d", equip_pos );
 		return R_E_PARAM;
 	}
 
@@ -56,11 +49,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	// get card from hand
 	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerHand, hand_pos, &vcard) || !VCARD_IS_REAL(&vcard))
 	{
-		if(L) {
-			luaL_error(L, "game_player_equip_card: invalid hand card pos - %d", hand_pos );
-		} else {
-			MSG_OUT("game_player_equip_card: invalid hand card pos - %d\n", hand_pos );
-		}
+		luaL_error(GL(L), "game_player_equip_card: invalid hand card pos - %d", hand_pos );
 		return R_E_PARAM;
 	}
 	

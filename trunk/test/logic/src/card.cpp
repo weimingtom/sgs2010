@@ -520,7 +520,7 @@ static RESULT card_match_one(const Card* pCard, const CardPattern* pPattern)
 	}
 	if(pPattern->value_max != CardValue_None)
 	{
-		if(pCard->value > pPattern->value_min)
+		if(pCard->value > pPattern->value_max)
 			return R_E_FAIL;
 	}
 

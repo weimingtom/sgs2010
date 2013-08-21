@@ -102,11 +102,11 @@ local cfg = {
 				local p = get_game_player(game, player);
 				message('【'..p.name..'】的判定牌【'..cfg.name..'】生效，玩家受到【'..cfg.name..'】的伤害。');
 				event.judge_card.result = 1;  -- 已经生效，不用再到下一家
-				return game_player_add_life(game, event, event.target, -3, INVALID_PLAYER, nil, 0)
+				return game_player_add_life(game, event, player, -3, INVALID_PLAYER, nil, 0)
 			else
 				-- 移动到下家(下家有闪电就再下家)
 				local np = game_next_player(game, player);
-				while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 do
+				while find_player_judgecard(get_game_player(game, np), get_card_id_by_sid(cfg.sid)) >= 0 do
 					np = game_next_player(game, np);
 				end
 				
@@ -117,16 +117,16 @@ local cfg = {
 		
 		[GameEvent_FiniCardCalc] = function(cfg, game, event, player)
 			-- 没有生效则移动到下一家(这里重复做一次,无懈可击的情况会直接跳到这个事件)
-			game_event_info(game, event, 1);
-			message('fini.. judge_result='..event.judge_card.judge_result);
+			--game_event_info(game, event, 1);
+			--message('fini.. judge_result='..event.judge_card.judge_result);
 			if event.judge_card.judge_result == 0 then
 				local list = event.judge_card.pos_vcard.list;
 				if list.num > 0 and YES == is_cur_card_valid(game, list.pcards[0].where, list.pcards[0].pos) then
 					-- 移动到下家(下家有闪电就再下家)
-					message("valid");
+					--message("valid");
 					local np = game_next_player(game, player);
 
-					while find_player_judgecard(get_game_player(gam, np), get_card_id_by_sid(cfg.sid)) >= 0 do
+					while find_player_judgecard(get_game_player(game, np), get_card_id_by_sid(cfg.sid)) >= 0 do
 						np = game_next_player(game, np);
 					end
 					return add_cur_card_to_player_judgment(game, event.judge_card.pos_vcard.vcard, event.judge_card.pos_vcard.list, np);

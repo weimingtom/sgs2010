@@ -175,34 +175,22 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	GetCard    stGetCard;
 
-	if(pGame == NULL || pParentEvent == NULL)
-	{
-		if(L) {
-			luaL_error(L, "game_passive_getcard: invalid null param");
-		} else {
-			MSG_OUT("game_passive_getcard: invalid null param\n");
-		}
-		return R_E_PARAM;
-	}
+// 	if(pGame == NULL || pParentEvent == NULL)
+// 	{
+// 		luaL_error(GL(L), "game_passive_getcard: invalid null param");
+// 		return R_E_PARAM;
+// 	}
 	
 	
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_passive_getcard: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_passive_getcard: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_passive_getcard: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 
 	if(num <= 0)
 	{
-		if(L) {
-			luaL_error(L, "game_passive_getcard: invalid card num %d", num);
-		} else {
-			MSG_OUT("game_passive_getcard: invalid card  num %d\n", num);
-		}
+		luaL_error(GL(L), "game_passive_getcard: invalid card num %d", num);
 		return R_E_PARAM;
 	}
 

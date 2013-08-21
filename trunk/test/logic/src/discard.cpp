@@ -226,31 +226,19 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_passive_discard: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_passive_discard: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_passive_discard: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 
 	if((where & (PatternWhere_Equip|PatternWhere_Hand|PatternWhere_Judgment)) == 0)
 	{
-		if(L) {
-			luaL_error(L, "game_passive_discard: invalid where - %d", where );
-		} else {
-			MSG_OUT("game_passive_discard: invalid where - %d\n", where );
-		}
+		luaL_error(GL(L), "game_passive_discard: invalid where - %d", where );
 		return R_E_PARAM;
 	}
 
 	if(num <= 0 || num > player_count_card(get_game_player(pGame, player), where))
 	{
-		if(L) {
-			luaL_error(L, "game_passive_discard: invalid num - %d", num );
-		} else {
-			MSG_OUT("game_passive_discard: invalid num - %d\n", num );
-		}
+		luaL_error(GL(L), "game_passive_discard: invalid num - %d", num );
 		return R_E_PARAM;
 
 	}
