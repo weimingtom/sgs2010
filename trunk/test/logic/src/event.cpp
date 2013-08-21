@@ -80,49 +80,51 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 	pPlayer = get_game_player(pGame, player);
 
 	//pHero = get_hero_config(pPlayer->hero);
-
-	skill_num = hero_skill_num(pPlayer->hero);
-
-	//if(pHero != NULL)
-	if(skill_num > 0)
+	if(pPlayer->hero != HeroID_None)
 	{
-		for(n = 1; n <=  skill_num; n++)
+
+		skill_num = hero_skill_num(pPlayer->hero);
+
+		//if(pHero != NULL)
+		if(skill_num > 0)
 		{
-			//pSkill = &pHero->skills[n];
-
-			//if(pSkill->check)
+			for(n = 1; n <=  skill_num; n++)
 			{
-				//ret = (*pSkill->check)(pGame, pEvent, player);
-				cu = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
-				//skill_flag = hero_skill_flag(pPlayer->hero, n);
+				//pSkill = &pHero->skills[n];
 
-				if(cu == USE_AUTO || cu == USE_QUIET)
+				//if(pSkill->check)
 				{
-					if(auto_use)
+					//ret = (*pSkill->check)(pGame, pEvent, player);
+					cu = call_hero_skill_can_use(pPlayer->hero, n, pGame, pEvent, player);
+					//skill_flag = hero_skill_flag(pPlayer->hero, n);
+
+					if(cu == USE_AUTO || cu == USE_QUIET)
 					{
-						if(cu == USE_AUTO) 
+						if(auto_use)
 						{
-							MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, get_hero_skill_name(pPlayer->hero, n));
-						}
-						//(*pSkill->use)(pGame, pEvent, player);
-						call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
-						use_cnt++;
-						if(pEvent->block == YES)
-						{
-							//if(pEvent->result == R_CANCEL)
-							//	return R_CANCEL;
-							return R_BACK;
+							if(cu == USE_AUTO) 
+							{
+								MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, get_hero_skill_name(pPlayer->hero, n));
+							}
+							//(*pSkill->use)(pGame, pEvent, player);
+							call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+							use_cnt++;
+							if(pEvent->block == YES)
+							{
+								//if(pEvent->result == R_CANCEL)
+								//	return R_CANCEL;
+								return R_BACK;
+							}
 						}
 					}
-				}
-				else if(cu == USE_MANUAL)
-				{
-					may_skills++;
+					else if(cu == USE_MANUAL)
+					{
+						may_skills++;
+					}
 				}
 			}
 		}
 	}
-	
 	
 	// check player hand card
 	for(n = 0; n < pPlayer->hand_card_num; n++)
@@ -277,16 +279,20 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 	pPlayer = get_game_player(pGame, player);
-	skill_num = hero_skill_num(pPlayer->hero);
-
-	for(n = 1; n <=  skill_num; n++)
+	
+	if(pPlayer->hero != HeroID_None)
 	{
-		call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
-		if(pEvent->block == YES)
+		skill_num = hero_skill_num(pPlayer->hero);
+
+		for(n = 1; n <=  skill_num; n++)
 		{
-			//if(pEvent->result == R_CANCEL)
-			//	return R_CANCEL;
-			return R_BACK;
+			call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+			if(pEvent->block == YES)
+			{
+				//if(pEvent->result == R_CANCEL)
+				//	return R_CANCEL;
+				return R_BACK;
+			}
 		}
 	}
 

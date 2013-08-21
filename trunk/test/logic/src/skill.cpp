@@ -37,7 +37,7 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 	//	return R_E_PARAM;
 	//}
 
-	skill_num = hero_skill_num(p->hero);
+	skill_num = p->hero == HeroID_None ? 0 : hero_skill_num(p->hero);
 
 	if(idx < 1 || idx > skill_num)
 	{
