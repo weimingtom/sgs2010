@@ -114,17 +114,20 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 
 	// skills
 
-	skill_num = hero_skill_num(p->hero);
-
-
-	for(n = 1; n <= skill_num; n++)
+	if(p->hero != HeroID_None)
 	{
-		cu = (USE_MANUAL == call_hero_skill_can_use(p->hero, n, pGame, pEvent, player));
-		skill_flag = hero_skill_flag(p->hero, n);
-		MSG_OUT("%s 技能[%d]: 【%s】%s%s\n", cu ? "*":" ", n,  get_hero_skill_name(p->hero, n), 
-			(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
-	
+		skill_num = hero_skill_num(p->hero);
+
+		for(n = 1; n <= skill_num; n++)
+		{
+			cu = (USE_MANUAL == call_hero_skill_can_use(p->hero, n, pGame, pEvent, player));
+			skill_flag = hero_skill_flag(p->hero, n);
+			MSG_OUT("%s 技能[%d]: 【%s】%s%s\n", cu ? "*":" ", n,  get_hero_skill_name(p->hero, n), 
+				(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
+
+		}
 	}
+
 
 	// equip skills
 	for(n = 0l; n < EquipIdx_Max; n++)
