@@ -76,7 +76,7 @@ end
 -- 使用武器技能的逻辑
 local function zbsm_use(cfg, game, event, player, out_card)
 	local out_pattern  = OutCardPattern();
-	game_load_out_pattern(out_pattern,  'hf:{none}{none}?');
+	game_load_out_pattern(out_pattern,  'hf:{none};{none}?');
 	
 	if R_SUCC ~= game_supply_card(game, event, player, player, out_pattern
 			, '请打出任意两张手牌作为【'..card_sid2name('sha')..'】：', out_card)  
@@ -124,7 +124,7 @@ function(cfg, game, event, player)
 	local out_card = OutCard();
 	game_init_outcard(out_card);
 	
-	if R_SUCC ~= zbsm_use(game, event, player, out_card)  then
+	if R_SUCC ~= zbsm_use(cfg, game, event, player, out_card)  then
 		-- 取消出牌
 		return R_CANCEL;
 	end				
@@ -133,7 +133,7 @@ function(cfg, game, event, player)
 	out_card.flag = OutCardFlag_SpecOut;
 	
 	-- 按正常流程出牌
-	return game_real_out(game, event, event.target, out_card) ;
+	return game_real_out(game, event, player, out_card) ;
 end
 
 
@@ -151,10 +151,11 @@ end
 
 cfg.event[GameEvent_PassiveOutCard] = 
 function(cfg, game, event, player)			
-	if R_SUCC ~= zbsm_use(game, event, player, event.pattern_out.out)  then
+	if R_SUCC ~= zbsm_use(cfg, game, event, player, event.pattern_out.out)  then
 		-- 取消出牌
 		return R_CANCEL;
-	end				
+	end	
+	return R_SUCC;
 end
 
 
