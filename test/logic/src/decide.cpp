@@ -5,7 +5,7 @@
 #include "stack.h"
 #include "decide.h"
 #include "discard.h"
-
+#include "script.h"
 #include "comm.h"
 
 
@@ -23,22 +23,14 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		if(L) {
-			luaL_error(L, "game_decide_card: invalid player index - %d", player );
-		} else {
-			MSG_OUT("game_decide_card: invalid player index - %d\n", player );
-		}
+		luaL_error(GL(L), "game_decide_card: invalid player index - %d", player );
 		return NO;
 	}
 
 	ST_ZERO(pattern);
 	if(R_SUCC != load_card_pattern(&pattern, szPattern, -1))
 	{
-		if(L) {
-			luaL_error(L, "game_decide_card: error card pattern \"%s\"", szPattern);
-		} else {
-			MSG_OUT("game_decide_card: error card pattern \"%s\"\n", szPattern);
-		}
+		luaL_error(GL(L), "game_decide_card: error card pattern \"%s\"", szPattern);
 		return NO;
 	}
 

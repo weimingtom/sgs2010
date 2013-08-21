@@ -3,6 +3,7 @@
 #include "event.h"
 #include "player.h"
 #include "life.h"
+#include "script.h"
 #include "comm.h"
 
 static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player)
@@ -43,16 +44,11 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	Player* pPlayer;
 	ChangeLife   stChgLife;
 
-//  这里的player可以是空的 INVALID_PLAYER
-// 	if(!IS_PLAYER_VALID(pGame, player))
-// 	{
-// 		if(L) {
-// 			luaL_error(L, "game_player_add_life: invalid player index - %d", player );
-// 		} else {
-// 			MSG_OUT("game_player_add_life: invalid player index - %d\n", player );
-// 		}
-// 		return R_E_FAIL;
-// 	}
+ 	if(!IS_PLAYER_VALID(pGame, player))
+ 	{
+		luaL_error(GL(L), "game_player_add_life: invalid player index - %d", player );
+ 		return R_E_FAIL;
+ 	}
 
 
 	ST_ZERO(stChgLife);
