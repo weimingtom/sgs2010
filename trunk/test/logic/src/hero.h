@@ -111,6 +111,8 @@ const char* hero_sex_str(HeroSex sex);
 // wrapper from lua to c code
 
 HeroID hero_maxid(void);
+int hero_id_valid(HeroID id);
+int hero_sid_valid(const char* sid);
 HeroID hero_sid2id(const char* sid);
 char* hero_sid(HeroID id, char* buf, int buflen);
 char* hero_name(HeroID id, char* buf, int buflen);

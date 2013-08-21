@@ -7,15 +7,26 @@
 
 
 local ss = {
-	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
-	'{lbss}h2;{lbss}h3;{lbss}h4;{shan}h5;{shan}h6;{shan}h7;{shan}h8;{shan}h9;{shan}h10;{shan}hJ;{shan}hQ;{shan}hK;{shan}hA;',
-	'{fthj}c2;{fthj}c3;{fthj}c4;{fthj}c5;{tao}c6;{tao}c7;{tao}c8;{tao}c9;{tao}c10;{tao}cJ;{tao}cQ;{tao}cK;{tao}cA;',
-	'{cxsgj}d2;{cxsgj}d3;{chitu}d4;{chitu}d5;{chitu}d6;{chitu}d7;{gsf}d8;{gsf}d9;{gdd}d10;{gdd}dJ;{bgz}dQ;{bgz}dK;{bgz}dA;',
-
-	'{sha}s2;{sha}s3;{sha}s4;{sha}s5;{sha}s6;{sha}s7;{sha}s8;{sha}s9;{sha}s10;{sha}sJ;{sha}sQ;{sha}sK;{sha}sA;',
-	'{sha}h2;{sha}h3;{sha}h4;{sha}h5;{sha}h6;{sha}h7;{sha}h8;{sha}h9;{sha}h10;{sha}hJ;{sha}hQ;{sha}hK;{sha}hA;',
-	'{sha}c2;{sha}c3;{sha}c4;{sha}c5;{sha}c6;{sha}c7;{sha}c8;{sha}c9;{sha}c10;{sha}cJ;{sha}cQ;{sha}cK;{sha}cA;',
-	'{nmrq}d2;{nmrq}d3;{sha}d4;{sha}d5;{sha}d6;{sha}d7;{sha}d8;{sha}d9;{sha}d10;{sha}dJ;{sha}dQ;{sha}dK;{sha}dA;',
+[==[
+{sha}d6;{sha}d7;{sha}d8;{sha}d9;{sha}d10;{sha}dK;
+{sha}s7;{sha}s8;{sha}s8;{sha}s9;{sha}s9;{sha}s10;{sha}s10;
+{sha}h10;{sha}h10;{sha}hJ;{sha}c2;{sha}c3;{sha}c4;{sha}c5;
+{sha}c6;{sha}c7;{sha}c8;{sha}c8;{sha}c9;{sha}c9;{sha}c10;{sha}c10;{sha}cJ;{sha}cJ;
+{shan}d2;{shan}d2;{shan}d3;{shan}d4;{shan}d5;{shan}d6;{shan}d7;{shan}d8;
+{shan}d9;{shan}d10;{shan}dJ;{shan}dJ;{shan}h2;{shan}h2;{shan}hK;
+{tao}dQ;{tao}h3;{tao}h4;{tao}h6;{tao}h7;{tao}h8;{tao}h9;{tao}hQ;
+{sd}sA;{sd}hQ;{lbss}c6;{lbss}s6;{lbss}h6;
+{wxkj}dQ;{wxkj}sJ;{wxkj}cQ;{wxkj}cK;
+{jdsr}cQ;{jdsr}cK;{wgfd}h3;{wgfd}h4;
+{wzsy}h7;{wzsy}h8;{wzsy}h9;{wzsy}hJ;
+{jd}sA;{jd}cA;{jd}dA;{tyjy}hA;
+{nmrq}s7;{nmrq}sK;{nmrq}c7;{wjqf}hA;
+{ssqy}d3;{ssqy}d4;{ssqy}s3;{ssqy}s4;{ssqy}sJ;
+{ghcq}s3;{ghcq}s4;{ghcq}sQ;{ghcq}hQ;{ghcq}c3;{ghcq}c4;
+{zhfd}hK;{dl}c5;{jy}s5;{ct}h5;{zx}dK;{dw}sK;
+{zgln}dA;{zgln}cA;{qgj}s6;{cxsgj}s2;{gsf}d5;{qlyyd}s5;{zbsm}sQ;{fthj}dQ;{qlg}h5;{bgz}s2;{bgz}c2;
+{hbj}s2;{rwd}c2;
+]==]
 };
 
 
@@ -56,6 +67,7 @@ function init_card_stack(stack)
 	stack_clear(stack);
 	for s,v in ipairs(ss) do
 		--message(v);
+		v = string.gsub(v, '%s+', '');
 		for cs in string.gfind(v, '([^;]+)') do
 			local po,_ ,sid,color, val = string.find(cs, '^{(%w+)}([shdc])([0-9JQKA]+)$');
 			if( not po) then

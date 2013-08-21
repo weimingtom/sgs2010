@@ -122,7 +122,7 @@ typedef  struct  tagPlayer
 
 
 
-RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero);
+RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero, int index);
 
 
 RESULT player_add_hand_card(Player* pPlayer, Card* pCard);

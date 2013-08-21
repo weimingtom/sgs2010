@@ -15,7 +15,7 @@ import "../global/reg.lua";
 
 
 local cfg = {
-	sid = 'chitu',
+	sid = 'ct',
 	name = '≥‡Õ√',
 	type = CardType_HorseDec,
 	desc = [==[°æ-1¬Ì°ø

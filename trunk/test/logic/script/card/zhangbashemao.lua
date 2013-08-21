@@ -102,7 +102,7 @@ end
 -- 武器效果触发，在出牌时触发
 cfg.can_use[GameEvent_RoundOutCard] = 
 function(cfg, game, event, player, pos_card)--
-	-- 如果自己出的杀为最后一张手牌。则可以最多指定3个目标，至少指定一个。并按行动顺序结算
+	-- 可以出杀，则可以使用该武器来提供杀
 	local c  = PosCard();
 	c.card.id = get_card_id_by_sid('sha');
 	c.card.color = CardColor_None;

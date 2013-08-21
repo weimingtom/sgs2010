@@ -71,6 +71,31 @@ HeroID hero_maxid(void)
 	return id;
 }
 
+int hero_id_valid(HeroID id)
+{
+	int r = 0;
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "is_hero_id_valid");
+	lua_pushnumber(L, id);	
+	lua_call(L, 1, 1);
+	r = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return r;
+}
+
+int hero_sid_valid(const char* sid)
+{
+	int r = 0;
+	lua_State* L = get_game_script();
+	lua_getglobal(L, "is_hero_sid_valid");
+	lua_pushstring(L, sid);	
+	lua_call(L, 1, 1);
+	r = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return r;
+}
+
+
 
 HeroID hero_sid2id(const char* sid)
 {

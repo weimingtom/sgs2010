@@ -15,7 +15,7 @@ import "../global/reg.lua";
 
 
 local cfg = {
-	sid = 'zixing',
+	sid = 'zx',
 	name = '×Ïè÷',
 	type = CardType_HorseDec,
 	desc = [==[¡¾-1Âí¡¿
