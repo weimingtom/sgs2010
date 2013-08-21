@@ -357,7 +357,7 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 
 	if(!IS_PLAYER_VALID(pGame, player))
 	{
-		luaL_error(GL(L), "game_passive_out: invalid player index - %d", player );
+		luaL_error(GL(L), "game_real_out: invalid player index - %d", player );
 		return R_E_PARAM;
 	}
 

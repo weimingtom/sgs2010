@@ -168,7 +168,7 @@ function calc_card_color_by_pos_card_list(list)
 		return CardColor_Diamond;
  	elseif o == 0  and r == 0 and b == 0 and s == 0 and h == 0 and d == 0 then
 		return CardColor_Club;
- 	elseif o == 0  and r == 0 and s == 0 and h == 0 then
+ 	elseif o == 0  and r == 0 and d == 0 and h == 0 then
 		return CardColor_GeneralBlack;
  	elseif o == 0  and b == 0 and s == 0 and c == 0 then
 		return CardColor_GeneralRed;
