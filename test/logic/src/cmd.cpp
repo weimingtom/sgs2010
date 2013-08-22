@@ -876,7 +876,6 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 						break;
 					case R_BACK:    // spec return R_BACK means back to caller with success
 						return R_SUCC;
-					case R_ABORT:   // fail and return to caller
 					case R_EXIT:    // back because need exit
 					case R_SKIP:   // skip the operator with success
 						return ret;

@@ -277,9 +277,9 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	INIT_EVENT(&event, GameEvent_PerPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	event.discard_pattern = &dis;
 
-	trigger_game_event(pGame, &event);
+	ret = trigger_game_event(pGame, &event);
 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_FAIL_RET(ret, ret);
 
 
 	INIT_EVENT(&event, GameEvent_PassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);

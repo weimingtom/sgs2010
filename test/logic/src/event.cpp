@@ -41,6 +41,7 @@ static RESULT call_player_global_event(GameContext* pGame, GameEventContext* pEv
 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT  ret;
 	int n;
 	int m = pEvent->trigger;
 
@@ -48,9 +49,8 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 	{
 		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
 		{
-			trigger_player_event(pGame, pEvent, m);
-			if(pEvent->block == YES)
-				break;
+			ret = trigger_player_event(pGame, pEvent, m);
+			RET_CHECK_BACK(ret);
 		}
 		m = (m + 1) % pGame->player_count;
 	}
@@ -63,19 +63,16 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 {
 	// check player skills
 	Player* pPlayer;
-	//const HeroConfig* pHero;
-	//const HeroSkill* pSkill;
-	// const CardConfig* pCardConfig;
-	//char buf[128];
-	int skill_num;
-	//int skill_flag;
-	PosCard    pos_card;
-	int  n;
-	YESNO   ret;
+	int     skill_num;
+	//int     skill_flag;
+	PosCard pos_card;
+	int     n;
+	YESNO   yesno;
 	CANUSE  cu;
-	int   may_skills = 0;
-	int   may_cards = 0;
-	int   use_cnt = 0;
+	RESULT  ret;
+	int     may_skills = 0;
+	int     may_cards = 0;
+	int     use_cnt = 0;
 	
 	pPlayer = get_game_player(pGame, player);
 
@@ -107,14 +104,9 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 								MSG_OUT("【%s】的武将技能【%s】被触发。\n", pPlayer->name, get_hero_skill_name(pPlayer->hero, n));
 							}
 							//(*pSkill->use)(pGame, pEvent, player);
-							call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+							ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
 							use_cnt++;
-							if(pEvent->block == YES)
-							{
-								//if(pEvent->result == R_CANCEL)
-								//	return R_CANCEL;
-								return R_BACK;
-							}
+							RET_CHECK_BACK(ret);
 						}
 					}
 					else if(cu == USE_MANUAL)
@@ -141,8 +133,8 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 			pos_card.card = pPlayer->hand_cards[n];
 			pos_card.where = CardWhere_PlayerHand;
 			pos_card.pos = n;
-			ret = game_card_can_out(pGame, pEvent, player, &pos_card);
-			if(ret == YES)
+			yesno = game_card_can_out(pGame, pEvent, player, &pos_card);
+			if(yesno == YES)
 				may_cards++;
 		}
 	}
@@ -175,15 +167,10 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 							MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, get_card_name(pos_card.card.id), equip_idx_str(n));
 						}
 						set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
-						call_card_event(pos_card.card.id, pGame, pEvent, player);
+						ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
 						set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
 						use_cnt++;
-						if(pEvent->block == YES)
-						{
-							//if(pEvent->result == R_CANCEL)
-							//	return R_CANCEL;
-							return R_BACK;
-						}
+						RET_CHECK_BACK(ret);
 					}
 				}
 				else if(cu == USE_MANUAL)
@@ -217,12 +204,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	ret = call_player_global_event(pGame, pEvent, player);
 
-	if(pEvent->block == YES)
-	{
-		//if(pEvent->result == R_CANCEL)
-		//	return R_CANCEL;
-		return R_BACK;
-	}
+	RET_CHECK_BACK(ret);
 
 	// auto use card and skills
 	ret = check_player_event(pGame, pEvent, player, 1);
@@ -240,9 +222,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	{
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
-		CHECK_RET(ret, ret);
-		if(pEvent->block == YES)
-			return R_BACK;
+		RET_CHECK_BACK(ret);
 		ret = check_player_event(pGame, pEvent, player, 0);
 	}
 
@@ -254,15 +234,17 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent)
 {
 	int n;
-	int m = pEvent->trigger;
+	int m;
+	RESULT  ret;
+	
+	m = pEvent->trigger;
 
 	for(n = 0; n < pGame->player_count; n++)
 	{
 		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
 		{
-			call_player_event(pGame, pEvent, m);
-			if(pEvent->block == YES)
-				break;
+			ret = call_player_event(pGame, pEvent, m);
+			RET_CHECK_BACK(ret);
 		}
 		m = (m + 1) % pGame->player_count;
 	}
@@ -272,6 +254,7 @@ RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent)
 
 RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int player)
 {
+	RESULT  ret;
 	Player* pPlayer;
 	int skill_num;
 	int n;
@@ -286,13 +269,8 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 
 		for(n = 1; n <=  skill_num; n++)
 		{
-			call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
-			if(pEvent->block == YES)
-			{
-				//if(pEvent->result == R_CANCEL)
-				//	return R_CANCEL;
-				return R_BACK;
-			}
+			ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+			RET_CHECK_BACK(ret);
 		}
 	}
 
@@ -305,13 +283,8 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 			pos_card.where = CardWhere_PlayerEquip;
 			pos_card.pos = n;
 
-			call_card_event(pos_card.card.id, pGame, pEvent, player);
-			if(pEvent->block == YES)
-			{
-				//if(pEvent->result == R_CANCEL)
-				//	return R_CANCEL;
-				return R_BACK;
-			}
+			ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
+			RET_CHECK_BACK(ret);
 		}
 	}
 	return R_SUCC;

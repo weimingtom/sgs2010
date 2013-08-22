@@ -24,80 +24,77 @@ local cfg = {
 	desc=[==[【贯石斧】
 攻击范围：３
 武器特效：目标角色使用【闪】抵消你使用【杀】的效果时，你可以弃两张牌，则【杀】依然造成伤害。]==],
-
 	
-	can_out = {
-		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
-			-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
-			return YES;
-		end,
-	},
-
-	
-	can_use = {
-		-- 可以用于修正攻击距离(只对杀有效)
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
-			if (player == event.trigger and event.attack_dis.card.id == get_card_id_by_sid('sha')) 
-			then
-				return USE_QUIET;
-			end
-			return USE_CANNOT;
-		end,
-		
-		-- 在对方出闪完成时，如果是你出的杀。则你可以弃两张牌，而对方的闪依然无效
-		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
-			if event.target == player and event.card_pattern.num >= 1    -- 目标
-				and event.card_pattern.patterns[0].id == get_card_id_by_sid('shan')   -- 出了‘闪’
-				and event.parent_event.id == GameEvent_OutCard    -- 出牌 
-				and event.parent_event.trigger == player          -- 我的出牌 				
-				and event.parent_event.target == event.trigger          -- 目标是出闪的人 
-				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
-				-- and string.find(event.ud, '{gsf}')    -- 只能使用一次
-			then
-				return USE_MANUAL;
-			end
-			return USE_CANNOT;
-		end,
-	},
-	
-	
-	event = {
-		-- 装备
-		[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
-			if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
-				error('invalid out equip card in event OutCardPrepare.');
-				return R_E_FAIL;
-			end
-			game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
-			return R_CANCEL;
-		end,
-		-- 攻击距离
-		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
-			if(player == event.trigger ) then
-				message('attack base: 3');
-				event.attack_dis.base = 3;
-			end
-			return R_DEF;
-		end,
-
-		-- 在对方出闪完成时，如果是你出的杀。则你可以弃两张牌，而对方的闪依然无效
-		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player)
-			-- 弃2张牌，可以放弃，如果不弃，则技能中止，什么也没发生
-			if R_SUCC == game_passive_discard(game, event, player, PatternWhere_Hand + PatternWhere_Equip, 2, NO, 
-				'请弃两张牌，若如此做。则你的【'..get_card_name(event.parent_event.out_card.vcard.id)..'】依然造成伤害:')
-			then
-			
-				message('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器技能生效，你的【杀】没能被闪避。');
-				event.result = R_CANCEL;
-				event.block = YES;
-				return R_BACK;
-			else
-				message('【'..get_game_player(game,player).name..'】取消了【'..cfg.name..'】武器技能。');
-			end
-			return R_SUCC;
-		end,
-	},
+	can_out = {},
+	can_use = {},
+	event = {},
 };
+
+-- 可装备检测
+cfg.can_out[GameEvent_RoundOutCard] = 
+function(cfg, game, event, player, pos_card)
+	-- RoundOutCard 事件只会用于出牌时的检测，不会广播该事件，所以触发调用时总是当前出牌的玩家
+	return YES;
+end
+
+-- 装备
+cfg.event[GameEvent_OutCardPrepare] = function (cfg, game, event, player)
+	if(event.out_card.list.num ~= 1 or event.out_card.list.pcards[0].where ~= CardWhere_PlayerHand) then
+		error('invalid out equip card in event OutCardPrepare.');
+		return R_E_FAIL;
+	end
+	game_player_equip_card(game, event, player, event.out_card.list.pcards[0].pos, EquipIdx_Weapon);
+	return R_CANCEL;
+end
+
+-- 可以用于修正攻击距离(只对杀有效)
+cfg.can_use[GameEvent_CalcAttackDis] = function(cfg, game, event, player, pos_card)
+	if (player == event.trigger and event.attack_dis.card.id == get_card_id_by_sid('sha')) 
+	then
+		return USE_QUIET;
+	end
+	return USE_CANNOT;
+end
+
+-- 攻击距离
+cfg.event[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+	if(player == event.trigger ) then
+		message('attack base: 3');
+		event.attack_dis.base = 3;
+	end
+	return R_DEF;
+end
+
+-- 在对方出闪完成时，如果是你出的杀。则你可以弃两张牌，而对方的闪依然无效
+cfg.can_use[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
+	if event.target == player and event.card_pattern.num >= 1    -- 目标
+		and event.card_pattern.patterns[0].id == get_card_id_by_sid('shan')   -- 出了‘闪’
+		and event.parent_event.id == GameEvent_OutCard    -- 出牌 
+		and event.parent_event.trigger == player          -- 我的出牌 				
+		and event.parent_event.target == event.trigger          -- 目标是出闪的人 
+		and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+		-- and string.find(event.ud, '{gsf}')    -- 只能使用一次
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+-- 在对方出闪完成时，如果是你出的杀。则你可以弃两张牌，而对方的闪依然无效
+cfg.event[GameEvent_AfterPassiveOut] = function (cfg, game, event, player)
+	-- 弃2张牌，可以放弃，如果不弃，则技能中止，什么也没发生
+	if R_SUCC == game_passive_discard(game, event, player, PatternWhere_Hand + PatternWhere_Equip, 2, NO, 
+		'请弃两张牌，若如此做。则你的【'..get_card_name(event.parent_event.out_card.vcard.id)..'】依然造成伤害:')
+	then	
+		message('【'..get_game_player(game,player).name..'】的【'..cfg.name..'】武器技能生效，你的【杀】没能被闪避。');
+		event.result = R_CANCEL;
+		event.block = YES;
+		return R_BACK;
+	else
+		message('【'..get_game_player(game,player).name..'】取消了【'..cfg.name..'】武器技能。');
+	end
+	return R_SUCC;
+end
 
 
 -- register

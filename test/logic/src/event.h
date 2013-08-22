@@ -149,8 +149,8 @@ struct tagGameEventContext
 	int        trigger;
 	int        target;
 	GameEventContext* parent_event;
-	RESULT     result;
-	YESNO	   block;
+	//RESULT     result;
+	//YESNO	   block;
 	union {
 		const NewGameConfig* new_game_config;
 		const char* file_name;
@@ -183,8 +183,8 @@ struct tagGameEventContext
 	(event)->trigger = (tr); \
 	(event)->target = (tg); \
 	(event)->parent_event = (p); \
-	(event)->block = NO; \
-	(event)->result = R_DEF; \
+	/*(event)->block = NO;*/ \
+	/*(event)->result = R_DEF;*/ \
 	if (p) { strncpy((event)->ud, (p)->ud, sizeof((event)->ud)); } \
 } while(0)
 
