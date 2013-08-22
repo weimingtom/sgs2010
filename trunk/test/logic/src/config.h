@@ -114,14 +114,11 @@ typedef enum _CANUSE
 typedef enum _RESULT
 {
 	R_SUCC  = 0,   // success, and continue loop
-	R_DEF   = 1,   // do default proc and continue loop
-	R_BACK  = 2,   // back to caller ,end cmd loop
-	R_EXIT  = 3,   // exit the game ,end cmd loop
-	R_CANCEL  = 4,   // op cancel, end cmd loop
-	R_ABORT  = 5,   // op abort, end cmd loop
-	R_RETRY  = 6,   // retry it , continue loop
-	R_SKIP   = 7,   // skip the loop , and as success
-	R_CONTINUE = 8, // continue next loop
+	R_DEF,         // no result and continue loop
+	R_BACK,        // no result back to caller
+	R_CANCEL,      // op cancel or fail, back to caller
+	R_SKIP,        // op success back to caller
+	R_EXIT,        // exit the game ,end any loop, can not be used in event return code
 
 
 	// error code ( <0 )
@@ -151,9 +148,15 @@ typedef enum _RESULT
 #define IS_FAIL(res)  ((res) < 0)
 #define IS_SUCC(res)  ((res) == R_SUCC)
 #define IS_CANCEL(res) ((res) == R_CANCEL)
+
 #define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
 #define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
-#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_SKIP || (r)==R_BACK) { return R_SUCC; } */  }while(0)
+//#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_SKIP || (r)==R_BACK) { return R_SUCC; } */  }while(0)
+
+
+#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_SKIP ) { return (ret); }  } while(0)
+#define RET_CHECK_SUCC_RET(ret, r)    do { if((ret) == R_BACK || (ret) == R_SKIP ) { return (r); }  } while(0)
+#define RET_CHECK_FAIL_RET(ret, r)    do { if((ret) == R_CANCEL) { return (r); }  } while(0)
 
 
 // bit operator

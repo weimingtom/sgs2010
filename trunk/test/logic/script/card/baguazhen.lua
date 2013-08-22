@@ -87,7 +87,8 @@ function(cfg, game, event, player)
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
 
 		-- 使用新的提示文字
-		event.pattern_out.alter_text = alter;
+		-- event.pattern_out.alter_text = alter;
+		message(alter);
 		
 		-- 返回RETRY来尝试其它方式
 		return R_RETRY;

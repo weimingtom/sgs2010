@@ -40,14 +40,10 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	INIT_EVENT(&event, GameEvent_PerDecideCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 	ret = trigger_game_event(pGame, &event);
-	(void)ret;
 
 	// some skill can make the decide success or fail directly.
-	if(event.result == R_CANCEL || event.result == R_ABORT)
-		return NO;
-
-	if(event.result == R_SKIP)
-		return YES;
+	RET_CHECK_FAIL_RET(ret, NO);
+	RET_CHECK_SUCC_RET(ret, YES);
 
 	// some skill can out a hand card to instead the decide card whill be poped from the stack
 	if(!CARD_VALID(&stCard.card))
@@ -79,7 +75,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 	INIT_EVENT(&event, GameEvent_PostDecideCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_card = &stCard;
 	trigger_game_event(pGame, &event);
-
+	// ignore return result
 
 	return B2YESNO(ret == R_SUCC);
 }
