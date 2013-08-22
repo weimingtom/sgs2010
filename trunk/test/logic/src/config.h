@@ -121,6 +121,7 @@ typedef enum _RESULT
 	R_ABORT  = 5,   // op abort, end cmd loop
 	R_RETRY  = 6,   // retry it , continue loop
 	R_SKIP   = 7,   // skip the loop , and as success
+	R_CONTINUE = 8, // continue next loop
 
 
 	// error code ( <0 )

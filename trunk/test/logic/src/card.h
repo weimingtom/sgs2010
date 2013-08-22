@@ -343,6 +343,18 @@ char* card_name(CardID  id, char* buf, int buflen);
 char* card_desc(CardID  id, char* buf, int buflen);
 YESNO  call_card_can_out(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
 CANUSE  call_card_can_use(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pos_card);
+/*
+除部分事件对返回值的特殊要求外（通常是强制回调事件,如OutCard驱动），普通的事件响应的返回值规则如下：
+R_SUCC - 事件执行成功，继续执行下一个Handle
+R_BACK - 事件执行成功，并中断该事件的处理，返回触发函数。
+R_CANCEL - 事件执行失败， 并中断该事件的处理，返回触发函数。
+R_RETRY  - 事件执行失败, 需要重新尝试
+R_CONTINUE - 执行无结果，继续执行下一个Handle
+R_SKIP - 执行无结果，并中断该事件的处理，返回触发函数。
+R_FAIL 系列 - 执行时出错，一般不会主动返回该值，可能是API的返回值。
+
+某些事件会忽略返回值，某些事件可能只接受有限几个返回值。其它按默认处理，可参见事件的详细说明
+*/
 RESULT  call_card_event(CardID  id, GameContext* pGame, GameEventContext* pEvent, int player);
 
 const char* get_card_sid(CardID  id);

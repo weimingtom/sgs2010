@@ -878,9 +878,12 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 						return R_SUCC;
 					case R_ABORT:   // fail and return to caller
 					case R_EXIT:    // back because need exit
-					case R_RETRY:   // not yet used
 					case R_SKIP:   // skip the operator with success
 						return ret;
+					case R_RETRY:   // not yet used
+					case R_CONTINUE:
+						// keep loop
+						break;
 					default:
 						// continue loops ...
 						break;
