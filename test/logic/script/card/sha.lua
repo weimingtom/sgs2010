@@ -16,18 +16,6 @@
 import "../global/reg.lua";
 
 
-add_player_event(
-	GameEvent_RoundBegin, 
-	function(game, event, player)
-		if(event.trigger == player) then
-			local p = get_game_player(game, player);
-			-- reset the sha out counter
-			message('reset sha counter for ['..p.name..']')
-			p.params[PLAYER_PARAM_SHA_COUNTER] = 0;
-		end
-		return R_DEF;
-	end
-);
 
 
 local cfg = {
@@ -41,17 +29,6 @@ local cfg = {
 
 	can_out = {
 		
-		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
-			local p = get_game_player(game, player);
-			if(p.params[PLAYER_PARAM_SHA_COUNTER] == 0) then
-				return YES;
-			end	
-			return NO;
-		end,
-	},
-	
-	can_use = {
-		-- empty for normal cards
 	},
 	
 	event = {	
@@ -64,7 +41,7 @@ local cfg = {
 
 
 
-	-- 出牌过程由下列3个事件驱动
+		-- 出牌过程由下列3个事件驱动
 
 		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
@@ -118,6 +95,33 @@ local cfg = {
 		end,
 	},
 };
+
+-- 能否出杀的限制
+add_player_event(
+	GameEvent_RoundBegin, 
+	function(game, event, player)
+		if(event.trigger == player) then
+			local p = get_game_player(game, player);
+			-- reset the sha out counter
+			message('reset sha counter for ['..p.name..']')
+			p.params[PLAYER_PARAM_SHA_COUNTER] = 0;
+		end
+		return R_DEF;
+	end
+);
+
+-- 能否出杀的检测
+cfg.can_out[GameEvent_RoundOutCard] = 
+function (cfg, game, event, player, pos_card)
+	local p = get_game_player(game, player);
+	if(p.params[PLAYER_PARAM_SHA_COUNTER] == 0) then
+		return YES;
+	end	
+	return NO;
+end
+
+
+
 
 -- register
 reg_card(cfg);
