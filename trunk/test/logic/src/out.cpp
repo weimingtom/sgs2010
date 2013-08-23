@@ -29,14 +29,13 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
 	RESULT   ret;
-	char     buf[128];
-	//const CardConfig* pCardConfig;
+
 	GameEventContext  stEvent;
 
 	if(target != INVALID_PLAYER)
 	{
 
-		MSG_OUT("%s 的目标设置为【%s】\n", card_str(&out_card->vcard, buf, sizeof(buf)), GAME_PLAYER(pGame, target)->name);
+		MSG_OUT("%s 的目标设置为【%s】\n", get_card_str(&out_card->vcard), GAME_PLAYER(pGame, target)->name);
 	}
 
 	// before out card effect (to each target)
@@ -537,9 +536,6 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
 		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
 
-		pEvent->result = R_SUCC;
-		pEvent->block = YES;
-
 		return R_BACK;
 
 	}
@@ -623,8 +619,6 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		pEvent->pattern_out->out.supply = get_game_cur_player(pGame); //suply card  is c current player
 		pEvent->pattern_out->out.trigger = pEvent->target;    // the supply card target player is real out card player
 
-		pEvent->result = R_SUCC;
-		pEvent->block = YES;
 
 		return R_BACK;
 
@@ -697,10 +691,6 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		out_card.target_num = 0;
 
 		game_real_out(NULL, pGame, pEvent, pGame->cur_player, &out_card);
-
-
-		//pEvent->result = R_SUCC;
-		//pEvent->block = YES;
 
 		return R_BACK;
 	}

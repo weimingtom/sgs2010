@@ -116,7 +116,8 @@ typedef enum _RESULT
 	R_SUCC  = 0,   // success, and continue loop
 	R_DEF,         // no result and continue loop
 	R_BACK,        // no result back to caller
-	R_CANCEL,      // op cancel or fail, back to caller
+	R_DONE,        // op success back to caller
+	R_CANCEL,      // op cancel, back to caller
 	R_SKIP,        // op success back to caller
 	R_EXIT,        // exit the game ,end any loop, can not be used in event return code
 
@@ -149,14 +150,17 @@ typedef enum _RESULT
 #define IS_SUCC(res)  ((res) == R_SUCC)
 #define IS_CANCEL(res) ((res) == R_CANCEL)
 
-#define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
-#define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
-//#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_SKIP || (r)==R_BACK) { return R_SUCC; } */  }while(0)
+//#define CHECK_RET(b, r)  do { if( (b) != R_SUCC ) { return (r); } } while(0) 
+//#define CHECK_RETV(b)  do { if( (b) != R_SUCC ) { return ; } } while(0) 
+//#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_DONE || (r)==R_BACK) { return R_SUCC; } */  }while(0)
 
 
-#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_SKIP ) { return (ret); }  } while(0)
-#define RET_CHECK_SUCC_RET(ret, r)    do { if((ret) == R_BACK || (ret) == R_SKIP ) { return (r); }  } while(0)
-#define RET_CHECK_FAIL_RET(ret, r)    do { if((ret) == R_CANCEL) { return (r); }  } while(0)
+#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_DONE ) { return (ret); }  } while(0)
+#define RET_CHECK_DONE_RET(ret, r)    do { if((ret) == R_DONE ) { return (r); }  } while(0)
+#define RET_CHECK_CANCEL_RET(ret, r)    do { if((ret) == R_CANCEL) { return (r); }  } while(0)
+#define RET_CHECK_RET(ret, r)    do { if((ret) != R_SUCC) { return (r); }  } while(0)
+#define RET_CHECK_RETV(ret)    do { if((ret) != R_SUCC) { return; }  } while(0)
+
 
 
 // bit operator

@@ -1,5 +1,9 @@
 --[[
- register card and hero
+ 1. register card and hero function  for script
+ 
+ 2. lua api for c code to get card/hero basic properties and call their events.
+ 
+ 
 
 --]]
 
@@ -13,6 +17,8 @@ local card_index = {};
 local hero_list = {};
 local hero_index = {};
 
+
+-- 以下用于配置TABLE字段的取值是否有效
 local chk_card_type = {
 	[CardType_Normal] = 1,
 	[CardType_Strategy] = 1,
@@ -33,6 +39,28 @@ local chk_hero_group = {
 	[HeroGroup_Shu] = 1,
 	[HeroGroup_Wu]= 1,
 	[HeroGroup_People] = 1,
+};
+
+-- 以下用于检查事件返回值是否有效
+local chk_ret_canuse = {
+	[USE_CANNOT] = 1,
+	[USE_AUTO] = 1,
+	[USE_MANUAL] = 1,
+	[USE_QUIET] = 1,
+};
+
+local chk_ret_yesno = {
+	[YES] = 1,
+	[NO] = 1,
+};
+
+local chk_ret_result = {
+	[R_SUCC] = 1,
+	[R_DEF] = 1,
+	[R_CANCEL] = 1,
+	--[R_BACK] = 1,
+	--[R_SKIP] = 1,
+	--[R_DONE] = 1,
 };
 
 ---------------------------------------------------------------
@@ -190,7 +218,7 @@ function call_card_can_out(id, game, event, player, pos_card)
 	
 	local ret = cfg.can_out[event.id](cfg, game, event, player, pos_card);
 	
-	if(ret ~= YES and ret ~= NO) then
+	if(nil == ret or nil == chk_ret_yesno[ret]) then
 		error('call_card_can_out return result is invalid: '..tostring(ret));
 	end
 	return ret;
@@ -209,7 +237,7 @@ function call_card_can_use(id, game, event, player, pos_card)
 	end
 	
 	local ret = cfg.can_use[event.id](cfg, game, event, player, pos_card);
-	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO and ret ~= USE_QUIET) then
+	if(nil == ret or nil == chk_ret_canuse[ret]) then
 		error('call_card_can_use return result is invalid: '..tostring(ret));
 	end
 	return ret;
@@ -229,7 +257,7 @@ function call_card_event(id, game, event, player)
 	
 	local ret = cfg.event[event.id](cfg, game, event, player);
 	
-	if( nil == ret or type(ret) ~= 'number' ) then
+	if( nil == ret or nil == chk_ret_result[ret]) then
 		error('call_card_event return result is invalid: '..tostring(ret));	
 	end
 	return ret;
@@ -403,7 +431,7 @@ function call_hero_skill_can_use(id, index, game, event, player)
 	end
 	
 	local ret = skill.can_use[event.id](cfg, game, event, player);
-	if(ret ~= USE_CANNOT and ret ~= USE_MANUAL and ret ~= USE_AUTO and ret ~= USE_QUIET) then
+	if(nil == ret or nil == chk_ret_canuse[ret]) then
 		error('call_hero_skill_can_use return result is invalid: '..tostring(ret));
 	end
 	return ret;
@@ -429,7 +457,7 @@ function call_hero_skill_event(id, index, game, event, player)
 	
 	local ret = skill.event[event.id](cfg, game, event, player);
 	
-	if(ret == nil or type(ret) ~= 'number') then
+	if(nil == ret or nil == chk_ret_result[ret]) then
 		error('call_hero_skill_event return result is invalid: '..tostring(ret));
 	end
 	return ret;

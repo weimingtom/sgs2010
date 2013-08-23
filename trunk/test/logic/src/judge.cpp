@@ -25,7 +25,7 @@ static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int 
 	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerJudgment,  pos, &vcard))
 	{
 		pPlayer->card_in_judge_num-- ;
-		return R_SKIP; // next judgment card
+		return R_DONE; // next judgment card
 	}
 
 	MSG_OUT("【%s】开始结算判定区牌 %s\n", pPlayer->name, vcard_str(&vcard, buf, sizeof(buf)));

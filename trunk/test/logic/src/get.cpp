@@ -28,8 +28,8 @@ RESULT game_first_getcard(GameContext* pGame)
 		// get 4 card each player
 		for(k = 0; k < 4; k++)
 		{
-			CHECK_RET(ret = game_pop_stack_card(pGame, &stCard), ret);
-			CHECK_RET(ret = player_add_hand_card(GAME_PLAYER(pGame, player), &stCard), ret);
+			RET_CHECK_RET(ret = game_pop_stack_card(pGame, &stCard), ret);
+			RET_CHECK_RET(ret = player_add_hand_card(GAME_PLAYER(pGame, player), &stCard), ret);
 		}
 
 		// next player
@@ -160,7 +160,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
 	}
 
-	CHECK_RET(ret,ret);
+	RET_CHECK_CANCEL_RET(ret, ret);
 
 	return R_SUCC;
 }
@@ -216,7 +216,7 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	}
 
 
-	CHECK_RET(ret, ret);
+	RET_CHECK_CANCEL_RET(ret, ret);
 
 	return R_SUCC;
 }

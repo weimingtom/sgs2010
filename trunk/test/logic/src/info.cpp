@@ -9,6 +9,7 @@
 #include "select.h"
 #include "life.h"
 #include "judge.h"
+#include "decide.h"
 #include "equip.h"
 #include "skill.h"
 #include "script.h"
@@ -346,20 +347,28 @@ static char* card_pattern_where_str(int where, char* buf, int buflen)
 }
 */
 
+
+static void p_card_pattern(const char* perffix, CardPattern* p)
+{
+	MSG_OUT("    %s.id=%d {%s};\n", perffix, p->id, get_card_sid(p->id));
+	MSG_OUT("    %s.color=%s;\n", perffix, ENUM2STR(CardColor, p->color));
+	MSG_OUT("    %s.value_min=%s;\n", perffix, ENUM2STR(CardValue, p->value_min));
+	MSG_OUT("    %s.value_max=%s;\n", perffix, ENUM2STR(CardValue, p->value_max));
+}
+
+
 static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 {
 	int n;
-	//char  buf[512];
+	char  s_per[512];
 
 	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STR(PatternWhere, p->where));
 	MSG_OUT("    %s.fixed=%s;\n", perffix, YESNO2STR(p->fixed));
 	MSG_OUT("    %s.num=%d;\n", perffix, p->num);
 	for(n = 0; n < p->num; n++)
 	{
-		MSG_OUT("    %s.patterns[%d].id=%d {%s};\n", perffix, n, p->patterns[n].id, get_card_sid(p->patterns[n].id));
-		MSG_OUT("    %s.patterns[%d].color=%s;\n", perffix, n, ENUM2STR(CardColor, p->patterns[n].color));
-		MSG_OUT("    %s.patterns[%d].value_min=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_min));
-		MSG_OUT("    %s.patterns[%d].value_max=%s;\n", perffix, n, ENUM2STR(CardValue, p->patterns[n].value_max));
+		snprintf(s_per, sizeof(s_per), "%s.patterns[%d]", perffix, n);
+		p_card_pattern(s_per, &p->patterns[n]);
 	}
 	MSG_OUT("    %s.ud=\"%s\";\n", perffix, p->ud);
 
@@ -553,6 +562,20 @@ static void game_event_param__pos_card(GameContext* pGame, GameEventContext* pEv
 	}
 }
 
+static void game_event_param__decide_card(GameContext* pGame, GameEventContext* pEvent)
+{
+	if(NULL == pEvent->decide_card)
+	{
+		MSG_OUT("    decide_card=NULL;\n");
+	}
+	else
+	{
+		p_card_pattern("decide_card.pattern", &pEvent->decide_card->pattern);
+		p_pos_card("decide_card.pos_card", &pEvent->decide_card->pos_card);
+		MSG_OUT("    decide_card.result=%s", YESNO2STR(pEvent->decide_card->result));
+	}
+}
+
 static void game_event_param__pos_vcard(GameContext* pGame, GameEventContext* pEvent)
 {
 	if(NULL == pEvent->pos_vcard)
@@ -736,6 +759,8 @@ static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 	case GameEvent_PerDecideCard:
 	case GameEvent_PerDecideCardCalc:
 	case GameEvent_PostDecideCard:
+		game_event_param__decide_card(pGame, pEvent);
+		break;
 	case GameEvent_PostGetCard:
 	case GameEvent_PerLostCard:
 	case GameEvent_PostLostCard:
