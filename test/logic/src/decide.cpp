@@ -12,13 +12,12 @@
 YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent,int player, const char* szPattern)
 {
 	GameEventContext  event;
-	RESULT ret;
 	int       pos;
-	PosCard   stCard;
-	CardPattern pattern;
+
+	DecideCard decide_card;
+
+	RESULT     ret;
 	//VCard   stVCard;
-	char temp[128];
-	char temp2[128];
 
 
 	if(!IS_PLAYER_VALID(pGame, player))
@@ -27,34 +26,37 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 		return NO;
 	}
 
-	ST_ZERO(pattern);
-	if(R_SUCC != load_card_pattern(&pattern, szPattern, -1))
+	ST_ZERO(decide_card);
+
+
+	if(R_SUCC != load_card_pattern(&decide_card.pattern, szPattern, -1))
 	{
 		luaL_error(GL(L), "game_decide_card: error card pattern \"%s\"", szPattern);
 		return NO;
 	}
 
-	ST_ZERO(stCard);
 
 	// GameEvent_PerDecideCard
 	INIT_EVENT(&event, GameEvent_PerDecideCard, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = &stCard;
+	event.decide_card = &decide_card;
 	ret = trigger_game_event(pGame, &event);
 
 	// some skill can make the decide success or fail directly.
-	RET_CHECK_FAIL_RET(ret, NO);
+	RET_CHECK_CANCEL_RET(ret, NO);
 	RET_CHECK_SUCC_RET(ret, YES);
 
 	// some skill can out a hand card to instead the decide card whill be poped from the stack
-	if(!CARD_VALID(&stCard.card))
+	if(!CARD_VALID(&decide_card.pos_card.card))
 	{
-		ret = game_pop_stack_card(pGame, &stCard.card);
-		CHECK_RET(ret, NO);
+		ret = game_pop_stack_card(pGame, &decide_card.pos_card.card);
+		RET_CHECK_RET(ret, NO);
+
 		//set_vcard_from_card(&stVCard, &stCard.card);
-		game_add_discard_cur(pGame, &stCard.card, &pos);
-		stCard.where = CardWhere_CurDiscardStack;
-		stCard.pos = pos;
-		MSG_OUT("从摸牌堆顶得到判定牌 %s\n", card_str(&stCard.card, temp, sizeof(temp)));
+		game_add_discard_cur(pGame, &decide_card.pos_card.card, &pos);
+		decide_card.pos_card.where = CardWhere_CurDiscardStack;
+		decide_card.pos_card.pos = pos;
+
+		MSG_OUT("从摸牌堆顶得到判定牌 %s\n", get_card_str(&decide_card.pos_card.card));
 	}
 
 
@@ -62,22 +64,26 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	// GameEvent_PerDecideCardCalc 
 	INIT_EVENT(&event, GameEvent_PerDecideCardCalc, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = &stCard;
+	event.decide_card = &decide_card;
+
+	// ignored event return. cannot cancel in this step
 	trigger_game_event(pGame, &event);
 
-	ret = card_match(&stCard.card, sizeof(PosCard), 1, &pattern, 1);
+	ret = card_match(&decide_card.pos_card.card, sizeof(PosCard), 1, &decide_card.pattern, 1);
+	decide_card.result = B2YESNO(ret == R_SUCC);
 
-
-	MSG_OUT("判定牌 %s,判定条件 %s,结果：%s\n",card_str(&stCard.card, temp, sizeof(temp)), card_pattern_str(&pattern, temp2, sizeof(temp2)), ret == R_SUCC ? "成功" : "失败");
+	MSG_OUT("判定牌 %s,判定条件 %s,结果：%s\n",get_card_str(&decide_card.pos_card.card), 
+			get_pattern_str(&decide_card.pattern), ret == R_SUCC ? "成功" : "失败");
 
 	// some skill can get the decide card after it be calculated.
 	// GameEvent_PostDecideCard
 	INIT_EVENT(&event, GameEvent_PostDecideCard, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = &stCard;
-	trigger_game_event(pGame, &event);
-	// ignore return result
+	event.decide_card = &decide_card;
 
-	return B2YESNO(ret == R_SUCC);
+	// ignore return result
+	trigger_game_event(pGame, &event);
+
+	return decide_card.result;
 }
 
 

@@ -858,34 +858,13 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 
 					ret = (*s_cmdDispatch[n].func)(argv, argc, pContext, pEvent);
 
-					// return follow code back to parent caller
-					switch(ret)
+					if(ret == R_CANCEL && force == YES)
 					{
-
-					case R_CANCEL:   // cancel the operator, need return to caller
-						if(force != YES)
-						{
-							// pEvent->result = R_CANCEL;
-							return R_CANCEL;
-						}
-						else
-						{
-							MSG_OUT("当前不能取消操作！\n");
-							// continue loops
-						}
-						break;
-					case R_BACK:    // spec return R_BACK means back to caller with success
-						return R_SUCC;
-					case R_EXIT:    // back because need exit
-					case R_SKIP:   // skip the operator with success
-						return ret;
-					case R_RETRY:   // not yet used
-					case R_CONTINUE:
-						// keep loop
-						break;
-					default:
-						// continue loops ...
-						break;
+						MSG_OUT("当前不能取消（放弃）操作！\n");
+					}
+					else
+					{
+						RET_CHECK_BACK(ret);
 					}
 				}
 				else
@@ -969,7 +948,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		if(NULL == get_line("[input select] : ", buffer, sizeof(buffer)))
+		if(NULL == get_line("[请选择] : ", buffer, sizeof(buffer)))
 			return R_E_FAIL;
 
 		strtrim(buffer);

@@ -7,6 +7,23 @@
 extern "C" {
 #endif
 
+
+// tolua_begin
+
+typedef struct tagDecideCard
+{
+	PosCard     pos_card;
+	CardPattern pattern;
+	YESNO       result;
+} DecideCard;
+
+
+
+
+// tolua_end
+
+
+
 // tolua_begin
 
 // get a card from stack and dicide it

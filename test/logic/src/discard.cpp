@@ -90,11 +90,8 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 		event.discard_pattern = &dis;
 		
 		ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
-		CHECK_RET(ret,ret);
+		RET_CHECK_CANCEL_RET(ret,ret);
 	}
-
-	
-	(void)ret;
 	
 	return R_SUCC;
 }
@@ -299,7 +296,6 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	CHECK_BACK_RET(event.result);
 
-
 	return R_SUCC;
 }
 
@@ -307,9 +303,9 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 {
 	int n;
 	GameEventContext    event;
-	VCard  stCard;
+	VCard     stCard;
 	PosVCard  disCard;
-	char buf[256];
+
 	Player* pPlayer = get_game_player(pGame, player);
 
 	if(R_SUCC != get_player_card(pPlayer, where, pos, &stCard))
@@ -353,7 +349,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 		else if(where == CardWhere_PlayerJudgment)
 			swhere = "ÅÐ¶¨Çø";
 
-		MSG_OUT("¡¾%s¡¿Æú%sÅÆ %s\n", pPlayer->name, swhere, vcard_str(&stCard, buf, sizeof(buf)));
+		MSG_OUT("¡¾%s¡¿Æú%sÅÆ %s\n", pPlayer->name, swhere, get_vcard_str(&stCard));
 
 		// event: post discard card
 		

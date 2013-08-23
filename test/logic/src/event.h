@@ -141,6 +141,7 @@ typedef struct tagSelectTarget SelectTarget;
 typedef struct tagSkillCanUse SkillCanUse;
 typedef struct tagCardCanUse CardCanUse;
 typedef struct tagJudgeCard  JudgeCard;
+typedef struct tagDecideCard  DecideCard;
 
 
 struct tagGameEventContext
@@ -149,8 +150,8 @@ struct tagGameEventContext
 	int        trigger;
 	int        target;
 	GameEventContext* parent_event;
-	//RESULT     result;
-	//YESNO	   block;
+	RESULT     result;
+	YESNO	   block;
 	union {
 		const NewGameConfig* new_game_config;
 		const char* file_name;
@@ -164,10 +165,11 @@ struct tagGameEventContext
 		DiscardPattern* discard_pattern; // when round discard card, or passive discard card
 		//DiscardCard* discard_card;  // discard card
 		PosCard*     pos_card;  // lost card,
-		PosVCard*     pos_vcard;  // discard card,
+		PosVCard*    pos_vcard;  // discard card,
 		JudgeCard*   judge_card;  // judgement vcard,
-		EquipCard*  equip_card; // for per/post equip card
-		ChangeLife* change_life; // when life is changed 
+		DecideCard*  decide_card;  // decide card
+		EquipCard*   equip_card; // for per/post equip card
+		ChangeLife*  change_life; // when life is changed 
 		SelectTarget* select_target; // when select target checked
 		SkillCanUse*  skill_canuse;
 		CardCanUse*   card_canuse;
