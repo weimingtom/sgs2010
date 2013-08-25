@@ -276,7 +276,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	ret = trigger_game_event(pGame, &event);
 
-	RET_CHECK_FAIL_RET(ret, ret);
+	RET_CHECK_CANCEL_RET(ret, ret);
 
 
 	INIT_EVENT(&event, GameEvent_PassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
@@ -284,9 +284,9 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	set_game_cur_player(pGame, player);
 	ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 
 	INIT_EVENT(&event, GameEvent_PostPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
@@ -294,7 +294,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	trigger_game_event(pGame, &event);
 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	return R_SUCC;
 }
