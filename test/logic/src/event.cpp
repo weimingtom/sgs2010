@@ -51,8 +51,7 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 		{
 			ret = trigger_player_event(pGame, pEvent, m);
 			RET_CHECK_RET(ret,ret);
-			if(pEvent->block == YES)
-				break;
+			EVENT_CHECK_BREAK(pEvent);
 		}
 		m = (m + 1) % pGame->player_count;
 	}
@@ -246,7 +245,8 @@ RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent)
 		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
 		{
 			ret = call_player_event(pGame, pEvent, m);
-			RET_CHECK_BACK(ret);
+			RET_CHECK_RET(ret);
+			EVENT_CHECK_BREAK(pEvent);
 		}
 		m = (m + 1) % pGame->player_count;
 	}

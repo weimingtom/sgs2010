@@ -185,11 +185,15 @@ struct tagGameEventContext
 	(event)->trigger = (tr); \
 	(event)->target = (tg); \
 	(event)->parent_event = (p); \
-	/*(event)->block = NO;*/ \
-	/*(event)->result = R_DEF;*/ \
+	(event)->block = NO; \
+	(event)->result = R_DEF; \
 	if (p) { strncpy((event)->ud, (p)->ud, sizeof((event)->ud)); } \
 } while(0)
 
+#define EVENT_CHECK_BREAK(event)   do { if((event)->block = YES) break;  }while (0)
+#define EVENT_CHECK_BREAK_RET(event, ret)   do { if((event)->block == YES) return (ret);  } while(0)
+#define EVENT_CHECK_BREAK_BACK(event)   EVENT_CHECK_BREAK_RET((event), R_SUCC)
+#define EVENT_CHECK_BREAK_RETV(event)   do { if((event)->block == YES) return;  } while(0)
 
 
 RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use);
