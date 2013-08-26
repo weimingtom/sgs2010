@@ -469,7 +469,7 @@ RESULT lua_import(lua_State* L,  const char* luafile_path)
 	{
 		MSG_OUT("%s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
-		return R_ABORT;
+		return R_E_FAIL;
 	}
 
 	lua_pushnil(L);
@@ -481,11 +481,24 @@ RESULT lua_import(lua_State* L,  const char* luafile_path)
 
 RESULT  reload_game_script()
 {
+	int state;
 	RESULT ret;
 	lua_State* L = g_game_L;
 
 	if(L == NULL)
 		return R_E_FAIL;
+
+	// clear before reload
+	lua_getglobal(L, "reload_clear");
+	state = lua_pcall(L, 0, 0);
+
+	if(state != 0)
+	{
+		MSG_OUT("%s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+		return R_E_FAIL;
+	}
+
 
 	// clear import table
 	lua_newtable(L);

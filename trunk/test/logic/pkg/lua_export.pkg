@@ -127,3 +127,21 @@ struct PosCardList
 {
 	PosCardList();
 };
+
+
+$lfile "./enum_str.lua"
+$lfile "./reg_card.lua"
+$lfile "./reg_hero.lua"
+$lfile "./player_event.lua"
+
+
+$[
+-- for reload clear reg cards/heros/events
+function  reload_clear()
+	clear_reg_card();
+	clear_reg_hero();
+	clear_player_event();
+end
+
+$]
+
