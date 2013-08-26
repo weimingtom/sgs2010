@@ -107,7 +107,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 							//(*pSkill->use)(pGame, pEvent, player);
 							ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
 							use_cnt++;
-							RET_CHECK_BACK(ret);
+							EVENT_CHECK_BREAK_BACK(pEvent);
 						}
 					}
 					else if(cu == USE_MANUAL)
@@ -171,7 +171,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 						ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
 						set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
 						use_cnt++;
-						RET_CHECK_BACK(ret);
+						EVENT_CHECK_BREAK_BACK(pEvent);
 					}
 				}
 				else if(cu == USE_MANUAL)

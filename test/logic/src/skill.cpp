@@ -25,6 +25,7 @@ YESNO can_use_skill(GameContext* pGame, GameEventContext* pEvent)
 
 RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 {
+	RESULT  ret;
 	//char name[128];
 	int skill_num;
 	Player* p = CUR_PLAYER(pGame);
@@ -62,7 +63,7 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	MSG_OUT("【%s】发动武将技能【%s】。\n", p->name, get_hero_skill_name(p->hero, idx));
 
-	call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
+	ret = call_hero_skill_event(p->hero, idx, pGame, pEvent, pGame->cur_player);
 
 	// post trigger use skill
 

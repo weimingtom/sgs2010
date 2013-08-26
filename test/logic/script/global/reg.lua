@@ -7,6 +7,7 @@
 
 --]]
 
+--[[
 import "comm.lua"
 
 
@@ -126,7 +127,7 @@ function reg_hero(cfg)
 end
 
 -------------------------------------------------------------------
--- card functions
+-- card info functions
 -------------------------------------------------------------------
 
 function get_card_maxid()
@@ -463,4 +464,4 @@ function call_hero_skill_event(id, index, game, event, player)
 	return ret;
 end
 
-
+--]]

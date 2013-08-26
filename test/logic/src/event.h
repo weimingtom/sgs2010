@@ -192,7 +192,7 @@ struct tagGameEventContext
 
 #define EVENT_CHECK_BREAK(event)   do { if((event)->block = YES) break;  }while (0)
 #define EVENT_CHECK_BREAK_RET(event, ret)   do { if((event)->block == YES) return (ret);  } while(0)
-#define EVENT_CHECK_BREAK_BACK(event)   EVENT_CHECK_BREAK_RET((event), R_SUCC)
+#define EVENT_CHECK_BREAK_BACK(event)   EVENT_CHECK_BREAK_RET((event), R_BACK)
 #define EVENT_CHECK_BREAK_RETV(event)   do { if((event)->block == YES) return;  } while(0)
 
 
