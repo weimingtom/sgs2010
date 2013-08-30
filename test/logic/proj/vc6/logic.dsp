@@ -325,7 +325,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "logic - Win32 Debug"
 
-USERDEP__LUA_E="..\..\src\card.h"	"..\..\src\card_stack.h"	"..\..\src\cmd.h"	"..\..\src\comm.h"	"..\..\src\config.h"	"..\..\src\decide.h"	"..\..\src\discard.h"	"..\..\src\equip.h"	"..\..\src\event.h"	"..\..\src\game.h"	"..\..\src\get.h"	"..\..\src\hero.h"	"..\..\src\info.h"	"..\..\src\judge.h"	"..\..\src\life.h"	"..\..\src\out.h"	"..\..\src\platform.h"	"..\..\src\player.h"	"..\..\src\script.h"	"..\..\src\select.h"	"..\..\src\skill.h"	"..\..\src\stack.h"	
+USERDEP__LUA_E="..\..\src\card.h"	"..\..\src\card_stack.h"	"..\..\src\cmd.h"	"..\..\src\comm.h"	"..\..\src\config.h"	"..\..\src\decide.h"	"..\..\src\discard.h"	"..\..\src\equip.h"	"..\..\src\event.h"	"..\..\src\game.h"	"..\..\src\get.h"	"..\..\src\hero.h"	"..\..\src\info.h"	"..\..\src\judge.h"	"..\..\src\life.h"	"..\..\src\out.h"	"..\..\src\platform.h"	"..\..\src\player.h"	"..\..\src\script.h"	"..\..\src\select.h"	"..\..\src\skill.h"	"..\..\src\stack.h"	"..\..\pkg\player_event.lua"	"..\..\pkg\reg_card.lua"	"..\..\pkg\reg_hero.lua"	"..\..\pkg\enum_str.lua"	
 # Begin Custom Build
 InputPath=..\..\pkg\lua_export.pkg
 

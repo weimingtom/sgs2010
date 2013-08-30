@@ -44,7 +44,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	trigger_game_event(pGame, &stEvent);
 
-	CHECK_BACK_RET(stEvent.result);	
+	RET_CHECK_BACK(stEvent.result);	
 
 	// out procedure (start do effect)
 
@@ -57,7 +57,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 
 		// response the out card , if event return R_CANCEL, out card is broken
-		CHECK_RET(ret, ret);
+		RET_CHECK_RET(ret, ret);
 	}
 
 	// per calc
@@ -66,7 +66,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	
 	trigger_game_event(pGame, &stEvent);
 
-	CHECK_BACK_RET(stEvent.result);
+	RET_CHECK_BACK(stEvent.result);
 
 	// some skill can skip the calc of out card
 	if(stEvent.result != R_SKIP)
@@ -76,7 +76,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		stEvent.out_card = out_card;
 
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-		CHECK_RET(ret, ret);
+		RET_CHECK_RET(ret, ret);
 	}
 
 	// post calc
@@ -85,7 +85,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	trigger_game_event(pGame, &stEvent);
 
-	CHECK_BACK_RET(stEvent.result);
+	RET_CHECK_BACK(stEvent.result);
 
 	return R_SUCC;
 }
@@ -316,7 +316,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 
 	trigger_game_event(pGame, &stEvent);
 
-	CHECK_BACK_RET(stEvent.result);
+	RET_CHECK_BACK(stEvent.result);
 
 	// some skill can skip the out card prepare, and set targets directly
 	if(stEvent.result == R_SKIP)
@@ -341,7 +341,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 
-		CHECK_RET(ret, ret);
+		RET_CHECK_RET(ret, ret);
 	}
 
 	return R_SUCC;
@@ -370,7 +370,7 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 
 
 	ret = remove_out_card(pGame, pEvent, out_card);
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 
 	add_out_stack(pGame, out_card);
 
@@ -403,7 +403,7 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 			}
 			else
 			{
-				luaL_error(GL(NULL), "%s: Invalid target %d", __FUNCTION__, out_card->targets[n]);
+				luaL_error(GL(NULL), "game_real_out: Invalid target %d", out_card->targets[n]);
 			}
 		}
 	}
@@ -413,7 +413,7 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 
 
 	// the out is not effect
-	CHECK_BACK_RET(ret);
+	RET_CHECK_BACK(ret);
 
 	return R_SUCC;
 }
@@ -441,9 +441,9 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	ret = cmd_loop(pGame, &stEvent, NO, "请出一张牌或者发动技能:");
 
-	CHECK_RET(ret, ret);
+	RET_CHECK_RET(ret, ret);
 
-	CHECK_BACK_RET(stEvent.result);
+	RET_CHECK_BACK(stEvent.result);
 
 	return R_SUCC;
 }
@@ -736,10 +736,8 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 
 	call_game_event(pGame, &event);
 	
-	if(event.result == R_CANCEL || event.result == R_ABORT)
-		return NO;
-	else if(event.result == R_BACK || event.result == R_SKIP || event.result == R_SUCC)
-		return YES;
+	RET_CHECK_CANCEL_RET(event.result, NO);
+	RET_CHECK_DONE_RET(event.result, YES);
 	
 	return call_card_can_out(pPosCard->card.id, pGame, pEvent, player, pPosCard);
 }
@@ -1034,7 +1032,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 		trigger_game_event(pGame, &event);
 		//ret = per_passive_out_card(pGame, pParentEvent, player, target, &pattern_out);
 
-		CHECK_BACK_RET(event.result);
+		RET_CHECK_BACK(event.result);
 
 		// be success directly (for example armor card skill may defend the attack of {sha} )
 		if(event.result == R_SKIP)
@@ -1052,7 +1050,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 	if(ret != R_SUCC)
 		return ret;
 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	ret = remove_out_card(pGame, pParentEvent, &pattern_out.out); 
 
@@ -1071,7 +1069,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 
 	// the passive out is not effect
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	return R_SUCC;
 }
@@ -1123,7 +1121,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 	// avoid the passive but result is cancel.
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	// be success directly (for example armor card skill may defend the attack of {sha} )
 	if(event.result == R_SKIP)
@@ -1181,7 +1179,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 
 	// the passive out is not effect
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	return R_SUCC;
 }
@@ -1245,7 +1243,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
 
-		CHECK_BACK_RET(event.result);
+		RET_CHECK_BACK(event.result);
 
 		// be success directly (for example armor card skill may defend the attack of {sha} )
 		if(event.result == R_SKIP)
@@ -1263,9 +1261,9 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 	
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	// 提供牌的过程，并不会真正从提供者手里删除，直到真正使用者在使用该牌的时候
 	*out_card = t_pattern_out.out;
@@ -1279,7 +1277,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
 	// the passive out is not effect
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 
 	return R_SUCC;

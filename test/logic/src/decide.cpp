@@ -43,7 +43,7 @@ YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pPare
 
 	// some skill can make the decide success or fail directly.
 	RET_CHECK_CANCEL_RET(ret, NO);
-	RET_CHECK_SUCC_RET(ret, YES);
+	RET_CHECK_RET(ret, YES);
 
 	// some skill can out a hand card to instead the decide card whill be poped from the stack
 	if(!CARD_VALID(&decide_card.pos_card.card))

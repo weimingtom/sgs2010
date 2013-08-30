@@ -386,7 +386,7 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 	ret = game_round_do_judge(pGame, pEvent, pGame->round_player);
 
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 
 	game_flush_discard_cur(pGame);
 
@@ -423,7 +423,7 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	}
 	
 	ret = game_round_do_get(pGame, pEvent, pGame->round_player, stGetCard.num);
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 
 	game_flush_discard_cur(pGame);
 
@@ -487,7 +487,7 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 	// discard loop
 	ret = game_round_discard_card(pGame, pEvent, pGame->round_player);
 
-	CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret,ret);
 	game_flush_discard_cur(pGame);
 
 
