@@ -490,7 +490,7 @@ RESULT  reload_game_script()
 
 	// clear before reload
 	lua_getglobal(L, "reload_clear");
-	state = lua_pcall(L, 0, 0);
+	state = lua_pcall(L, 0, 0, 0);
 
 	if(state != 0)
 	{

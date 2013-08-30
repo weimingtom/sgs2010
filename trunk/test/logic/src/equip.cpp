@@ -66,7 +66,7 @@ RESULT game_player_equip_card(lua_State* L, GameContext* pGame, GameEventContext
 	trigger_game_event(pGame, &event);
 
 	// some skill can break equip a card? 
-	CHECK_BACK_RET(event.result);
+	RET_CHECK_BACK(event.result);
 
 	if(R_SUCC == player_remove_card(pPlayer, CardWhere_PlayerHand, hand_pos, NULL))
 	{
