@@ -135,13 +135,17 @@ $lfile "./reg_hero.lua"
 $lfile "./player_event.lua"
 
 
-$[
--- for reload clear reg cards/heros/events
+$[--##reload_clear
+--[[
+ for reload clear reg cards/heros/events
+--]]
+-- comment 111
 function  reload_clear()
 	clear_reg_card();
 	clear_reg_hero();
 	clear_player_event();
 end
+
 
 $]
 
