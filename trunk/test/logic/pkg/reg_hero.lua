@@ -1,6 +1,8 @@
+---------------------------------------------------------------
 --[[
 	reg_card.lua : register api and card managment api 
 --]]
+---------------------------------------------------------------
 
 
 local hero_list = {};
@@ -40,6 +42,8 @@ local chk_ret_result = {
 	--[R_SKIP] = 1,
 	--[R_DONE] = 1,
 };
+
+local s_s = [==[ppppsssss $ '' " ' --[[ ]==];
 
 function reg_hero(cfg)
 

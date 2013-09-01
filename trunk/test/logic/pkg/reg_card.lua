@@ -1,8 +1,9 @@
+---------------------------------------------------------------
 --[[
 	reg_card.lua : register api and card managment api 
 --]]
-
-
+---------------------------------------------------------------
+	
 local card_list = {};
 local card_index = {};
 
@@ -42,10 +43,11 @@ local chk_ret_result = {
 };
 
 
-
+--[[
 ---------------------------------------------------------------
 -- register functions
 ---------------------------------------------------------------
+--]]
 
 function reg_card(cfg)
 	if(cfg.sid == nil or cfg.sid == '') then
@@ -62,7 +64,7 @@ function reg_card(cfg)
 
 	
 	if(card_index[cfg.sid] ~= nil) then
-		error('register duplicated card sid\''..cfg.sid..'\'. ')
+		error('register duplicated card sid\''..cfg.sid..'\'. ');
 	end
 	
 	local id = table.getn(card_list) + 1;	
@@ -97,7 +99,7 @@ end
 function get_card_name(id)
 
 	if (id == 0) then
-		return "任意";
+		return '任意';
 	end
 
 	local cfg = card_list[id];
@@ -127,7 +129,7 @@ function get_card_desc(id)
 		error('get_card_desc('..tostring(id)..'): unknown card id.');
 	end
 	
-	return cfg.desc or "";
+	return cfg.desc or '';
 end
 
 function get_card_sid(id)

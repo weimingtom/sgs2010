@@ -3,7 +3,6 @@
 
 --]]
 
-
 import("global/*.lua");
 import("card/*.lua");
 import("hero/*.lua");
