@@ -133,7 +133,7 @@ static RESULT cmd_help(const char** argv, int argc, GameContext* pContext, GameE
 {
 	MSG_OUT(PROJ_NAME" "VERSION_STR"\n");
 	cmd_help_i(argc > 1 ? argv[1] : NULL);
-	return R_SUCC;
+	return R_DEF;
 }
 
 static void param_error(const char* cmd)
@@ -449,7 +449,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		return R_E_PARAM;
 	}
 
-	return R_SUCC;
+	return R_DEF;
 }
 
 static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
@@ -467,8 +467,6 @@ static RESULT cmd_get(const char** argv, int argc, GameContext* pContext, GameEv
 			num = 1;
 		}
 	}
-
-
 
 	return game_cmd_getcard(pContext, pEvent, num);
 }
@@ -511,26 +509,27 @@ static RESULT cmd_out(const char** argv, int argc, GameContext* pContext, GameEv
 
 static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
 {
+	int    idx;
+	RESULT ret;
 	if(get_game_status(pContext) == Status_None)
 	{
 		MSG_OUT("当前不在游戏中!\n");
 		return R_E_STATUS;
 	}
 
-	int idx;
-
+	ret = R_DEF;
 
 	if(argc >= 2 && 0 == to_int(argv[1], &idx))
 	{
-		return  game_cmd_use_skill(pContext, pEvent, idx);
+		ret = game_cmd_use_skill(pContext, pEvent, idx);
 	}
 	else if(argc >= 2 && (0 == strcasecmp(argv[1], "weapon") || 0 == strcasecmp(argv[1], "w")) )
 	{
-		return  game_cmd_use_weapon(pContext, pEvent);
+		ret = game_cmd_use_weapon(pContext, pEvent);
 	}
 	else if(argc >= 2 && (0 == strcasecmp(argv[1], "armor") || 0 == strcasecmp(argv[1], "a")) )
 	{
-		return  game_cmd_use_armor(pContext, pEvent);
+		ret = game_cmd_use_armor(pContext, pEvent);
 	}
 	else
 	{
@@ -538,7 +537,7 @@ static RESULT cmd_useskill(const char** argv, int argc, GameContext* pContext, G
 		return R_E_PARAM;
 	}
 	
-	return R_SUCC;
+	return ret;
 }
 
 /*
@@ -630,9 +629,9 @@ static RESULT cmd_save(const char** argv, int argc, GameContext* pContext, GameE
 	}
 
 
-	return game_save(pContext, argv[1]);
+	game_save(pContext, argv[1]);
 
-	return R_E_FAIL;
+	return R_DEF;
 }
 
 static RESULT cmd_load(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
@@ -864,7 +863,16 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 					}
 					else
 					{
-						RET_CHECK_BACK(ret);
+						switch(ret)
+						{
+						case R_SUCC:         // success and back to caller
+						case R_BACK:         // back to caller no result
+						case R_CANCEL:       // cancel current operator and back to caller
+						case R_EXIT:         // exit game 
+							return ret;
+						default:
+							break;
+						}
 					}
 				}
 				else

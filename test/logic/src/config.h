@@ -116,7 +116,7 @@ typedef enum _RESULT
 	R_SUCC  = 0,   // success, and continue loop
 	R_DEF,         // no result and continue loop
 	R_BACK,        // no result back to caller
-	R_DONE,        // op success back to caller
+	//R_DONE,        // op success back to caller
 	R_CANCEL,      // op cancel, back to caller
 	R_SKIP,        // op success back to caller
 	R_EXIT,        // exit the game ,end any loop, can not be used in event return code
@@ -155,13 +155,13 @@ typedef enum _RESULT
 //#define CHECK_BACK_RET(r)    do { if((r) == R_CANCEL || (r) == R_ABORT) { return (r); } /* if((r)==R_DONE || (r)==R_BACK) { return R_SUCC; } */  }while(0)
 
 
-#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_DONE ) { return (ret); }  } while(0)
-#define RET_CHECK_DONE_RET(ret, r)    do { if((ret) == R_DONE ) { return (r); }  } while(0)
+//#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_SUCC) { return (ret); }  } while(0)
+//#define RET_CHECK_DONE_RET(ret, r)    do { if((ret) == R_DONE ) { return (r); }  } while(0)
 #define RET_CHECK_CANCEL_RET(ret, r)    do { if((ret) == R_CANCEL) { return (r); }  } while(0)
 #define RET_CHECK_RET(ret, r)    do { if((ret) != R_SUCC) { return (r); }  } while(0)
 #define RET_CHECK_RETV(ret)    do { if((ret) != R_SUCC) { return; }  } while(0)
 
-
+#define RET_CANCEL_TO_DEF_RET(ret)   do { if((ret)==R_CANCEL) { return R_DEF; } else { return (ret); } }while(0)
 
 // bit operator
 #define FLAG_SET(f, b)   ((f)|=(b))

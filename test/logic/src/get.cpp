@@ -98,7 +98,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 		}
 
 		// goto out status
-		return R_BACK;
+		return R_SUCC;
 	}
 	else if(pEvent->id == GameEvent_PassiveGetCard)
 	{
@@ -121,7 +121,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 			}
 		}
 
-		return R_BACK;
+		return R_SUCC;
 	}
 	else
 	{

@@ -207,7 +207,7 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 			return R_E_FAIL;
 		}
 
-		return R_BACK;
+		return R_SUCC;
 	}
 
 	return R_E_STATUS;
