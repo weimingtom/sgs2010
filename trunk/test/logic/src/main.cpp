@@ -90,7 +90,10 @@ int main(int argc, char** argv)
 
 	INIT_EVENT(&stEvent, GameEvent_None, INVALID_PLAYER, INVALID_PLAYER, pParentEvent);
 
-	cmd_loop(&stGameContext, &stEvent, YES, NULL);
+	while (R_EXIT != cmd_loop(&stGameContext, &stEvent, YES, NULL))
+	{
+		// next game
+	}
 
 	close_game_script();
 

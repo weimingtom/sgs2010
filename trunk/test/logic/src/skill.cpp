@@ -67,12 +67,13 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	// post trigger use skill
 
-	return R_BACK;
+	return ret;
 }
 
 
 RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT  ret;
 	Player* p = CUR_PLAYER(pGame);
 	VCard  vcard;
 	PosCard   pcard;
@@ -104,14 +105,15 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("【%s】发动【%s】的%s效果。\n", p->name, get_card_name(pcard.card.id), equip_idx_str(EquipIdx_Weapon));
 
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
-	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	ret = call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
-	return R_BACK;
+	return ret;
 }
 
 RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT ret;
 	Player* p = CUR_PLAYER(pGame);
 	VCard     vcard;
 	PosCard   pcard;
@@ -144,10 +146,13 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 	MSG_OUT("【%s】发动【%s】的%s效果。\n", p->name, get_card_name(pcard.card.id), equip_idx_str(EquipIdx_Armor));
 
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_InUse);
-	call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
+	ret = call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
-	return R_BACK;
+	if(ret == R_CANCEL)
+		return R_DEF;
+
+	return ret;
 }
 
 

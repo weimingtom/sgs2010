@@ -536,7 +536,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
 		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
 
-		return R_BACK;
+		return R_SUCC;
 
 	}
 	else if(pEvent->id == GameEvent_SupplyCard)
@@ -620,7 +620,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		pEvent->pattern_out->out.trigger = pEvent->target;    // the supply card target player is real out card player
 
 
-		return R_BACK;
+		return R_SUCC;
 
 	}
 	else /*	if(pEvent->id == GameEvent_RoundOutCard) */  // in any event can out is allowed
@@ -690,9 +690,15 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		out_card.flag = OutCardFlag_None;
 		out_card.target_num = 0;
 
-		game_real_out(NULL, pGame, pEvent, pGame->cur_player, &out_card);
+		RESULT ret = game_real_out(NULL, pGame, pEvent, pGame->cur_player, &out_card);
 
-		return R_BACK;
+		// when out card is canceled , no effects
+		if(ret == R_CANCEL) 
+		{
+			return R_DEF;
+		}
+
+		return ret;
 	}
 
 	// other event can not out card

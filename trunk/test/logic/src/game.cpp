@@ -733,7 +733,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		{
 			if(pGame->status == Status_GameOver)
 			{
-				MSG_OUT("游戏正常结束。\n");
+				MSG_OUT("游戏结束。\n");
 			}
 			else if(pGame->status == Status_GameAbort)
 			{

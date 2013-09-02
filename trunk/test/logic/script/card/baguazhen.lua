@@ -61,7 +61,7 @@ function(cfg, game, event, player, pos_card)
 	return USE_CANNOT;
 end
 
--- 被动出牌‘闪’时,使用gbz判定来代替
+-- 被动出牌‘闪’时,使用bgz判定来代替
 cfg.event[GameEvent_PassiveOutCard] = 
 function(cfg, game, event, player)
 
