@@ -48,12 +48,15 @@ function classCode:register (pre)
 
  -- pad to 16 bytes
  local npad = 16 - (#s % 16)
+ if npad==1 then
+   npad = 2;
+ end
  local spad = ""
  for i=1,npad do
- 	spad = spad .. "-"
+   spad = spad .. "-"
  end
  s = s..spad
- 
+   
  -- convert to C
  output('\n'..pre..'{ /* begin embedded lua code */\n')
  output(pre..' int top = lua_gettop(tolua_S);')
