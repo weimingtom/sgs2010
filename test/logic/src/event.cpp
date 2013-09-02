@@ -45,6 +45,8 @@ RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent)
 	int n;
 	int m = pEvent->trigger;
 
+	ret = R_DEF;
+
 	for(n = 0; n < pGame->player_count; n++)
 	{
 		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
@@ -177,8 +179,7 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	// auto use card and skills
 	ret = check_player_event(pGame, pEvent, player, 1);
 
-	if(ret == R_BACK)
-		return R_BACK;
+	EVENT_CHECK_BREAK_RET(pEvent, ret);
 
 	if(ret == R_DEF)
 	{
@@ -190,11 +191,11 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	{
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
-		RET_CHECK_BACK(ret);
+		EVENT_CHECK_BREAK_RET(pEvent, ret);
 		ret = check_player_event(pGame, pEvent, player, 0);
 	}
 
-	return R_SUCC;
+	return R_DEF;
 }
 
 
@@ -207,18 +208,19 @@ RESULT call_game_event(GameContext* pGame, GameEventContext* pEvent)
 	
 	m = pEvent->trigger;
 
+	ret = R_DEF;
+
 	for(n = 0; n < pGame->player_count; n++)
 	{
 		if(!IS_PLAYER_DEAD(get_game_player(pGame, m)))
 		{
 			ret = call_player_event(pGame, pEvent, m);
-			RET_CHECK_RET(ret, ret);
 			EVENT_CHECK_BREAK(pEvent);
 		}
 		m = (m + 1) % pGame->player_count;
 	}
 
-	return R_SUCC;
+	return ret;
 }
 
 RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int player)
@@ -231,18 +233,6 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 	pPlayer = get_game_player(pGame, player);
-	
-	if(pPlayer->hero != HeroID_None)
-	{
-		skill_num = hero_skill_num(pPlayer->hero);
-
-		for(n = 1; n <=  skill_num; n++)
-		{
-			ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
-			RET_CHECK_BACK(ret);
-		}
-	}
-
 
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
@@ -253,9 +243,21 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 			pos_card.pos = n;
 
 			ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
-			RET_CHECK_BACK(ret);
+			EVENT_CHECK_BREAK_RET(pEvent, ret);
 		}
 	}
-	return R_SUCC;
+
+	if(pPlayer->hero != HeroID_None)
+	{
+		skill_num = hero_skill_num(pPlayer->hero);
+
+		for(n = 1; n <=  skill_num; n++)
+		{
+			ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+			EVENT_CHECK_BREAK_RET(pEvent, ret);
+		}
+	}
+
+	return R_DEF;
 }
 
