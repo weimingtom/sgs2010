@@ -170,7 +170,7 @@ function clean (s)
  --print('>>>>>>>>>>>>> after reduce space\n'..S);
  -- restore strings
   S = gsub(S, "%$(%d+);", function (a) return stb[tonumber(a)]; end);	
-  --print('>>>>>>>>>>>>> after unmask\n'..S);
+  print('>>>>>>>>>>>>> after unmask\n'..S);
   return S
 end
 
