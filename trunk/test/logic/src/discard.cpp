@@ -90,7 +90,7 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 		event.discard_pattern = &dis;
 		
 		ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
-		RET_CHECK_CANCEL_RET(ret,ret);
+		RET_CHECK_RET(ret,ret);
 	}
 	
 	return R_SUCC;

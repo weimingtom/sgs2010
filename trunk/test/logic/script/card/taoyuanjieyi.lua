@@ -78,8 +78,14 @@ local cfg = {
 		-- 出牌后的结算（某些技能可以跳过此事件）
 		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
 			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+			
+			-- 如果没有人需要加体力，直接返回SUCC
+			if player == INVALID_PLAYER then
+				message('场上无人需要恢复体力！');
+				return R_SUCC;
+			end
 			-- add life( from player, out card 'nmrq', skill 0 )
-			return game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
+			return game_player_add_life(game, event, event.target, 1, player, event.out_card, 0);
 		end,
 	},
 

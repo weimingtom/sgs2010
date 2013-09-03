@@ -315,7 +315,7 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	lua_pushlightuserdata(L, pGame);
 	lua_pushstring(L, path);
 
-	state = lua_pcall(L, 2, 0, 0);
+	state = script_pcall(L, 2, 0);
 
 	if(state != 0)
 	{

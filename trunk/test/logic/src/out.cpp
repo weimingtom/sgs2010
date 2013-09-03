@@ -58,7 +58,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 
 		// response the out card , if event return R_CANCEL, out card is broken
-		RET_CHECK_RET(ret, ret);
+		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 	}
 
 	// per calc
@@ -77,7 +77,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		stEvent.out_card = out_card;
 
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-		RET_CHECK_RET(ret, ret);
+		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 	}
 
 	// post calc
@@ -341,11 +341,10 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 		INIT_EVENT(&stEvent, GameEvent_OutCardPrepare, trigger, INVALID_PLAYER, pParentEvent);
 		stEvent.out_card = out_card;
 
-		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 
-		// must return R_SUCC for continue out card
-		RET_CHECK_RET(ret, R_CANCEL);
+		// if return R_CANCEL, break out card
+		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 	}
 
 	return R_SUCC;
@@ -700,12 +699,10 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		RESULT ret = game_real_out(NULL, pGame, pEvent, pGame->cur_player, &out_card);
 
 		// when out card is canceled , no effects
-		if(ret == R_CANCEL) 
-		{
-			return R_DEF;
-		}
+		//RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 
-		return ret;
+		// out card must return R_SUCC, because cmd_loop need back to its caller for next out ot use skill
+		return R_SUCC;
 	}
 
 	// other event can not out card

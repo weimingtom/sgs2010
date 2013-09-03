@@ -700,7 +700,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		lua_pushlightuserdata(L, pGame);
 		lua_pushlightuserdata(L, pEvent);
 
-		state = lua_pcall(L, 2, 1, 0);
+		state = script_pcall(L, 2, 1);
 
 		if(state != 0)
 		{
@@ -727,7 +727,7 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 		lua_pushlightuserdata(L, pGame);
 		lua_pushlightuserdata(L, pEvent);
 
-		state = lua_pcall(L, 2, 1, 0);
+		state = script_pcall(L, 2, 1);
 
 		if(state != 0)
 		{
