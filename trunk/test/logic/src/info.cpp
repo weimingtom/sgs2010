@@ -713,96 +713,42 @@ static void game_event_param__skill_canuse(GameContext* pGame, GameEventContext*
 
 static void game_event_param(GameContext* pGame, GameEventContext* pEvent)
 {
-	switch(pEvent->id)
-	{
-	case GameEvent_NewGame:
+	if(game_event_get_new_game_config(NULL, pEvent))
 		game_event_param__new_game_config(pGame, pEvent);
-		break;
-	case GameEvent_LoadGame:
+	if(game_event_get_file_name(NULL, pEvent))
 		game_event_param__file_name(pGame, pEvent);
-		break;
-	case GameEvent_PerRoundGet:
-	case GameEvent_RoundGetCard:
-	case GameEvent_PostRoundGet:
-	case GameEvent_PassiveGetCard:
+	if(game_event_get_get_card(NULL, pEvent))
 		game_event_param__get_card(pGame, pEvent);
-		break;
-	case GameEvent_GetBaseAttackDis:
-	case GameEvent_CalcAttackDis:
+	if(game_event_get_attack_dis(NULL, pEvent))
 		game_event_param__attack_dis(pGame, pEvent);
-		break;
-	case GameEvent_BeforePassiveOut:
+	if(game_event_get_before_pout(NULL, pEvent))
 		game_event_param__before_pout(pGame, pEvent);
-		break;
-	case GameEvent_AfterPassiveOut:
+	if(game_event_get_card_pattern(NULL, pEvent))
 		game_event_param__card_pattern(pGame, pEvent);
-		break;
-	case GameEvent_PerPassiveOutCard:
-	case GameEvent_PassiveOutCard:
-	case GameEvent_PostPassiveOutCard:
-	case GameEvent_PerSupplyCard:
-	case GameEvent_SupplyCard:
-	case GameEvent_PostSupplyCard:
+	if(game_event_get_pattern_out(NULL, pEvent))
 		game_event_param__pattern_out(pGame, pEvent);
-		break;
-	case GameEvent_PerOutCardPrepare:
-	case GameEvent_OutCardPrepare:
-	case GameEvent_PerOutCard:
-	case GameEvent_BeforeOutCardEffect:
-	case GameEvent_OutCard:
-	case GameEvent_PerOutCardCalc:
-	case GameEvent_OutCardCalc:
-	case GameEvent_PostOutCardCalc:
-	case GameEvent_PostOutCard:
+	if(game_event_get_out_card(NULL, pEvent))
 		game_event_param__out_card(pGame, pEvent);
-		break;
-	case GameEvent_PerDecideCard:
-	case GameEvent_PerDecideCardCalc:
-	case GameEvent_PostDecideCard:
+	if(game_event_get_decide_card(NULL, pEvent))
 		game_event_param__decide_card(pGame, pEvent);
-		break;
-	case GameEvent_PostGetCard:
-	case GameEvent_PerLostCard:
-	case GameEvent_PostLostCard:
-	case GameEvent_CheckCardCanOut:
+	if(game_event_get_pos_card(NULL, pEvent))
 		game_event_param__pos_card(pGame, pEvent);
-		break;
-	case GameEvent_RoundDiscardCard:
-	case GameEvent_PassiveDiscardCard:
+	if(game_event_get_discard_pattern(NULL, pEvent))
 		game_event_param__discard_pattern(pGame, pEvent);
-		break;
-	case GameEvent_PerDiscardCard:
-	case GameEvent_PostDiscardCard:
+	if(game_event_get_pos_vcard(NULL, pEvent))
 		game_event_param__pos_vcard(pGame, pEvent);
-		break;
-	case GameEvent_PerCardCalc:
-	case GameEvent_CardCalc:
-	case GameEvent_PostCardCalc:
-	case GameEvent_FiniCardCalc:
+	if(game_event_get_judge_card(NULL, pEvent))
 		game_event_param__judge_card(pGame, pEvent);
-		break;
-	case GameEvent_PerEquipCard:
-	case GameEvent_PostEquipCard:
+	if(game_event_get_equip_card(NULL, pEvent))
 		game_event_param__equip_card(pGame, pEvent);
-		break;
-	case GameEvent_PerChangeLife:
-	case GameEvent_ChangeLife:
-	case GameEvent_PostChangeLife:
+	if(game_event_get_change_life(NULL, pEvent))
 		game_event_param__change_life(pGame, pEvent);
-		break;
-	case GameEvent_SelectTarget:
+	if(game_event_get_select_target(NULL, pEvent))
 		game_event_param__select_target(pGame, pEvent);
-		break;
-	case GameEvent_CheckCardCanUse:
+	if(game_event_get_card_canuse(NULL, pEvent))
 		game_event_param__card_canuse(pGame, pEvent);
-		break;
-	case GameEvent_CheckSkillCanUse:
+	if(game_event_get_skill_canuse(NULL, pEvent))
 		game_event_param__skill_canuse(pGame, pEvent);
-		break;
-	default:
-		/* do nothing */
-		break;
-	}
 
 }
 

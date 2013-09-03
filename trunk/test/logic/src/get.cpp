@@ -216,7 +216,7 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	}
 
 
-	RET_CHECK_CANCEL_RET(ret, ret);
+	RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 
 	return R_SUCC;
 }

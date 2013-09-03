@@ -224,10 +224,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 
 			trigger_game_event(pGame, &event);
 
-			if(event.result == R_CANCEL)
-			{
-				return R_CANCEL;
-			}
+			RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 			// 和自己的距离始终是0
 			if(player == target)
@@ -237,7 +234,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 			}
 
 			// some skill can set attack no check distance...  set base to -1
-			if(event.result != R_SKIP && dis.base >= 0)
+			if(event.result != R_SUCC && dis.base >= 0)
 			{
 				if(dis.base + dis.inc < dis.dis)
 				{
@@ -262,7 +259,7 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 	event.select_target = &select_target;
 	trigger_game_event(pGame, &event);
 
-	if(event.result == R_CANCEL)
+	RET_CHECK_CANCEL(event.result)
 	{
 		// cannot select this player as target
 		if(tip)

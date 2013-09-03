@@ -19,6 +19,8 @@ static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContex
 	INIT_EVENT(&event, GameEvent_PerDead, player, INVALID_PLAYER, pParentEvent);
 	trigger_game_event(pGame, &event);
 
+	// ignore event result
+
 
 	// event dead
 
@@ -33,6 +35,10 @@ static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContex
 
 		// set the player to dead
 		pPlayer->status = PlayerStatus_Dead;
+
+		// after the player dead
+		INIT_EVENT(&event, GameEvent_PostDead, player, INVALID_PLAYER, pParentEvent);
+		trigger_game_event(pGame, &event);
 	}
 	return R_SUCC;
 }
