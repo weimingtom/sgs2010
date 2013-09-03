@@ -274,9 +274,12 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	INIT_EVENT(&event, GameEvent_PerPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	event.discard_pattern = &dis;
 
-	ret = trigger_game_event(pGame, &event);
+	trigger_game_event(pGame, &event);
 
-	RET_CHECK_CANCEL_RET(ret, ret);
+	// passive discard card can be canceled by skills
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
+	// passive discard card can be skipped directly return R_SUCC
+	RET_CHECK_SUCC_RET(event.result, R_SUCC);
 
 
 	INIT_EVENT(&event, GameEvent_PassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
@@ -286,7 +289,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
 	RET_CHECK_RET(ret,ret);
 
-	RET_CHECK_BACK(event.result);
+	//RET_CHECK_BACK(event.result);
 
 
 	INIT_EVENT(&event, GameEvent_PostPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
@@ -294,7 +297,8 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	trigger_game_event(pGame, &event);
 
-	RET_CHECK_BACK(event.result);
+	// passive discard card can be canceled by skills
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 	return R_SUCC;
 }

@@ -72,8 +72,10 @@ function(cfg, game, event, player)
 	if(game_decide_card(game,event,player, 'r') == YES) then
 		-- 判定成功，则视为你已经出了一张闪，无花色，无点数
 		message('【'..cfg.name..'】判定成功，视为你已经打出了一张【'..card_sid2name('shan')..'】。');
-		--event.result = R_SUCC;
-		--event.block = YES;
+		-- 让PassiveOutCard直接成功
+		event.result = R_SUCC;
+		event.block = YES;
+		-- 填充虚拟的出牌
 		event.pattern_out.out.trigger = player;
 		event.pattern_out.out.supply = player;
 		event.pattern_out.out.target = event.target;
@@ -81,7 +83,7 @@ function(cfg, game, event, player)
 		event.pattern_out.out.vcard.color = CardColor_None;
 		event.pattern_out.out.vcard.value = CardValue_None;
 		event.pattern_out.out.vcard.flag = CardFlag_None;
-		return R_BACK;
+		return R_SUCC;
 	else
 		-- 你仍然可以打出一张闪
 		local alter = '【'..cfg.name..'】判定失败，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
@@ -90,8 +92,8 @@ function(cfg, game, event, player)
 		-- event.pattern_out.alter_text = alter;
 		message(alter);
 		
-		-- 返回RETRY来尝试其它方式
-		return R_RETRY;
+		-- 返回,可以再尝试其它方式，这里之后，八卦阵已经标记不能再用。
+		return R_DEF;
 	end
 end
 

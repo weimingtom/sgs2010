@@ -44,7 +44,8 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	trigger_game_event(pGame, &stEvent);
 
-	RET_CHECK_BACK(stEvent.result);	
+	// can cancel out card
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
 
 	// out procedure (start do effect)
 
@@ -66,7 +67,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	
 	trigger_game_event(pGame, &stEvent);
 
-	RET_CHECK_BACK(stEvent.result);
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
 
 	// some skill can skip the calc of out card
 	if(stEvent.result != R_SKIP)
@@ -85,7 +86,8 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 	trigger_game_event(pGame, &stEvent);
 
-	RET_CHECK_BACK(stEvent.result);
+	// event return cancel, so out card is invalid.  
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
 
 	return R_SUCC;
 }
@@ -316,7 +318,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 
 	trigger_game_event(pGame, &stEvent);
 
-	RET_CHECK_BACK(stEvent.result);
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);
 
 	// some skill can skip the out card prepare, and set targets directly
 	if(stEvent.result == R_SKIP)
@@ -327,6 +329,7 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 	{
 		for(n = 0;  n< out_card->target_num; n++)
 		{
+			// 如果目标检查不能通过，则直接取消出牌
 			if(R_SUCC != game_check_attack(pGame, pParentEvent, trigger, out_card->targets[n], out_card->vcard.id, 1))
 			{
 				return R_CANCEL;
@@ -341,7 +344,8 @@ static RESULT out_card_prepare(GameContext* pGame, GameEventContext* pParentEven
 		//ret = (*pCardConfig->out)(pGame, &stEvent, trigger);
 		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
 
-		RET_CHECK_RET(ret, ret);
+		// must return R_SUCC for continue out card
+		RET_CHECK_RET(ret, R_CANCEL);
 	}
 
 	return R_SUCC;
@@ -363,17 +367,16 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	
 	// prepare out card
 	ret = out_card_prepare(pGame, pEvent, player, out_card);
-	
-	if(ret != R_SUCC && ret != R_DEF)
-		return ret;
 
+	RET_CHECK_RET(ret, ret);
 
 
 	ret = remove_out_card(pGame, pEvent, out_card);
-	RET_CHECK_RET(ret,ret);
+	RET_CHECK_RET(ret, ret);
 
 	add_out_stack(pGame, out_card);
 
+	// post prepare , out card message . out put target select alter text.
 	if(out_card->message[0] != '\0')
 	{
 		out_card->message[sizeof(out_card->message)-1] = 0;
@@ -385,15 +388,18 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	ret = per_out_card(pGame, pEvent, player, out_card);
 
 	// 到了这里不应该被打断了
-	// CHECK_BACK_RET(ret);
+	// RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 	
 	if(out_card->target_num == 0)
 	{
+
+		// NO target out card drive
 		ret = do_out_card(pGame, pEvent, player, INVALID_PLAYER, out_card);
 		//CHECK_RET(ret,ret);
 	}
 	else
 	{
+		// for each target out card drive
 		for(n = 0; n < out_card->target_num; n++)
 		{
 			if(IS_PLAYER_VALID(pGame, out_card->targets[n]))
@@ -411,9 +417,10 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	// post out maybe modify out cards 
 	post_out_card(pGame, pEvent, player, out_card);
 
+	// ignore event result
 
 	// the out is not effect
-	RET_CHECK_BACK(ret);
+	RET_CHECK_RET(ret, R_CANCEL);
 
 	return R_SUCC;
 }
@@ -443,7 +450,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	RET_CHECK_RET(ret, ret);
 
-	RET_CHECK_BACK(stEvent.result);
+	//RET_CHECK_BACK(stEvent.result);
 
 	return R_SUCC;
 }
@@ -743,7 +750,7 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 	call_game_event(pGame, &event);
 	
 	RET_CHECK_CANCEL_RET(event.result, NO);
-	RET_CHECK_DONE_RET(event.result, YES);
+	RET_CHECK_SUCC_RET(event.result, YES);
 	
 	return call_card_can_out(pPosCard->card.id, pGame, pEvent, player, pPosCard);
 }
@@ -1038,11 +1045,10 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 		trigger_game_event(pGame, &event);
 		//ret = per_passive_out_card(pGame, pParentEvent, player, target, &pattern_out);
 
-		RET_CHECK_BACK(event.result);
+		RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 		// be success directly (for example armor card skill may defend the attack of {sha} )
-		if(event.result == R_SKIP)
-			return R_SUCC;
+		RET_CHECK_SUCC_RET(event.result, R_SUCC);
 	}
 
 
@@ -1053,15 +1059,13 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	ret = cmd_loop(pGame, &event, NO, pattern_out.alter_text);
 
-	if(ret != R_SUCC)
-		return ret;
+	RET_CHECK_RET(ret, ret);
 
-	RET_CHECK_BACK(event.result);
+	//RET_CHECK_BACK(event.result);
 
 	ret = remove_out_card(pGame, pParentEvent, &pattern_out.out); 
 
-	if(ret != R_SUCC)
-		return ret;
+	RET_CHECK_RET(ret, ret);
 
 	add_out_stack(pGame, &pattern_out.out);
 
@@ -1073,9 +1077,8 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	trigger_game_event(pGame, &event);
 
-
 	// the passive out is not effect
-	RET_CHECK_BACK(event.result);
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 	return R_SUCC;
 }
@@ -1127,11 +1130,10 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 	// avoid the passive but result is cancel.
-	RET_CHECK_BACK(event.result);
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 	// be success directly (for example armor card skill may defend the attack of {sha} )
-	if(event.result == R_SKIP)
-		return R_SUCC;
+	RET_CHECK_SUCC_RET(event.result, R_SUCC);
 
 	// is pattern card is empty, success directly
 	if(before_pout.pattern.num == 0)
@@ -1145,9 +1147,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 		memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 
-		if(ret != R_SUCC)
-			return ret;
-
+		RET_CHECK_RET(ret, ret);
 	}
 	else
 	{
@@ -1166,9 +1166,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 			memcpy(out_pattern->ud, t_out_pattern.ud, sizeof(out_pattern->ud));
 
-
-			if(ret != R_SUCC)
-				return ret;
+			RET_CHECK_RET(ret, ret);
 		}
 
 		memcpy(before_pout.pattern.ud, t_out_pattern.ud, sizeof(before_pout.pattern.ud));
@@ -1185,7 +1183,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 
 	// the passive out is not effect
-	RET_CHECK_BACK(event.result);
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 	return R_SUCC;
 }
@@ -1248,12 +1246,10 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 		memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
-
-		RET_CHECK_BACK(event.result);
+		RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 		// be success directly (for example armor card skill may defend the attack of {sha} )
-		if(event.result == R_SKIP)
-			return R_SUCC;
+		RET_CHECK_SUCC_RET(event.result, R_SUCC);
 	}
 
 
@@ -1269,7 +1265,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	
 	RET_CHECK_RET(ret,ret);
 
-	RET_CHECK_BACK(event.result);
+	//RET_CHECK_BACK(event.result);
 
 	// 提供牌的过程，并不会真正从提供者手里删除，直到真正使用者在使用该牌的时候
 	*out_card = t_pattern_out.out;
@@ -1282,9 +1278,8 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
-	// the passive out is not effect
-	RET_CHECK_BACK(event.result);
-
+	// the supply cards is not effect
+	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 	return R_SUCC;
 }

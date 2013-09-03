@@ -25,7 +25,7 @@ static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int 
 	if(R_SUCC != get_player_card(pPlayer, CardWhere_PlayerJudgment,  pos, &vcard))
 	{
 		pPlayer->card_in_judge_num-- ;
-		return R_DONE; // next judgment card
+		return R_DEF; // next judgment card
 	}
 
 	MSG_OUT("【%s】开始结算判定区牌 %s\n", pPlayer->name, vcard_str(&vcard, buf, sizeof(buf)));
@@ -67,7 +67,7 @@ static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int 
 		{
 			INIT_EVENT(&event, GameEvent_CardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 			event.judge_card = &stJudgeCard;
-			//(*pCardConfig->out)(pGame, &event, pGame->cur_player);
+			// ignore event result
 			call_card_event(stJudgeCard.pos_vcard.vcard.id, pGame, &event, pGame->round_player);
 
 			// post calc , before discard
@@ -78,12 +78,14 @@ static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int 
 		}
 
 
-		// after calc
+		// finally sfter calc
 
 		INIT_EVENT(&event, GameEvent_FiniCardCalc, pGame->round_player, INVALID_PLAYER, pEvent);
 		event.judge_card = &stJudgeCard;
 
 		call_card_event(stJudgeCard.pos_vcard.vcard.id, pGame, &event, pGame->cur_player);
+
+		// ignore event result
 
 	}
 

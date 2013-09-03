@@ -157,7 +157,12 @@ typedef enum _RESULT
 
 //#define RET_CHECK_BACK(ret)           do { if((ret) == R_BACK || (ret) == R_CANCEL || (ret) == R_SUCC) { return (ret); }  } while(0)
 //#define RET_CHECK_DONE_RET(ret, r)    do { if((ret) == R_DONE ) { return (r); }  } while(0)
+
+#define RET_CHECK_CANCEL(ret)    if((ret) == R_CANCEL)
+
 #define RET_CHECK_CANCEL_RET(ret, r)    do { if((ret) == R_CANCEL) { return (r); }  } while(0)
+#define RET_CHECK_SUCC_RET(ret, r)    do { if((ret) == R_SUCC) { return (r); }  } while(0)
+
 #define RET_CHECK_RET(ret, r)    do { if((ret) != R_SUCC) { return (r); }  } while(0)
 #define RET_CHECK_RETV(ret)    do { if((ret) != R_SUCC) { return; }  } while(0)
 
