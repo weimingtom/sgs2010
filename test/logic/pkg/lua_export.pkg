@@ -54,7 +54,7 @@ typedef struct tagGameContext
 }GameContext;
 
 
-
+/*
 $#define TOLUA_DISABLE_tolua_get_GameEventContext_get_card_ptr
 $#define TOLUA_DISABLE_tolua_get_GameEventContext_attack_dis_ptr
 $#define TOLUA_DISABLE_tolua_get_GameEventContext_card_pattern_ptr
@@ -88,7 +88,7 @@ $#define tolua_get_GameEventContext_change_life_ptr  tolua_game_game_event_get_c
 $#define tolua_get_GameEventContext_select_target_ptr  tolua_game_game_event_get_select_target00
 $#define tolua_get_GameEventContext_skill_canuse_ptr  tolua_game_game_event_get_skill_canuse00
 $#define tolua_get_GameEventContext_card_canuse_ptr  tolua_game_game_event_get_card_canuse00
-
+*/
 
 
 typedef struct tagGameEventContext

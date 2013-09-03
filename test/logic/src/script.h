@@ -12,7 +12,12 @@ lua_State* get_game_script();
 void  close_game_script();
 RESULT  reload_game_script();
 
+
+int script_pcall (lua_State *L, int narg, int result);
+
 lua_State* get_ai_script();
+
+
 
 
 // wrapped function from lua

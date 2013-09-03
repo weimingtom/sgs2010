@@ -192,6 +192,8 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	{
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
+		// 这里需要检测R_CANCEL，因为角色可能放弃在此事件内的行动
+		RET_CHECK_RET(ret, ret);
 		EVENT_CHECK_BREAK_RET(pEvent, ret);
 		ret = check_player_event(pGame, pEvent, player, 0);
 	}

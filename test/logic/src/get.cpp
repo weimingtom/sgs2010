@@ -158,9 +158,9 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 		snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "«Î√˛[%d]’≈≈∆:", stGetCard.num);
 		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+		RET_CHECK_RET(ret, ret);
 	}
 
-	RET_CHECK_CANCEL_RET(ret, ret);
 
 	return R_SUCC;
 }
@@ -213,10 +213,10 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	else
 	{
 		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+		RET_CHECK_RET(ret, ret);
 	}
 
 
-	RET_CHECK_CANCEL_RET(ret, R_CANCEL);
 
 	return R_SUCC;
 }

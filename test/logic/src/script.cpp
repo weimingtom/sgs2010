@@ -261,7 +261,7 @@ int luaex_import_file(lua_State* L )
 	lua_getfield(L, -1, "sort"); // ... [t] [table] [table.sort]
 	lua_pushvalue(L, -3);       
 	lua_pushcfunction(L, file_name_cmp);   // ... [t] [table] [table.sort] [t] [file_name_cmp]
-	if(0 != lua_pcall(L, 2, 0, 0))  // ... [t] [table] 
+	if(0 != script_pcall(L, 2, 0))  // ... [t] [table] 
 	{
 		set_cur_path(cwd_path);
 		lua_error(L);
@@ -464,7 +464,7 @@ RESULT lua_import(lua_State* L,  const char* luafile_path)
 	lua_setfield(L, LUA_REGISTRYINDEX, "__import_path");
 	lua_getglobal(L, "import");
 	lua_pushstring(L, luafile_path);
-	state = lua_pcall(L, 1, 0, 0);
+	state = script_pcall(L, 1, 0);
 	if(state != 0)
 	{
 		MSG_OUT("%s\n", lua_tostring(L, -1));
@@ -490,7 +490,7 @@ RESULT  reload_game_script()
 
 	// clear before reload
 	lua_getglobal(L, "reload_clear");
-	state = lua_pcall(L, 0, 0, 0);
+	state = script_pcall(L, 0, 0);
 
 	if(state != 0)
 	{
@@ -551,5 +551,42 @@ char* get_enumt_str(const char* enum_type, int val, int is_bit_or, char* buf, in
 	lua_pop(L, 1);
 	return buf;
 
+}
+
+
+static int traceback (lua_State *L) 
+{
+	lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+	if (!lua_istable(L, -1)) 
+	{
+		lua_pop(L, 1);
+		return 1;
+	}
+	lua_getfield(L, -1, "traceback");
+	if (!lua_isfunction(L, -1)) 
+	{
+		lua_pop(L, 2);
+		return 1;
+	}
+	lua_pushvalue(L, 1);  /* pass error message */
+	lua_pushinteger(L, 2);  /* skip this function and traceback */
+	lua_call(L, 2, 1);  /* call debug.traceback */
+	return 1;
+}
+
+
+int script_pcall(lua_State *L, int narg, int result) 
+{
+	int status;
+	int base = lua_gettop(L) - narg;  /* function index */
+	lua_pushcfunction(L, traceback);  /* push traceback function */
+	lua_insert(L, base);  /* put it under chunk and args */
+	//signal(SIGINT, laction);
+	status = lua_pcall(L, narg, result, base);
+	//signal(SIGINT, SIG_DFL);
+	lua_remove(L, base);  /* remove traceback function */
+	/* force a complete garbage collection in case of errors */
+	if (status != 0) lua_gc(L, LUA_GCCOLLECT, 0);
+	return status;
 }
 
