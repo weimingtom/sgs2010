@@ -27,92 +27,29 @@ local cfg = {
 ★游戏开始时你的攻击范围是1，关于攻击范围的解释请看“用语集”。
 ★每个出牌阶段你只能使用一张杀。]==],
 
-	can_out = {
-		
-	},
+	can_out = { },
 	
-	event = {	
-		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
-		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
-		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
-			event.attack_dis.base = 1; 
-			return R_SUCC;
-		end,
-
-
-
-		-- 出牌过程由下列3个事件驱动
-
-		-- 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
-		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
-			-- select target
-			local ret;
-			local target = -1;
-			ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), NO, NO,
-				"请为【"..cfg.name.."】指定一个目标:");
-			if(ret == R_SUCC) then
-				event.out_card.targets[0] = target;
-				event.out_card.target_num = 1;
-				event.out_card.message = '【'..get_game_player(game, player).name..'】指定了【'
-					.. get_game_player(game, target).name .. '】作为【'
-					.. cfg.name ..'】的目标。';
-
-				local p = get_game_player(game, player);
-				p.params[PLAYER_PARAM_SHA_COUNTER] = p.params[PLAYER_PARAM_SHA_COUNTER] + 1;
-				return R_SUCC;
-			end
-			-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
-			-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
-			return R_CANCEL;
-		end,
-		
-		-- 出牌的过程驱动
-		[GameEvent_OutCard] = function(cfg, game, event, player)
-			local ret;
-			-- local p = get_game_player(game, player);
-			-- target passive shan
-			
-			local out_pattern  = OutCardPattern();
-			game_load_out_pattern(out_pattern,  'h:{shan}?');
-
-			ret = game_passive_out(game, event, event.target, player, out_pattern,
-				"请出一张【"..card_sid2name('shan').."】:");
-
-			if(ret == R_SUCC) then
-				return R_CANCEL;
-			end
-
-			-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
-			-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
-			return R_SUCC;
-		end,
-		
-		-- 出牌后的结算（某些技能可以跳过此事件）
-		[GameEvent_OutCardCalc] = function (cfg, game, event, player)
-			-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
-			-- lost life( from player, out card 'sha', skill 0 )
-			return game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
-		end,
-	},
+	event = { },
 };
 
+
+
 -- 能否出杀的限制
-add_player_event(
-	GameEvent_RoundBegin, 
-	function(game, event, player)
-		if(event.trigger == player) then
-			local p = get_game_player(game, player);
-			-- reset the sha out counter
-			message('reset sha counter for ['..p.name..']')
-			p.params[PLAYER_PARAM_SHA_COUNTER] = 0;
-		end
-		return R_DEF;
+local function sha_reset_count(game, event, player)
+	if(event.trigger == player) then
+		local p = get_game_player(game, player);
+		-- reset the sha out counter
+		message('reset sha counter for ['..p.name..']')
+		p.params[PLAYER_PARAM_SHA_COUNTER] = 0;
 	end
-);
+	return R_DEF;
+end
+
+add_player_event(GameEvent_RoundBegin, sha_reset_count);
+
 
 -- 能否出杀的检测
-cfg.can_out[GameEvent_RoundOutCard] = 
-function (cfg, game, event, player, pos_card)
+cfg.can_out[GameEvent_RoundOutCard] =  function(cfg, game, event, player, pos_card)
 	local p = get_game_player(game, player);
 	if(p.params[PLAYER_PARAM_SHA_COUNTER] == 0) then
 		return YES;
@@ -121,6 +58,74 @@ function (cfg, game, event, player, pos_card)
 end
 
 
+
+
+-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+cfg.event[GameEvent_GetBaseAttackDis] =  function (cfg, game, event, player)
+	event.attack_dis.base = 1; 
+	return R_SUCC;
+end
+
+
+
+-- 出牌过程由下列3个事件驱动
+
+-- GameEvent_OutCardPrepare 出牌前的准备（如选择目标等，某些技能可以跳过此事件）
+cfg.event[GameEvent_OutCardPrepare] =  function (cfg, game, event, player)
+	-- select target
+	local ret;
+	local target = -1;
+	ret, target = game_select_target(game, event, player, get_card_id_by_sid(cfg.sid), NO, NO,
+		"请为【"..cfg.name.."】指定一个目标:");
+	if(ret == R_SUCC) then
+		event.out_card.targets[0] = target;
+		event.out_card.target_num = 1;
+		event.out_card.message = '【'..get_game_player(game, player).name..'】指定了【'
+			.. get_game_player(game, target).name .. '】作为【'
+			.. cfg.name ..'】的目标。';
+
+		local p = get_game_player(game, player);
+		p.params[PLAYER_PARAM_SHA_COUNTER] = p.params[PLAYER_PARAM_SHA_COUNTER] + 1;
+		return R_SUCC;
+	end
+	message(event.get_card.num);
+	-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
+	-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
+	return R_CANCEL;
+end
+
+
+
+-- GameEvent_OutCard 出牌的过程驱动
+cfg.event[GameEvent_OutCard] = function(cfg, game, event, player)
+	local ret;
+	-- local p = get_game_player(game, player);
+	-- target passive shan
+	
+	local out_pattern  = OutCardPattern();
+	game_load_out_pattern(out_pattern,  'h:{shan}?');
+
+	ret = game_passive_out(game, event, event.target, player, out_pattern,
+		"请出一张【"..card_sid2name('shan').."】:");
+
+	if(ret == R_SUCC) then
+		return R_CANCEL;
+	end
+
+	-- 如果没有特别的驱动过程，则应该返回 R_SUCC，让结算过程继续。
+	-- 如果返回R_CANCEL，则出牌过程完成，牌会进入弃牌堆，但不会执行出牌结算过程
+	return R_SUCC;
+end
+
+
+
+-- GameEvent_OutCardCalc 出牌后的结算（某些技能可以跳过此事件）
+cfg.event[GameEvent_OutCardCalc] = function(cfg, game, event, player)
+	-- 结算牌的效果，如扣体力，弃目标的牌等等。针对每个目标都会执行结算事件
+	-- lost life( from player, out card 'sha', skill 0 )
+	return game_player_add_life(game, event, event.target, -1, player, event.out_card, 0);
+end
 
 
 -- register
