@@ -70,11 +70,13 @@ function classVariable:isvariable ()
 end
 
 -- get variable value
-function classVariable:getvalue (class,static, prop_get)
+function classVariable:getvalue (class,static,outside, prop_get)
 
 	local name
-	if prop_get then
-
+	if class and outside and prop_get then
+		name = prop_get..'(tolua_S, self)'
+		return name
+	elseif prop_get then
 		name = prop_get.."()"
 	else
 		name = self.name
@@ -136,6 +138,11 @@ function classVariable:supcode ()
   _,_,self.mod = strfind(self.mod,'^%s*static%s%s*(.*)')
  end
 
+ -- outside
+ local _,_,outside = strfind(self.mod, '(tolua_outside)')
+ if outside ~= nil then
+  self.mod = string.gsub(self.mod, "tolua_outside", "")
+ end
 
  -- check self value
  if class and static==nil then
@@ -155,14 +162,14 @@ function classVariable:supcode ()
  else
 	local t,ct = isbasic(self.type)
 	if t then
-		output('  tolua_push'..t..'(tolua_S,(',ct,')'..self:getvalue(class,static,prop_get)..');')
+		output('  tolua_push'..t..'(tolua_S,(',ct,')'..self:getvalue(class,static,outside,prop_get)..');')
 	else
 		local push_func = get_push_function(self.type)
 		t = self.type
 		if self.ptr == '&' or self.ptr == '' then
-			output('  ',push_func,'(tolua_S,(void*)&'..self:getvalue(class,static,prop_get)..',"',t,'");')
+			output('  ',push_func,'(tolua_S,(void*)&'..self:getvalue(class,static,outside,prop_get)..',"',t,'");')
 		else
-			output('  ',push_func,'(tolua_S,(void*)'..self:getvalue(class,static,prop_get)..',"',t,'");')
+			output('  ',push_func,'(tolua_S,(void*)'..self:getvalue(class,static,outside,prop_get)..',"',t,'");')
 		end
 	end
  end
@@ -223,7 +230,9 @@ function classVariable:supcode ()
 			if self.ptr~='' then ptr = '*' end
 			output(' ')
 			local name = prop_set or self.name
-			if class and static then
+			if class and outside and prop_set then
+				output(name)
+			elseif class and static then
 				output(self.parent.type..'::'..name)
 			elseif class then
 				output('self->'..name)
@@ -231,7 +240,9 @@ function classVariable:supcode ()
 				output(name)
 			end
 			local t = isbasic(self.type)
-			if prop_set then
+			if class and outside and prop_set then
+				output('(tolua_S, self, ')
+			elseif prop_set then
 				output('(')
 			else
 				output(' = ')

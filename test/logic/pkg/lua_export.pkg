@@ -100,22 +100,22 @@ typedef struct tagGameEventContext
 	RESULT   result;
 	YESNO	 block;
 	//union {
-	tolua_readonly GetCard*      get_card;       // num for get card, discard card. etc
-	tolua_readonly AttackDis*    attack_dis; 
-	tolua_readonly OutCardPattern* card_pattern;
-	tolua_readonly BeforePassiveOut* before_pout; 
-	tolua_readonly PatternOut*   pattern_out;    // for passive out, supply card etc..
-	tolua_readonly OutCard*      out_card;       // real out,  per/post out
-	tolua_readonly DiscardPattern* discard_pattern; // when life is changed 
-	tolua_readonly PosCard*      pos_card;       // lost card,
-	tolua_readonly PosVCard*     pos_vcard;      // pos vcard,
-	tolua_readonly JudgeCard*    judge_card;     // judgement card
-	tolua_readonly DecideCard*   decide_card;    // decide card
-	tolua_readonly EquipCard*    equip_card;     // for per/post equip card
-	tolua_readonly ChangeLife*   change_life;    // when life is changed 
-	tolua_readonly SelectTarget* select_target;  // when select target checked
-	tolua_readonly SkillCanUse*  skill_canuse;   // check skill can use
-	tolua_readonly CardCanUse*   card_canuse;    // check card can use
+	tolua_readonly tolua_outside tolua_property__event GetCard*      get_card;       // num for get card, discard card. etc
+	tolua_readonly tolua_outside tolua_property__event AttackDis*    attack_dis; 
+	tolua_readonly tolua_outside tolua_property__event OutCardPattern* card_pattern;
+	tolua_readonly tolua_outside tolua_property__event BeforePassiveOut* before_pout; 
+	tolua_readonly tolua_outside tolua_property__event PatternOut*   pattern_out;    // for passive out, supply card etc..
+	tolua_readonly tolua_outside tolua_property__event OutCard*      out_card;       // real out,  per/post out
+	tolua_readonly tolua_outside tolua_property__event DiscardPattern* discard_pattern; // when life is changed 
+	tolua_readonly tolua_outside tolua_property__event PosCard*      pos_card;       // lost card,
+	tolua_readonly tolua_outside tolua_property__event PosVCard*     pos_vcard;      // pos vcard,
+	tolua_readonly tolua_outside tolua_property__event JudgeCard*    judge_card;     // judgement card
+	tolua_readonly tolua_outside tolua_property__event DecideCard*   decide_card;    // decide card
+	tolua_readonly tolua_outside tolua_property__event EquipCard*    equip_card;     // for per/post equip card
+	tolua_readonly tolua_outside tolua_property__event ChangeLife*   change_life;    // when life is changed 
+	tolua_readonly tolua_outside tolua_property__event SelectTarget* select_target;  // when select target checked
+	tolua_readonly tolua_outside tolua_property__event SkillCanUse*  skill_canuse;   // check skill can use
+	tolua_readonly tolua_outside tolua_property__event CardCanUse*   card_canuse;    // check card can use
 	//};
 	char   ud[MAX_UD_LEN];
 } GameEventContext;
