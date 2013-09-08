@@ -447,9 +447,10 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	ret = cmd_loop(pGame, &stEvent, NO, "请出一张牌或者发动技能:");
 
+	CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 	RET_CHECK_RET(ret, ret);
-
-	//RET_CHECK_BACK(stEvent.result);
+	// 有没有可能在使用技能或者出牌之后，当前出牌阶段立刻中止？
+	EVENT_CHECK_BREAK_RET(&stEvent,R_BACK);
 
 	return R_SUCC;
 }
@@ -541,6 +542,8 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 		pEvent->pattern_out->out.supply = get_game_cur_player(pGame);
 		pEvent->pattern_out->out.trigger = get_game_cur_player(pGame);
+		pEvent->block = YES;
+		pEvent->result = R_SUCC;
 
 		return R_SUCC;
 
@@ -625,6 +628,8 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		pEvent->pattern_out->out.supply = get_game_cur_player(pGame); //suply card  is c current player
 		pEvent->pattern_out->out.trigger = pEvent->target;    // the supply card target player is real out card player
 
+		pEvent->block = YES;
+		pEvent->result = R_SUCC;
 
 		return R_SUCC;
 
@@ -1042,6 +1047,8 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 		trigger_game_event(pGame, &event);
 		//ret = per_passive_out_card(pGame, pParentEvent, player, target, &pattern_out);
 
+		CHECK_PLAYER_DEAD_RET(pGame, player, R_CANCEL);
+
 		RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
 		// be success directly (for example armor card skill may defend the attack of {sha} )
@@ -1049,14 +1056,21 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 	}
 
 
-	INIT_EVENT(&event, GameEvent_PassiveOutCard, player, target, pParentEvent);
-	event.pattern_out = &pattern_out;
 
-	set_game_cur_player(pGame, player);
+	ret = R_SUCC;
 
-	ret = cmd_loop(pGame, &event, NO, pattern_out.alter_text);
+	while(ret == R_SUCC)
+	{
+		INIT_EVENT(&event, GameEvent_PassiveOutCard, player, target, pParentEvent);
+		event.pattern_out = &pattern_out;
 
-	RET_CHECK_RET(ret, ret);
+		set_game_cur_player(pGame, player);
+		ret = cmd_loop(pGame, &event, NO, pattern_out.alter_text);
+		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+		RET_CHECK_RET(ret, ret);
+		EVENT_CHECK_BREAK( &event);
+	}
+
 
 	//RET_CHECK_BACK(event.result);
 
@@ -1126,6 +1140,9 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 
 	memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
+
+	CHECK_PLAYER_DEAD_RET(pGame, player, R_CANCEL);
+
 	// avoid the passive but result is cancel.
 	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
@@ -1143,6 +1160,8 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 		ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &before_pout.pattern, before_pout.alter_text);
 
 		memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
+
+		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 
 		RET_CHECK_RET(ret, ret);
 	}
@@ -1250,16 +1269,24 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	}
 
 
-	INIT_EVENT(&event, GameEvent_SupplyCard, player, trigger, pParentEvent);
-	event.pattern_out = &t_pattern_out;
 
-	set_game_cur_player(pGame, player);
+	ret = R_SUCC;
 
+	while(ret == R_SUCC)
+	{
+		INIT_EVENT(&event, GameEvent_SupplyCard, player, trigger, pParentEvent);
+		event.pattern_out = &t_pattern_out;
 
-	ret = cmd_loop(pGame, &event, NO, t_pattern_out.alter_text);
+		set_game_cur_player(pGame, player);
+		ret = cmd_loop(pGame, &event, NO, t_pattern_out.alter_text);
+		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+		RET_CHECK_RET(ret, ret);
+		EVENT_CHECK_BREAK( &event);
+	}
 
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
-	
+
+	CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 	RET_CHECK_RET(ret,ret);
 
 	//RET_CHECK_BACK(event.result);

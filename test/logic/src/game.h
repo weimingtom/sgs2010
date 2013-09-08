@@ -107,6 +107,9 @@ typedef enum _GameResult
 
 #define IS_PLAYER_VALID(pGame, p) ((p)>=0 && (p)<(pGame)->player_count && (pGame)->players[(p)].status != PlayerStatus_Dead)
 
+#define CHECK_PLAYER_DEAD_RET(pGame, pl, ret)   do{ if(IS_PLAYER_DEAD(GAME_PLAYER((pGame), (pl)))) { return (ret); } } while(0)
+
+
 // game process base funs
 
 RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutineers);

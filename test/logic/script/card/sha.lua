@@ -13,9 +13,6 @@
 
 --]]
 
-import "../global/reg.lua";
-
-
 
 
 local cfg = {
@@ -89,7 +86,7 @@ cfg.event[GameEvent_OutCardPrepare] =  function (cfg, game, event, player)
 		p.params[PLAYER_PARAM_SHA_COUNTER] = p.params[PLAYER_PARAM_SHA_COUNTER] + 1;
 		return R_SUCC;
 	end
-	message(event.get_card.num);
+
 	-- 如果准备完成应该返回R_SUCC，让出牌过程继续进行下去。
 	-- 返回R_CANCEL,则出牌中止，牌不会进入弃牌堆。
 	return R_CANCEL;

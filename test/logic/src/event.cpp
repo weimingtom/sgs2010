@@ -20,6 +20,30 @@
 
 // end lua interface implements
 
+RESULT player_cmd_event(GameContext* pGame, GameEventContext* pEvent, int player, YESNO force, const char* alter_text)
+{
+	RESULT  ret;
+
+	ret = R_SUCC;
+
+	while(ret == R_SUCC)
+	{
+		set_game_cur_player(pGame, player);
+		ret = cmd_loop(pGame, pEvent, force, alter_text);
+
+		// 要检查玩家是否已经阵亡，如果是，则需要立刻结果它的命令输入，返回调用
+		CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
+		// 这里需要检测R_CANCEL，因为角色可能放弃在此事件内的行动
+		RET_CHECK_RET(ret, ret);
+		EVENT_CHECK_BREAK_RET(pEvent, ret);
+
+	}
+	return R_SUCC;
+}
+
+
+
+
 static RESULT call_player_global_event(GameContext* pGame, GameEventContext* pEvent, int player)
 {
 	RESULT ret = R_DEF;
@@ -113,6 +137,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 					ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
 					set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
 					use_cnt++;
+					CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 					EVENT_CHECK_BREAK_RET(pEvent, ret);
 				}
 			}
@@ -142,6 +167,7 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 					}
 					ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
 					use_cnt++;
+					CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 					EVENT_CHECK_BREAK_RET(pEvent, ret);
 				}
 			}
@@ -175,11 +201,13 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 
 	ret = call_player_global_event(pGame, pEvent, player);
 
+	CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 	EVENT_CHECK_BREAK_RET(pEvent, ret);
 
 	// auto use card and skills
 	ret = check_player_event(pGame, pEvent, player, 1);
 
+	CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 	EVENT_CHECK_BREAK_RET(pEvent, ret);
 
 	if(ret == R_DEF)
@@ -192,6 +220,9 @@ RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int pl
 	{
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
+
+		// 要检查玩家是否已经阵亡，如果是，则需要立刻结果它的命令输入，返回调用
+		CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 		// 这里需要检测R_CANCEL，因为角色可能放弃在此事件内的行动
 		RET_CHECK_RET(ret, ret);
 		EVENT_CHECK_BREAK_RET(pEvent, ret);
@@ -247,6 +278,7 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 			pos_card.pos = n;
 
 			ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
+			CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 			EVENT_CHECK_BREAK_RET(pEvent, ret);
 		}
 	}
@@ -258,6 +290,7 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 		for(n = 1; n <=  skill_num; n++)
 		{
 			ret = call_hero_skill_event(pPlayer->hero, n, pGame, pEvent, player);
+			CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
 			EVENT_CHECK_BREAK_RET(pEvent, ret);
 		}
 	}

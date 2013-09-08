@@ -13,10 +13,6 @@
 --]]
 
 
-import "../global/reg.lua";
-
-
-
 local cfg = {
 	sid = 'bgz',
 	name = 'АЫидеѓ',

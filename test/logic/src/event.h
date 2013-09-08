@@ -201,21 +201,23 @@ struct tagGameEventContext
 	if (p) { strncpy((event)->ud, (p)->ud, sizeof((event)->ud)); } \
 } while(0)
 
-#define EVENT_CHECK_BREAK(event)   if((event)->block = YES) { break; } else {}
+#define EVENT_CHECK_BREAK(event)   if((event)->block == YES) { break; } else {}
 #define EVENT_CHECK_BREAK_RET(event, ret)   do { if((event)->block == YES) return (ret);  } while(0)
 #define EVENT_CHECK_BREAK_BACK(event)   EVENT_CHECK_BREAK_RET((event), R_BACK)
 #define EVENT_CHECK_BREAK_RETV(event)   do { if((event)->block == YES) return;  } while(0)
 
 
-
+// 包装一个在指定事件下循环等待玩家指令的调用
+RESULT player_cmd_event(GameContext* pGame, GameEventContext* pEvent, int player);
 
 
 RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int player, int auto_use);
 
 // trigger event begin from current player, check and call all player's event handles 
 RESULT trigger_game_event(GameContext* pGame, GameEventContext* pEvent);
-// trigger event in specified player, check and call the player's event handles 
+// trigger event in specified player, check and call the player's event handles d__
 RESULT trigger_player_event(GameContext* pGame, GameEventContext* pEvent, int player);
+
 
 
 // call all player's event handles without check. (some specified event)

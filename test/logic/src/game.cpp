@@ -359,7 +359,6 @@ static  RESULT game_round_begin(GameContext* pGame, GameEventContext* pEvent)
 	GameEventContext  event;
 	INIT_EVENT(&event, GameEvent_RoundBegin, pGame->round_player, INVALID_PLAYER, pEvent);
 
-
 	trigger_game_event(pGame, &event);
 
 	game_flush_discard_cur(pGame);
@@ -386,9 +385,9 @@ static RESULT game_round_judge(GameContext* pGame, GameEventContext* pEvent)
 
 	ret = game_round_do_judge(pGame, pEvent, pGame->round_player);
 
-	RET_CHECK_RET(ret,ret);
-
 	game_flush_discard_cur(pGame);
+
+	RET_CHECK_RET(ret,ret);
 
 
 	INIT_EVENT(&event, GameEvent_PostRoundJudge, pGame->round_player, INVALID_PLAYER, pEvent);
@@ -423,10 +422,10 @@ static RESULT game_round_getcard(GameContext* pGame, GameEventContext* pEvent)
 	}
 	
 	ret = game_round_do_get(pGame, pEvent, pGame->round_player, stGetCard.num);
-	RET_CHECK_RET(ret,ret);
 
 	game_flush_discard_cur(pGame);
 
+	RET_CHECK_RET(ret,ret);
 
 	INIT_EVENT(&event, GameEvent_PostRoundGet, pGame->round_player, INVALID_PLAYER, pEvent);
 	event.get_card = &stGetCard;
@@ -459,6 +458,8 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 		game_flush_discard_cur(pGame);
 	}
 
+	game_flush_discard_cur(pGame);
+
 	INIT_EVENT(&event, GameEvent_PostRoundOut, pGame->round_player, INVALID_PLAYER, pEvent);
 	trigger_game_event(pGame, &event);
 	game_flush_discard_cur(pGame);
@@ -486,9 +487,9 @@ static RESULT game_round_discardcard(GameContext* pGame, GameEventContext* pEven
 
 	// discard loop
 	ret = game_round_discard_card(pGame, pEvent, pGame->round_player);
+	game_flush_discard_cur(pGame);
 
 	RET_CHECK_RET(ret,ret);
-	game_flush_discard_cur(pGame);
 
 
 	// wait cmd_loop discard cmd execute
@@ -553,38 +554,46 @@ static RESULT game_next_status(GameContext* pGame, GameEventContext* pEvent)
 		pGame->round_num = 1;
 		break;
 	case Status_Round_Begin:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
 			goto __RoundEnd;
 		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundJudge))
 			goto __RoundJudge;
 		pGame->status = Status_Round_Judge;
 		break;
 	case Status_Round_Judge:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
 			goto __RoundEnd;
 	__RoundJudge:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundGet))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundGet))
 			goto __RoundGet;
 		pGame->status = Status_Round_Get;
 		break;
 	case Status_Round_Get:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
 			goto __RoundEnd;
 	__RoundGet:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundOut))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundOut))
 			goto __RoundOut;
 		pGame->status = Status_Round_Out;
 		break;
 	case Status_Round_Out:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
 			goto __RoundEnd;
 	__RoundOut:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundDiscard))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRoundDiscard))
 			goto __RoundDiscard;
 		pGame->status = Status_Round_Discard;
 		break;
 	case Status_Round_Discard:
-		if(PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
+		if(IS_PLAYER_DEAD(ROUND_PLAYER(pGame)) || 
+			PLAYER_CHK_FLAG(ROUND_PLAYER(pGame), PlayerFlag_SkipThisRound))
 			goto __RoundEnd;
 	__RoundDiscard:
 		pGame->status = Status_Round_End;
