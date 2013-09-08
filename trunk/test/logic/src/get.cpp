@@ -69,7 +69,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	int n;
 	PosCard  stCard;
 
-	if(pEvent->id == GameEvent_RoundGetCard)
+	if(pEvent->id == GameEvent_RoundGetCard || pEvent->id == GameEvent_PassiveGetCard)
 	{
 		// in round get, must get 2 card, 2 can modify by skill
 
@@ -97,10 +97,13 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 			}
 		}
 
+		pEvent->block = YES;
+		pEvent->result = R_SUCC;
+
 		// goto out status
 		return R_SUCC;
 	}
-	else if(pEvent->id == GameEvent_PassiveGetCard)
+/*	else if(pEvent->id == GameEvent_PassiveGetCard)
 	{
 		// in passive get, get specifyed number cards
 		if(pEvent->get_card->num != num)
@@ -121,9 +124,12 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 			}
 		}
 
+		pEvent->block = YES;
+		pEvent->result = R_SUCC;
+
 		return R_SUCC;
 	}
-	else
+*/	else
 	{
 		MSG_OUT("当前不允许进行摸牌!\n");
 	}
@@ -141,24 +147,30 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	stGetCard.num = num;
 	stGetCard.force = YES;
+	snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "请摸[%d]张牌:", stGetCard.num);
 
 	INIT_EVENT(&event, GameEvent_RoundGetCard, player, INVALID_PLAYER, pEvent);
 	event.get_card = &stGetCard;
 
-	set_game_cur_player(pGame, player);
 
 	// if get card force and no more skill can be used. do get directly
 	if(YES == stGetCard.force && R_SUCC != check_player_event(pGame, &event, player, 0))
 	{
+		set_game_cur_player(pGame, player);
 		game_cmd_getcard(pGame, &event, stGetCard.num);
 		ret = R_SUCC;
 	}
 	else
 	{
-
-		snprintf(stGetCard.alter_text, sizeof(stGetCard.alter_text), "请摸[%d]张牌:", stGetCard.num);
-		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
-		RET_CHECK_RET(ret, ret);
+		ret = R_SUCC;
+		while(ret == R_SUCC)
+		{
+			set_game_cur_player(pGame, player);
+			ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+			RET_CHECK_RET(ret, ret);
+			EVENT_CHECK_BREAK(&event);
+		}
 	}
 
 
@@ -202,21 +214,26 @@ RESULT game_passive_getcard(lua_State* L, GameContext* pGame, GameEventContext* 
 	INIT_EVENT(&event, GameEvent_PassiveGetCard, player, INVALID_PLAYER, pParentEvent);
 	event.get_card = &stGetCard;
 
-	set_game_cur_player(pGame, player);
 
 	// if get card force and no more skill can be used. do get directly
 	if(YES == stGetCard.force && R_SUCC != check_player_event(pGame, &event, player, 0))
 	{
+		set_game_cur_player(pGame, player);
 		game_cmd_getcard(pGame, &event, stGetCard.num);
 		ret = R_SUCC;
 	}
 	else
 	{
-		ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
-		RET_CHECK_RET(ret, ret);
+		ret = R_SUCC;
+		while(ret == R_SUCC)
+		{
+			set_game_cur_player(pGame, player);
+			ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+			RET_CHECK_RET(ret, ret);
+			EVENT_CHECK_BREAK(&event);
+		}
 	}
-
-
 
 	return R_SUCC;
 }

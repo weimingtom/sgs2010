@@ -9,9 +9,8 @@
 
 --]]
 
-import "../global/reg.lua";
 
-reg_card {
+local cfg =  {
 	sid = "shan",
 	name="闪",
 	type=CardType_Normal,
@@ -19,12 +18,13 @@ reg_card {
 
 ★闪通常情况下只能在回合外使用或打出。]],
 
-	can_out = {
-	},
-	
-	can_use = {
-	},
-	
-	event = {
-	},
+	can_out = { },	
+	can_use = { },
+	event = { },
 };
+
+
+
+-- register
+reg_card(cfg);
+

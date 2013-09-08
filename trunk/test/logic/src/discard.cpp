@@ -75,22 +75,29 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 		return R_E_FAIL;
 
 	// 如果手牌数量大于当前体力值，则需要弃置部分手牌，直到手牌数量等于当前体力，不能弃多，也不能不弃
-	while(p->hand_card_num > p->cur_life)
+	if(p->hand_card_num > p->cur_life)
 	{
 		ST_ZERO(dis);
-
-		set_game_cur_player(pGame, player);
-
-		INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		dis.num = p->hand_card_num - p->cur_life;
 		dis.where = PatternWhere_Hand;
 		dis.force = YES;
 		snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张手牌:", dis.num);
-		
+
+		INIT_EVENT(&event, GameEvent_RoundDiscardCard, player, INVALID_PLAYER, pParentEvent);
 		event.discard_pattern = &dis;
-		
-		ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
-		RET_CHECK_RET(ret,ret);
+
+		ret = R_SUCC;
+		while (ret == R_SUCC)
+		{
+			set_game_cur_player(pGame, player);
+
+			
+			ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
+
+			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+			RET_CHECK_RET(ret, ret);
+			EVENT_CHECK_BREAK( &event);
+		}
 	}
 	
 	return R_SUCC;
@@ -207,6 +214,9 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 			return R_E_FAIL;
 		}
 
+		pParentEvent->block = YES;
+		pParentEvent->result = R_SUCC;
+
 		return R_SUCC;
 	}
 
@@ -276,18 +286,28 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 
 	trigger_game_event(pGame, &event);
 
+	CHECK_PLAYER_DEAD_RET(pGame, player, R_CANCEL);
+
 	// passive discard card can be canceled by skills
 	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 	// passive discard card can be skipped directly return R_SUCC
 	RET_CHECK_SUCC_RET(event.result, R_SUCC);
 
-
 	INIT_EVENT(&event, GameEvent_PassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	event.discard_pattern = &dis;
 
-	set_game_cur_player(pGame, player);
-	ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
-	RET_CHECK_RET(ret,ret);
+	ret = R_SUCC;
+	while (ret == R_SUCC)
+	{
+
+		set_game_cur_player(pGame, player);
+		ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
+
+		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+		RET_CHECK_RET(ret, ret);
+		EVENT_CHECK_BREAK( &event);
+		
+	}
 
 	//RET_CHECK_BACK(event.result);
 

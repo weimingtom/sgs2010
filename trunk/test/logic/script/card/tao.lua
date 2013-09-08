@@ -35,10 +35,8 @@
 
 --]]
 
-import "../global/reg.lua";
 
-
-reg_card {
+local cfg = {
 	sid = "tao",
 	name="桃",
 	type=CardType_Normal,
@@ -46,76 +44,79 @@ reg_card {
 一、在你的出牌阶段，你可以使用它来回复你的1点体力。
 二、当有角色处于濒死状态时，你可以对该角色使用【桃】，防止该角色的死亡。]==],
 
-
-	can_out = {
-		-- 出牌时，如果自己的体力小于最大体力，则可以出桃
-		[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
-			local p = get_game_player(game, player);
-			if(p.cur_life < p.max_life ) then
-				 return YES;
-			end
-			return NO;
-		end,
-		-- 有玩家处于濒死状态，则可以对它使用桃
-		[GameEvent_PerDead] = function(cfg, game, event, player, pos_card)
-			local p = get_game_player(game, event.trigger);
-			if(p.cur_life <= 0) then
-				return YES;
-			end
-			return NO;
-		end,
-	},
-	
-	can_use = {
-	},
-	
-	event = {
-		-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
-		--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
-		[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
-			event.attack_dis.base = -1; 
-			return R_SUCC;
-		end,
-	
-	
-		[GameEvent_OutCard] = function(cfg, game, event, player)
-			-- out process is directly succss.
-			return R_SUCC;
-		end,
-
-		[GameEvent_OutCardCalc] = function(cfg, game, event, player)
-			if(event.parent_event.id == GameEvent_PerDead) then
-				-- 在濒死时出桃，则给濒死者加一点体力
-				local p = get_game_player(game, event.parent_event.trigger);
-				game_player_add_life(game, event, event.parent_event.trigger, 1, player, event.out_card, 0);
-				if(p.cur_life > 0) then
-					event.result = R_ABORT;
-					event.block = YES;
-				end
-				return R_SUCC;
-			elseif(event.parent_event.id == GameEvent_RoundOutCard) then
-				-- 在出牌阶段的出桃，则给出牌者自己加一点体力
-				return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
-			else
-				game_event_info(game, event, 1);
-				error('在非正常的事件内响应【'..cfg.name..'】');
-			end
-			return R_DEF;
-		end,
-		
-		-- 出牌的流程和技能不同，不会直接在响应事件内调用。应按出牌流程在OutCardCalc内结算效果
-		--[[
-		[GameEvent_PerDead] = function(cfg, game, event, player)
-			local p = get_game_player(game, event.trigger);
-			game_player_add_life(game, event, event.trigger, 1, event.trigger, event.out_card, 0);
-			if(p.cur_life > 0) then
-				event.result = R_ABORT;
-				event.block = YES;
-			end
-			return R_SUCC;
-		end,
-		--]]
-	},
+	can_out = { },
+	-- can_use = { },
+	event = { },
 };
+
+
+-- 出牌时，如果自己的体力小于最大体力，则可以出桃
+cfg.can_out[GameEvent_RoundOutCard] = function(cfg, game, event, player, pos_card)
+	local p = get_game_player(game, player);
+	if(p.cur_life < p.max_life ) then
+		 return YES;
+	end
+	return NO;
+end
+
+-- 有玩家处于濒死状态，则可以对它使用桃
+cfg.can_out[GameEvent_PerDead] = function(cfg, game, event, player, pos_card)
+	local p = get_game_player(game, event.trigger);
+	if(p.cur_life <= 0) then
+		return YES;
+	end
+	return NO;
+end
+
+
+-- 如果出牌时需要选择目标，则会Call这个事件来决定牌的基本攻击范围，
+--  返回-1表示不检查攻击范围, >= 0此牌的基本攻击距离（注意实际攻击范围可能受技能或者武器的影响）
+cfg.event[GameEvent_GetBaseAttackDis] = function (cfg, game, event, player)
+	event.attack_dis.base = -1; 
+	return R_SUCC;
+end
+
+cfg.event[GameEvent_OutCard] = function(cfg, game, event, player)
+	-- out process is directly succss.
+	return R_SUCC;
+end
+
+cfg.event[GameEvent_OutCardCalc] = function(cfg, game, event, player)
+	if(event.parent_event.id == GameEvent_PerDead) then
+		-- 在濒死时出桃，则给濒死者加一点体力
+		local p = get_game_player(game, event.parent_event.trigger);
+		game_player_add_life(game, event, event.parent_event.trigger, 1, player, event.out_card, 0);
+		if(p.cur_life > 0) then
+			event.result = R_SUCC;
+			event.block = YES;
+		end
+		return R_SUCC;
+	elseif(event.parent_event.id == GameEvent_RoundOutCard) then
+		-- 在出牌阶段的出桃，则给出牌者自己加一点体力
+		return game_player_add_life(game, event, player, 1, player, event.out_card, 0);
+	else
+		game_event_info(game, event, 1);
+		error('在非正常的事件内响应【'..cfg.name..'】');
+	end
+	return R_DEF;
+end
+
+-- 出牌的流程和技能不同，不会直接在响应事件内调用。应按出牌流程在OutCardCalc内结算效果
+--[[
+cfg.event[GameEvent_PerDead] = function(cfg, game, event, player)
+	local p = get_game_player(game, event.trigger);
+	game_player_add_life(game, event, event.trigger, 1, event.trigger, event.out_card, 0);
+	if(p.cur_life > 0) then
+		event.result = R_SUCC;
+		event.block = YES;
+	end
+	return R_SUCC;
+end
+--]]
+
+
+-- register
+reg_card(cfg);
+
 
 

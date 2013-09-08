@@ -67,7 +67,8 @@ RESULT game_cmd_use_skill(GameContext* pGame, GameEventContext* pEvent, int idx)
 
 	// post trigger use skill
 
-	return ret;
+	(void)ret;
+	return R_SUCC;
 }
 
 
@@ -108,7 +109,8 @@ RESULT game_cmd_use_weapon(GameContext* pGame, GameEventContext* pEvent)
 	ret = call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
-	return ret;
+	(void)ret;
+	return R_SUCC;
 }
 
 RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
@@ -149,10 +151,8 @@ RESULT game_cmd_use_armor(GameContext* pGame, GameEventContext* pEvent)
 	ret = call_card_event(pcard.card.id, pGame, pEvent, get_game_cur_player(pGame));
 	set_player_card_flag(p, pcard.where, pcard.pos, CardFlag_None);
 
-	if(ret == R_CANCEL)
-		return R_DEF;
-
-	return ret;
+	(void)ret;
+	return R_SUCC;
 }
 
 

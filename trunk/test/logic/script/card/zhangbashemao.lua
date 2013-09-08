@@ -151,9 +151,10 @@ end
 
 cfg.event[GameEvent_PassiveOutCard] = 
 function(cfg, game, event, player)			
-	if R_SUCC ~= zbsm_use(cfg, game, event, player, event.pattern_out.out)  then
-		-- 取消出牌
-		return R_CANCEL;
+	if R_SUCC == zbsm_use(cfg, game, event, player, event.pattern_out.out)  then
+		-- 被动出牌成功
+		event.block = YES;
+		event.result = R_SUCC;
 	end	
 	return R_SUCC;
 end
