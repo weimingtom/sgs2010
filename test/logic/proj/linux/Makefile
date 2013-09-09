@@ -44,7 +44,7 @@ $(OBJS):%.obj:%.cpp
 
 ../../pkg/lua_export.cpp: ../../pkg/lua_export.pkg $(HEADS)
 	@echo tolua gen $@ ...
-	@cd $(PKG_DIR) && $(TOLUA) -o lua_export.cpp -H lua_export.h -n game lua_export.pkg && cd -
+	@cd $(PKG_DIR) && $(TOLUA) -o lua_export.cpp -H lua_export.h -n game -L hook.lua lua_export.pkg && cd -
 
 ../../pkg/lua_export.h: ../../pkg/lua_export.cpp
 
