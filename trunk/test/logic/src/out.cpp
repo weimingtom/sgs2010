@@ -705,6 +705,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 
 		// when out card is canceled , no effects
 		//RET_CHECK_CANCEL_RET(ret, R_CANCEL);
+		(void)ret;
 
 		// out card must return R_SUCC, because cmd_loop need back to its caller for next out ot use skill
 		return R_SUCC;

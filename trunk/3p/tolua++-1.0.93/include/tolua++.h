@@ -179,7 +179,9 @@ TOLUA_API int tolua_fast_isa(lua_State *L, int mt_indexa, int mt_indexb, int sup
 #define tolua_owned
 #endif
 
-// add by krh: for used in function parameters, cannot pass nil from script
+/* 
+ * add by krh: for used in function parameters, cannot pass nil from script
+ */
 #ifndef tolua_notnull
 #define tolua_notnull
 #endif
