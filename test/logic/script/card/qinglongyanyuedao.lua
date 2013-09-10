@@ -139,7 +139,7 @@ local cfg =  {
 				-- 设置目标
 				out_card.target_num = 1;
 				out_card.targets[0] = target;
-				out_card.flag = bitor(OutCardFlag_WithTarget, OutCardFlag_WithTarget);
+				out_card.flag = bitor(OutCardFlag_SpecOut, OutCardFlag_WithTarget);
 				
 				if R_SUCC == game_real_out(game, event, player, out_card) then
 					-- 杀已经生效也结束武器技能

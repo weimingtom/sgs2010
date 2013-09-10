@@ -140,6 +140,9 @@ hujia.event[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 	return R_BACK;  -- 返回BACK，因为 PassiveOut完成
 end
 
+-- 也可以用于提供【闪】
+hujia.can_use[GameEvent_SupplyCard] = hujia.can_use[GameEvent_PassiveOutCard];
+hujia.event[GameEvent_SupplyCard] = hujia.event[GameEvent_PassiveOutCard];
 
 cfg.skills = {
 	jianxiong,

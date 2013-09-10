@@ -13,6 +13,7 @@ typedef struct tagGameContext GameContext;
 // operator of get card stack
 
 RESULT game_load(GameContext* pGame, const char* file_name);
+int luaex_game_load(lua_State* L);
 
 
 #ifdef __cplusplus

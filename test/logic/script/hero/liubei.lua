@@ -64,7 +64,7 @@ rende.event[GameEvent_RoundOutCard] = function (cfg, game, event, player)
 		local target = select_target_check(game ,event,  player, CardID_None, NO, NO, '请选择要给牌的玩家：', 
 			function(t) 
 				local p = get_game_player(game, t);
-				if is_player_handfull( p ) then
+				if YES == is_player_handfull( p ) then
 					message('玩家【'..p.name..'】手牌已满！');
 					return false;
 				end
@@ -103,19 +103,19 @@ local function jijiang_use(game, event, player, out_card)
 	local out_p = OutCardPattern();
 	local self = get_game_player(game, player);
 	local next_player = game_next_player(game, player);
-	message('1 pattern.ud:', event.pattern_out.pattern.ud);
+	-- message('1 pattern.ud:', event.pattern_out.pattern.ud);
 	while(next_player ~= player) 
 	do
 		local p = get_game_player(game, next_player);
 		--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
 		local group = get_hero_group(p.hero);
 		if(group == HeroGroup_Shu) then
-			game_load_out_pattern(out_p, 'h:{sha}?'..event.pattern_out.pattern.ud);
+			game_load_out_pattern(out_p, 'h:{sha}?');
 			local ret = game_supply_card(game, event, player, next_player, 
 					out_p, '请为【'.. self.name ..'】提供一张【'..card_sid2name('sha')..'】，你也可以拒绝该请求:', 
 					out_card);
-			event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
-			message('2 pattern.ud:', event.pattern_out.pattern.ud);
+			-- event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
+			-- message('2 pattern.ud:', event.pattern_out.pattern.ud);
 			if (R_SUCC == ret) then
 				return R_SUCC; 
 			end
@@ -153,7 +153,7 @@ jijiang.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	local out_card = OutCard();
 	game_init_outcard(out_card);
 	
-	if R_SUCC ~= jijiang_use(cfg, game, event, player, out_card)  then
+	if R_SUCC ~= jijiang_use(game, event, player, out_card)  then
 		-- 取消出牌
 		return R_CANCEL;
 	end				
@@ -183,13 +183,17 @@ jijiang.can_use[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
 end
 
 jijiang.event[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
-	if R_SUCC == jijiang_use(cfg, game, event, player, event.pattern_out.out)  then
+	if R_SUCC == jijiang_use(game, event, player, event.pattern_out.out)  then
 		-- 被动出牌成功
 		event.block = YES;
 		event.result = R_SUCC;
 	end	
 	return R_DEF;
 end
+
+-- 也可以用于提供【杀】
+jijiang.can_use[GameEvent_SupplyCard] = jijiang.can_use[GameEvent_PassiveOutCard];
+jijiang.event[GameEvent_SupplyCard] = jijiang.event[GameEvent_PassiveOutCard];
 
 
 cfg.skills = {
@@ -202,5 +206,23 @@ cfg.skills = {
 reg_hero(cfg);
 
 
+-------------------------------------------------------------------------------
+--
+-- test case for liubei skill
+--
+-------------------------------------------------------------------------------
+
+local sav1 = {
+};
+
+local function test_rende(game, event)
+	game_load(game, sav1);
+	expect('^[曹操] %$ ');
+	send_cmd('i');
+	local w = expect('%* %[(%d+)%] %(杀,' );
+	expect('^[曹操] %$ ');
+
+end
 
 
+-- reg_test(test_rende);
