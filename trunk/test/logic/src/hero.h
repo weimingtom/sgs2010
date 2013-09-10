@@ -13,24 +13,12 @@ extern "C" {
 typedef enum _HeroID
 {
 	HeroID_None = 0,
+	HeroID_Begin = 1,
+	HeroID_Unknown = -1,
 	// other hero ids are registered in script
-	/*
-	HeroID_CaoCao = 1,
-	HeroID_LiuBei,
-	HeroID_SunQuan,
 
-	HeroID_GuanYu,
-	HeroID_ZhangFei,
-	HeroID_ZhaoYun,
-	HeroID_MaChao,
-	HeroID_XiaHouDun,
-	HeroID_ZhangLiao,
-	HeroID_LuXun,
-	HeroID_SunShangXiang,
-
-
-	HeroID_Max,
-	*/
+	HeroID_Marked = 1000,
+	HeroID_Max = 1001,
 }HeroID;
 
 
@@ -64,41 +52,7 @@ typedef enum _SkillFlag
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
-/*
-typedef YESNO  (*SKILLCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*SKILLUSEFUN)(GameContext*, GameEventContext*, int);
 
-typedef struct tagHeroSkill
-{
-	char name[MAX_NAME_LEN];
-	char desc[MAX_DESC_LEN];
-	char flag;
-	SKILLCHECKFUN  check;
-	SKILLUSEFUN   use;
-} HeroSkill;
-
-
-#define MAX_HERO_SKILL_NUM    5
-
-typedef struct  tagHeroConfig
-{
-	HeroID     id;
-	char       name[MAX_NAME_LEN];
-	int        life;
-	YESNO      isMaster;
-	HeroGroup  group;
-	HeroSex    sex;
-	char desc[MAX_DESC_LEN];
-	int  skillNum;
-	HeroSkill skills[MAX_HERO_SKILL_NUM];
-} HeroConfig;
-
-
-
-
-const HeroConfig* get_hero_config(HeroID id);
-
-*/
 
 
 // tolua_begin

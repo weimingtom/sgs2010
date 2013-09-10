@@ -156,7 +156,7 @@ function(cfg, game, event, player)
 		event.block = YES;
 		event.result = R_SUCC;
 	end	
-	return R_SUCC;
+	return R_DEF;
 end
 
 
