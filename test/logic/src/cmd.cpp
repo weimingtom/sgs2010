@@ -274,21 +274,7 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 		}
 		else
 		{
-			int n;
-			char  buffer[128];
-			Card* pCard;
-			MSG_OUT("当前弃牌: 共[%d]张\n", pContext->cur_discard_card_num);
-			for(n = 0; n < pContext->cur_discard_card_num; n++)
-			{
-				pCard = &pContext->cur_discard_cards[n];
-				MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
-			}
-
-			MSG_OUT("弃牌牌堆: 共[%d]张\n", pContext->discard_card_stack.count);		
-			card_stack_dump(&pContext->discard_card_stack);
-
-			MSG_OUT("摸牌牌堆: 共[%d]张\n", pContext->get_card_stack.count);		
-			card_stack_dump(&pContext->get_card_stack);
+			game_stack_info(pContext, pEvent);
 		}
 	}
 	else if(!strcmp(argv[1], "player") || !strcmp(argv[1], "p"))  // player info: -n - prev [n] player; +n - next n player; n - player index n info; 
@@ -353,95 +339,11 @@ static RESULT cmd_info(const char** argv, int argc, GameContext* pContext, GameE
 	}
 	else if(!strcmp(argv[1], "card") || !strcmp(argv[1], "c"))
 	{
-		int maxid;
-		int id;
-		//const CardConfig *pCardCfg;
-		//char  sid[128];
-		//char  name[128];
-		//char  desc[1024];
-		if(argc < 3)
-		{
-			maxid = card_maxid();
-			for(id = 1; id <= maxid; id++)
-			{
-				//pCardCfg = get_card_config((CardID)id);
-
-				//if(pCardCfg)
-				//{
-				//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
-				//}
-
-				if(card_id_valid((CardID)id))
-				{
-					MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid((CardID)id),
-						get_card_name((CardID)id), card_type_str(card_type((CardID)id)));
-				}
-			}
-		}
-		else
-		{
-			if(!card_sid_valid(argv[2]))
-			{
-				MSG_OUT("没找到sid为\'%s\'的卡牌!\n", argv[2]);
-				return R_E_PARAM;
-			}
-			else
-			{
-				id = card_sid2id(argv[2]);
-			
-				MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, get_card_sid((CardID)id),
-					get_card_name((CardID)id), card_type_str(card_type((CardID)id)), 
-					get_card_desc((CardID)id));
-			}
-		}				
+		game_card_info(pContext, pEvent, argc < 3 ? NULL : argv[2]);
 	}
 	else if(!strcmp(argv[1], "hero") || !strcmp(argv[1], "h"))
 	{
-		int maxid;
-		int id;
-		int n;
-		//char  sid[128];
-		//char  name[128];
-		//char  desc[1024];
-		int  skill_num;
-		int  skill_flag;
-		//const HeroConfig *pHero;
-		if(argc < 3)
-		{
-			maxid = hero_maxid();
-			for(id = 1; id <= maxid; id++)
-			{
-				if(hero_id_valid((HeroID)id))
-				{
-					MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid((HeroID)id), 
-						get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
-						hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"");
-				}
-			}
-		}
-		else
-		{
-			if(!hero_sid_valid(argv[2]))
-			{
-				MSG_OUT("没找到sid为'%s'的武将!\n", argv[2]);
-				return R_E_PARAM;
-			}
-			else
-			{
-				id = hero_sid2id(argv[2]);
-				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, get_hero_sid((HeroID)id), 
-					get_hero_name((HeroID)id), hero_group_str(hero_group((HeroID)id)), 
-					hero_sex_str(hero_sex((HeroID)id)), hero_life((HeroID)id), (hero_master((HeroID)id) == YES) ? ", 主公":"", 
-					get_hero_desc((HeroID)id));
-				skill_num = hero_skill_num((HeroID)id);
-				for(n = 1; n <= skill_num; n++)
-				{
-					skill_flag = hero_skill_flag((HeroID)id, n);
-					MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  get_hero_skill_name((HeroID)id, n), 
-						(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
-				}
-			}
-		}				
+		game_hero_info(pContext, pEvent, argc < 3 ? NULL : argv[2]);	
 	}
 	else
 	{

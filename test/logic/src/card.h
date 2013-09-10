@@ -29,43 +29,12 @@ typedef enum _CardType
 typedef enum _CardID
 {
 	CardID_None = 0,
+	CardID_Begin = 1,
+	CardID_Unknown = -1,
+	CardID_Marked = 1000,
 	// other card ids are registered in script.
 	//
-	/*
-	CardID_Attack = 1,   // SHA - a normal attack card, the target lose 1 life unless the target out a SHAN card
-	CardID_Defend,   // SHAN - a normal defend card, counteract the effect of the SHA card
-	CardID_Medicine, // TAO - a normal medicine card, the target restore one life when used to.
-	CardID_Lightning, // SHANDIAN
-	CardID_Happy,     // LEBUSISHU
-	CardID_Unassailable, // WUXIEJEJI
-	CardID_OtherAttack,   // JIEDAOSHAREN
-	CardID_Foison,    // WUGUFENGDENG
-	CardID_GenWithAir, // WUZHONGSHENGYOU
-	CardID_Duel, // JUEDOU
-	CardID_MakeBrother, // TAOYUANJIEYI
-	CardID_Aggression, // NANMANRUQING
-	CardID_AllAttack, // WANJIANQIFA - attack all player except Attacker. all of the target lose 1 life unless the target out a SHAN card
-	CardID_Snitch, // SHUNGSHOUQIANYANG
-	CardID_KickLadder, // GUOHECAIQIAO
-	CardID_ZhuaHuang, 
-	CardID_DiLu, 
-	CardID_JueYing, 
-	CardID_ChiTu, 
-	CardID_ZiXing, 
-	CardID_DaWan, 
-	CardID_LianNu,
-	CardID_SwordHanBing,
-	CardID_SwordQingHong,
-	CardID_SwordChiXiong,
-	CardID_AxeGuanShi,
-	CardID_SwordQingLong,
-	CardID_SpearZhangBa,
-	CardID_HalberdFangTian,
-	CardID_BowQiLing,
-	CardID_BaGua,
-	CardID_SheildRenWang,
-	CardID_Max,
-	*/
+	CardID_Max = 1001,
 }CardID;
 
 // card color
@@ -165,22 +134,7 @@ typedef struct tagPosCardList PosCardList;
 typedef struct tagGameContext GameContext;
 typedef struct tagGameEventContext GameEventContext;
 
-/*
-typedef YESNO  (*CARDCHECKFUN)(GameContext*, GameEventContext*, int);
-typedef RESULT (*CARDOUTFUN)(GameContext*, GameEventContext*, int);
 
-
-typedef struct tagCardConfig
-{
-	CardID       id;
-	CardType     type;
-	char         name[MAX_NAME_LEN];
-	char         desc[MAX_DESC_LEN];
-	TargetType   target;  // target select strategy
-	CARDCHECKFUN check;   // called when card want to out(use, activity)   default NULL. can not be used in activity
-	CARDOUTFUN   out;     // called when card out (activity)               default NULL. can not be used in activity
-}CardConfig;
-*/
 
 // tolua_begin
 

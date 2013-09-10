@@ -26,3 +26,181 @@ SHU001　KayaK
 
 --]]
 
+local cfg = {
+	sid = "liubei",
+	name = "刘备",
+	desc = [==[【乱世的枭雄·刘备】
+仁德——出牌阶段，你可以将任意数量的手牌以任意分配方式交给其他角色，若你给出的牌张数不少于两张时，你回复1点体力。
+★分出的牌，对方无法拒绝。
+激将——主公技，当你需要使用（或打出）一张【杀】时，你可以发动激将。所有蜀势力角色按行动顺序依次选择是否打出一张【杀】“提供”给你（视为由你使用或打出），直到有一名角色或没有任何角色决定如此做时为止。]==],
+	group = HeroGroup_Shu,
+	sex = HeroSex_Male,
+	master = YES,
+	life = 4,
+};
+
+local rende = {
+	name="仁德",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+rende.can_use[GameEvent_RoundOutCard] = function (cfg, game, event, player)
+	-- 这里不限制。可多次使用
+	return USE_MANUAL;
+end
+
+rende.event[GameEvent_RoundOutCard] = function (cfg, game, event, player)
+	local count = 0;
+	-- 循环给出牌，直到取消，统计给出牌的张数
+	while true do
+		-- 选择要给出的牌，直到取消
+		local where, pos = select_other_card(game, event, player, player, 'hc', '请选择一张手牌：');
+		if where == nil then
+			break;
+		end
+		-- 选择给牌的目标玩家，取消可重选
+		local target = select_target_check(game ,event,  player, CardID_None, NO, NO, '请选择要给牌的玩家：', 
+			function(t) 
+				local p = get_game_player(game, t);
+				if is_player_handfull( p ) then
+					message('玩家【'..p.name..'】手牌已满！');
+					return false;
+				end
+				return true;
+			end);
+		
+		if target ~= nil then
+			-- 给牌
+			if R_SUCC == game_player_getcard_from_player(game, event, target, player, where, pos) then
+				count = count + 1;
+			end
+		end
+	end
+	
+	-- 回复体力
+	if count >= 2 then
+		game_player_add_life(game, event, player, 1, player, nil, 0);
+	end
+	
+	return R_SUCC;
+end
+
+
+local jijiang = {
+	name="激将",
+	flag=SkillFlag_Master,
+	can_use = { },
+	event = { },
+};
+
+
+
+local function jijiang_use(game, event, player, out_card)
+	-- 请求Shu势力玩家支持杀
+	-- 从下一个玩家开始，如果是蜀势力，那么就求一张杀
+	local out_p = OutCardPattern();
+	local self = get_game_player(game, player);
+	local next_player = game_next_player(game, player);
+	message('1 pattern.ud:', event.pattern_out.pattern.ud);
+	while(next_player ~= player) 
+	do
+		local p = get_game_player(game, next_player);
+		--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
+		local group = get_hero_group(p.hero);
+		if(group == HeroGroup_Shu) then
+			game_load_out_pattern(out_p, 'h:{sha}?'..event.pattern_out.pattern.ud);
+			local ret = game_supply_card(game, event, player, next_player, 
+					out_p, '请为【'.. self.name ..'】提供一张【'..card_sid2name('sha')..'】，你也可以拒绝该请求:', 
+					out_card);
+			event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
+			message('2 pattern.ud:', event.pattern_out.pattern.ud);
+			if (R_SUCC == ret) then
+				return R_SUCC; 
+			end
+		end
+		next_player = game_next_player(game, next_player);
+	end
+	return R_DEF;
+end
+
+
+jijiang.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
+	-- 可以出杀，则可以使用该技能来提供杀
+	
+	local p = get_game_player(game, player);
+	-- 只有主公才能使用
+	if(p.id == PlayerID_Master) then
+	
+		local c  = PosCard();
+		c.card.id = get_card_id_by_sid('sha');
+		c.card.color = CardColor_None;
+		c.card.value = CardValue_None;
+		c.card.flag = CardFlag_FromHand;
+		c.card.where = CardWhere_PlayerHand;
+		c.card.pos = -1;  -- no pos
+		
+		if  YES == game_card_can_out(game, event, player, c) then
+			return USE_MANUAL;
+		end
+	end
+	return USE_CANNOT;
+	
+end
+
+jijiang.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
+	local out_card = OutCard();
+	game_init_outcard(out_card);
+	
+	if R_SUCC ~= jijiang_use(cfg, game, event, player, out_card)  then
+		-- 取消出牌
+		return R_CANCEL;
+	end				
+
+	out_card.target_num = 0;
+	out_card.flag = OutCardFlag_SpecOut;
+	
+	-- 按正常流程出牌
+	return game_real_out(game, event, player, out_card) ;
+end
+
+
+
+jijiang.can_use[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
+	local p = get_game_player(game, player);
+	-- 只有主公才能使用
+	if(p.id == PlayerID_Master) then
+		-- 当需要出一张杀的时候
+		if(event.trigger == player and event.pattern_out.pattern.num == 1 and
+			event.pattern_out.pattern.patterns[0].id == get_card_id_by_sid('sha') ) 
+		then
+			return USE_MANUAL;
+		end
+	end
+
+	return USE_CANNOT;
+end
+
+jijiang.event[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
+	if R_SUCC == jijiang_use(cfg, game, event, player, event.pattern_out.out)  then
+		-- 被动出牌成功
+		event.block = YES;
+		event.result = R_SUCC;
+	end	
+	return R_DEF;
+end
+
+
+cfg.skills = {
+	rende,
+	jijiang,
+};
+
+
+-- register hero 
+reg_hero(cfg);
+
+
+
+

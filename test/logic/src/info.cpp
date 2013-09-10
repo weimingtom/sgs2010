@@ -271,6 +271,127 @@ RESULT game_global_info(GameContext* pGame, GameEventContext* pEvent)
 }
 
 
+RESULT game_stack_info(GameContext* pGame, GameEventContext* pEvent)
+{
+	int n;
+	char  buffer[128];
+	Card* pCard;
+	MSG_OUT("当前弃牌: 共[%d]张\n", pGame->cur_discard_card_num);
+	for(n = 0; n < pGame->cur_discard_card_num; n++)
+	{
+		pCard = &pGame->cur_discard_cards[n];
+		MSG_OUT(" [%d] %s\n", n, card_str(pCard, buffer, sizeof(buffer)));
+	}
+
+	MSG_OUT("弃牌牌堆: 共[%d]张\n", pGame->discard_card_stack.count);		
+	card_stack_dump(&pGame->discard_card_stack);
+
+	MSG_OUT("摸牌牌堆: 共[%d]张\n", pGame->get_card_stack.count);		
+	card_stack_dump(&pGame->get_card_stack);
+
+	return R_SUCC;
+}
+
+RESULT game_card_info(GameContext* pGame, GameEventContext* pEvent, const char* sid)
+{
+	CardID maxid;
+	CardID id;
+
+	//char  sid[128];
+	//char  name[128];
+	//char  desc[1024];
+	if(sid == NULL)
+	{
+		maxid = card_maxid();
+		for(id = CardID_Begin; id <= maxid; id = (CardID)(id + 1))
+		{
+			//pCardCfg = get_card_config((CardID)id);
+
+			//if(pCardCfg)
+			//{
+			//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
+			//}
+
+			if(card_id_valid(id))
+			{
+				MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid(id),
+					get_card_name(id), card_type_str(card_type(id)));
+			}
+		}
+	}
+	else
+	{
+		if(!card_sid_valid(sid))
+		{
+			MSG_OUT("没找到sid为\'%s\'的卡牌!\n", sid);
+			return R_E_PARAM;
+		}
+		else
+		{
+			id = card_sid2id(sid);
+
+			MSG_OUT("(%d) {%s}, %s, %s\n%s\n", id, get_card_sid(id),
+				get_card_name(id), card_type_str(card_type(id)), 
+				get_card_desc(id));
+		}
+	}
+	return R_SUCC;
+}
+
+RESULT game_hero_info(tolua_notnull GameContext* pGame,tolua_notnull  GameEventContext* pEvent, const char* sid)
+{
+	HeroID maxid;
+	HeroID id;
+	int n;
+	//char  sid[128];
+	//char  name[128];
+	//char  desc[1024];
+	int  skill_num;
+	int  skill_flag;
+
+	if(sid == NULL)
+	{
+		maxid = hero_maxid();
+		for(id = HeroID_Begin; id <= maxid; id = (HeroID)(id + 1))
+		{
+			if(hero_id_valid(id))
+			{
+				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid(id), 
+					get_hero_name(id), hero_group_str(hero_group(id)), 
+					hero_sex_str(hero_sex(id)), hero_life(id), (hero_master(id) == YES) ? ", 主公":"");
+			}
+		}
+	}
+	else
+	{
+		if(!hero_sid_valid(sid))
+		{
+			MSG_OUT("没找到sid为'%s'的武将!\n", sid);
+			return R_E_PARAM;
+		}
+		else
+		{
+			id = hero_sid2id(sid);
+			MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n%s\n", id, get_hero_sid(id), 
+				get_hero_name(id), hero_group_str(hero_group(id)), 
+				hero_sex_str(hero_sex(id)), hero_life(id), (hero_master(id) == YES) ? ", 主公":"", 
+				get_hero_desc(id));
+			skill_num = hero_skill_num(id);
+			for(n = 1; n <= skill_num; n++)
+			{
+				skill_flag = hero_skill_flag(id, n);
+				MSG_OUT(" 技能[%d]： 【%s】%s%s\n", n,  get_hero_skill_name(id, n), 
+					(skill_flag & SkillFlag_Master) ? ",主公技":"",  (skill_flag & SkillFlag_Passive) ? ",锁定技":"");
+			}
+		}
+	}
+	return R_SUCC;
+}
+
+
+
+
+
 static void game_event_param__new_game_config(GameContext* pGame, GameEventContext* pEvent)
 {
 	if(NULL == pEvent->new_game_config)

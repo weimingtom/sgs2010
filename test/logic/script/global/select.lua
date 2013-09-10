@@ -38,7 +38,12 @@ function select_other_card(game , event, player, target, pattern, alter)
 	-- 手牌
 	if string.find(pattern, 'h') then
 		for n = 0, p.hand_card_num - 1 do
-			items = items..'手牌['..(n+1)..']\n';
+			if target == player then
+				local card = get_player_handcard(p, n);
+				items = items..'手牌：'..get_card_str(card)..'\n';
+			else
+				items = items..'手牌['..(n+1)..']\n';
+			end
 			index = index + 1;
 			wherepos[index] = { where = CardWhere_PlayerHand, pos = n, };
 		end
@@ -67,7 +72,7 @@ function select_other_card(game , event, player, target, pattern, alter)
 	
 	-- 放弃
 	if string.find(pattern, 'c') then
-		items = items..'取消弃牌\n';
+		items = items..'取消选择\n';
 		index = index + 1;
 		wherepos[index] = { where = CardWhere_None, pos = 0, };
 	end

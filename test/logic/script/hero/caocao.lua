@@ -25,13 +25,11 @@ WEI001　KayaK
 
 --]]
 
-import "../global/reg.lua";
-
-
-reg_hero({
+local cfg = {
 	sid = "caocao",
 	name = "曹操",
-	desc = [==[奸雄——你可以立即获得对你造成伤害的牌。
+	desc = [==[【魏武帝·曹操】
+奸雄——你可以立即获得对你造成伤害的牌。
 护驾——主公技，当你需要使用（或打出）一张【闪】时，你可以发动护驾。
 所有魏势力角色按行动顺序依次选择是否打出一张【闪】“提供”给你（视为由你使用或打出），
 直到有一名角色或没有任何角色决定如此做时为止。
@@ -40,104 +38,117 @@ reg_hero({
 	sex = HeroSex_Male,
 	master = YES,
 	life = 4,
-	skills	= { 
-		[1] = {
-			name="奸雄",
-			flag=0,
-			can_use = {
-				[GameEvent_PostChangeLife] = function(cfg, game, event, player)
-					if(event.change_life.delta < 0 and event.trigger == player 
-						and event.change_life.src_cards.list.num > 0 and YES ~= is_player_handfull(get_game_player(game, player)) ) then
-						local cnt = 0;
-						for n = 0, event.change_life.src_cards.list.num - 1 do
-							if(YES == is_cur_card_valid(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos)) then
-								cnt = cnt + 1;
-							end
-						end
-						return cnt > 0 and USE_MANUAL or USE_CANNOT;
-					end
-					return USE_CANNOT;
-				end,
-			},
-			event = {
-				[GameEvent_PostChangeLife] = function(cfg, game, event, player)
-					-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
-					for n = 0, event.change_life.src_cards.list.num - 1 do
-						add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
-					end
+};
 
-					return R_SUCC; -- 返回SUCC，继续响应
-				end,
-			},
-		},
-		[2] = {
-			name="护驾",
-			flag=SkillFlag_Master,
-			can_use = {
-				[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
-					-- 当需要出一张闪的时候,只能主公
-					local p = get_game_player(game, player);
-					if(p.id == PlayerID_Master and event.pattern_out.pattern.num == 1 
-						-- and event.pattern_out.pattern.fixed ~= YES
-						and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan'
-						and not string.find(event.pattern_out.pattern.ud, '%[hujia%]') ) 
-					then
-						return USE_MANUAL;
-					end
-					return USE_CANNOT;
-				end,
-			},
-			event = {
-				--[[
-					问题: 1) 曹操使用护驾，某魏势力使用八卦阵，判定失败，且没有从手牌打出闪，则其它魏势力可以继续打出闪吗？
-				--]]
-				[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
-					-- 请求Wei势力玩家支持闪
-					-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
-					local out_p = OutCardPattern();
-					local self = get_game_player(game, player);
-					local next_player = game_next_player(game, player);
-					message('1 pattern.ud:', event.pattern_out.pattern.ud);
-					while(next_player ~= player) 
-					do
-						local p = get_game_player(game, next_player);
-						--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
-						local group = get_hero_group(p.hero);
-						if(group == HeroGroup_Wei) then
-							game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
-							local ret = game_supply_card(game, event, player, next_player, 
-									out_p, '请为【'.. self.name ..'】提供一张【闪】，你也可以拒绝该请求:', 
-									event.pattern_out.out);
-							event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
-							message('2 pattern.ud:', event.pattern_out.pattern.ud);
-							if (R_SUCC == ret) then
-								event.result = R_SUCC;
-								event.block = YES;
-								return R_BACK;   -- 返回BACK，因为 PassiveOut完成
-							end
-						end
-						next_player = game_next_player(game, next_player);
-					end
-					
-					
-					message('3 pattern.ud:', event.pattern_out.pattern.ud);
-					-- 已经使用护驾，添加标记
-					event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '[hujia]';
-					--  没人响应，你仍然可以出一张闪
-					
-					game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
-					
-					local alter = '你使用【'..cfg.skills[2].name..'】无人响应，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
-					-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
-					local ret = game_passive_out(game, event.parent_event, player, event.target, out_p, alter);
-					event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
-					event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);
-					event.block = YES;
-					return R_BACK;  -- 返回BACK，因为 PassiveOut完成
-				end,
-			},
-		},
-	},
-});
+
+local jianxiong = {
+	name="奸雄",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+jianxiong.can_use[GameEvent_PostChangeLife] = function(cfg, game, event, player)
+	if(event.change_life.delta < 0 and event.trigger == player 
+		and event.change_life.src_cards.list.num > 0 and YES ~= is_player_handfull(get_game_player(game, player)) ) then
+		local cnt = 0;
+		for n = 0, event.change_life.src_cards.list.num - 1 do
+			if(YES == is_cur_card_valid(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos)) then
+				cnt = cnt + 1;
+			end
+		end
+		return cnt > 0 and USE_MANUAL or USE_CANNOT;
+	end
+	return USE_CANNOT;
+end
+
+jianxiong.event[GameEvent_PostChangeLife] = function(cfg, game, event, player)
+	-- game_player_add_cards (game, event, player, event.change_life.src_cards.list);
+	for n = 0, event.change_life.src_cards.list.num - 1 do
+		add_cur_card_to_player_hand(game, event.change_life.src_cards.list.pcards[n].where, event.change_life.src_cards.list.pcards[n].pos, player);
+	end
+
+	return R_SUCC; -- 返回SUCC，继续响应
+end
+
+local hujia = {
+	name="护驾",
+	flag=SkillFlag_Master,
+	can_use = { },
+	event = { },
+};
+
+hujia.can_use[GameEvent_PassiveOutCard] = function(cfg, game, event, player)
+	-- 当需要出一张闪的时候,只能主公
+	local p = get_game_player(game, player);
+	if(p.id == PlayerID_Master and event.pattern_out.pattern.num == 1 
+		-- and event.pattern_out.pattern.fixed ~= YES
+		and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'shan'
+		and not string.find(event.pattern_out.pattern.ud, '%[hujia%]') ) 
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+
+--[[
+	问题: 1) 曹操使用护驾，某魏势力使用八卦阵，判定失败，且没有从手牌打出闪，则其它魏势力可以继续打出闪吗？
+--]]
+hujia.event[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
+	-- 请求Wei势力玩家支持闪
+	-- 从下一个玩家开始，如果是魏势力，那么就求一张闪
+	local out_p = OutCardPattern();
+	local self = get_game_player(game, player);
+	local next_player = game_next_player(game, player);
+	message('1 pattern.ud:', event.pattern_out.pattern.ud);
+	while(next_player ~= player) 
+	do
+		local p = get_game_player(game, next_player);
+		--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
+		local group = get_hero_group(p.hero);
+		if(group == HeroGroup_Wei) then
+			game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
+			local ret = game_supply_card(game, event, player, next_player, 
+					out_p, '请为【'.. self.name ..'】提供一张【'..card_sid2name('shan')..'】，你也可以拒绝该请求:', 
+					event.pattern_out.out);
+			event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
+			message('2 pattern.ud:', event.pattern_out.pattern.ud);
+			if (R_SUCC == ret) then
+				event.result = R_SUCC;
+				event.block = YES;
+				return R_BACK;   -- 返回BACK，因为 PassiveOut完成
+			end
+		end
+		next_player = game_next_player(game, next_player);
+	end
+	
+	
+	message('3 pattern.ud:', event.pattern_out.pattern.ud);
+	-- 已经使用护驾，添加标记
+	event.pattern_out.pattern.ud = event.pattern_out.pattern.ud .. '[hujia]';
+	--  没人响应，你仍然可以出一张闪
+	
+	game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
+	
+	local alter = '你使用【'..cfg.skills[2].name..'】无人响应，你仍然可以打出一张【'..card_sid2name('shan')..'】:';
+	-- 你仍然可以打出一张闪(上一级事件指定为PassiveOut的上一级事件,防止嵌套的PassiveOut让其它地方产生误判)
+	local ret = game_passive_out(game, event.parent_event, player, event.target, out_p, alter);
+	event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
+	event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);
+	event.block = YES;
+	return R_BACK;  -- 返回BACK，因为 PassiveOut完成
+end
+
+
+cfg.skills = {
+	jianxiong,
+	hujia,
+};
+
+-- register hero 
+reg_hero(cfg);
+
+
 
 
