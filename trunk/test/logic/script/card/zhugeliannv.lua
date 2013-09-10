@@ -92,7 +92,7 @@ function(cfg, game, event, player)
 	out_card.flag = OutCardFlag_SpecOut;
 	
 	-- 按正常流程出牌
-	return game_real_out(game, event, event.target, out_card) ;
+	return game_real_out(game, event, player, out_card) ;
 end
 
 -- register

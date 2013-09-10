@@ -3,7 +3,7 @@
 #include "cmd.h"
 #include "comm.h"
 #include "script.h"
-
+#include "load.h"
 
 #include "../pkg/lua_export.h"
 
@@ -402,6 +402,13 @@ static RESULT game_script_prepare(lua_State* L)
 
 	// load game core libraries
 	tolua_game_open(L);
+
+	// extra game functions
+	// for load game from a table
+	lua_pushcfunction(L, luaex_game_load);
+	lua_setglobal(L, "game_load");
+
+
 
 	return reload_game_script();
 }

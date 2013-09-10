@@ -57,6 +57,17 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
  	}
 
 
+	pPlayer = get_game_player(pGame, player);
+
+	if(life_inc + pPlayer->cur_life > pPlayer->max_life)
+	{
+		life_inc = pPlayer->max_life - pPlayer->cur_life;
+		// 如果不需要回体力，则直接返回成功。
+		if(life_inc == 0)
+			return R_SUCC;
+	}
+
+
 	ST_ZERO(stChgLife);
 
 	stChgLife.delta = life_inc;
@@ -83,7 +94,6 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	event.change_life = &stChgLife;
 
 
-	pPlayer = get_game_player(pGame, player);
 
 	pPlayer->cur_life += stChgLife.delta;
 
@@ -92,10 +102,10 @@ RESULT game_player_add_life(lua_State* L, GameContext* pGame, GameEventContext* 
 	else
 		MSG_OUT("【%s】回复[%d]点体力, 当前体力为: %d/%d。\n", pPlayer->name, stChgLife.delta, pPlayer->cur_life, pPlayer->max_life);
 
-	if(pPlayer->cur_life > pPlayer->max_life)
-	{
-		pPlayer->cur_life = pPlayer->max_life;
-	}
+// 	if(pPlayer->cur_life > pPlayer->max_life)
+// 	{
+// 		pPlayer->cur_life = pPlayer->max_life;
+// 	}
 
 	stChgLife.after_life = pPlayer->cur_life;
 

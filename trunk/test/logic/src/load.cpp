@@ -186,7 +186,6 @@ static int lua_game_load(lua_State* L)
 	const char* file_name;
 
 	pGame = (GameContext*)lua_touserdata(L, 1);
-	file_name = luaL_checkstring(L, 2);
 
 
 	//ret = R_SUCC;
@@ -201,15 +200,26 @@ static int lua_game_load(lua_State* L)
 	lua_rawset(L, -3);   // [t] [t]
 	lua_setmetatable(L, -2);  // [t]
 
-	if(0 != luaL_loadfile(L, file_name))   // [t] [f]
+
+	if(lua_istable(L, 2))
 	{
-		luaL_error(L, "%s", lua_tostring(L, -1));
+		lua_pushvalue(L, 2);
+		lua_setfield(L, -2, "game");		
 	}
+	else 
+	{
+		file_name = luaL_checkstring(L, 2);
 
-	lua_pushvalue(L, -2);   // [t] [f] [t]
-	lua_setfenv(L, -2);     // [t] [f]
+		if(0 != luaL_loadfile(L, file_name))   // [t] [f]
+		{
+			luaL_error(L, "%s", lua_tostring(L, -1));
+		}
 
-	lua_call(L, 0, 0);
+		lua_pushvalue(L, -2);   // [t] [f] [t]
+		lua_setfenv(L, -2);     // [t] [f]
+
+		lua_call(L, 0, 0);
+	}
 
 	//stack:  [t] 
 
@@ -294,6 +304,12 @@ static int lua_game_load(lua_State* L)
 
 	return 0;
 }
+
+int luaex_game_load(lua_State* L)
+{
+	return lua_game_load(L);
+}
+
 
 RESULT game_load(GameContext* pGame, const char* file_name)
 {
