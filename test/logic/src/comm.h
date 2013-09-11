@@ -51,9 +51,9 @@ RESULT to_float(const char* text, float* pv);
 
 void log_text(const char* fmt, ...) __ATTR_FMT__(printf,1,2);
 
-int message_printf(const char* fmt, ...) __ATTR_FMT__(printf,1,2);
+//int message_printf(const char* fmt, ...) __ATTR_FMT__(printf,1,2);
 
-#define MSG_OUT   message_printf
+//#define MSG_OUT   message_printf
 
 #ifdef OUTPUT_UTF8 
 char* to_utf8(const char*  str, char* buffer, int len);

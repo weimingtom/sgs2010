@@ -597,3 +597,16 @@ int script_pcall(lua_State *L, int narg, int result)
 	return status;
 }
 
+RESULT script_init_test()
+{
+	return R_SUCC;
+}
+
+
+
+void script_test_continue(const char* msg, int msg_sz, char* buf, int len)
+{
+	buf[0] = 0;
+}
+
+

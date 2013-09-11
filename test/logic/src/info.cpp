@@ -1,7 +1,7 @@
 #include "config.h"
 #include "game.h"
 #include "info.h"
-#include "comm.h"
+#include "cmd.h"
 #include "event.h"
 #include "get.h"
 #include "out.h"

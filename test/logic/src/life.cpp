@@ -4,7 +4,7 @@
 #include "player.h"
 #include "life.h"
 #include "script.h"
-#include "comm.h"
+#include "cmd.h"
 
 static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player)
 {

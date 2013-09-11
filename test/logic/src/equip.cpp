@@ -6,7 +6,7 @@
 #include "card.h"
 #include "player.h"
 #include "script.h"
-#include "comm.h"
+#include "cmd.h"
 
 //////////////////////////////////////////////////////////////////////////
 // script exports

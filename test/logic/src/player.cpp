@@ -1,7 +1,9 @@
 #include "config.h"
 #include "player.h"
 #include "hero.h"
+#include "cmd.h"
 #include "comm.h"
+
 
 RESULT init_player(Player* pPlayer, PlayerID id, HeroID hero, int index)
 {

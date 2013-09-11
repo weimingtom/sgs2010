@@ -1,7 +1,7 @@
 #include "config.h"
 #include "card.h"
-#include "comm.h"
 #include "script.h"
+#include "cmd.h"
 //#include "card_impl/card_impl.h"
 
 
