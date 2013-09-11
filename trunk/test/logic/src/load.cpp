@@ -185,7 +185,12 @@ static int lua_game_load(lua_State* L)
 	GameContext* pGame;
 	const char* file_name;
 
-	pGame = (GameContext*)lua_touserdata(L, 1);
+	pGame = (GameContext*)tolua_tousertype(L, 1, NULL);
+
+	if(pGame == NULL)
+	{
+		luaL_error(L, "game null pointer!");
+	}
 
 
 	if(pGame->status != Status_None)

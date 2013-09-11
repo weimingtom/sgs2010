@@ -374,6 +374,10 @@ int luaex_import_file(lua_State* L )
 }
 
 
+static int luaex_reg_test(lua_State* L);
+static int luaex_do_test(lua_State* L);
+static int luaex_test_send_cmd(lua_State* L);
+static int luaex_test_expect(lua_State* L);
 
 
 static RESULT game_script_prepare(lua_State* L)
@@ -400,6 +404,8 @@ static RESULT game_script_prepare(lua_State* L)
 	lua_setglobal(L, "bitxor");
 
 
+
+
 	// load game core libraries
 	tolua_game_open(L);
 
@@ -408,6 +414,20 @@ static RESULT game_script_prepare(lua_State* L)
 	lua_pushcfunction(L, luaex_game_load);
 	lua_setglobal(L, "game_load");
 
+
+	// register test api
+	lua_newtable(L);   // for localvar stored test  cases
+	lua_pushvalue(L, -1);
+	lua_pushcclosure(L, luaex_reg_test, 1);
+	lua_setglobal(L, "reg_test");
+	lua_pushcclosure(L, luaex_do_test, 1);
+	lua_setfield(L, LUA_REGISTRYINDEX, "__test_fun__");
+
+	lua_pushcfunction(L, luaex_test_send_cmd);
+	lua_setglobal(L, "send_cmd");
+	lua_pushstring(L, "");
+	lua_pushcclosure(L, luaex_test_expect, 1);
+	lua_setglobal(L, "expect");
 
 
 	return reload_game_script();
@@ -597,16 +617,165 @@ int script_pcall(lua_State *L, int narg, int result)
 	return status;
 }
 
-RESULT script_init_test()
+
+
+
+static int luaex_reg_test(lua_State* L)
 {
-	return R_SUCC;
+	if(!is_test_mode())
+		return 0;
+
+	lua_pushvalue(L, lua_upvalueindex(1));  // t 
+
+	const char* name = luaL_checkstring(L, 1);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+
+	lua_pushvalue(L, 1);
+	lua_pushvalue(L, 2);
+	lua_settable(L, -3);
+	lua_pop(L, 1);
+
+	lua_pushnumber(L, 1);
+	return 1;
 }
 
 
 
-void script_test_continue(const char* msg, int msg_sz, char* buf, int len)
+
+
+static int luaex_do_test(lua_State* L)
 {
-	buf[0] = 0;
+	tolua_Error  err;
+	GameContext* pGame;
+
+	if(tolua_isvaluenil(L, 1, &err) || !tolua_isusertype(L, 1, "GameContext", 0, &err))
+	{
+		tolua_error(L, "#ferror in function 'luaex_do_test'.",&err);
+		return 0;
+	}
+
+	pGame = (GameContext*)tolua_tousertype(L, 1, NULL);
+
+	lua_pushvalue(L, lua_upvalueindex(1));
+	lua_pushnil(L); // t  key
+
+	while(lua_next(L, -2) != 0)
+	{
+		// t, name, test_fun 
+		tolua_pushusertype(L, pGame, "GameContext");  // t, name, test_fun, game
+		lua_call(L, 1, 0);   // t, name
+	}
+
+	// t
+
+	lua_pop(L, 1);
+	return 0;
+}
+
+
+
+static int luaex_test_send_cmd(lua_State* L)
+{
+	// return command string to cmd process
+	const char* cmd = luaL_checkstring(L, 1);
+	printf("send cmd: %s\n", cmd);
+	lua_pushvalue(L, 1);
+	return lua_yield(L, 1);
+}
+
+static int luaex_test_expect(lua_State* L)
+{
+	// get out text
+	const char* pat = luaL_checkstring(L, 1);
+	const char* text = lua_tostring(L, lua_upvalueindex(1));
+
+	printf("pattern: %s\n", pat);
+	printf("text   : %s\n", text);
+
+	return 0;
+}
+
+
+
+
+RESULT script_test_continue(GameContext* pGame, const char* msg, int msg_sz, char* buf, int len)
+{
+	lua_State* L;
+	lua_State* Lt;
+	int state;
+
+	// main script state
+	L = get_game_script();
+
+	lua_getfield(L, LUA_REGISTRYINDEX, "__test_thread__");
+		
+	Lt = lua_tothread(L, -1);
+	if(Lt == NULL)
+	{
+		lua_pop(L, 1);
+		// new lua thread
+		Lt = lua_newthread(L);
+		if(Lt == NULL)
+		{
+			luaL_error(L, "create test thread failed");
+		}
+
+		lua_setfield(L, LUA_REGISTRYINDEX, "__test_thread__");
+
+		// 启动函数
+		lua_getfield(L, LUA_REGISTRYINDEX, "__test_fun__");
+		lua_xmove(L, Lt, 1);
+
+
+		// 第一次resume 传入 Game对象
+		tolua_pushusertype(Lt, pGame, "GameContext");
+		state = lua_resume(Lt, 1);	
+	}
+	else
+	{
+		lua_pop(L, 1); // 删除
+
+		// 修改expect 函数的upvalue(1)
+		lua_getglobal(L, "expect");
+		lua_pushlstring(Lt, msg, msg_sz);
+		lua_setupvalue(L, -1, 1);
+		lua_pop(L, 1);
+		
+		state = lua_resume(Lt, 0);
+	}
+
+
+
+	if(state != 0)
+	{
+		if(state != LUA_YIELD)
+		{
+			luaL_error(L, lua_tostring(Lt, -1));
+		}
+		else
+		{
+			// get cmd 
+			buf[0] = 0;
+			if(lua_gettop(Lt) >= 1)
+			{
+				strncpy(buf, lua_tostring(Lt, 1), len);
+			}
+			buf[len-1] = 0;
+			return R_SUCC;
+		}
+	}
+	else
+	{
+		// test over
+		lua_pushstring(L, "__test_thread__");
+		lua_pushnil(L);
+		lua_settable(L, LUA_REGISTRYINDEX);
+
+		// exit test mode
+		return R_CANCEL;
+	}
+	return R_SUCC;
+
 }
 
 

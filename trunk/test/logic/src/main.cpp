@@ -78,19 +78,17 @@ int main(int argc, char** argv)
 
 	MSG_OUT(PROJ_NAME" "VERSION_STR"\n");
 
+	if(argc >= 2 && !strcasecmp(argv[1], "-t"))
+	{
+		set_test_mode();
+	}
+
+
 	if(R_SUCC != init_game_script())
 	{
 		return 1;
 	}
 
-	if(argc >= 2 && !strcasecmp(argv[1], "-t"))
-	{
-		// run test
-		if(R_SUCC == script_init_test())
-		{
-			set_test_mode();
-		}
-	}
 
 
 	ST_ZERO(stGameContext);

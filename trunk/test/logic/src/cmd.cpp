@@ -94,7 +94,7 @@ static char* get_word(char* cmd, char** next)
 }
 
 
-static char* get_line(const char* prompt, char* buf, int size)
+static char* get_line(GameContext* pGame, const char* prompt, char* buf, int size)
 {
 #ifdef WIN32
 	int n,c;
@@ -106,11 +106,13 @@ static char* get_line(const char* prompt, char* buf, int size)
 	if(is_test_mode())
 	{
 		// contiue test proc
-		script_test_continue(s_out_messages,s_out_len, buf, size);
-		return buf;
+		if(R_SUCC == script_test_continue(pGame, s_out_messages,s_out_len, buf, size))
+		{
+			return buf;
+		}
+
+		s_test_mode = 0;
 	}
-
-
 
 	for(n = 0; n < size-1; n++)
 	{
@@ -141,7 +143,15 @@ static char* get_line(const char* prompt, char* buf, int size)
 		MSG_OUT("%s", prompt);
 
 		// contiue test proc
-		script_test_continue(s_out_messages,s_out_len, buf, size);
+		if(R_SUCC == script_test_continue(pGame, s_out_messages,s_out_len, buf, size))
+		{
+			return buf;
+		}
+
+		s_test_mode = 0;
+		
+		// 先返回一个空命令，重新进入指令循环
+		buf[0] = 0;
 		return buf;
 	}
 
@@ -786,7 +796,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 	}
 
 	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0), 
-		get_line(prompt, cmdline, sizeof(cmdline)))
+		get_line(pContext, prompt, cmdline, sizeof(cmdline)))
 	{
 		next =  cmdline;
 		argc = 0;
@@ -928,7 +938,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		if(NULL == get_line("[请选择] : ", buffer, sizeof(buffer)))
+		if(NULL == get_line(pContext, "[请选择] : ", buffer, sizeof(buffer)))
 			return R_E_FAIL;
 
 		strtrim(buffer);
