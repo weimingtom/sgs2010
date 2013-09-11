@@ -38,6 +38,19 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value);
 
 
+
+void cmd_output(const char* fmt, ...) __ATTR_FMT__(printf,1,2);;
+#define MSG_OUT   cmd_output
+
+
+
+
+// for test api
+
+void set_test_mode();
+BOOL  is_test_mode();
+
+
 #ifdef __cplusplus
 }
 #endif

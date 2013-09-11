@@ -17,6 +17,27 @@
 #define MAX_PARAM_NUM   64
 #define MAX_CMD_LEN     4096
 
+#define MAX_OUT_MSG_SIZE  65536
+
+static char s_out_messages[MAX_OUT_MSG_SIZE] = {0};
+static size_t s_out_len = 0;
+static int  s_test_mode = 0;
+
+
+void set_test_mode()
+{
+	s_test_mode = 1;
+	s_out_messages[0] = 0;
+	s_out_len = 0;
+}
+
+
+BOOL  is_test_mode()
+{
+	return s_test_mode != 0;
+}
+
+
 
 // get a world from cmd split with space,return the point to the word first valid char, null if no more any words 
 static char* get_word(char* cmd, char** next)
@@ -82,6 +103,15 @@ static char* get_line(const char* prompt, char* buf, int size)
 
 	MSG_OUT("%s", prompt);
 
+	if(is_test_mode())
+	{
+		// contiue test proc
+		script_test_continue(s_out_messages,s_out_len, buf, size);
+		return buf;
+	}
+
+
+
 	for(n = 0; n < size-1; n++)
 	{
 		c = getchar();
@@ -106,6 +136,15 @@ static char* get_line(const char* prompt, char* buf, int size)
 	char    utf8[1024];
 	char*   sl;
 
+	if(is_test_mode())
+	{
+		MSG_OUT("%s", prompt);
+
+		// contiue test proc
+		script_test_continue(s_out_messages,s_out_len, buf, size);
+		return buf;
+	}
+
 
 	A2UTF8( prompt, utf8, sizeof(utf8));
 
@@ -124,6 +163,37 @@ static char* get_line(const char* prompt, char* buf, int size)
 	log_text("%s\n", buf);
 
 	return buf;
+}
+
+void cmd_output(const char* fmt, ...)
+{
+	char text[4096];
+	char utf8[4096*2];
+
+
+	va_list vl;
+	size_t sz;
+
+	va_start(vl, fmt);
+	sz = vsnprintf(text, sizeof(text), fmt, vl);
+	va_end(vl);
+
+	if(is_test_mode())
+	{
+		if(sz + s_out_len >= sizeof(s_out_messages))
+		{
+			sz = sizeof(s_out_messages)/sizeof(s_out_messages[0]) - s_out_len - 1;
+		}
+		memcpy(s_out_messages + s_out_len, text, sz);
+		s_out_len += sz;
+		s_out_messages[s_out_len] = 0;
+	}	
+
+	A2UTF8(text, utf8, sizeof(utf8));
+
+	log_text("%s", utf8);
+
+	printf("%s", utf8);
 }
 
 

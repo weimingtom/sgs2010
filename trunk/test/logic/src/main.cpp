@@ -83,6 +83,15 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	if(argc >= 2 && !strcasecmp(argv[1], "-t"))
+	{
+		// run test
+		if(R_SUCC == script_init_test())
+		{
+			set_test_mode();
+		}
+	}
+
 
 	ST_ZERO(stGameContext);
 

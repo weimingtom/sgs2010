@@ -19,6 +19,9 @@ lua_State* get_ai_script();
 
 
 
+RESULT script_init_test();
+void script_test_continue(const char* msg, int msg_sz, char* buf, int len);
+
 
 // wrapped function from lua
 char* get_enumt_str(const char* enum_type, int val, int is_bit_or, char* buf, int buflen);

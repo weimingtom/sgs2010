@@ -3,7 +3,7 @@
 #include "judge.h"
 #include "event.h"
 #include "discard.h"
-#include "comm.h"
+#include "cmd.h"
 
 
 static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int player)

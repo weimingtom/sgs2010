@@ -7,6 +7,7 @@
 #include "discard.h"
 #include "script.h"
 #include "comm.h"
+#include "cmd.h"
 
 
 YESNO game_decide_card(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent,int player, const char* szPattern)

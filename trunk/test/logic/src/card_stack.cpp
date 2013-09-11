@@ -1,6 +1,7 @@
 #include "config.h"
 #include "card_stack.h"
 #include "comm.h"
+#include "cmd.h"
 
 
 /*

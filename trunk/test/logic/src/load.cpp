@@ -4,7 +4,7 @@
 #include "card_stack.h"
 #include "player.h"
 #include "script.h"
-#include "comm.h"
+#include "cmd.h"
 #include "load.h"
 
 
@@ -187,6 +187,11 @@ static int lua_game_load(lua_State* L)
 
 	pGame = (GameContext*)lua_touserdata(L, 1);
 
+
+	if(pGame->status != Status_None)
+	{
+		luaL_error(L, "已经在游戏中，不能加载游戏进度!");
+	}
 
 	//ret = R_SUCC;
 

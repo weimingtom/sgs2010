@@ -3,7 +3,7 @@
 #include "card.h"
 #include "event.h"
 #include "card_stack.h"
-#include "comm.h"
+#include "cmd.h"
 #include "save.h"
 #include "script.h"
 
