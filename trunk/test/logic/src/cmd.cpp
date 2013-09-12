@@ -785,17 +785,60 @@ static void cmd_help_i(const char* cmd)
 	}
 }
 
-
-
-static char* get_cmd_line(const char* prompt, char* buf, int len, int* mode)
+static RESULT cmd_do_script(GameContext* pGame, GameEventContext* pEvent)
 {
+	RESULT ret;
+	int state;
+	lua_State* L = get_game_script();
+	
+	lua_pushlightuserdata(L, pGame);
+	lua_pushlightuserdata(L, pEvent);
+
+	state = script_pcall(L, 2, 1);
+	
+	if(state != 0)
+	{
+		MSG_OUT("%s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+		return R_E_FAIL;
+	}
+
+	ret = (RESULT)lua_tointeger(L, -1);
+
+	lua_pop(L, 1);
+
+	return ret;
+}
+
+static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const char* prompt, char* buf, int len)
+{
+	int mode;
 	if(is_test_mode())
 	{
 		// contiue test proc
-		if(R_SUCC == script_test_continue(s_out_messages,s_out_len, buf, len, int* mode))
+		mode = CMD_LINE_MODE_NORMAL;
+
+		MSG_OUT("%s", prompt);
+
+		if(R_SUCC == script_test_continue(s_out_messages,s_out_len, buf, len, &mode))
 		{
 			s_out_len = 0;
 			s_out_messages[0] = 0;
+
+
+			if(mode == CMD_LINE_MODE_SCRIPT)
+			{
+				if(R_SUCC != cmd_do_script(pGame, pEvent))
+				{
+					s_test_mode = 0;
+					buf[0] = 0;
+					MSG_OUT("%s\n", buf);
+					return buf;
+				}
+			}
+
+
+			MSG_OUT("%s\n", buf);
 			return buf;
 		}
 
@@ -804,9 +847,8 @@ static char* get_cmd_line(const char* prompt, char* buf, int len, int* mode)
 
 		//  ß∞‹ÕÀ≥ˆ≤‚ ‘ƒ£ Ω
 		s_test_mode = 0;
-		
 		buf[0] = 0;
-		mode = CMD_LINE_MODE_NORMAL;
+		MSG_OUT("%s\n", buf);
 		return buf;
 	}
 	else
@@ -825,7 +867,6 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 	int   argc;
 	char  *next, *w;
 	int   n;
-	int   mode;
 	RESULT   ret;
 
 	if(get_game_status(pContext) == Status_None)
@@ -837,8 +878,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 		snprintf(prompt, sizeof(prompt), "[%s] $ ", CUR_PLAYER(pContext)->name);
 	}
 
-	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0), mode = CMD_LINE_MODE_NORMAL, 
-		get_cmd_line(prompt, cmdline, sizeof(cmdline), &mode))
+	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0) , get_cmd_line(pContext, pEvent, prompt, cmdline, sizeof(cmdline)))
 	{
 		next =  cmdline;
 		argc = 0;
@@ -980,7 +1020,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		if(NULL == get_cmd_line("[«Î—°‘Ò] : ", buffer, sizeof(buffer)))
+		if(NULL == get_cmd_line(pContext, pEvent, "[«Î—°‘Ò] : ", buffer, sizeof(buffer)))
 			return R_E_FAIL;
 
 		strtrim(buffer);

@@ -185,7 +185,7 @@ static int lua_game_load(lua_State* L)
 	GameContext* pGame;
 	const char* file_name;
 
-	pGame = (GameContext*)tolua_tousertype(L, 1, NULL);
+	pGame = (GameContext*)lua_touserdata(L, 1);
 
 	if(pGame == NULL)
 	{
@@ -325,8 +325,6 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 	char  path[MAX_PATH];
 
 
-	snprintf(path, sizeof(path), "%s/../sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
-
 	L = get_game_script();
 
 	if(L == NULL)
@@ -335,7 +333,17 @@ RESULT game_load(GameContext* pGame, const char* file_name)
 
 	lua_pushcfunction(L, lua_game_load);
 	lua_pushlightuserdata(L, pGame);
-	lua_pushstring(L, path);
+
+	if(file_name[0] == '?')
+	{
+		snprintf(path, sizeof(path), "%s",  file_name);		
+		lua_getfield(L, LUA_REGISTRYINDEX, path);
+	}
+	else
+	{
+		snprintf(path, sizeof(path), "%s/../sav/%s.sav", get_app_path(base, sizeof(base)), file_name);
+		lua_pushstring(L, path);
+	}
 
 	state = script_pcall(L, 2, 0);
 

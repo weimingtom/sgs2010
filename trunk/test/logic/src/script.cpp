@@ -3,7 +3,9 @@
 #include "cmd.h"
 #include "comm.h"
 #include "script.h"
+
 #include "load.h"
+#include "event.h"
 
 #include "../pkg/lua_export.h"
 
@@ -625,11 +627,11 @@ static int luaex_game_load(lua_State* L)
 {
 	if(lua_type(L, 1) == LUA_TSTRING)
 	{
-		TEST_INFO("load game from : %s\n", lua_tostring(L, 1));
+		TEST_INFO(">> load game from : %s\n", lua_tostring(L, 1));
 	}
 	else if(lua_type(L, 1) == LUA_TTABLE)
 	{
-		TEST_INFO("load game from table\n", lua_tostring(L, 1));
+		TEST_INFO(">> load game from table\n", lua_tostring(L, 1));
 	}
 	else 
 	{
@@ -641,48 +643,45 @@ static int luaex_game_load(lua_State* L)
 }
 
 
-/*
-static RESULT script_load_game(lua_State* L, int narg)
+static int aux_load(lua_State* L)
 {
+	GameContext*       pGame;
+	GameEventContext*  pParentEvent;
 	GameEventContext    event;
-	//RESULT ret;
-	if(pContext->status != Status_None)
-	{
-		MSG_OUT("已经在游戏中，不能加载一个游戏进度!\n");
-		return R_E_STATUS;
-	}
 
-	if(argc != 2)
+
+	pGame = (GameContext*)lua_touserdata(L, 1);
+	pParentEvent = (GameEventContext*)lua_touserdata(L, 2);
+
+	lua_pushvalue(L, lua_upvalueindex(1));
+	lua_setfield(L, LUA_REGISTRYINDEX, "?sav");
+
+
+	//RESULT ret;
+	if(pGame->status != Status_None)
 	{
-		param_error(argv[0]);
-		return R_E_PARAM;
+		luaL_error(L, "已经在游戏中，不能加载一个游戏进度!");
+		return 0;
 	}
 
 	// load game
 
-	INIT_EVENT(&event, GameEvent_LoadGame, INVALID_PLAYER , INVALID_PLAYER, pEvent);
-	event.file_name = argv[1];
-
-	//ret = game_load(pContext, argv[1]);
-
-	//if(R_SUCC != ret)
-	//{
-	//	return ret;
-	//}
+	INIT_EVENT(&event, GameEvent_LoadGame, INVALID_PLAYER , INVALID_PLAYER, pParentEvent);
+	event.file_name = "?sav";
 
 	// game main
-	return game_main(pContext, &event);
+	lua_pushnumber(L, game_main(pGame, &event));
+	return 1;
 }
-*/
 
 static int luaex_test_send_cmd(lua_State* L)
 {
 	// return command string to cmd process
 	const char* cmd = luaL_checkstring(L, 1);
-	TEST_INFO("send cmd: %s\n", cmd);
+	//TEST_INFO("send cmd: %s\n", cmd);
 	lua_pushnumber(L, TEST_CMD_SENDCMD);
 	lua_pushvalue(L, 1);
-	return lua_yield(L, 1);
+	return lua_yield(L, 2);
 }
 
 static int luaex_test_expect(lua_State* L)
@@ -691,14 +690,14 @@ static int luaex_test_expect(lua_State* L)
 	const char* pat = luaL_checkstring(L, 1);
 	const char* text = lua_tostring(L, lua_upvalueindex(1));
 
-	TEST_INFO("pattern: %s\n", pat);
-	TEST_INFO("text   : %s\n", text);
+	//TEST_INFO("pattern: %s\n", pat);
+	//TEST_INFO("text   : %s\n", text);
 
 	return 0;
 }
 
 
-static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len);
+static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, int* mode);
 
 
 RESULT script_test_run(GameContext* pGame, int index)
@@ -772,8 +771,8 @@ RESULT script_test_continue(const char* msg, int msg_sz, char* buf, int len, int
 
 	// 修改expect 函数的upvalue(1)
 	lua_getglobal(L, "expect");
-	lua_pushlstring(Lt, msg, msg_sz);
-	lua_setupvalue(L, -1, 1);
+	lua_pushlstring(L, msg, msg_sz);
+	lua_setupvalue(L, -2, 1);
 	lua_pop(L, 1);
 	
 	return script_test_resume(Lt, 0, buf, len, mode);
@@ -784,7 +783,10 @@ static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, in
 {
 	int state;
 
-	mode = CMD_LINE_MODE_NORMAL;
+	if(mode)
+	{
+		*mode = CMD_LINE_MODE_NORMAL;
+	}
 
 	state = lua_resume(Lt, args);
 
@@ -798,7 +800,7 @@ static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, in
 		}
 		else
 		{
-			if(buf)
+			if(buf && mode)
 			{
 				// get cmd 
 				buf[0] = 0;
@@ -809,12 +811,12 @@ static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, in
 					{
 					case TEST_CMD_LOAD:
 						// load game continue
-						mode = CMD_LINE_MODE_SCRIPT;
+						*mode = CMD_LINE_MODE_SCRIPT;
 						lua_pushvalue(Lt, 2);
 						lua_xmove(Lt, get_game_script(), 1);
-						lua_pushcclosure(L, aux_load, 1);
+						lua_pushcclosure(get_game_script(), aux_load, 1);
 
-						strncpy(buf, "aux_load", len);
+						// strncpy(buf, "aux_load", len);
 						break;
 					case TEST_CMD_SENDCMD:
 						strncpy(buf, luaL_checkstring(Lt, 2), len);
