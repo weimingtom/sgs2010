@@ -12,6 +12,13 @@ typedef struct tagGameContext  GameContext;
 typedef struct tagGameEventContext  GameEventContext;
 
 
+
+#define CMD_LINE_MODE_NORMAL    0
+#define CMD_LINE_MODE_SCRIPT    1
+#define CMD_LINE_MODE_FILE      2
+
+
+
 #define MAX_SEL_OPTION_LEN       256
 #define MAX_SEL_INPUT_LEN        128
 

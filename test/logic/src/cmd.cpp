@@ -94,7 +94,7 @@ static char* get_word(char* cmd, char** next)
 }
 
 
-static char* get_line(GameContext* pGame, const char* prompt, char* buf, int size)
+static char* get_line(const char* prompt, char* buf, int size)
 {
 #ifdef WIN32
 	int n,c;
@@ -103,16 +103,6 @@ static char* get_line(GameContext* pGame, const char* prompt, char* buf, int siz
 
 	MSG_OUT("%s", prompt);
 
-	if(is_test_mode())
-	{
-		// contiue test proc
-		if(R_SUCC == script_test_continue(pGame, s_out_messages,s_out_len, buf, size))
-		{
-			return buf;
-		}
-
-		s_test_mode = 0;
-	}
 
 	for(n = 0; n < size-1; n++)
 	{
@@ -137,23 +127,6 @@ static char* get_line(GameContext* pGame, const char* prompt, char* buf, int siz
 #elif defined(LINUX)
 	char    utf8[1024];
 	char*   sl;
-
-	if(is_test_mode())
-	{
-		MSG_OUT("%s", prompt);
-
-		// contiue test proc
-		if(R_SUCC == script_test_continue(pGame, s_out_messages,s_out_len, buf, size))
-		{
-			return buf;
-		}
-
-		s_test_mode = 0;
-		
-		// 先返回一个空命令，重新进入指令循环
-		buf[0] = 0;
-		return buf;
-	}
 
 
 	A2UTF8( prompt, utf8, sizeof(utf8));
@@ -660,6 +633,39 @@ static RESULT cmd_reload(const char** argv, int argc, GameContext* pContext, Gam
 	return reload_game_script();
 }
 
+
+static RESULT  cmd_test(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent)
+{
+	// 列出/执行测试用例
+
+
+	if(argc < 2)
+	{
+		param_error(argv[0]);
+		return R_E_PARAM;
+	}
+
+
+	if(!strcmp(argv[1], "list") || !strcmp(argv[1], "l"))
+	{
+		// script_list_test
+		script_test_list();
+
+	}
+	else if(!strcmp(argv[1], "run") || !strcmp(argv[1], "r"))
+	{
+		// script_test_run(index)
+		
+		if(argc >= 3)
+		{
+			script_test_run(pContext, atoi(argv[2]));
+		}
+	}
+
+
+	return R_DEF;
+}
+
 typedef RESULT (*FunCmd)(const char** argv, int argc, GameContext* pContext, GameEventContext* pEvent);
 
 
@@ -728,6 +734,10 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 	{ "reload", "r", cmd_reload,
 		"reload \n\treload script files.", 
 		NULL},
+	{ "test", NULL, cmd_test,
+		"test list/l\n\tlist all test cases.\n"
+		"test run/r all/<id>\n\trun all or give index test case.", 
+		NULL},
 };
 
 #define CMD_NUM (int)(COUNT(s_cmdDispatch))
@@ -776,6 +786,37 @@ static void cmd_help_i(const char* cmd)
 }
 
 
+
+static char* get_cmd_line(const char* prompt, char* buf, int len, int* mode)
+{
+	if(is_test_mode())
+	{
+		// contiue test proc
+		if(R_SUCC == script_test_continue(s_out_messages,s_out_len, buf, len, int* mode))
+		{
+			s_out_len = 0;
+			s_out_messages[0] = 0;
+			return buf;
+		}
+
+		s_out_len = 0;
+		s_out_messages[0] = 0;
+
+		// 失败退出测试模式
+		s_test_mode = 0;
+		
+		buf[0] = 0;
+		mode = CMD_LINE_MODE_NORMAL;
+		return buf;
+	}
+	else
+	{
+		mode = CMD_LINE_MODE_NORMAL;
+		return get_line(prompt, buf, len);
+	}
+}
+
+
 RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, const char* strAlter)
 {
 	char  prompt[MAX_NAME_LEN + 10];
@@ -784,6 +825,7 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 	int   argc;
 	char  *next, *w;
 	int   n;
+	int   mode;
 	RESULT   ret;
 
 	if(get_game_status(pContext) == Status_None)
@@ -795,8 +837,8 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 		snprintf(prompt, sizeof(prompt), "[%s] $ ", CUR_PLAYER(pContext)->name);
 	}
 
-	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0), 
-		get_line(pContext, prompt, cmdline, sizeof(cmdline)))
+	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0), mode = CMD_LINE_MODE_NORMAL, 
+		get_cmd_line(prompt, cmdline, sizeof(cmdline), &mode))
 	{
 		next =  cmdline;
 		argc = 0;
@@ -938,7 +980,7 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 		}
 
-		if(NULL == get_line(pContext, "[请选择] : ", buffer, sizeof(buffer)))
+		if(NULL == get_cmd_line("[请选择] : ", buffer, sizeof(buffer)))
 			return R_E_FAIL;
 
 		strtrim(buffer);
