@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+
 typedef struct tagGameContext GameContext;
 
 
@@ -21,8 +22,13 @@ int script_pcall (lua_State *L, int narg, int result);
 lua_State* get_ai_script();
 
 
+RESULT script_test_list();
+
+
+RESULT script_test_run(GameContext* pGame, int index);
+
 // ¼ÌÐø²âÊÔ
-RESULT script_test_continue(GameContext* pGame, const char* msg, int msg_sz, char* buf, int len);
+RESULT script_test_continue(const char* msg, int msg_sz, char* buf, int len, int* mode);
 
 
 // wrapped function from lua

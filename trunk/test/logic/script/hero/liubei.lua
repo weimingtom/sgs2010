@@ -484,7 +484,7 @@ local sav1 = {
 };
 
 local function test_rende(game)
-	game_load(game, sav1);
+	game_load(sav1);
 	expect('^[²Ü²Ù] %$ ');
 	send_cmd('i');
 	local w = expect('%* %[(%d+)%] %(É±,' );

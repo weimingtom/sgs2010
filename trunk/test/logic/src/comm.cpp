@@ -344,7 +344,7 @@ RESULT to_int(const char* text, int* pv)
 	if(*p != '\0')
 		return R_E_FAIL;
 
-	*pv = l;
+	if(pv) *pv = l;
 	return R_SUCC;
 }
 
@@ -358,7 +358,7 @@ RESULT to_uint(const char* text, unsigned int* pv)
 	if(*p != '\0')
 		return R_E_FAIL;
 
-	*pv = ul;
+	if(pv) *pv = ul;
 	return R_SUCC;
 
 }
@@ -373,7 +373,7 @@ RESULT to_float(const char* text, float* pv)
 	if(*p != '\0')
 		return R_E_FAIL;
 
-	*pv = f;
+	if(pv) *pv = f;
 	return R_SUCC;
 
 }

@@ -149,3 +149,48 @@ end
 
 $]
 
+$[--##test
+
+--[[
+  for support test in procress
+--]]
+
+local test_tb = {
+	n = 0;
+};
+
+local test_print = testmsg or print;
+
+function reg_test(name, fun)
+	if(type(name) ~= 'string' or name == '') then
+		error('invalid test name');
+	end
+	test_tb.n = test_tb.n + 1;
+	test_tb[test_tb.n] = { name = name, fun = fun };
+end
+
+function do_test(game, index)
+	coroutine.yield(0); -- 这里必需的，协程启动后立刻返回主线程，通过resume来执行后面的步骤
+	if(index == nil or index == 0) then
+		for i, c in ipairs(test_tb) do
+			test_print('run test case ' .. tostring(i) .. ': ' .. c.name);
+			c.fun(game);
+		end
+	elseif (test_tb[index]) then
+		
+		test_print('run test case: ' .. test_tb[index].name);
+		test_tb[index].fun(game);
+	else
+		error('test case index '..tostring(index).. 'is not exists!');
+	end
+end
+
+
+function list_test()
+	for i, c in ipairs(test_tb) do
+		test_print('test case ' .. tostring(i) .. ': ' .. c.name);
+	end
+end
+
+$]
+

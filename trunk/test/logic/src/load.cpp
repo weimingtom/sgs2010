@@ -315,10 +315,6 @@ static int lua_game_load(lua_State* L)
 	return 0;
 }
 
-int luaex_game_load(lua_State* L)
-{
-	return lua_game_load(L);
-}
 
 
 RESULT game_load(GameContext* pGame, const char* file_name)

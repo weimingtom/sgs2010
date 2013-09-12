@@ -374,10 +374,10 @@ int luaex_import_file(lua_State* L )
 }
 
 
-static int luaex_reg_test(lua_State* L);
-static int luaex_do_test(lua_State* L);
+
 static int luaex_test_send_cmd(lua_State* L);
 static int luaex_test_expect(lua_State* L);
+static int luaex_game_load(lua_State* L);
 
 
 static RESULT game_script_prepare(lua_State* L)
@@ -416,13 +416,6 @@ static RESULT game_script_prepare(lua_State* L)
 
 
 	// register test api
-	lua_newtable(L);   // for localvar stored test  cases
-	lua_pushvalue(L, -1);
-	lua_pushcclosure(L, luaex_reg_test, 1);
-	lua_setglobal(L, "reg_test");
-	lua_pushcclosure(L, luaex_do_test, 1);
-	lua_setfield(L, LUA_REGISTRYINDEX, "__test_fun__");
-
 	lua_pushcfunction(L, luaex_test_send_cmd);
 	lua_setglobal(L, "send_cmd");
 	lua_pushstring(L, "");
@@ -617,68 +610,77 @@ int script_pcall(lua_State *L, int narg, int result)
 	return status;
 }
 
+enum TEST_CMD {
+	TEST_CMD_INIT = 0,
+	TEST_CMD_LOAD = 1,
+	TEST_CMD_SENDCMD = 2,
+};
+
+#define  TEST_ERR   printf
+#define  TEST_INFO    printf
 
 
 
-static int luaex_reg_test(lua_State* L)
+static int luaex_game_load(lua_State* L)
 {
-	if(!is_test_mode())
-		return 0;
-
-	lua_pushvalue(L, lua_upvalueindex(1));  // t 
-
-	const char* name = luaL_checkstring(L, 1);
-	luaL_checktype(L, 2, LUA_TFUNCTION);
-
+	if(lua_type(L, 1) == LUA_TSTRING)
+	{
+		TEST_INFO("load game from : %s\n", lua_tostring(L, 1));
+	}
+	else if(lua_type(L, 1) == LUA_TTABLE)
+	{
+		TEST_INFO("load game from table\n", lua_tostring(L, 1));
+	}
+	else 
+	{
+		luaL_typerror(L, 1, "string or table");
+	}
+	lua_pushnumber(L, TEST_CMD_LOAD);
 	lua_pushvalue(L, 1);
-	lua_pushvalue(L, 2);
-	lua_settable(L, -3);
-	lua_pop(L, 1);
-
-	lua_pushnumber(L, 1);
-	return 1;
+	return lua_yield(L, 2);
 }
 
 
-
-
-
-static int luaex_do_test(lua_State* L)
+/*
+static RESULT script_load_game(lua_State* L, int narg)
 {
-	tolua_Error  err;
-	GameContext* pGame;
-
-	if(tolua_isvaluenil(L, 1, &err) || !tolua_isusertype(L, 1, "GameContext", 0, &err))
+	GameEventContext    event;
+	//RESULT ret;
+	if(pContext->status != Status_None)
 	{
-		tolua_error(L, "#ferror in function 'luaex_do_test'.",&err);
-		return 0;
+		MSG_OUT("已经在游戏中，不能加载一个游戏进度!\n");
+		return R_E_STATUS;
 	}
 
-	pGame = (GameContext*)tolua_tousertype(L, 1, NULL);
-
-	lua_pushvalue(L, lua_upvalueindex(1));
-	lua_pushnil(L); // t  key
-
-	while(lua_next(L, -2) != 0)
+	if(argc != 2)
 	{
-		// t, name, test_fun 
-		tolua_pushusertype(L, pGame, "GameContext");  // t, name, test_fun, game
-		lua_call(L, 1, 0);   // t, name
+		param_error(argv[0]);
+		return R_E_PARAM;
 	}
 
-	// t
+	// load game
 
-	lua_pop(L, 1);
-	return 0;
+	INIT_EVENT(&event, GameEvent_LoadGame, INVALID_PLAYER , INVALID_PLAYER, pEvent);
+	event.file_name = argv[1];
+
+	//ret = game_load(pContext, argv[1]);
+
+	//if(R_SUCC != ret)
+	//{
+	//	return ret;
+	//}
+
+	// game main
+	return game_main(pContext, &event);
 }
-
-
+*/
 
 static int luaex_test_send_cmd(lua_State* L)
 {
 	// return command string to cmd process
 	const char* cmd = luaL_checkstring(L, 1);
-	printf("send cmd: %s\n", cmd);
+	TEST_INFO("send cmd: %s\n", cmd);
+	lua_pushnumber(L, TEST_CMD_SENDCMD);
 	lua_pushvalue(L, 1);
 	return lua_yield(L, 1);
 }
@@ -689,20 +691,70 @@ static int luaex_test_expect(lua_State* L)
 	const char* pat = luaL_checkstring(L, 1);
 	const char* text = lua_tostring(L, lua_upvalueindex(1));
 
-	printf("pattern: %s\n", pat);
-	printf("text   : %s\n", text);
+	TEST_INFO("pattern: %s\n", pat);
+	TEST_INFO("text   : %s\n", text);
 
 	return 0;
 }
 
 
+static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len);
 
 
-RESULT script_test_continue(GameContext* pGame, const char* msg, int msg_sz, char* buf, int len)
+RESULT script_test_run(GameContext* pGame, int index)
 {
 	lua_State* L;
 	lua_State* Lt;
-	int state;
+
+	// main script state
+	L = get_game_script();
+
+	lua_getfield(L, LUA_REGISTRYINDEX, "__test_thread__");
+
+	Lt = lua_tothread(L, -1);
+	if(Lt != NULL)
+	{
+		TEST_ERR("test is already in running!\n");
+		return R_E_FAIL;
+	}
+
+	lua_pop(L, 1);
+	// new lua thread
+	Lt = lua_newthread(L);
+	if(Lt == NULL)
+	{
+		TEST_ERR("create test thread failed\n");
+		return R_E_FAIL;
+	}
+
+	lua_setfield(L, LUA_REGISTRYINDEX, "__test_thread__");
+
+	// 启动函数(需要是lua函数)
+	lua_getfield(L, LUA_GLOBALSINDEX, "do_test");
+	lua_xmove(L, Lt, 1);
+
+
+	// 第一次resume 传入 Game对象
+	tolua_pushusertype(Lt, pGame, "GameContext");
+	// 第二个参数，要运行的testcase 序号
+	if(index <= 0)
+	{
+		lua_pushnil(Lt);
+	}
+	else
+	{
+		lua_pushnumber(Lt, index);
+	}
+	
+	return script_test_resume(Lt, 2, NULL, 0, NULL);
+
+}
+
+
+RESULT script_test_continue(const char* msg, int msg_sz, char* buf, int len, int* mode)
+{
+	lua_State* L;
+	lua_State* Lt;
 
 	// main script state
 	L = get_game_script();
@@ -712,70 +764,100 @@ RESULT script_test_continue(GameContext* pGame, const char* msg, int msg_sz, cha
 	Lt = lua_tothread(L, -1);
 	if(Lt == NULL)
 	{
-		lua_pop(L, 1);
-		// new lua thread
-		Lt = lua_newthread(L);
-		if(Lt == NULL)
-		{
-			luaL_error(L, "create test thread failed");
-		}
-
-		lua_setfield(L, LUA_REGISTRYINDEX, "__test_thread__");
-
-		// 启动函数
-		lua_getfield(L, LUA_REGISTRYINDEX, "__test_fun__");
-		lua_xmove(L, Lt, 1);
-
-
-		// 第一次resume 传入 Game对象
-		tolua_pushusertype(Lt, pGame, "GameContext");
-		state = lua_resume(Lt, 1);	
-	}
-	else
-	{
-		lua_pop(L, 1); // 删除
-
-		// 修改expect 函数的upvalue(1)
-		lua_getglobal(L, "expect");
-		lua_pushlstring(Lt, msg, msg_sz);
-		lua_setupvalue(L, -1, 1);
-		lua_pop(L, 1);
-		
-		state = lua_resume(Lt, 0);
+		TEST_ERR("test is not in running!\n");
+		return R_E_FAIL;
 	}
 
+	lua_pop(L, 1); // 删除
+
+	// 修改expect 函数的upvalue(1)
+	lua_getglobal(L, "expect");
+	lua_pushlstring(Lt, msg, msg_sz);
+	lua_setupvalue(L, -1, 1);
+	lua_pop(L, 1);
+	
+	return script_test_resume(Lt, 0, buf, len, mode);
+}
+
+
+static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, int* mode)
+{
+	int state;
+
+	mode = CMD_LINE_MODE_NORMAL;
+
+	state = lua_resume(Lt, args);
 
 
 	if(state != 0)
 	{
 		if(state != LUA_YIELD)
 		{
-			luaL_error(L, lua_tostring(Lt, -1));
+			TEST_ERR("%s\n", lua_tostring(Lt, -1));
+			return R_E_FAIL;
 		}
 		else
 		{
-			// get cmd 
-			buf[0] = 0;
-			if(lua_gettop(Lt) >= 1)
+			if(buf)
 			{
-				strncpy(buf, lua_tostring(Lt, 1), len);
+				// get cmd 
+				buf[0] = 0;
+				if(lua_gettop(Lt) >= 2)
+				{
+					int cmd = luaL_checkinteger(Lt, 1);
+					switch(cmd)
+					{
+					case TEST_CMD_LOAD:
+						// load game continue
+						mode = CMD_LINE_MODE_SCRIPT;
+						lua_pushvalue(Lt, 2);
+						lua_xmove(Lt, get_game_script(), 1);
+						lua_pushcclosure(L, aux_load, 1);
+
+						strncpy(buf, "aux_load", len);
+						break;
+					case TEST_CMD_SENDCMD:
+						strncpy(buf, luaL_checkstring(Lt, 2), len);
+						buf[len-1] = 0;
+						break;
+					}
+				}
 			}
-			buf[len-1] = 0;
 			return R_SUCC;
 		}
 	}
 	else
 	{
 		// test over
-		lua_pushstring(L, "__test_thread__");
-		lua_pushnil(L);
-		lua_settable(L, LUA_REGISTRYINDEX);
+		lua_pushstring(Lt, "__test_thread__");
+		lua_pushnil(Lt);
+		lua_settable(Lt, LUA_REGISTRYINDEX);
 
 		// exit test mode
 		return R_CANCEL;
 	}
 	return R_SUCC;
-
 }
 
+RESULT script_test_list()
+{
+	int state;
+	lua_State* L;
+
+	// main script state
+	L = get_game_script();
+
+	lua_getglobal(L, "test_list");
+
+	state = script_pcall(L, 0, 0);
+
+	if(state != 0)
+	{
+		MSG_OUT("%s", lua_tostring(L, -1));
+		lua_pop(L, 1);
+		return R_E_FAIL;
+	}
+
+	return R_SUCC;
+}
 
