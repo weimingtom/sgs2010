@@ -489,6 +489,8 @@ local function test_rende(game)
 	send_cmd('i');
 	local w = expect('%* %[(%d+)%] %(É±,' );
 	expect('^[²Ü²Ù] %$ ');
+	send_cmd('o 1');
+	send_cmd('q');
 
 end
 
