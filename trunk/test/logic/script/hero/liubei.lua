@@ -485,13 +485,14 @@ local sav1 = {
 
 local function test_rende(game)
 	game_load(sav1);
-	expect('^[≤‹≤Ÿ] %$ ');
+	expect('^%[¡ı±∏%] %$ ');
 	send_cmd('i');
-	local w = expect('%* %[(%d+)%] %(…±,' );
-	expect('^[≤‹≤Ÿ] %$ ');
-	send_cmd('o 1');
+	local w = expect('^%* %[(%d+)%] %(…±,' );
+	expect('^%[¡ı±∏%] %$ ');
+	send_cmd('o '..w);
+	send_cmd('c');
 	send_cmd('q');
-
+	expect('”Œœ∑±ªÕÊº“÷–÷π');
 end
 
 

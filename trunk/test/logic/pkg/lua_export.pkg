@@ -135,19 +135,6 @@ $lfile "./reg_hero.lua"
 $lfile "./player_event.lua"
 
 
-$[--##reload_clear
---[[
- for reload clear reg cards/heros/events
---]]
--- comment 111
-function  reload_clear()
-	clear_reg_card();
-	clear_reg_hero();
-	clear_player_event();
-end
-
-
-$]
 
 $[--##test
 
@@ -159,7 +146,13 @@ local test_tb = {
 	n = 0;
 };
 
+
+-- wrapped test functions
+
 local test_print = testmsg or print;
+local test_send_cmd = send_cmd;
+local test_expect = expect;
+local test_load_game = load_game;
 
 function reg_test(name, fun)
 	if(type(name) ~= 'string' or name == '') then
@@ -169,16 +162,33 @@ function reg_test(name, fun)
 	test_tb[test_tb.n] = { name = name, fun = fun };
 end
 
+function send_cmd(cmd)
+	return test_send_cmd(cmd);
+end
+
+function expect(pattern, mode, ext)
+	return test_expect(pattern, mode, ext);
+end
+
+
+function load_game(sav)
+	return test_load_game(sav);
+end
+
+
+-- called for c code 
+
 function do_test(game, index)
 	coroutine.yield(0); -- 这里必需的，协程启动后立刻返回主线程，通过resume来执行后面的步骤
 	if(index == nil or index == 0) then
 		for i, c in ipairs(test_tb) do
-			test_print('run test case ' .. tostring(i) .. ': ' .. c.name);
+			test_print('\nrun test case ' .. tostring(i) .. ': ' .. c.name);
 			c.fun(game);
+			test_print('\nfunish test case ' .. tostring(i) .. ': ' .. c.name);
 		end
 	elseif (test_tb[index]) then
 		
-		test_print('run test case: ' .. test_tb[index].name);
+		test_print('\nrun test case: ' .. test_tb[index].name);
 		test_tb[index].fun(game);
 	else
 		error('test case index '..tostring(index).. 'is not exists!');
@@ -192,5 +202,25 @@ function list_test()
 	end
 end
 
+
+function clear_reg_test()
+	test_tb = { n = 0 };
+end
+
 $]
 
+
+$[--##reload_clear
+--[[
+ for reload clear reg cards/heros/events
+--]]
+-- comment 111
+function  reload_clear()
+	clear_reg_card();
+	clear_reg_hero();
+	clear_player_event();
+	clear_reg_test();
+end
+
+
+$]

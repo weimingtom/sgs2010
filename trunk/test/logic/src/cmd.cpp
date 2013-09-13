@@ -641,12 +641,12 @@ static RESULT  cmd_test(const char** argv, int argc, GameContext* pContext, Game
 
 	if(argc < 2)
 	{
-		param_error(argv[0]);
-		return R_E_PARAM;
+		//param_error(argv[0]);
+		//return R_E_PARAM;
 	}
 
 
-	if(!strcmp(argv[1], "list") || !strcmp(argv[1], "l"))
+	if(argc < 2 || !strcmp(argv[1], "list") || !strcmp(argv[1], "l"))
 	{
 		// script_list_test
 		script_test_list();
@@ -658,7 +658,17 @@ static RESULT  cmd_test(const char** argv, int argc, GameContext* pContext, Game
 		
 		if(argc >= 3)
 		{
-			script_test_run(pContext, atoi(argv[2]));
+			if (R_SUCC == script_test_run(pContext, atoi(argv[2])))
+			{
+				set_test_mode();
+			}
+		}
+		else
+		{
+			if (R_SUCC == script_test_run(pContext, -1))
+			{
+				set_test_mode();
+			}
 		}
 	}
 
@@ -734,7 +744,7 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 	{ "reload", "r", cmd_reload,
 		"reload \n\treload script files.", 
 		NULL},
-	{ "test", NULL, cmd_test,
+	{ "test", "t", cmd_test,
 		"test list/l\n\tlist all test cases.\n"
 		"test run/r all/<id>\n\trun all or give index test case.", 
 		NULL},
@@ -812,7 +822,8 @@ static RESULT cmd_do_script(GameContext* pGame, GameEventContext* pEvent)
 
 static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const char* prompt, char* buf, int len)
 {
-	int mode;
+	int     mode;
+	RESULT  ret;
 	if(is_test_mode())
 	{
 		// contiue test proc
@@ -820,7 +831,8 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 
 		MSG_OUT("%s", prompt);
 
-		if(R_SUCC == script_test_continue(s_out_messages,s_out_len, buf, len, &mode))
+		ret = script_test_continue(s_out_messages,s_out_len, buf, len, &mode);
+		if(R_SUCC == ret)
 		{
 			s_out_len = 0;
 			s_out_messages[0] = 0;
@@ -833,6 +845,16 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 					s_test_mode = 0;
 					buf[0] = 0;
 					MSG_OUT("%s\n", buf);
+
+					script_test_error();
+
+					if(pGame->status != Status_None)
+					{
+						//longjmp(pContext->__jb__, R_EXIT);
+						//pGame->status = Status_GameAbort;
+						luaL_error(get_game_script(), "Run test error!");
+					}
+
 					return buf;
 				}
 			}
@@ -849,6 +871,20 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 		s_test_mode = 0;
 		buf[0] = 0;
 		MSG_OUT("%s\n", buf);
+
+		if(R_CANCEL == ret)
+		{
+			// test finished
+
+		}
+		else if(pGame->status != Status_None)
+		{
+			//longjmp(pContext->__jb__, R_EXIT);
+			//pGame->status = Status_GameAbort;
+			luaL_error(get_game_script(), "Run test error!");
+		}
+
+
 		return buf;
 	}
 	else
