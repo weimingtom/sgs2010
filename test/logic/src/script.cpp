@@ -684,15 +684,109 @@ static int luaex_test_send_cmd(lua_State* L)
 	return lua_yield(L, 2);
 }
 
+
+/*
+
+  @param[1] string lua style pattern for search
+  @param[2] string mod char set :
+      'k' keep current text after matched;
+	  'l' keep matched line after matched;
+	  'f' match only first line;
+	  't' test mode, no fail, if use this mode, caller must check match results for test is matched or not
+	  'p' pattern is a explicit text
+  @param[3] string extern text.
+  @return  matched results. 
+
+*/
 static int luaex_test_expect(lua_State* L)
 {
 	// get out text
 	const char* pat = luaL_checkstring(L, 1);
+	const char* mod = luaL_optstring(L, 2, "");
+	const char* ext = luaL_optstring(L, 3, "");
+
 	const char* text = lua_tostring(L, lua_upvalueindex(1));
 
 	//TEST_INFO("pattern: %s\n", pat);
 	//TEST_INFO("text   : %s\n", text);
 
+	int top;
+
+	// get line
+	const char*  sl = text;
+
+	while(true)
+	{
+		const char* eol = sl;
+		while(*eol && *eol != '\n') 
+		{
+			eol++;
+		}
+
+		top = lua_gettop(L);
+
+		// string.find
+		lua_getfield(L, LUA_GLOBALSINDEX, "string");
+		lua_getfield(L, -1, "find");
+		lua_remove(L, -2);
+
+		// call 
+		lua_pushlstring(L, sl, eol-sl);
+		lua_pushvalue(L, 1);
+		lua_pushnumber(L, 1);
+		lua_pushboolean(L, strchr(mod, 'p') ? 1 : 0);
+
+		lua_call(L, 4, LUA_MULTRET);
+
+		if(!lua_isnil(L, top+1))
+		{
+			// update text
+			if(!strchr(mod, 'k'))
+			{
+				// update current text
+				if(strchr(mod, 'l'))
+				{
+					// keep matched line
+					lua_pushstring(L, sl);
+				}
+				else if(*eol == '\n')
+				{
+					// update to after current line 
+					lua_pushstring(L, eol+1);
+				}
+				else
+				{
+					// update to after current line ( empty string )
+					lua_pushstring(L, eol);
+				}
+				lua_replace(L, lua_upvalueindex(1));
+			}
+
+			// remove first two return results;
+			lua_remove(L, top+1);
+			lua_remove(L, top+1);
+			return lua_gettop(L)-top;
+		}
+
+		lua_settop(L, top);
+
+		if(strchr(mod, 'f'))
+		{
+			// match only first line
+			break;
+		}
+
+		if(*eol == 0)
+			break;
+		sl = eol + 1;
+	}
+
+	// test mode, not throw error, return null
+	if(NULL == strchr(mod, 't'))
+	{
+		luaL_error(L, "expect \'%s\', mode \'%s\', ext \'%s\' unmatched at the text:\n%s\n", pat, mod, ext, text);
+	}
+	// no matched
 	return 0;
 }
 
@@ -713,7 +807,7 @@ RESULT script_test_run(GameContext* pGame, int index)
 	Lt = lua_tothread(L, -1);
 	if(Lt != NULL)
 	{
-		TEST_ERR("test is already in running!\n");
+		TEST_ERR("\ntest is already in running!\n");
 		return R_E_FAIL;
 	}
 
@@ -722,7 +816,7 @@ RESULT script_test_run(GameContext* pGame, int index)
 	Lt = lua_newthread(L);
 	if(Lt == NULL)
 	{
-		TEST_ERR("create test thread failed\n");
+		TEST_ERR("\ncreate test thread failed\n");
 		return R_E_FAIL;
 	}
 
@@ -763,7 +857,7 @@ RESULT script_test_continue(const char* msg, int msg_sz, char* buf, int len, int
 	Lt = lua_tothread(L, -1);
 	if(Lt == NULL)
 	{
-		TEST_ERR("test is not in running!\n");
+		TEST_ERR("\ntest is not in running!\n");
 		return R_E_FAIL;
 	}
 
@@ -795,7 +889,14 @@ static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, in
 	{
 		if(state != LUA_YIELD)
 		{
-			TEST_ERR("%s\n", lua_tostring(Lt, -1));
+			TEST_ERR("\n%s\n", lua_tostring(Lt, -1));
+
+			// test over
+			lua_pushstring(Lt, "__test_thread__");
+			lua_pushnil(Lt);
+			lua_settable(Lt, LUA_REGISTRYINDEX);
+
+
 			return R_E_FAIL;
 		}
 		else
@@ -841,6 +942,17 @@ static RESULT script_test_resume(lua_State* Lt, int args, char* buf, int len, in
 	return R_SUCC;
 }
 
+
+void script_test_error()
+{
+	// test over
+	lua_State* L = get_game_script();
+	lua_pushstring(L, "__test_thread__");
+	lua_pushnil(L);
+	lua_settable(L, LUA_REGISTRYINDEX);
+
+}
+
 RESULT script_test_list()
 {
 	int state;
@@ -849,7 +961,7 @@ RESULT script_test_list()
 	// main script state
 	L = get_game_script();
 
-	lua_getglobal(L, "test_list");
+	lua_getglobal(L, "list_test");
 
 	state = script_pcall(L, 0, 0);
 
@@ -862,4 +974,3 @@ RESULT script_test_list()
 
 	return R_SUCC;
 }
-
