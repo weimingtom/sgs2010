@@ -483,6 +483,11 @@ local sav1 = {
 	status = Status_Round_Out,
 };
 
+local sav=[==[
+master,caocao,4,show,hand:{sha}s1;{tao}s2;{jd}s3;equip:{zbsm}d10;judge:{sd}h1;
+spy,liubei,4,hide,hand:{lbss}cJ;
+
+]==]
 local function test_rende(game)
 	game_load(sav1);
 	expect('^%[Αυ±Έ%] %$ ');
