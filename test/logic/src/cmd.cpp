@@ -17,11 +17,16 @@
 #define MAX_PARAM_NUM   64
 #define MAX_CMD_LEN     4096
 
+
+#define CMD_OUT(s)   do { puts(s); log_text("%s\n", (s)); } while (0)
+
+
 #define MAX_OUT_MSG_SIZE  65536
 
 static char s_out_messages[MAX_OUT_MSG_SIZE] = {0};
 static size_t s_out_len = 0;
 static int  s_test_mode = 0;
+static int  s_test_input = 0;
 
 
 void set_test_mode()
@@ -161,7 +166,7 @@ void cmd_output(const char* fmt, ...)
 	sz = vsnprintf(text, sizeof(text), fmt, vl);
 	va_end(vl);
 
-	if(is_test_mode())
+	if(is_test_mode() && s_test_input == 0)
 	{
 		if(sz + s_out_len >= sizeof(s_out_messages))
 		{
@@ -844,7 +849,7 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 				{
 					s_test_mode = 0;
 					buf[0] = 0;
-					MSG_OUT("%s\n", buf);
+					CMD_OUT(buf);
 
 					script_test_error();
 
@@ -860,7 +865,7 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 			}
 
 
-			MSG_OUT("%s\n", buf);
+			CMD_OUT(buf);
 			return buf;
 		}
 
@@ -870,7 +875,7 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 		// Ê§°ÜÍË³ö²âÊÔÄ£Ê½
 		s_test_mode = 0;
 		buf[0] = 0;
-		MSG_OUT("%s\n", buf);
+		CMD_OUT(buf);
 
 		if(R_CANCEL == ret)
 		{

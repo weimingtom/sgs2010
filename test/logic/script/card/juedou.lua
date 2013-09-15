@@ -86,7 +86,7 @@ reg_card {
 			while true do
 				game_load_out_pattern(pattern, 'h:{sha}?');
 				if(R_SUCC ~= game_passive_out(game, event, p[flag], p[3-flag], pattern, 
-					'请出一张【'..card_sid2name('sha')..'】。')) 
+					'请出一张【'..card_sid2name('sha')..'】：')) 
 				then
 					-- ud保存的为 1： target 负， 2：player负
 					event.out_card.ud = tostring(flag);
