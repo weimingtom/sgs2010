@@ -9,7 +9,9 @@ extern "C" {
 #endif
 
 
+// tolua_begin
 #define CARD_STACK_SIZE    108
+// tolua_end
 
 typedef struct tagCardStack
 {

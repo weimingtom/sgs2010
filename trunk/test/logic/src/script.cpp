@@ -406,16 +406,10 @@ static RESULT game_script_prepare(lua_State* L)
 	lua_setglobal(L, "bitxor");
 
 
-
-
-	// load game core libraries
-	tolua_game_open(L);
-
 	// extra game functions
 	// for load game from a table
 	lua_pushcfunction(L, luaex_game_load);
 	lua_setglobal(L, "game_load");
-
 
 	// register test api
 	lua_pushcfunction(L, luaex_test_send_cmd);
@@ -423,6 +417,11 @@ static RESULT game_script_prepare(lua_State* L)
 	lua_pushstring(L, "");
 	lua_pushcclosure(L, luaex_test_expect, 1);
 	lua_setglobal(L, "expect");
+
+
+
+	// load game core libraries
+	tolua_game_open(L);
 
 
 	return reload_game_script();
@@ -627,7 +626,7 @@ static int luaex_game_load(lua_State* L)
 {
 	if(lua_type(L, 1) == LUA_TSTRING)
 	{
-		TEST_INFO(">> load game from : %s\n", lua_tostring(L, 1));
+		TEST_INFO(">> load game from file: %s\n", lua_tostring(L, 1));
 	}
 	else if(lua_type(L, 1) == LUA_TTABLE)
 	{
@@ -653,8 +652,6 @@ static int aux_load(lua_State* L)
 	pGame = (GameContext*)lua_touserdata(L, 1);
 	pParentEvent = (GameEventContext*)lua_touserdata(L, 2);
 
-	lua_pushvalue(L, lua_upvalueindex(1));
-	lua_setfield(L, LUA_REGISTRYINDEX, "?sav");
 
 
 	//RESULT ret;
@@ -667,10 +664,28 @@ static int aux_load(lua_State* L)
 	// load game
 
 	INIT_EVENT(&event, GameEvent_LoadGame, INVALID_PLAYER , INVALID_PLAYER, pParentEvent);
-	event.file_name = "?sav";
 
+	if(lua_istable(L,lua_upvalueindex(1)))
+	{
+		lua_pushvalue(L, lua_upvalueindex(1));
+		lua_setfield(L, LUA_REGISTRYINDEX, "?sav");
+
+		event.file_name = "?sav";
+	}
+	else
+	{
+		event.file_name = lua_tostring(L, lua_upvalueindex(1));
+	}
+	
 	// game main
 	lua_pushnumber(L, game_main(pGame, &event));
+
+	if(lua_istable(L,lua_upvalueindex(1)))
+	{
+		lua_pushnil(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, "?sav");
+	}
+
 	return 1;
 }
 
@@ -705,7 +720,8 @@ static int luaex_test_expect(lua_State* L)
 	const char* mod = luaL_optstring(L, 2, "");
 	const char* ext = luaL_optstring(L, 3, "");
 
-	const char* text = lua_tostring(L, lua_upvalueindex(1));
+	lua_getfield(L, LUA_REGISTRYINDEX, "__test_expect_text__");
+	const char* text = lua_tostring(L, -1);
 
 	//TEST_INFO("pattern: %s\n", pat);
 	//TEST_INFO("text   : %s\n", text);
@@ -759,7 +775,7 @@ static int luaex_test_expect(lua_State* L)
 					// update to after current line ( empty string )
 					lua_pushstring(L, eol);
 				}
-				lua_replace(L, lua_upvalueindex(1));
+				lua_setfield(L, LUA_REGISTRYINDEX, "__test_expect_text__");
 			}
 
 			// remove first two return results;
@@ -864,10 +880,10 @@ RESULT script_test_continue(const char* msg, int msg_sz, char* buf, int len, int
 	lua_pop(L, 1); // É¾³ý
 
 	// ÐÞ¸Äexpect º¯ÊýµÄupvalue(1)
-	lua_getglobal(L, "expect");
+	//lua_getglobal(L, "expect");
 	lua_pushlstring(L, msg, msg_sz);
-	lua_setupvalue(L, -2, 1);
-	lua_pop(L, 1);
+	lua_setfield(L, LUA_REGISTRYINDEX, "__test_expect_text__");
+	//lua_pop(L, 1);
 	
 	return script_test_resume(Lt, 0, buf, len, mode);
 }

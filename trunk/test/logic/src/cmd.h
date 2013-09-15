@@ -47,9 +47,8 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 
 
 void cmd_output(const char* fmt, ...) __ATTR_FMT__(printf,1,2);;
+
 #define MSG_OUT   cmd_output
-
-
 
 
 // for test api

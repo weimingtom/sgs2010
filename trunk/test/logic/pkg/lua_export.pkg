@@ -158,15 +158,21 @@ function reg_test(name, fun)
 	if(type(name) ~= 'string' or name == '') then
 		error('invalid test name');
 	end
+	if(type(fun) ~= 'function') then
+		error('invalid test function for test "'..name..'"');
+	end
 	test_tb.n = test_tb.n + 1;
 	test_tb[test_tb.n] = { name = name, fun = fun };
 end
 
-function send_cmd(cmd)
-	return test_send_cmd(cmd);
+function send_cmd(s)
+	return test_send_cmd(s);
 end
 
+cmd=send_cmd;
+
 function expect(pattern, mode, ext)
+	--print("expect", test_expect);
 	return test_expect(pattern, mode, ext);
 end
 

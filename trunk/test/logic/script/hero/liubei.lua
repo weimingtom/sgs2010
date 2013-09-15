@@ -211,294 +211,136 @@ reg_hero(cfg);
 -- test case for liubei skill
 --
 -------------------------------------------------------------------------------
+--[[
+import '../global/load.lua';
 
-local sav1 = {
-	player_count = 6,
-	minister_count = 1,
-	spy_count = 1,
-	mutineer_count = 3,
-	players = {
-		{
-			id = PlayerID_Mutineer,
-			hero = 'caocao',
-			max_life = 3,
-			cur_life = 3,
-			name = '玩家1',
-			hand_card_num = 4,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'ct', color = CardColor_Heart, value = CardValue_5, flag = CardFlag_None, },
-				{ sid = 'wzsy', color = CardColor_Heart, value = CardValue_J, flag = CardFlag_None, },
-				{ sid = 'dl', color = CardColor_Club, value = CardValue_5, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_9, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Hide,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-		{
-			id = PlayerID_Mutineer,
-			hero = 'liubei',
-			max_life = 3,
-			cur_life = 3,
-			name = '玩家2',
-			hand_card_num = 4,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'shan', color = CardColor_Diamond, value = CardValue_10, flag = CardFlag_None, },
-				{ sid = 'lbss', color = CardColor_Spade, value = CardValue_6, flag = CardFlag_None, },
-				{ sid = 'bgz', color = CardColor_Club, value = CardValue_2, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Spade, value = CardValue_10, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Hide,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-		{
-			id = PlayerID_Mutineer,
-			hero = 'caocao',
-			max_life = 3,
-			cur_life = 3,
-			name = '玩家3',
-			hand_card_num = 4,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'gsf', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_9, flag = CardFlag_None, },
-				{ sid = 'zhfd', color = CardColor_Heart, value = CardValue_K, flag = CardFlag_None, },
-				{ sid = 'wzsy', color = CardColor_Heart, value = CardValue_8, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Hide,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-		{
-			id = PlayerID_Spy,
-			hero = 'liubei',
-			max_life = 3,
-			cur_life = 3,
-			name = '玩家4',
-			hand_card_num = 4,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'tao', color = CardColor_Heart, value = CardValue_4, flag = CardFlag_None, },
-				{ sid = 'tyjy', color = CardColor_Heart, value = CardValue_A, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_10, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_J, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Hide,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-		{
-			id = PlayerID_Master,
-			hero = 'liubei',
-			max_life = 5,
-			cur_life = 5,
-			name = '刘备',
-			hand_card_num = 5,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'jd', color = CardColor_Diamond, value = CardValue_A, flag = CardFlag_None, },
-				{ sid = 'qlg', color = CardColor_Heart, value = CardValue_5, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_7, flag = CardFlag_None, },
-				{ sid = 'rwd', color = CardColor_Club, value = CardValue_2, flag = CardFlag_None, },
-				{ sid = 'ghcq', color = CardColor_Heart, value = CardValue_Q, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'zgln', color = CardColor_Club, value = CardValue_A, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Show,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-		{
-			id = PlayerID_Minister,
-			hero = 'caocao',
-			max_life = 4,
-			cur_life = 4,
-			name = '曹操',
-			hand_card_num = 4,
-			judgment_card_num = 0,
-			hand_cards = {
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
-				{ sid = 'ghcq', color = CardColor_Spade, value = CardValue_3, flag = CardFlag_None, },
-				{ sid = 'shan', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
-				{ sid = 'wgfd', color = CardColor_Heart, value = CardValue_4, flag = CardFlag_None, },
-			},
-			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
-			},
-			judgment_cards = {
-			},
-			status = PlayerStatus_Hide,
-			flag = PlayerFlag_None,
-			params = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-			card_in_judge_num = 0,
-		},
-	},
-	get_card_stack = {
-		count = 82,
-		cards = {
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_9, flag = CardFlag_None, },
-			{ sid = 'lbss', color = CardColor_Heart, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Heart, value = CardValue_10, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'ssqy', color = CardColor_Spade, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'lbss', color = CardColor_Club, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'qlyyd', color = CardColor_Spade, value = CardValue_5, flag = CardFlag_None, },
-			{ sid = 'cxsgj', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_10, flag = CardFlag_None, },
-			{ sid = 'ssqy', color = CardColor_Diamond, value = CardValue_4, flag = CardFlag_None, },
-			{ sid = 'hbj', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'nmrq', color = CardColor_Spade, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'ghcq', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_9, flag = CardFlag_None, },
-			{ sid = 'jdsr', color = CardColor_Club, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'wzsy', color = CardColor_Heart, value = CardValue_9, flag = CardFlag_None, },
-			{ sid = 'qgj', color = CardColor_Spade, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'jd', color = CardColor_Spade, value = CardValue_A, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_9, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_9, flag = CardFlag_None, },
-			{ sid = 'sd', color = CardColor_Heart, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'ssqy', color = CardColor_Spade, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'wxkj', color = CardColor_Spade, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'ghcq', color = CardColor_Club, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Diamond, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'dw', color = CardColor_Spade, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'wgfd', color = CardColor_Heart, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
-			{ sid = 'ssqy', color = CardColor_Spade, value = CardValue_4, flag = CardFlag_None, },
-			{ sid = 'nmrq', color = CardColor_Spade, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'jy', color = CardColor_Spade, value = CardValue_5, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_10, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'zgln', color = CardColor_Diamond, value = CardValue_A, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'zbsm', color = CardColor_Spade, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'bgz', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'zx', color = CardColor_Diamond, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_6, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_5, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Heart, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Heart, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'nmrq', color = CardColor_Club, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'tao', color = CardColor_Heart, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'wxkj', color = CardColor_Club, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'jd', color = CardColor_Club, value = CardValue_A, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Heart, value = CardValue_10, flag = CardFlag_None, },
-			{ sid = 'wzsy', color = CardColor_Heart, value = CardValue_7, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Heart, value = CardValue_K, flag = CardFlag_None, },
-			{ sid = 'wjqf', color = CardColor_Heart, value = CardValue_A, flag = CardFlag_None, },
-			{ sid = 'fthj', color = CardColor_Diamond, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Spade, value = CardValue_8, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Heart, value = CardValue_J, flag = CardFlag_None, },
-			{ sid = 'jdsr', color = CardColor_Club, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'sd', color = CardColor_Spade, value = CardValue_A, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_4, flag = CardFlag_None, },
-			{ sid = 'wxkj', color = CardColor_Club, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'ssqy', color = CardColor_Diamond, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'ghcq', color = CardColor_Spade, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'wxkj', color = CardColor_Diamond, value = CardValue_Q, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_10, flag = CardFlag_None, },
-			{ sid = 'ghcq', color = CardColor_Spade, value = CardValue_4, flag = CardFlag_None, },
-			{ sid = 'sha', color = CardColor_Club, value = CardValue_3, flag = CardFlag_None, },
-			{ sid = 'shan', color = CardColor_Diamond, value = CardValue_9, flag = CardFlag_None, },
-		},
-	},
-	discard_card_stack = {
-		count = 0,
-		cards = {
-		},
-	},
-	cur_discard_card_num = 0,
-	cur_discard_cards = {
-	},
-	round_num = 1,
-	round_player = 4,
-	cur_player = 4,
-	status = Status_Round_Out,
-};
-
-local sav=[==[
-master,caocao,4,show,hand:{sha}s1;{tao}s2;{jd}s3;equip:{zbsm}d10;judge:{sd}h1;
-spy,liubei,4,hide,hand:{lbss}cJ;
-
+local sav = [==[
+player:liubei,master,4,show,hand:{ct}h5;{wzsy}hJ;{dl}c5;{sha}c9,equip:,judge:,
+player:caocao,mutineer,3,hide,hand:{shan}d10;{lbss}
 ]==]
-local function test_rende(game)
-	game_load(sav1);
+
+--]]
+
+local function test_jijiang1(game)
+	game_load('lb');
 	expect('^%[刘备%] %$ ');
-	send_cmd('i');
-	local w = expect('^%* %[(%d+)%] %(杀,' );
+	cmd('i');
+	local w = expect('^%* 技能%[(%d+)%]: 【激将】,主公技' );
 	expect('^%[刘备%] %$ ');
-	send_cmd('o '..w);
-	send_cmd('c');
-	send_cmd('q');
+	cmd('u '..w);
+	expect('【刘备】发动武将技能【激将】。', 'fp')
+	while true do
+		expect('请为【刘备】提供一张【杀】，你也可以拒绝该请求:', 'p','没有人可以提供杀，测试失败');
+		expect('^%[(.-)%] %$ ');
+		cmd('i');
+		w = expect('^%* %[(%d+)%] %(杀,','t');
+		if w then
+			cmd('o '..w);
+			break;
+		else
+			cmd('p');
+		end
+	end
+	expect('当前玩家切换为【刘备】', 'pf');
+	expect('请为【杀】指定一个目标:', 'pf');
+	
+	cmd('1');
+
+	expect('请出一张【闪】:', 'p');
+	cmd('i');
+	w = expect('^%* %[(%d+)%] %(闪,','t');
+	if w then
+		cmd('o '..w);
+	else
+		cmd('p');
+	end
+	
+	cmd('q');
 	expect('游戏被玩家中止');
 end
 
+local function test_jijiang2(game)
+	game_load('lb');
+	expect('^%[刘备%] %$ ');
+	cmd('i');
+	local w = expect('^%* %[(%d+)%] %(决斗,');  -- 需要一张决斗来产生被动出杀的过程
+	cmd('o '..w);
+	expect('请为【决斗】指定一个目标:', 'fp');
+	cmd('1');
+	expect('请出一张【杀】：','p');  -- 决斗开始
+	cmd('i');
+	w = expect('^%* %[(%d+)%] %(杀,');  -- 对方需要一张杀
+	cmd('o '..w);
+	expect('请出一张【杀】：','p');  -- 决斗开始
+	expect('^%[刘备%] %$ ');
+	cmd('i');
+	local w = expect('^%* 技能%[(%d+)%]: 【激将】,主公技' );  -- 激将应该可用
+	expect('^%[刘备%] %$ ');
+	cmd('u '..w);
+	expect('【刘备】发动武将技能【激将】。', 'fp')
+	while true do
+		expect('请为【刘备】提供一张【杀】，你也可以拒绝该请求:', 'p','没有人可以提供杀，测试失败');
+		expect('^%[(.-)%] %$ ');
+		cmd('i');
+		w = expect('^%* %[(%d+)%] %(杀,','t');
+		if w then
+			cmd('o '..w);
+			break;
+		else
+			cmd('p');
+		end
+	end
+	expect('【刘备】打出由【.-】提供的牌 %(杀');
+	expect('请出一张【杀】：', 'p');
+	cmd('p');
+	cmd('q');
+	expect('游戏被玩家中止');
+end
 
-reg_test('测试 - 刘备技能仁德', test_rende);
+local function test_jijiang3(game)
+	game_load('lb');
+	expect('^%[刘备%] %$ ');
+	cmd('i');
+	expect('* 技能[w]: 【诸葛连弩】,武器效果', 'p'); -- 需要装备诸葛连弩来产生提供杀的过程
+	cmd('u w');
+	expect('请出一张【杀】：', 'p');
+	expect('^%[刘备%] %$ ');
+	cmd('i');
+	local w = expect('^%* 技能%[(%d+)%]: 【激将】,主公技' );  -- 激将应该可用
+	expect('^%[刘备%] %$ ');
+	cmd('u '..w);
+	expect('【刘备】发动武将技能【激将】。', 'fp')
+	while true do
+		expect('请为【刘备】提供一张【杀】，你也可以拒绝该请求:', 'p','没有人可以提供杀，测试失败');
+		expect('^%[(.-)%] %$ ');
+		cmd('i');
+		w = expect('^%* %[(%d+)%] %(杀,','t');
+		if w then
+			cmd('o '..w);
+			break;
+		else
+			cmd('p');
+		end
+	end
+	-- 下面为正常的出杀流程
+	expect('当前玩家切换为【刘备】', 'pf');
+	expect('请为【杀】指定一个目标:', 'pf');
+	
+	cmd('1');
+
+	expect('请出一张【闪】:', 'p');
+	cmd('i');
+	w = expect('^%* %[(%d+)%] %(闪,','t');
+	if w then
+		cmd('o '..w);
+	else
+		cmd('p');
+	end
+	
+	cmd('q');
+	expect('游戏被玩家中止');
+end
+
+reg_test('测试 - 刘备技能激将 - 出牌阶段主动出杀', test_jijiang1);
+reg_test('测试 - 刘备技能激将 - 被动出杀', test_jijiang2);
+reg_test('测试 - 刘备技能激将 - 为技能提供杀', test_jijiang3);

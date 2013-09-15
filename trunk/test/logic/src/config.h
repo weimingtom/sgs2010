@@ -62,13 +62,6 @@ extern "C" {
 #define  X_TNALLOC(st, n)        (st*)X_ALLOC(sizeof(st) * (n))
 
 
-#define  MAX_NAME_LEN    32
-#define  MAX_DESC_LEN    512
-#define  MAX_PLAYER_NUM  20
-#define  MAX_ALTER_TEXT_LEN    256
-#define  MAX_HERO_NUM    256
-#define  MAX_UD_LEN      256
-
 #ifndef COUNT
 #define COUNT(a)  (sizeof(a)/sizeof((a)[0]))
 #endif
@@ -94,6 +87,17 @@ extern "C" {
 #define MAX(a,b)   ((a)>(b)?(a):(b))
 
 #define C2I(c)  ((int)(unsigned char)(c))
+
+
+// tolua_begin
+#define  MAX_NAME_LEN    32
+#define  MAX_DESC_LEN    512
+#define  MAX_PLAYER_NUM  20
+#define  MAX_ALTER_TEXT_LEN    256
+#define  MAX_HERO_NUM    256
+#define  MAX_UD_LEN      256
+// tolua_end
+
 
 // tolua_begin
 
