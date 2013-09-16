@@ -96,6 +96,9 @@ extern "C" {
 #define  MAX_ALTER_TEXT_LEN    256
 #define  MAX_HERO_NUM    256
 #define  MAX_UD_LEN      256
+
+#define  NUM_ANY   -1   // 任意数量，用于弃牌时可以弃任意数量的牌
+
 // tolua_end
 
 
