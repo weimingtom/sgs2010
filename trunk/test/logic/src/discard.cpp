@@ -165,7 +165,7 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 			return R_E_PARAM;
 		}
 
-		if(num != pParentEvent->discard_pattern->num)
+		if(pParentEvent->discard_pattern->num != NUM_ANY && num != pParentEvent->discard_pattern->num)
 		{
 			MSG_OUT("弃牌的数量不正确!\n");
 			return R_E_PARAM;
@@ -214,6 +214,8 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 			return R_E_FAIL;
 		}
 
+		// real discard cards number
+		pParentEvent->discard_pattern->num = num;
 		pParentEvent->block = YES;
 		pParentEvent->result = R_SUCC;
 
@@ -224,10 +226,12 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 }
 
 
-RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent, int player, int where, int num, YESNO force, const char* alter_text)
+RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* pParentEvent
+							, int player, int where, int num, YESNO force, const char* alter_text, int* real_num)
 {
 	RESULT ret;
-
+	char  snum[16];
+	const char*  swhere;
 	GameEventContext  event;
 	DiscardPattern   dis;
 
@@ -243,7 +247,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 		return R_E_PARAM;
 	}
 
-	if(num <= 0 || num > player_count_card(get_game_player(pGame, player), where))
+	if( NUM_ANY != num && (num <= 0 || num > player_count_card(get_game_player(pGame, player), where)) )
 	{
 		luaL_error(GL(L), "game_passive_discard: invalid num - %d", num );
 		return R_E_PARAM;
@@ -263,22 +267,23 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	else
 	{
 		// 自动生成一个提示串
-		if(where == PatternWhere_Hand)
+		if(num == NUM_ANY)
 		{
-			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张手牌：", num);
-		}
-		else if(where == PatternWhere_Equip)
-		{
-			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张装备牌：", num);
-		}
-		else if(where == PatternWhere_Judgment)
-		{
-			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张判定牌：", num);
+			snprintf(snum, sizeof(snum), "%s", "任意");
 		}
 		else
 		{
-			snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张牌：", num);
+			snprintf(snum, sizeof(snum), "[%d]", num);
 		}
+
+		if(where == CardWhere_PlayerHand)
+			swhere = "手";
+		else if(where == CardWhere_PlayerEquip)
+			swhere = "装备";
+		else if(where == CardWhere_PlayerJudgment)
+			swhere = "判定区";
+		
+		snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃%s张%s牌：", snum, swhere);
 	}
 
 	INIT_EVENT(&event, GameEvent_PerPassiveDiscardCard, player, INVALID_PLAYER, pParentEvent);
@@ -320,6 +325,8 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 	// passive discard card can be canceled by skills
 	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
 
+	if(real_num) *real_num =  dis.num;
+
 	return R_SUCC;
 }
 
@@ -329,6 +336,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 	GameEventContext    event;
 	VCard     stCard;
 	PosVCard  disCard;
+	const char* swhere = "";
 
 	Player* pPlayer = get_game_player(pGame, player);
 
@@ -365,7 +373,7 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 			game_add_discard_cur(pGame, &disCard.list.pcards[n].card, &disCard.list.pcards[n].pos);
 			disCard.list.pcards[n].where = CardWhere_CurDiscardStack;
 		}
-		const char* swhere = "";
+
 		if(where == CardWhere_PlayerHand)
 			swhere = "手";
 		else if(where == CardWhere_PlayerEquip)
