@@ -108,7 +108,7 @@ local function jijiang_use(game, event, player, out_card)
 	do
 		local p = get_game_player(game, next_player);
 		--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
-		local group = get_hero_group(p.hero);
+		local group = is_hero_id_valid(p.hero) and get_hero_group(p.hero) or HeroGroup_None;
 		if(group == HeroGroup_Shu) then
 			game_load_out_pattern(out_p, 'h:{sha}?');
 			local ret = game_supply_card(game, event, player, next_player, 

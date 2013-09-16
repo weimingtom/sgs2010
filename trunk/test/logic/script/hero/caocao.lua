@@ -106,7 +106,7 @@ hujia.event[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 	do
 		local p = get_game_player(game, next_player);
 		--message('supply - player:'..p.name..',hero:'..p.hero..',id:'..p.id);
-		local group = get_hero_group(p.hero);
+		local group = is_hero_id_valid(p.hero) and get_hero_group(p.hero) or HeroGroup_None;
 		if(group == HeroGroup_Wei) then
 			game_load_out_pattern(out_p, 'h:{shan}?'..event.pattern_out.pattern.ud);
 			local ret = game_supply_card(game, event, player, next_player, 

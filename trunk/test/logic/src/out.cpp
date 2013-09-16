@@ -430,14 +430,14 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 {
 	RESULT    ret;
 	//OutCard  out_card;
-	GameEventContext  stEvent;
+	//GameEventContext  stEvent;
 
 	//ST_ZERO(out_card);
 
-	INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, INVALID_PLAYER, pEvent);
+	//INIT_EVENT(&stEvent, GameEvent_RoundOutCard, player, INVALID_PLAYER, pEvent);
 	//stEvent.out_card = &out_card;
 
-	if(R_SUCC != check_player_event(pGame, &stEvent, player, 0))
+	if(R_SUCC != check_player_event(pGame, pEvent, player, 0))
 	{
 		// 没有可出的牌和可使用的技能，进入下一阶段
 		return R_CANCEL;
@@ -445,12 +445,12 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	set_game_cur_player(pGame, player);
 
-	ret = cmd_loop(pGame, &stEvent, NO, "请出一张牌或者发动技能:");
+	ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
 
 	CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 	RET_CHECK_RET(ret, ret);
 	// 有没有可能在使用技能或者出牌之后，当前出牌阶段立刻中止？
-	EVENT_CHECK_BREAK_RET(&stEvent,R_BACK);
+	EVENT_CHECK_BREAK_RET(pEvent,R_BACK);
 
 	return R_SUCC;
 }

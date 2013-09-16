@@ -22,7 +22,7 @@ local cfg = {
 	desc = [==[【年轻的贤君·孙权】
 制衡——出牌阶段，你可以弃置任意数量的牌，然后摸取等量的牌。每回合限用一次。
 救援——主公技，锁定技，其他吴势力角色在你濒死状态下对你使用【桃】时，你额外回复1点体力。]==],
-	group = HeroGroup_Wei,
+	group = HeroGroup_Wu,
 	sex = HeroSex_Male,
 	master = YES,
 	life = 4,
@@ -37,19 +37,19 @@ local zhiheng = {
 
 -- 只能使用一次
 zhiheng.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
-	if not string.find(event.ud, '{zhiheng}') then
+	if not string.find(event.ud, '[zhiheng]', 1, true) then
 		return USE_MANUAL;
 	end
 	return USE_CANNOT;
 end
 
 zhiheng.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
-	local ret, num = game_passive_discard(game, event, player, CardWhere_PlayerHand, NUM_ANY, NO, '请弃任意数量的牌然后再从牌堆摸相同数量的牌：');
+	local ret, num = game_passive_discard(game, event, player, PatternWhere_Hand, NUM_ANY, NO, '请弃任意数量的牌然后再从牌堆摸相同数量的牌：');
 	if ret ~= R_SUCC then
 		return R_DEF;
 	end
 	game_passive_getcard(game, event, player, num, YES);
-	event.ud = event.ud .. '{zhiheng}';
+	event.ud = event.ud .. '[zhiheng]';
 	return R_SUCC;
 end
 
@@ -64,20 +64,32 @@ local jiuyuan = {
 
 local function player2group(game, player)
 	local p = get_game_player(game, player);
-	if p == nil then
-		return nil;
+	if p == nil or not is_hero_id_valid(p.hero) then
+		return HeroGroup_None;
 	end
 	return get_hero_group(p.hero);
 end
 
+-- 加体力时，且为濒死状态
 jiuyuan.can_use[GameEvent_PerChangeLife] = function(cfg, game, event, player)
-	if event.change_life.delta > 0  -- 加体力
-		and player2group(event.change_life.src_player) == HeroGroup_Wu  -- 源玩家是吴
-		and event.change_life.src_card and get_card_sid(event.change_life.src_card.vcard.id) == 'tao'  -- 牌是桃
+	if event.trigger == player 
+		and event.change_life.delta > 0                               -- 加体力
+		and get_game_player(game, player).id == PlayerID_Master  -- 主公技
+		and get_game_player(game, player).cur_life <= 0          -- 涉死状态
+		and player2group(game, event.change_life.src_player) == HeroGroup_Wu  -- 源玩家是吴
+		and get_card_sid(event.change_life.src_cards.vcard.id) == 'tao'  -- 牌是桃
 	then
 		return USE_AUTO;
 	end
 	return USE_CANNOT;
+end
+
+jiuyuan.event[GameEvent_PerChangeLife] = function(cfg, game, event, player)
+	-- 额外恢复一点体力
+	local p = get_game_player(game, player);
+	message('【'..p.name..'】将额外恢复[1]点体力。');
+	event.change_life.delta = event.change_life.delta + 1;
+	return R_SUCC;
 end
 
 
