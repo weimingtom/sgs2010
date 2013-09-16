@@ -93,6 +93,7 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 
 			
 			ret = cmd_loop(pGame, &event,dis.force, dis.alter_text);
+			game_flush_discard_cur(pGame);
 
 			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 			RET_CHECK_RET(ret, ret);

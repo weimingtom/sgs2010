@@ -10,7 +10,7 @@
 #include "cmd.h"
 #include "stack.h"
 #include "script.h"
-
+#include "discard.h"
 
 // the new game first step , all player get 4 cards
 RESULT game_first_getcard(GameContext* pGame)
@@ -167,6 +167,7 @@ RESULT game_round_do_get(GameContext* pGame, GameEventContext* pEvent, int playe
 		{
 			set_game_cur_player(pGame, player);
 			ret = cmd_loop(pGame, &event, stGetCard.force, stGetCard.alter_text);
+			game_flush_discard_cur(pGame);
 			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 			RET_CHECK_RET(ret, ret);
 			EVENT_CHECK_BREAK(&event);

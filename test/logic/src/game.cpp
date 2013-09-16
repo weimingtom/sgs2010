@@ -452,7 +452,9 @@ static RESULT game_round_outcard(GameContext* pGame, GameEventContext* pEvent)
 		return R_SUCC;
 	}
 
-	while (R_SUCC == game_round_do_out(pGame, pEvent, pGame->round_player))
+	INIT_EVENT(&event, GameEvent_RoundOutCard, pGame->round_player, INVALID_PLAYER, pEvent);
+
+	while (R_SUCC == game_round_do_out(pGame, &event, pGame->round_player))
 	{
 		// do nothing
 		game_flush_discard_cur(pGame);
