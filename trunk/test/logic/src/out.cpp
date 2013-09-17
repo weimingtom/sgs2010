@@ -36,6 +36,18 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	{
 
 		MSG_OUT("%s 的目标设置为【%s】\n", get_card_str(&out_card->vcard), GAME_PLAYER(pGame, target)->name);
+
+		INIT_EVENT(&stEvent, GameEvent_OutCardSetTarget, trigger, target, pParentEvent);
+		stEvent.out_card = out_card;
+
+		trigger_game_event(pGame, &stEvent);
+
+		// can cancel out card
+		RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
+
+		// 可能修改目标
+		target = out_card->target;
+
 	}
 
 	// before out card effect (to each target)

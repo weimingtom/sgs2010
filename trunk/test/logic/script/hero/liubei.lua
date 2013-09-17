@@ -26,6 +26,7 @@ SHU001　KayaK
 
 --]]
 
+
 local cfg = {
 	sid = "liubei",
 	name = "刘备",
@@ -128,22 +129,11 @@ end
 
 jijiang.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	-- 可以出杀，则可以使用该技能来提供杀
-	
-	local p = get_game_player(game, player);
 	-- 只有主公才能使用
-	if(p.id == PlayerID_Master) then
-	
-		local c  = PosCard();
-		c.card.id = get_card_id_by_sid('sha');
-		c.card.color = CardColor_None;
-		c.card.value = CardValue_None;
-		c.card.flag = CardFlag_FromHand;
-		c.card.where = CardWhere_PlayerHand;
-		c.card.pos = -1;  -- no pos
-		
-		if  YES == game_card_can_out(game, event, player, c) then
-			return USE_MANUAL;
-		end
+	if  event.trigger == player 
+	and get_game_player(game, player).id == PlayerID_Master)	
+	and card_can_out_by_sid(game, event, player, 'sha') then
+		return USE_MANUAL;
 	end
 	return USE_CANNOT;
 	
