@@ -117,7 +117,7 @@ hujia.event[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 			if (R_SUCC == ret) then
 				event.result = R_SUCC;
 				event.block = YES;
-				return R_BACK;   -- 返回BACK，因为 PassiveOut完成
+				return R_SUCC;   -- 返回BACK，因为 PassiveOut完成
 			end
 		end
 		next_player = game_next_player(game, next_player);
@@ -137,7 +137,7 @@ hujia.event[GameEvent_PassiveOutCard]= function(cfg, game, event, player)
 	event.pattern_out.pattern.ud = out_p.ud; -- 更新ud记录技能的使用痕迹
 	event.result = select(ret == R_SUCC, R_SUCC, R_ABORT);
 	event.block = YES;
-	return R_BACK;  -- 返回BACK，因为 PassiveOut完成
+	return R_SUCC;  -- 返回BACK，因为 PassiveOut完成
 end
 
 -- 也可以用于提供【闪】

@@ -66,6 +66,18 @@ function calc_card_color_by_pos_card_list(list)
 	end
 end
 
+--  检查给出 的牌ID是否可出（按手牌计）
+function card_can_out_by_sid(game, event, sid)
+	local c  = PosCard();
+	c.card.id = get_card_id_by_sid(sid);
+	c.card.color = CardColor_None;
+	c.card.value = CardValue_None;
+	c.card.flag = CardFlag_FromHand;
+	c.card.where = CardWhere_PlayerHand;
+	c.card.pos = -1;  -- no pos
+	
+	return  YES == game_card_can_out(game, event, player, c);
+end
 
 --- debug output
 

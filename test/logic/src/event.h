@@ -68,6 +68,7 @@ typedef enum _GameEvent
 	GameEvent_PerOutCardPrepare, // 触发型：即将出牌前的准备动作
 	GameEvent_OutCardPrepare,    // 驱动型：（卡牌）执行出牌前的准备动作
 	GameEvent_PerOutCard,        // 触发型：即将出牌（出牌完成准备，针对所有目标开始结算前）
+	GameEvent_OutCardSetTarget,   // 触发型：目标设定（设置出牌的目标后）
 	GameEvent_BeforeOutCardEffect, // 触发型：即将结算出牌效果（针对每个目标开始驱动前）
 	GameEvent_OutCard,           // 驱动型：（卡牌）执行出牌动作
 	GameEvent_PerOutCardCalc,    // 触发型：即将结算出牌效果（针对每个目标开始结算前）

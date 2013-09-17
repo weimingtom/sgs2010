@@ -16,3 +16,70 @@ WU006　KayaK
 [Q]大乔装备【藤甲】受到别人的普杀，能否发动【流离】？[A]能。
 --]]
 
+
+local cfg = {
+	sid = "daqiao",
+	name = "大乔",
+	desc = [==[【矜持之花·大乔】
+国色——出牌阶段，你可以将你的任意方块花色的牌当【乐不思蜀】使用。
+流离——当你成为【杀】的目标时，你可以弃一张牌，并将此【杀】转移给你攻击范围内的另一名角色。（该角色不得是【杀】的使用者）]==],
+	group = HeroGroup_Wu,
+	sex = HeroSex_Female,
+	master = NO,
+	life = 3,
+};
+
+local guose = {
+	name="国色",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+guose.can_use[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
+	-- 理论上 这里还需要检查是否可以出【乐不思蜀】，不过，一般总是可以出的，就不检查了
+	if event.trigger == player 
+	and card_can_out_by_sid(game, event, player, 'lbss')  then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+guose.event[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
+	local pattern = OutCardPattern();
+	local out - OutCard();
+	game_load_out_pattern(pattern, 'hef:d?');
+	if R_SUCC == game_supply_card(game, event, player, player, pattern, 
+			'请出一张方块花色的牌当作【'..card_sid2name('sha')..'】:', out) then
+		out.vcard.id = get_card_id_by_sid('lbss');
+		out.flag = OutCardFlag_SpecOut;
+		return game_real_out(game, event, player, out);
+	end
+	return R_SUCC;
+end
+
+local liuli = {
+	name="流离",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+liuli.can_use[GameEvent_OutCard] = function(cfg, game, evendt, player)
+
+end
+
+
+liuli.event[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
+
+
+end
+
+cfg.skills = {
+	guose,
+	liuli,
+};
+
+reg_hero(cfg);
+
+
