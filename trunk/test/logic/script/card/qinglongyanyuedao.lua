@@ -56,13 +56,14 @@ local cfg =  {
 		
 		-- 在对方出闪完成时，如果是你出的杀。则你可以继续对同一个目标使用一张杀
 		[GameEvent_AfterPassiveOut] = function (cfg, game, event, player, pos_card)
+			--game_event_info(game, event, 1);
 			if event.target == player and event.card_pattern.num >= 1    -- 目标
 				and event.card_pattern.patterns[0].id == get_card_id_by_sid('shan')   -- 出了‘闪’
 				and event.parent_event.id == GameEvent_OutCard    -- 出牌 
 				and event.parent_event.trigger == player          -- 我的出牌 				
 				and event.parent_event.target == event.trigger          -- 目标是出闪的人 
 				and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
-				and string.find(event.ud, '{qlyyd}')
+				and not string.find(event.ud, '{qlyyd}')
 			then
 				-- 在 {qlyyd} 技能内不再重复发动 
 				if event.parent_event.id == GameEvent_OutCard 

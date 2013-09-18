@@ -74,7 +74,7 @@ local cfg = {
 		[GameEvent_OutCardPrepare] = function(cfg, game, event, player)
 			-- 需要选择一名装备区有武器的玩家A（使用杀者）
 			local target = select_target_check(game, event, player, event.out_card.vcard.id, NO, NO, 
-					'请为【'..cfg.name..'】的一个装备有武器的目标玩家：', 
+					'请为【'..cfg.name..'】指定一个装备有武器的目标玩家：', 
 					function (t)
 						local p = get_game_player(game, t);
 						if(get_player_equipcard(p, EquipIdx_Weapon) == nil) then

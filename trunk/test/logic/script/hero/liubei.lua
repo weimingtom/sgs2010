@@ -131,7 +131,7 @@ jijiang.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	-- 可以出杀，则可以使用该技能来提供杀
 	-- 只有主公才能使用
 	if  event.trigger == player 
-	and get_game_player(game, player).id == PlayerID_Master)	
+	and get_game_player(game, player).id == PlayerID_Master
 	and card_can_out_by_sid(game, event, player, 'sha') then
 		return USE_MANUAL;
 	end

@@ -25,6 +25,7 @@ typedef struct tagOutCard
 	int      target_num;
 	int      targets[MAX_PLAYER_NUM];
 	int      flag;
+	int      cur_target;  // 当前目标，用于SetTarget会修改当前目标
 	Card     vcard;    //  use as card (virtual) real out card in list following
 	PosCardList list;
 	char     message[MAX_ALTER_TEXT_LEN];
@@ -36,7 +37,8 @@ typedef struct tagOutCard
 typedef struct tagOutCardPattern
 {
 	int         where;    // limited where the card is comes from 
-	YESNO       fixed;    // limited the card is fixed or can use hero skill/weapon skill/armor skill to generate 
+	YESNO       fixed;    // limited the card is fixed or can use hero skill,weapon skill or armor skill to generate 
+	YESNO       anyone;   // match of one card matched any one of the patterns 
 	int         num;      // pattern count
 	CardPattern patterns[MAX_CARD_LIST_NUM];
 	char        ud[MAX_PATTERN_UD_LEN];     // 用于脚本通过pattern在各脚本间传递一些暗示信息
@@ -71,6 +73,8 @@ typedef enum enOutCardFlag
 
 // tolua_end
 
+
+#define PATTERN_MATCH_CARD_NUM(p)  ((p)->anyone == YES ? 1 : (p)->num)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -425,6 +425,7 @@ OutCard* game_event_get_out_card(lua_State* L, tolua_notnull GameEventContext* p
 	case GameEvent_PerOutCardPrepare:
 	case GameEvent_OutCardPrepare:
 	case GameEvent_PerOutCard:
+	case GameEvent_OutCardSetTarget:
 	case GameEvent_BeforeOutCardEffect:
 	case GameEvent_OutCard:
 	case GameEvent_PerOutCardCalc:

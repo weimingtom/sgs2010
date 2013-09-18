@@ -186,7 +186,7 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
 		fprintf_tab(file, tabs+1, "{ ");
-		game_save_vcard(&pPlayer->judgment_cards[n], file, 0);
+		game_save_vcard(&pPlayer->judgment_cards[n], file, tabs+2);
 		fprintf_tab(file, 0, "},\n");
 	}
 	fprintf_tab(file, tabs, "},\n");

@@ -39,6 +39,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 
 		INIT_EVENT(&stEvent, GameEvent_OutCardSetTarget, trigger, target, pParentEvent);
 		stEvent.out_card = out_card;
+		out_card->cur_target = target;
 
 		trigger_game_event(pGame, &stEvent);
 
@@ -46,8 +47,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 		RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
 
 		// 可能修改目标
-		target = out_card->target;
-
+		target = out_card->cur_target;
 	}
 
 	// before out card effect (to each target)
@@ -289,6 +289,23 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 	return R_SUCC;
 }
 
+static RESULT clear_prepare_out_flag(GameContext* pGame, GameEventContext* pEvent, OutCard* out_card)
+{
+	int n;
+	Player* pPlayer = get_game_player(pGame, out_card->supply);
+
+	for(n = 0; n < out_card->list.num; n++)
+	{
+		if(get_player_card_flag(pPlayer, out_card->list.pcards[n].where, out_card->list.pcards[n].pos) == CardFlag_PrepareOut)
+		{
+			set_player_card_flag(pPlayer, out_card->list.pcards[n].where, out_card->list.pcards[n].pos, CardFlag_None);
+		}
+	}
+
+	return R_SUCC;
+}
+
+
 static RESULT add_out_stack(GameContext* pGame, OutCard* out_card)
 {
 	int n;
@@ -379,11 +396,12 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	// prepare out card
 	ret = out_card_prepare(pGame, pEvent, player, out_card);
 
-	RET_CHECK_RET(ret, ret);
+	;
+	RET_CHECK_RET(ret, (clear_prepare_out_flag(pGame, pEvent, out_card),ret));
 
 
 	ret = remove_out_card(pGame, pEvent, out_card);
-	RET_CHECK_RET(ret, ret);
+	RET_CHECK_RET(ret, (clear_prepare_out_flag(pGame, pEvent, out_card),ret));
 
 	add_out_stack(pGame, out_card);
 
@@ -482,9 +500,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		// check out pattern
-		if(num != pEvent->pattern_out->pattern.num)
+		if(num != PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern))
 		{
-			MSG_OUT("出牌的数量不符合要求，应该出[%d]张牌!\n", pEvent->pattern_out->pattern.num);
+			MSG_OUT("出牌的数量不符合要求，应该出[%d]张牌!\n", PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern));
 			return R_E_PARAM;
 		}
 
@@ -565,9 +583,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 
 		// check out pattern
-		if(num != pEvent->pattern_out->pattern.num)
+		if(num != PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern))
 		{
-			MSG_OUT("提供的牌的数量不符合要求，应该提供[%d]张牌!\n", pEvent->pattern_out->pattern.num);
+			MSG_OUT("提供的牌的数量不符合要求，应该提供[%d]张牌!\n", PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern));
 			return R_E_PARAM;
 		}
 
@@ -823,6 +841,7 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 		case 'e' : pPattern->where |= PatternWhere_Equip; break;
 		case 'j' : pPattern->where |=PatternWhere_Judgment; break;
 		case 'f' : pPattern->fixed = YES; break;
+		case 'a' : pPattern->anyone = YES; break;
 		default: return R_E_FAIL;  // invalid flsg char.
 		}
 		p++;
@@ -1089,7 +1108,7 @@ static RESULT game_passive_out_card(lua_State* L, GameContext* pGame, GameEventC
 
 	ret = remove_out_card(pGame, pParentEvent, &pattern_out.out); 
 
-	RET_CHECK_RET(ret, ret);
+	RET_CHECK_RET(ret, (clear_prepare_out_flag(pGame, pParentEvent,  &pattern_out.out),ret));
 
 	add_out_stack(pGame, &pattern_out.out);
 
@@ -1299,9 +1318,6 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
-	CHECK_PLAYER_DEAD_RET(pGame, player, ret);
-	RET_CHECK_RET(ret,ret);
-
 	//RET_CHECK_BACK(event.result);
 
 	// 提供牌的过程，并不会真正从提供者手里删除，直到真正使用者在使用该牌的时候
@@ -1316,7 +1332,7 @@ RESULT game_supply_card(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	memcpy(out_pattern->ud, t_pattern_out.pattern.ud, sizeof(out_pattern->ud));
 
 	// the supply cards is not effect
-	RET_CHECK_CANCEL_RET(event.result, R_CANCEL);
+	RET_CHECK_CANCEL_RET(event.result, (clear_prepare_out_flag(pGame, pParentEvent, out_card) , R_CANCEL));
 
 	return R_SUCC;
 }

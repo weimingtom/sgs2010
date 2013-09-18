@@ -567,8 +567,8 @@ static void p_out_card(GameContext* pGame, const char* perffix, OutCard* p)
 	for(n = 0; n < p->target_num; n++)
 	{
 		MSG_OUT("    %s.targets[%d]=%d \"%s\";\n", perffix, n, p->targets[n], player_name(pGame, p->targets[n]));
-
 	}
+	MSG_OUT("    %s.cur_target=%d \"%s\";\n", perffix, p->cur_target, player_name(pGame, p->cur_target));
 	MSG_OUT("    %s.flag=%s;\n", perffix, BITOR2STR(OutCardFlag, p->flag));
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
@@ -887,7 +887,7 @@ RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent, int detail)
 		Player* ptr = get_game_player(pGame, pe->trigger);
 		Player* pta = get_game_player(pGame, pe->target);
 
-		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】;ud=[\"%s\"]\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无",  pe->ud);
+		MSG_OUT("[%d] 事件【%s】, 触发者【%s】,目标【%s】;ud=\"%s\"\n", deep,buf, ptr ? ptr->name :"无",pta ? pta->name : "无",  pe->ud);
 		if(detail)
 		{
 			game_event_param(pGame, pe);
