@@ -36,7 +36,7 @@ local guose = {
 	event = { },
 };
 
-guose.can_use[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
+guose.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	-- 理论上 这里还需要检查是否可以出【乐不思蜀】，不过，一般总是可以出的，就不检查了
 	if event.trigger == player 
 	and card_can_out_by_sid(game, event, player, 'lbss')  then
@@ -45,9 +45,9 @@ guose.can_use[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
 	return USE_CANNOT;
 end
 
-guose.event[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
+guose.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	local pattern = OutCardPattern();
-	local out - OutCard();
+	local out = OutCard();
 	game_load_out_pattern(pattern, 'hef:d?');
 	if R_SUCC == game_supply_card(game, event, player, player, pattern, 
 			'请出一张方块花色的牌当作【'..card_sid2name('sha')..'】:', out) then
@@ -65,14 +65,36 @@ local liuli = {
 	event = { },
 };
 
-liuli.can_use[GameEvent_OutCard] = function(cfg, game, evendt, player)
-
+-- 可修改对自己使用的杀的目标
+liuli.can_use[GameEvent_OutCardSetTarget] = function(cfg, game, event, player)
+	if event.target == player 
+	and get_card_sid(event.out_card.vcard.id) == 'sha'
+	and get_live_player_num(game) >= 3   -- 需要有可选择的流离的目标
+	then 
+		return USE_MANUAL;
+	end 
+	return USE_CANNOT;
 end
 
 
-liuli.event[GameEvent_RoundOutCard] = function(cfg, game, evendt, player)
-
-
+liuli.event[GameEvent_OutCardSetTarget] = function(cfg, game, event, player)
+	-- 弃一张牌
+	if R_SUCC == game_passive_discard(game, event, player, bitor(PatternWhere_Hand,PatternWhere_Equip), 1, NO, nil ) then
+		-- 选择一个第3方目标
+		local target = select_target_check(game, event, player, event.out_card.vcard.id, NO, YES, 
+				'请为对你使用的【'..get_card_name(event.out_card.vcard.id)..'】重新指定一个新的目标：', 
+				function (t)
+					if t == player or t == event.trigger then
+						message('不能指定自己或者打出杀的玩家为目标。');
+						return false;
+					end
+					return true;
+				end);
+		event.out_card.cur_target = target;
+		event.result = R_SUCC;
+		event.block = YES;
+	end
+	return R_SUCC;
 end
 
 cfg.skills = {

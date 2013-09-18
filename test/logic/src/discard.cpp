@@ -277,6 +277,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 			snprintf(snum, sizeof(snum), "[%d]", num);
 		}
 
+		swhere = "";
 		if(where == CardWhere_PlayerHand)
 			swhere = " ÷";
 		else if(where == CardWhere_PlayerEquip)
