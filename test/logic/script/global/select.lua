@@ -72,7 +72,7 @@ function select_other_card(game , event, player, target, pattern, alter)
 	
 	-- 放弃
 	if string.find(pattern, 'c') then
-		items = items..'取消选择\n';
+		items = items..'(c)取消选择\n';
 		index = index + 1;
 		wherepos[index] = { where = CardWhere_None, pos = 0, };
 	end

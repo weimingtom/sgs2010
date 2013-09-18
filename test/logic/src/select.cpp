@@ -124,6 +124,7 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 	int num;
 	const char*  p;
 	const char*  q;
+	const char*  t;
 	int   result;
 
 	if(!IS_PLAYER_VALID(pGame, player))
@@ -157,9 +158,34 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 			q = p + strlen(p);
 		}
 
-		memcpy(opts[num].text, p, MIN(q-p, (int)sizeof(opts[num].text)-1));
-		opts[num].text[MIN(q-p, (int)sizeof(opts[num].text)-1)] = '\0';
+		t = NULL;
+
+		if(t[0]=='(')
+		{
+			t = strchr(p, ')');
+			if(t > q)
+			{
+				t = NULL;
+			}
+		}
+
+		if(t == NULL)
+		{
+			t = p;
+		}
+		else
+		{
+			t = t + 1;
+		}
+
+		memcpy(opts[num].text, t, MIN(q-t, (int)sizeof(opts[num].text)-1));
+		opts[num].text[MIN(q-t, (int)sizeof(opts[num].text)-1)] = '\0';	
 		opts[num].input[0] = '\0';
+		if (t > p)
+		{
+			memcpy(opts[num].input, p+1, MIN(t-p-2, (int)sizeof(opts[num].input)-1));
+			opts[num].input[MIN(t-p-2, (int)sizeof(opts[num].input)-1)] = '\0';
+		}
 		opts[num].value = num + 1;
 		num++;
 
