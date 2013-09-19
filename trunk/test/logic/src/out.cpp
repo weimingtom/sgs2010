@@ -775,7 +775,18 @@ RESULT game_cmd_pass(GameContext* pGame, GameEventContext* pEvent)
 
 YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player, PosCard* pPosCard)
 {
+	Player* pPlayer;
 	GameEventContext   event;
+
+	pPlayer = get_game_player(pGame, player);
+
+	if( pPlayer == NULL) 
+		return NO;
+
+	// 使用中的牌不能出
+	if(CardFlag_None != get_player_card_flag(pPlayer, pPosCard->where, pPosCard->pos))
+		return NO;
+
 
 	INIT_EVENT(&event, GameEvent_CheckCardCanOut, player, INVALID_PLAYER, pEvent);
 	event.pos_card = pPosCard;
