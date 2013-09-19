@@ -166,6 +166,17 @@ CANUSE game_card_can_use(GameContext* pGame, GameEventContext* pEvent, int playe
 {
 	GameEventContext   event;
 	CardCanUse   stCanUse;
+	Player* pPlayer;
+
+	pPlayer = get_game_player(pGame, player);
+
+	if(pPlayer == NULL)
+		return USE_CANNOT;
+
+	if(CardFlag_None != get_player_card_flag(pPlayer, pPosCard->where, pPosCard->pos) )
+		return USE_CANNOT;
+
+
 	INIT_EVENT(&event, GameEvent_CheckCardCanUse, player, INVALID_PLAYER, pEvent);
 	stCanUse.pos_card = *pPosCard;
 	stCanUse.can_use = USE_CANNOT;
@@ -183,6 +194,13 @@ CANUSE game_skill_can_use(GameContext* pGame, GameEventContext* pEvent, int play
 {
 	GameEventContext   event;
 	SkillCanUse     stCanUse;
+	Player* pPlayer;
+
+	pPlayer = get_game_player(pGame, player);
+
+	if(pPlayer == NULL)
+		return USE_CANNOT;
+
 	INIT_EVENT(&event, GameEvent_CheckSkillCanUse, player, INVALID_PLAYER, pEvent);
 	stCanUse.hero_id = heroid;
 	stCanUse.skill_index = skillindex;

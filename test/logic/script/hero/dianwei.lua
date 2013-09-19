@@ -68,7 +68,7 @@ qiangxi.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 			end
 			-- 再次检查攻击范围（因为可能弃了武器之后攻击范围已改变）
 			set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_InUse);
-			local r = game_check_attack(game, event, player, target, get_card_id_by_sid('sha'), 0))
+			local r = game_check_attack(game, event, player, target, get_card_id_by_sid('sha'), 0);
 			set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_None);
 			if r ~= R_SUCC then
 				message('你不能弃置该武器！');
@@ -79,8 +79,13 @@ qiangxi.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 			end
 		end
 		-- 效果目标受到伤害
+		if R_SUCC ~= game_player_add_life(game, event, target, -1, player, nil, 1) then
+			return R_DEF;
+		end
 		
 		-- 只能使用一次
+		event.ud = event.ud .. '[qiangxi]';
+		return R_SUCC;
 	else
 		-- canceled;
 		return R_DEF;

@@ -102,53 +102,8 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 	int     use_cnt = 0;
 	
 	pPlayer = get_game_player(pGame, player);
-	
-	// check player hand card
-	for(n = 0; n < pPlayer->hand_card_num; n++)
-	{
-		pos_card.card = pPlayer->hand_cards[n];
-		pos_card.where = CardWhere_PlayerHand;
-		pos_card.pos = n;
-		yesno = game_card_can_out(pGame, pEvent, player, &pos_card);
-		if(yesno == YES)
-			may_cards++;
-	}
 
-
-	// check player equip card skills
-
-	for(n = 0; n < EquipIdx_Max; n++)
-	{
-		if(CARD_VALID(&pPlayer->equip_cards[n]))
-		{
-			pos_card.card = pPlayer->equip_cards[n];
-			pos_card.where = CardWhere_PlayerEquip;
-			pos_card.pos = n;
-			cu = game_card_can_use(pGame, pEvent, player, &pos_card);
-			if(cu == USE_AUTO || cu == USE_QUIET)
-			{
-				if(auto_use)
-				{
-					if(cu == USE_AUTO)
-					{
-						MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, get_card_name(pos_card.card.id), equip_idx_str(n));
-					}
-					set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
-					ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
-					set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
-					use_cnt++;
-					CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
-					EVENT_CHECK_BREAK_RET(pEvent, ret);
-				}
-			}
-			else if(cu == USE_MANUAL)
-			{
-				may_skills++;
-			}
-		}
-	}
-
-	// check skill can use
+	// 1. check hero skill can use
 	if(pPlayer->hero != HeroID_None)
 	{
 		skill_num = hero_skill_num(pPlayer->hero);
@@ -177,6 +132,54 @@ RESULT check_player_event(GameContext* pGame, GameEventContext* pEvent, int play
 			}
 		}
 	}
+	
+	// 2. check player equip card skills
+
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&pPlayer->equip_cards[n]) && pPlayer->equip_cards[n].flag == CardFlag_None)
+		{
+			pos_card.card = pPlayer->equip_cards[n];
+			pos_card.where = CardWhere_PlayerEquip;
+			pos_card.pos = n;
+			cu = game_card_can_use(pGame, pEvent, player, &pos_card);
+			if(cu == USE_AUTO || cu == USE_QUIET)
+			{
+				if(auto_use)
+				{
+					if(cu == USE_AUTO)
+					{
+						MSG_OUT("【%s】的【%s】%s效果被触发。\n", pPlayer->name, get_card_name(pos_card.card.id), equip_idx_str(n));
+					}
+					set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
+					ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
+					set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
+					use_cnt++;
+					CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
+					EVENT_CHECK_BREAK_RET(pEvent, ret);
+				}
+			}
+			else if(cu == USE_MANUAL)
+			{
+				may_skills++;
+			}
+		}
+	}
+
+	// 3. check player hand card can out?
+	for(n = 0; n < pPlayer->hand_card_num; n++)
+	{
+		if(pPlayer->hand_cards[n].flag == CardFlag_None)
+		{
+			pos_card.card = pPlayer->hand_cards[n];
+			pos_card.where = CardWhere_PlayerHand;
+			pos_card.pos = n;
+			yesno = game_card_can_out(pGame, pEvent, player, &pos_card);
+			if(yesno == YES)
+				may_cards++;
+		}
+	}
+
 
 	if(auto_use)
 	{
@@ -269,20 +272,7 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	pPlayer = get_game_player(pGame, player);
 
-	for(n = 0; n < EquipIdx_Max; n++)
-	{
-		if(CARD_VALID(&pPlayer->equip_cards[n]))
-		{
-			pos_card.card = pPlayer->equip_cards[n];
-			pos_card.where = CardWhere_PlayerEquip;
-			pos_card.pos = n;
-
-			ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
-			CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
-			EVENT_CHECK_BREAK_RET(pEvent, ret);
-		}
-	}
-
+	// call hero skill event
 	if(pPlayer->hero != HeroID_None)
 	{
 		skill_num = hero_skill_num(pPlayer->hero);
@@ -294,6 +284,26 @@ RESULT call_player_event(GameContext* pGame, GameEventContext* pEvent, int playe
 			EVENT_CHECK_BREAK_RET(pEvent, ret);
 		}
 	}
+
+
+	// call equip card event
+	for(n = 0; n < EquipIdx_Max; n++)
+	{
+		if(CARD_VALID(&pPlayer->equip_cards[n]) && pPlayer->equip_cards[n].flag == CardFlag_None)
+		{
+			pos_card.card = pPlayer->equip_cards[n];
+			pos_card.where = CardWhere_PlayerEquip;
+			pos_card.pos = n;
+
+			set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_InUse);
+			ret = call_card_event(pos_card.card.id, pGame, pEvent, player);
+			set_player_card_flag(pPlayer, pos_card.where, pos_card.pos, CardFlag_None);
+
+			CHECK_PLAYER_DEAD_RET(pGame, player, R_DEF);
+			EVENT_CHECK_BREAK_RET(pEvent, ret);
+		}
+	}
+
 
 	return R_DEF;
 }

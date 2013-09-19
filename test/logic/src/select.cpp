@@ -160,7 +160,7 @@ int game_select_items(lua_State* L, GameContext* pGame, GameEventContext* pParen
 
 		t = NULL;
 
-		if(t[0]=='(')
+		if(p[0]=='(')
 		{
 			t = strchr(p, ')');
 			if(t > q)
