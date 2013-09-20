@@ -39,9 +39,9 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 		pTarget = get_game_player(pGame, t);
 		if(!IS_PLAYER_DEAD(pTarget))
 		{
-			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "%s, %s, life: %d/%d%s, hand cards: %d", 
+			snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text), "【%s】, %s, 体力: %d/%d%s, 手牌: %d", pTarget->name, 
 				player_id_str( (t == player || IS_PLAYER_SHOW(pTarget) || IS_PLAYER_DEAD(pTarget)) ? pTarget->id : PlayerID_Unknown),
-				pTarget->name, pTarget->cur_life, pTarget->max_life, IS_PLAYER_DEAD(pTarget)?"(Dead)":"", pTarget->hand_card_num);
+				pTarget->cur_life, pTarget->max_life, IS_PLAYER_DEAD(pTarget)?"(死亡)":"", pTarget->hand_card_num);
 
 			snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%d", idbegin + idcnt);
 			sel_opts[idcnt].value = t;
@@ -52,7 +52,7 @@ RESULT game_select_target(lua_State* L, GameContext* pGame, GameEventContext* pP
 	// 
 	if(force != YES)
 	{
-		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"Cancel");
+		snprintf(sel_opts[idcnt].text, sizeof(sel_opts[idcnt].text),"取消");
 		snprintf(sel_opts[idcnt].input, sizeof(sel_opts[idcnt].input), "%s\n%s", "c", "cancel");
 		sel_opts[idcnt].value =  -100;
 		idcnt++;

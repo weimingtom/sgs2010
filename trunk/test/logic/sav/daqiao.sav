@@ -6,10 +6,10 @@ game = {
 	players = {
 		{
 			id = PlayerID_Mutineer,
-			hero = 'none',
+			hero = 'diaochan',
 			max_life = 3,
 			cur_life = 3,
-			name = 'Íæ¼Ò1',
+			name = 'õõ²õ',
 			hand_card_num = 4,
 			judgment_card_num = 0,
 			hand_cards = {
@@ -263,7 +263,7 @@ game = {
 	cur_discard_cards = {
 	},
 	round_num = 1,
-	round_player = 1,
-	cur_player = 1,
+	round_player = 0,
+	cur_player = 0,
 	status = Status_Round_Out,
 };
