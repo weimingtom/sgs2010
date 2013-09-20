@@ -483,7 +483,7 @@ static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 	int n;
 	char  s_per[512];
 
-	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STR(PatternWhere, p->where));
+	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STRC(PatternWhere, p->where));
 	MSG_OUT("    %s.fixed=%s;\n", perffix, YESNO2STR(p->fixed));
 	MSG_OUT("    %s.num=%d;\n", perffix, p->num);
 	for(n = 0; n < p->num; n++)
@@ -569,7 +569,7 @@ static void p_out_card(GameContext* pGame, const char* perffix, OutCard* p)
 		MSG_OUT("    %s.targets[%d]=%d \"%s\";\n", perffix, n, p->targets[n], player_name(pGame, p->targets[n]));
 	}
 	MSG_OUT("    %s.cur_target=%d \"%s\";\n", perffix, p->cur_target, player_name(pGame, p->cur_target));
-	MSG_OUT("    %s.flag=%s;\n", perffix, BITOR2STR(OutCardFlag, p->flag));
+	MSG_OUT("    %s.flag=%s;\n", perffix, BITOR2STRC(OutCardFlag, p->flag));
 
 	snprintf(s_per, sizeof(s_per), "%s.vcard", perffix);
 	p_card(s_per, &p->vcard);
@@ -765,7 +765,7 @@ static void game_event_param__discard_pattern(GameContext* pGame, GameEventConte
 	else
 	{
 		MSG_OUT("    discard_pattern.num=%d;\n", pEvent->discard_pattern->num);
-		MSG_OUT("    discard_pattern.where=%s;\n", BITOR2STR(PatternWhere, pEvent->discard_pattern->where));
+		MSG_OUT("    discard_pattern.where=%s;\n", BITOR2STRC(PatternWhere, pEvent->discard_pattern->where));
 		MSG_OUT("    discard_pattern.force=%s;\n", YESNO2STR(pEvent->discard_pattern->force));
 		MSG_OUT("    discard_pattern.alter_text=\"%s\";\n", pEvent->discard_pattern->alter_text);
 	}
@@ -883,7 +883,7 @@ RESULT game_event_info(GameContext* pGame, GameEventContext* pEvent, int detail)
 
 	for(deep = 0; pe != NULL; deep++)
 	{
-		get_enumt_str("GameEvent", pe->id, 0,  buf, sizeof(buf));
+		get_enumt_str("GameEvent", pe->id, 0, NULL, NULL, NULL, buf, sizeof(buf));
 		Player* ptr = get_game_player(pGame, pe->trigger);
 		Player* pta = get_game_player(pGame, pe->target);
 

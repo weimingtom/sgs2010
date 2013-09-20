@@ -20,7 +20,7 @@ local function num2enum(pattern)
 end
 
 
-function get_enum_str(type_name, val, is_bit_or)
+function get_enum_str(type_name, val, is_bit_or, bit_or_split, bit_or_head, bit_or_tail)
 	local enum_map = {};
 	
 	if(enum_map[type_name] == nil) then
@@ -31,6 +31,8 @@ function get_enum_str(type_name, val, is_bit_or)
 	
 	local ret = '';
 	if is_bit_or and val ~= 0 then
+		bit_or_split = tostring(bit_or_split or '+');
+	
 		-- 查找一组包含的bit
 		local bits = {};
 		local bv = 0;
@@ -84,7 +86,7 @@ function get_enum_str(type_name, val, is_bit_or)
 		
 		for _, b in ipairs(bits) do
 			if(ret ~= '') then
-				ret = ret .. '|';
+				ret = ret .. bit_or_split;
 			end
 			ret = ret ..  fun(b);
 		end
@@ -93,9 +95,11 @@ function get_enum_str(type_name, val, is_bit_or)
 		if(bv ~= val) then
 			local bx = bitand(val, bitnot(bv));
 			if(ret ~= '') then
-				ret = ret .. '|';
+				ret = ret .. bit_or_split;
 			end
 			ret = ret ..  string.format('0x%x', bx);
+			-- add head and tail
+			ret = tostring(bit_or_head or '') .. ret .. tostring(bit_or_tail or '');
 		end
 	else
 		ret = fun(val);
