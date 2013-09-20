@@ -53,43 +53,46 @@ qiangxi.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 		'请选择一个攻击范围内的目标角色：',
 		function (t) return true; end);
 
-	-- 选择自减一点体力还是弃武器牌
-	local sel = game_select_items(game, event, player, '自减[1]点体力\n弃置武器牌\n(c)取消\n', '请选择：');
-	if sel == 1 or sel == 2 then
-		if sel == 1 then
-			if R_SUCC ~= game_player_add_life(game, event, player, -1, player, nil, 1) then
+	while true do
+		-- 选择自减一点体力还是弃武器牌
+		local sel = game_select_items(game, event, player, '自减[1]点体力\n弃置武器牌\n(c)取消\n', '请选择：');
+		if sel == 1 or sel == 2 then
+			if sel == 1 then
+				if R_SUCC ~= game_player_add_life(game, event, player, -1, player, nil, 1) then
+					return R_DEF;
+				end
+				-- 这里可能自己已死，不过，不过技能应该继续走完的。
+			else
+				if get_player_equipcard(get_game_player(game, player), EquipIdx_Weapon) == nil then
+					message('你没有装备武器, 发动技能失败！');
+					return R_DEF;
+				end
+				-- 再次检查攻击范围（因为可能弃了武器之后攻击范围已改变）
+				set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_InUse);
+				local r = game_check_attack(game, event, player, target, get_card_id_by_sid('sha'), 0);
+				set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_None);
+				if r ~= R_SUCC then
+					message('你不能弃置该武器（你使用了该武器的攻击距离）！');
+					return R_DEF;
+				end
+				if R_SUCC ~= game_player_discard_card(game, event, player, CardWhere_PlayerEquip, EquipIdx_Weapon) then
+					return R_DEF;
+				end
+			end
+			-- 效果目标受到伤害
+			if R_SUCC ~= game_player_add_life(game, event, target, -1, player, nil, 1) then
 				return R_DEF;
 			end
-			-- 这里可能自己已死，不过，不过技能应该继续走完的。
+			
+			-- 只能使用一次
+			event.ud = event.ud .. '[qiangxi]';
+			return R_SUCC;
 		else
-			if get_player_equipcard(get_game_player(game, player), EquipIdx_Weapon) == nil then
-				message('你没有装备武器, 发动技能失败！');
-				return R_DEF;
-			end
-			-- 再次检查攻击范围（因为可能弃了武器之后攻击范围已改变）
-			set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_InUse);
-			local r = game_check_attack(game, event, player, target, get_card_id_by_sid('sha'), 0);
-			set_player_card_flag(get_game_player(game, player), CardWhere_PlayerEquip, EquipIdx_Weapon, CardFlag_None);
-			if r ~= R_SUCC then
-				message('你不能弃置该武器！');
-				return R_DEF;
-			end
-			if R_SUCC ~= game_player_discard_card(game, event, player, CardWhere_PlayerEquip, EquipIdx_Weapon) then
-				return R_DEF;
-			end
-		end
-		-- 效果目标受到伤害
-		if R_SUCC ~= game_player_add_life(game, event, target, -1, player, nil, 1) then
+			-- canceled;
 			return R_DEF;
 		end
-		
-		-- 只能使用一次
-		event.ud = event.ud .. '[qiangxi]';
-		return R_SUCC;
-	else
-		-- canceled;
-		return R_DEF;
 	end
+	return R_DEF;
 end
 
 

@@ -101,7 +101,7 @@ game = {
 				{ sid = 'sha', color = CardColor_Club, value = CardValue_J, flag = CardFlag_None, },
 			},
 			equip_cards = {
-				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
+				{ sid = 'qlyyd', color = CardColor_Spade, value = CardValue_5, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },
@@ -169,7 +169,7 @@ game = {
 		},
 	},
 	get_card_stack = {
-		count = 82,
+		count = 81,
 		cards = {
 			{ sid = 'wzsy', color = CardColor_Heart, value = CardValue_9, flag = CardFlag_None, },
 			{ sid = 'bgz', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
@@ -195,7 +195,6 @@ game = {
 			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_9, flag = CardFlag_None, },
 			{ sid = 'sha', color = CardColor_Diamond, value = CardValue_K, flag = CardFlag_None, },
 			{ sid = 'hbj', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
-			{ sid = 'qlyyd', color = CardColor_Spade, value = CardValue_5, flag = CardFlag_None, },
 			{ sid = 'jd', color = CardColor_Club, value = CardValue_A, flag = CardFlag_None, },
 			{ sid = 'wjqf', color = CardColor_Heart, value = CardValue_A, flag = CardFlag_None, },
 			{ sid = 'dw', color = CardColor_Spade, value = CardValue_K, flag = CardFlag_None, },
@@ -264,7 +263,7 @@ game = {
 	cur_discard_cards = {
 	},
 	round_num = 1,
-	round_player = 2,
-	cur_player = 2,
+	round_player = 3,
+	cur_player = 3,
 	status = Status_Round_Out,
 };
