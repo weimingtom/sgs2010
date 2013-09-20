@@ -129,8 +129,6 @@ RESULT player_add_hand_card(Player* pPlayer, Card* pCard);
 RESULT player_add_judgment_card(Player* pPlayer, VCard* pCard);
 
 
-RESULT set_player_card_flag(Player* pPlayer, CardWhere where, int pos, CardFlag flag);
-CardFlag get_player_card_flag(Player* pPlayer, CardWhere where, int pos);
 
 
 RESULT get_player_card(Player* pPlayer, CardWhere where, int pos, VCard* pCard);
@@ -155,6 +153,8 @@ Card* get_player_equipcard(tolua_notnull Player* pPlayer, int index);
 int find_player_handcard(tolua_notnull Player* pPlayer, CardID id);
 int find_player_judgecard(tolua_notnull Player* pPlayer, CardID id);
 
+RESULT set_player_card_flag(tolua_notnull Player* pPlayer, CardWhere where, int pos, CardFlag flag);
+CardFlag get_player_card_flag(tolua_notnull Player* pPlayer, CardWhere where, int pos);
 
 YESNO is_player_dead(tolua_notnull Player* pPlayer);
 YESNO is_player_show(tolua_notnull Player* pPlayer);

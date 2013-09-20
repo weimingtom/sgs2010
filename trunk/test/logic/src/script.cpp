@@ -541,7 +541,7 @@ lua_State* get_ai_script()
 
 
 
-char* get_enumt_str(const char* enum_type, int val, int is_bit_or, char* buf, int buflen)
+char* get_enumt_str(const char* enum_type, int val, int is_bit_or, const char* or_splitter, const char* or_head, const char* or_tail, char* buf, int buflen)
 {
 	static  char s_tmp[1024];
 
@@ -552,7 +552,10 @@ char* get_enumt_str(const char* enum_type, int val, int is_bit_or, char* buf, in
 	lua_pushstring(L, enum_type);	
 	lua_pushnumber(L, val);	
 	lua_pushboolean(L, is_bit_or);	
-	lua_call(L, 3, 1);
+	if(or_splitter) { lua_pushstring(L, or_splitter); } else { lua_pushnil(L); }
+	if(or_head) { lua_pushstring(L, or_head); } else { lua_pushnil(L); }
+	if(or_tail) { lua_pushstring(L, or_tail); } else { lua_pushnil(L); }
+	lua_call(L, 6, 1);
 
 	if(buf == NULL) 
 	{

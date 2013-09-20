@@ -14,3 +14,24 @@ QUN003　KayaK
 
 --]]
 
+local cfg = {
+	sid = "daqiao",
+	name = "貂蝉",
+	desc = [==[【乱世的舞姬·貂蝉】
+离间——出牌阶段，你可以弃一张牌并选择两名男性角色。若如此做，视为其中一名男性角色对另一名男性角色使用一张【决斗】。（此【决斗】不能被【无懈可击】响应）。每回合限用一次。
+★使用离间时，你决定是由哪个角色对另一个角色使用【决斗】。
+闭月——回合结束阶段，可摸一张牌。]==],
+	group = HeroGroup_People,
+	sex = HeroSex_Female,
+	master = NO,
+	life = 3,
+};
+
+local lijian = {
+	name="离间",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+

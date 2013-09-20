@@ -192,7 +192,7 @@ static void game_save_player(Player* pPlayer, FILE* file, int tabs)
 	fprintf_tab(file, tabs, "},\n");
 
 	fprintf_tab(file, tabs, "status = %s,\n", ENUM2STR(PlayerStatus, pPlayer->status));
-	fprintf_tab(file, tabs, "flag = %s,\n", BITOR2STR(PlayerFlag, pPlayer->flag));
+	fprintf_tab(file, tabs, "flag = %s,\n", BITOR2STRL(PlayerFlag, pPlayer->flag));
 
 	fprintf_tab(file, tabs, "params = {");
 	for(n = 0; n < MAX_PLAYER_PARAM; n++)
