@@ -89,8 +89,8 @@ lijian.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	-- 已用过技能
 	event.ud = event.ud .. '[lijian]';
 	
-	message('技能【'..lijian.name..'】生效，视为【'..get_game_player(game, trigger)
-		..'】对【'..get_game_player(game, target)..'】使用了一张【'..card_sid2name('sha')..'】。'
+	message('技能【'..lijian.name..'】生效，视为【'..get_game_player(game, trigger).name
+		..'】对【'..get_game_player(game, target).name..'】使用了一张【'..card_sid2name('sha')..'】。');
 	
 	-- 决斗过程
 	local out_card = OutCard();
@@ -106,7 +106,7 @@ lijian.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	out_card.vcard.flag = CardFlag_None;
 	out_card.list.num = 0;  -- 没有实际的牌。
 	
-	return game_real_out(game, event, trigger, out_card);
+	return game_call_out_drive(game, event, trigger, target, out_card);
 end
 
 local biyue = {

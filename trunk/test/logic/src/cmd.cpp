@@ -689,25 +689,31 @@ struct tagCmdDispatch
 	const char* name;
 	const char* sort_name;
 	FunCmd  func;
+	int     flag;
 	const char*  brief;
 	const char*  detail;
 };
 
+enum {
+	cmd_f_comm = 0,
+	cmd_f_game = 1,
+};
+
 static const struct tagCmdDispatch   s_cmdDispatch[] = {
-	{ "help", "h", cmd_help,
+	{ "help", "h", cmd_help, cmd_f_comm, 
 		"help/h\n\tprint this message\n"
 		"help/h <cmd>\n\tprint the <cmd> desc message.", 
 		NULL},
-	{ "quit", "q", cmd_quit,
+	{ "quit", "q", cmd_quit,  cmd_f_comm, 
 		"quit/q\n\tquit the program.",
 		NULL},
-	{ "start", "s", cmd_start, 
+	{ "start", "s", cmd_start, cmd_f_game,
 		"start/s <cfg_num>\n\tstart a new game with <cfg_num> players config." , 
 		"\tthe cfg_num can be one of 6,7 or 8:\n"
 		"\t* 6 players: 1 master, 1 minister, 1 spy, 3 mutineers;\n"
 		"\t* 7 players: 1 master, 2 ministers, 1 spy, 3 mutineers;\n"
 		"\t* 8 players: 1 master, 2 ministers, 1 spy, 4 mutineers."},
-	{ "info", "i",	cmd_info, 
+	{ "info", "i",	cmd_info, cmd_f_comm, 
 		"info/i\n\tshow current player info, handle cards, aromo card, etc.\n"
 		"info/i game/g\n\t show the game current global info\n"
 		"info/i event/e\n\t show the game current event info\n"
@@ -716,40 +722,40 @@ static const struct tagCmdDispatch   s_cmdDispatch[] = {
 		"info/i card/c <name>\n\t show card info by name\n"
 		"info/i hero/h <name>\n\t show hero info by name", 
 		NULL},
-	{ "get", "g",   cmd_get,
+	{ "get", "g",   cmd_get,cmd_f_game,
 		"get/g\n\tget card from card stack.", 
 		NULL},
-	{ "out", "o",	cmd_out, 
+	{ "out", "o",	cmd_out, cmd_f_game,
 		"out/o <card idx> ...\n\tout one or more card.", 
 		NULL},
-	{ "useskill", "u",	cmd_useskill, 
+	{ "useskill", "u",	cmd_useskill, cmd_f_game,
 		"useskill/u <skill idx> ...\n\tuse a hero skill.\n" 
 		"useskill/u w/weapon ...\n\tuse weapon skill.\n"
 		"useskill/u a/armor ...\n\tuse armor skill.", 
 		NULL},
-	/*{ "usesweapon", "w",	cmd_useweapon, 
+	/*{ "usesweapon", "w",	cmd_useweapon, cmd_f_game,
 		"usesweapon/w ...\n\tuse the weapon card - some weapon can active in out card round - as a skill.", 
 		NULL},*/
-	{ "cancel", "c",	cmd_cancelskill, 
+	{ "cancel", "c",	cmd_cancelskill, cmd_f_game,
 		"cancel/c \n\tcancel the skill in using.", 
 		NULL},
-	{ "pass", "p", cmd_pass,
+	{ "pass", "p", cmd_pass,cmd_f_game,
 		"pass/p\n\tno out card, so pass this round.", 
 		NULL},
-	{ "discard", "d", cmd_discard,
+	{ "discard", "d", cmd_discard,cmd_f_game,
 		"discard/d <card idx> ...\n\tdiscard card with idx.", 
 		NULL},
 
-	{ "save", NULL, cmd_save,
+	{ "save", NULL, cmd_save,cmd_f_game,
 		"save <file_name>\n\tsave current game context to file.", 
 		NULL},
-	{ "load", NULL, cmd_load,
+	{ "load", NULL, cmd_load,cmd_f_game,
 		"load <file_name>\n\tload current game context from file.", 
 		NULL},
-	{ "reload", "r", cmd_reload,
+	{ "reload", "r", cmd_reload,cmd_f_game,
 		"reload \n\treload script files.", 
 		NULL},
-	{ "test", "t", cmd_test,
+	{ "test", "t", cmd_test, cmd_f_game,
 		"test list/l\n\tlist all test cases.\n"
 		"test run/r all/<id>\n\trun all or give index test case.", 
 		NULL},
@@ -999,6 +1005,51 @@ static const char*  strchr_notnull(const char* str,  char ch)
 	return str;
 }
 
+static void  cmd_comm(GameContext* pContext, GameEventContext* pEvent, char*  cmd)
+{
+	// 这里直接检测 info 和　quit 指令
+	const char* argv[MAX_PARAM_NUM];
+	int argc;
+	char* next;
+	char* w;
+	int n;
+
+	next =  cmd;
+	argc = 0;
+	memset(argv, 0, sizeof(argv));
+	while( NULL != (w = get_word(next, &next) ) )
+	{
+		if(argc < (int)COUNT(argv))
+		{
+			argv[argc++] = w;
+		}
+	}
+
+	if(*next != 0)
+	{
+		MSG_OUT("error cmd at col %d!\n", (int)(next - cmd));
+	}
+	else if(argc > 0)
+	{
+		for(n= 0; n < CMD_NUM; n++)
+		{
+			if(!strcmp(argv[0], s_cmdDispatch[n].name) || (s_cmdDispatch[n].sort_name && !strcmp(argv[0], s_cmdDispatch[n].sort_name)))
+			{
+				break;
+			}
+		}
+
+		if(n < CMD_NUM)
+		{
+
+			(*s_cmdDispatch[n].func)(argv, argc, pContext, pEvent);
+		}
+		else
+		{
+			MSG_OUT("invalid cmd : %s!\n", argv[0]);
+		}
+	}
+}
 
 RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOption options[], int optnum, const char* strAlter, int* out_value)
 {
@@ -1105,6 +1156,9 @@ RESULT select_loop(GameContext* pContext, GameEventContext* pEvent, const SelOpt
 			}
 		}
 
+		// 没有找到匹配，看看是不是info 指令 ，是的话，执行info 
+		 
+		cmd_comm(pContext, pEvent, buffer);
 	}
 	return R_E_FAIL;
 }

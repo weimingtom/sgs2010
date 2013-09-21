@@ -646,25 +646,27 @@ CardID  card_maxid()
 	return id;
 }
 
-int card_id_valid(CardID  id)
+int card_id_valid(CardID  id, int not_none)
 {
 	int r = 0;
 	lua_State* L = get_game_script();
 	lua_getglobal(L, "is_card_id_valid");
 	lua_pushnumber(L, id);	
-	lua_call(L, 1, 1);
+	lua_pushboolean(L, not_none);
+	lua_call(L, 2, 1);
 	r = lua_toboolean(L, -1);
 	lua_pop(L, 1);
 	return r;
 }
 
-int card_sid_valid(const char* sid)
+int card_sid_valid(const char* sid, int not_none)
 {
 	int r = 0;
 	lua_State* L = get_game_script();
 	lua_getglobal(L, "is_card_sid_valid");
 	lua_pushstring(L, sid);	
-	lua_call(L, 1, 1);
+	lua_pushboolean(L, not_none);
+	lua_call(L, 2, 1);
 	r = lua_toboolean(L, -1);
 	lua_pop(L, 1);
 	return r;

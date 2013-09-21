@@ -131,7 +131,7 @@ RESULT game_cmd_getcard(GameContext* pGame, GameEventContext* pEvent, int num)
 	}
 */	else
 	{
-		MSG_OUT("当前不允许进行摸牌!\n");
+		MSG_OUT("当前状态不允许进行摸牌!\n");
 	}
 	
 	return R_E_STATUS;

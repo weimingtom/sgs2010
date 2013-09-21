@@ -24,6 +24,57 @@ static RESULT per_out_card(GameContext* pGame, GameEventContext* pParentEvent, i
 	return event.result;
 }
 
+static RESULT out_card_drive(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card, int skip_drive)
+{
+	RESULT   ret;
+
+	GameEventContext  stEvent;
+
+
+	// out procedure (start do effect)
+
+	// result is skip means skip the out card drive , calc card directly. (disable the chance of target response the out card)
+	if(skip_drive == 0)  
+	{
+		// out card drive
+		INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
+		stEvent.out_card = out_card;
+		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+
+		// response the out card , if event return R_CANCEL, out card is broken
+		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
+	}
+
+	// per calc
+	INIT_EVENT(&stEvent, GameEvent_PerOutCardCalc, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+
+	trigger_game_event(pGame, &stEvent);
+
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
+
+	// some skill can skip the calc of out card
+	if(stEvent.result != R_SKIP)
+	{
+		// calc card
+		INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
+		stEvent.out_card = out_card;
+
+		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
+		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
+	}
+
+	// post calc
+	INIT_EVENT(&stEvent, GameEvent_PostOutCardCalc, trigger, target, pParentEvent);
+	stEvent.out_card = out_card;
+
+	trigger_game_event(pGame, &stEvent);
+
+	// event return cancel, so out card is invalid.  
+	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
+
+	return R_SUCC;
+}
 
 
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
@@ -60,48 +111,7 @@ static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, in
 	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
 
 	// out procedure (start do effect)
-
-	// result is skip means skip the out card drive , calc card directly. (disable the chance of target response the out card)
-	if(stEvent.result != R_SKIP)  
-	{
-		// out card drive
-		INIT_EVENT(&stEvent, GameEvent_OutCard, trigger, target, pParentEvent);
-		stEvent.out_card = out_card;
-		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-
-		// response the out card , if event return R_CANCEL, out card is broken
-		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
-	}
-
-	// per calc
-	INIT_EVENT(&stEvent, GameEvent_PerOutCardCalc, trigger, target, pParentEvent);
-	stEvent.out_card = out_card;
-	
-	trigger_game_event(pGame, &stEvent);
-
-	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
-
-	// some skill can skip the calc of out card
-	if(stEvent.result != R_SKIP)
-	{
-		// calc card
-		INIT_EVENT(&stEvent, GameEvent_OutCardCalc, trigger, target, pParentEvent);
-		stEvent.out_card = out_card;
-
-		ret = call_card_event(out_card->vcard.id, pGame, &stEvent, trigger);
-		RET_CHECK_CANCEL_RET(ret, R_CANCEL);
-	}
-
-	// post calc
-	INIT_EVENT(&stEvent, GameEvent_PostOutCardCalc, trigger, target, pParentEvent);
-	stEvent.out_card = out_card;
-
-	trigger_game_event(pGame, &stEvent);
-
-	// event return cancel, so out card is invalid.  
-	RET_CHECK_CANCEL_RET(stEvent.result, R_CANCEL);	
-
-	return R_SUCC;
+	return out_card_drive(pGame, pParentEvent, trigger, target, out_card, stEvent.result == R_SKIP);
 }
 
 
@@ -1356,5 +1366,17 @@ void game_init_outcard(OutCard* out_card)
 
 
 
+RESULT game_call_out_drive(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player, int target, tolua_notnull OutCard* out_card)
+{
+	if(!IS_PLAYER_VALID(pGame, player))
+	{
+		luaL_error(GL(L), "game_supply_card: invalid player index - %d", player );
+		return R_E_PARAM;
+	}
+
+
+	return out_card_drive(pGame, pEvent, player, target, out_card, 0);
+
+}
 
 

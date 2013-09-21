@@ -50,8 +50,10 @@ guose.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	local out = OutCard();
 	game_load_out_pattern(pattern, 'hef:d?');
 	if R_SUCC == game_supply_card(game, event, player, player, pattern, 
-			'请出一张方块花色的牌当作【'..card_sid2name('sha')..'】:', out) then
+			'请出一张方块花色的牌当作【'..card_sid2name('lbss')..'】:', out) then
 		out.vcard.id = get_card_id_by_sid('lbss');
+		out.vcard.color = calc_card_color_by_pos_card_list(out.list);
+		out.vcard.value = calc_card_value_by_pos_card_list(out.list);
 		out.flag = OutCardFlag_SpecOut;
 		return game_real_out(game, event, player, out);
 	end

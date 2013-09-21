@@ -24,6 +24,26 @@ end
 
 
 --[[
+	选择一个项目 ，带check函数检查选择是否符合要求
+--]]
+function select_item_check(game, event, player, items, alter, funchk)
+	if type(items) == 'table' then
+		items = join(items, '', '', '\n');
+	end
+	while true do
+		local sel = game_select_items(game, event, player, items, alter);
+
+		if funchk  then
+			if(funchk(sel)) then
+				return sel;
+			end
+		else
+			return sel;
+		end
+	end
+end
+
+--[[
 	选择其它玩家的牌
 	
 	返回 where, pos; 取消返回 nil

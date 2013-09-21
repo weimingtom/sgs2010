@@ -94,9 +94,9 @@ local cfg = {
 			for ps in string.gfind(event.out_card.ud, '%((%d+)%)') do
 				local card = game_get_discard_cur(game, tonumber(ps));
 				if(card ) then
-					items = items .. get_card_str(card) .. '\n';
+					items = items .. ' ' .. get_card_str(card) .. '\n';
 				else
-					items = items .. '(空) 已被其它玩家选择' .. '\n';
+					items = items .. ' (空) 已被其它玩家选择' .. '\n';
 				end
 				table.insert(pos, tonumber(ps));
 			end

@@ -14,3 +14,111 @@ SHU002　KayaK
 
 --]]
 
+local cfg = {
+	sid = "guanyu",
+	name = "关羽",
+	desc = [==[【美髯公·关羽】
+武圣——你可以将你的任意一张红色牌当【杀】使用或打出。
+★若同时用到当前装备的红色装备效果时，不可把这张装备牌当【杀】来使用或打出。]==],
+	group = HeroGroup_Shu,
+	sex = HeroSex_Male,
+	master = NO,
+	life = 4,
+};
+
+
+local wusheng = {
+	name = "武圣",
+	flag=0,
+	can_use = { },
+	event = { },
+};
+
+-- 使用技能的逻辑
+local function ws_use(cfg, game, event, player, out_card)
+	local out_pattern  = OutCardPattern();
+	game_load_out_pattern(out_pattern,  'hef:r?');
+	
+	if R_SUCC ~= game_supply_card(game, event, player, player, out_pattern
+			, '请打出任意红色牌作为【'..card_sid2name('sha')..'】：', out_card)  
+	then
+		-- 取消出牌
+		return R_CANCEL;
+	end
+	
+	-- 修正为虚拟牌【杀】
+	out_card.vcard.id = get_card_id_by_sid('sha');
+	-- 计算组合牌的花色
+	out_card.vcard.color = calc_card_color_by_pos_card_list(out_card.list);
+	-- 没有点数
+	out_card.vcard.value = calc_card_value_by_pos_card_list(out_card.list);
+	-- 来自手牌
+	out_card.vcard.flag = CardFlag_None;
+	
+	
+	return R_SUCC;
+end
+
+
+
+-- 出牌时使用
+wusheng.can_use[GameEvent_RoundOutCard] = function(cfg, game, event, player)
+	-- 可以出杀，则可以使用该技能来提供杀
+	if  event.trigger == player 
+		and card_can_out_by_sid(game, event, player, 'sha') 
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+wusheng.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
+	local out_card = OutCard();
+	game_init_outcard(out_card);
+	
+	if R_SUCC ~= ws_use(cfg, game, event, player, out_card)  then
+		-- 取消出牌
+		return R_CANCEL;
+	end				
+
+	out_card.target_num = 0;
+	out_card.flag = OutCardFlag_SpecOut;
+	
+	-- 按正常流程出牌
+	return game_real_out(game, event, player, out_card) ;
+end
+
+
+-- 被动出‘杀’时
+wusheng.can_use[GameEvent_PassiveOutCard] = function (cfg, game, event, player)
+	-- 当需要出一张杀的时候
+	if event.trigger == player and event.pattern_out.pattern.num == 1 
+		and get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'sha'  
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+wusheng.event[GameEvent_PassiveOutCard] = function(cfg, game, event, player)			
+	if R_SUCC == ws_use(cfg, game, event, player, event.pattern_out.out)  then
+		-- 被动出牌成功
+		event.block = YES;
+		event.result = R_SUCC;
+	end	
+	return R_DEF;
+end
+
+
+-- 可用于提供‘杀’
+wusheng.can_use[GameEvent_SupplyCard] = wusheng.can_use[GameEvent_PassiveOutCard];
+wusheng.event[GameEvent_SupplyCard] = wusheng.event[GameEvent_PassiveOutCard];
+
+
+cfg.skills = {
+	wusheng,
+};
+
+-- register
+reg_hero(cfg);
+

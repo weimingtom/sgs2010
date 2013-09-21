@@ -88,12 +88,12 @@ function get_card_maxid()
 	return table.getn(card_list);
 end
 
-function is_card_id_valid(id)
-	return card_list[id] ~= nil;
+function is_card_id_valid(id, not_none)
+	return (id == CardID_None and not not_none) or card_list[id] ~= nil;
 end
 
-function is_card_sid_valid(sid)
-	return card_index[sid] ~= nil;
+function is_card_sid_valid(sid, not_none)
+	return (sid == 'none' and not not_none) or card_index[sid] ~= nil;
 end
 
 function get_card_name(id)

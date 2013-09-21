@@ -91,12 +91,13 @@ function get_hero_maxid()
 	return table.getn(hero_list);
 end
 
+
 function is_hero_id_valid(id)
-	return hero_list[id] ~= nil;
+	return (id == HeroID_None and not not_none) or hero_list[id] ~= nil;
 end
 
 function is_hero_sid_valid(sid)
-	return hero_index[sid] ~= nil;
+	return (sid == 'none' and not not_none) or hero_index[sid] ~= nil;
 end
 
 function get_hero_sid(id)

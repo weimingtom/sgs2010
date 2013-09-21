@@ -20,3 +20,108 @@ WEI006　KayaK
 
 --]]
 
+local cfg = {
+	sid = "guojia",
+	name = "郭嘉",
+	desc = [==[【早终的先知·郭嘉】
+天妒——在你的判定牌生效后，你可以立即获得它。
+★此时机为判定结果决定后。
+遗计——你每受到1点伤害，可摸两张牌，将其中的一张交给任意一名角色，然后将另一张交给任意一名角色。]==],
+	group = HeroGroup_Wei,
+	sex = HeroSex_Male,
+	master = NO,
+	life = 3,
+};
+
+
+local tiandu={
+	name="天妒",
+	flag = 0,
+	can_use = { },
+	event = { },
+};
+
+-- 自己的判定牌生效之后，可以立刻获得它
+tiandu.can_use[GameEvent_PostDecideCard] = function(cfg, game, event, player)
+	if event.trigger == player 
+		and YES == is_cur_card_valid(game, event.decide_card.pos_card.where, event.decide_card.pos_card.pos)
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+
+tiandu.event[GameEvent_PostDecideCard] = function(cfg, game, event, player)
+	return add_cur_card_to_player_hand(game, event.decide_card.pos_card.where, event.decide_card.pos_card.pos, player);
+end
+
+
+
+local yiji={
+	name="遗计",
+	flag = 0,
+	can_use = { },
+	event = { },
+};
+
+
+yiji.can_use[GameEvent_PostChangeLife] = function(cfg, game, event, player)
+	if event.trigger == player   -- 自己受到伤害
+		and event.change_life.delta  < 0   -- 伤害
+		and event.change_life.src_player ~= player  -- 不是来自自身的伤害 
+		and not string.find(event.ud, '[yiji]', 1, true)
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+
+yiji.event[GameEvent_PostChangeLife] = function(cfg, game, event, player)
+	-- 每受到一点伤害都可以执行一次技能效果。除非主动放弃
+	for n = -event.change_life.delta , 1, -1 do
+		local tb = {};
+		for k = 1,2 do
+			local pos = game_pop_stack_card_dis(game);
+			table.insert(tb, pos);
+			local card = game_get_discard_cur(game, pos);
+			message('【'.. get_game_player(game, player).name ..'】从牌堆得到牌 ' .. get_card_str(card).. '。');
+		end
+		
+		-- 第一张牌给一个角色
+		for _,pos in ipairs(tb) do
+			local card = game_get_discard_cur(game, pos);
+			local target = select_target_check(game, event, player, CardID_None, YES, YES, 
+				'请选择要将牌 '.. get_card_str(card) .. '交给任意一名角色：', 
+				function(t) 
+					if YES == is_player_handfull(get_game_player(game, t)) then
+						message('【'..get_game_player(game, t).name..'】的手牌已满，请选择其它角色。');
+						return false;
+					end
+					return true;
+				end);
+			add_cur_card_to_player_hand(game, CardWhere_CurDiscardStack, pos, target);
+		end
+		
+		if n > 1 then
+			-- 继续
+			if 2  == select_item_check(game, event, player, { '继续', '(c)取消'}, '是否继续发动技能？', nil) then
+				break;
+			end
+		end
+	end
+	
+	event.ud = event.ud .. '[yiji]';
+	return R_SUCC;
+end
+
+
+cfg.skills = {
+	tiandu,
+	yiji,
+};
+
+reg_hero(cfg);
+
+

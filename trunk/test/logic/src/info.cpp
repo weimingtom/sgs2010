@@ -61,6 +61,17 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 				cu = 0;
 			}
 		}
+		else if(pEvent->id == GameEvent_RoundDiscardCard || pEvent->id == GameEvent_PassiveDiscardCard)
+		{
+			if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->where ))
+			{
+				cu = 1;
+			}
+			else
+			{
+				cu = 0;
+			}
+		}
 		else
 		{
 			cu = (YES == game_card_can_out(pGame, pEvent, player, &pos_card));
@@ -84,7 +95,18 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			{
 				// 是否匹配
 				if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->pattern_out->pattern.where ) 
-					&& card_match(&pos_card.card, sizeof(PosCard), 1, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+					&& R_SUCC == card_match(&pos_card.card, sizeof(PosCard), 1, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+				{
+					cu = 1;
+				}
+				else
+				{
+					cu = 0;
+				}
+			}
+			else if(pEvent->id == GameEvent_RoundDiscardCard || pEvent->id == GameEvent_PassiveDiscardCard)
+			{
+				if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->where ))
 				{
 					cu = 1;
 				}
@@ -312,7 +334,7 @@ RESULT game_card_info(GameContext* pGame, GameEventContext* pEvent, const char* 
 			//	MSG_OUT("(%d) %s, %s\n", pCardCfg->id, pCardCfg->name, card_type_str(pCardCfg->type));
 			//}
 
-			if(card_id_valid(id))
+			if(card_id_valid(id, 1))
 			{
 				MSG_OUT("(%d) {%s}: %s, %s\n", id, get_card_sid(id),
 					get_card_name(id), card_type_str(card_type(id)));
@@ -321,7 +343,7 @@ RESULT game_card_info(GameContext* pGame, GameEventContext* pEvent, const char* 
 	}
 	else
 	{
-		if(!card_sid_valid(sid))
+		if(!card_sid_valid(sid, 1))
 		{
 			MSG_OUT("没找到sid为\'%s\'的卡牌!\n", sid);
 			return R_E_PARAM;
@@ -354,7 +376,7 @@ RESULT game_hero_info(tolua_notnull GameContext* pGame,tolua_notnull  GameEventC
 		maxid = hero_maxid();
 		for(id = HeroID_Begin; id <= maxid; id = (HeroID)(id + 1))
 		{
-			if(hero_id_valid(id))
+			if(hero_id_valid(id, 1))
 			{
 				MSG_OUT("(%d) {%s}: 【%s】, %s, %s, life %d%s\n", id, get_hero_sid(id), 
 					get_hero_name(id), hero_group_str(hero_group(id)), 
@@ -364,7 +386,7 @@ RESULT game_hero_info(tolua_notnull GameContext* pGame,tolua_notnull  GameEventC
 	}
 	else
 	{
-		if(!hero_sid_valid(sid))
+		if(!hero_sid_valid(sid, 1))
 		{
 			MSG_OUT("没找到sid为'%s'的武将!\n", sid);
 			return R_E_PARAM;
