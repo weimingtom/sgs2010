@@ -147,6 +147,7 @@ card  pattern: <{sid}><color><val> , 至少需要指定一个样式
 void game_load_out_pattern(lua_State* L, tolua_notnull OutCardPattern* out_pattern, tolua_notnull const char* s_pattern);
 
 
+
 RESULT game_real_out(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player, tolua_notnull OutCard* out_card);
 
 // trigger supply from player the card match the  pattern, return through out_card
@@ -158,6 +159,8 @@ RESULT game_passive_out(lua_State* L, tolua_notnull GameContext* pGame, tolua_no
 						, tolua_notnull OutCardPattern* out_pattern, const char* alter_text);
 
 void game_init_outcard(tolua_notnull OutCard* out_card);
+
+RESULT game_call_out_drive(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player, int target, tolua_notnull OutCard* out_card);
 
 /*
  特殊出牌需要2步完成，这里不再提供函数方式

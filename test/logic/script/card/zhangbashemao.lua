@@ -90,9 +90,9 @@ local function zbsm_use(cfg, game, event, player, out_card)
 	-- 计算组合牌的花色
 	out_card.vcard.color = calc_card_color_by_pos_card_list(out_card.list);
 	-- 没有点数
-	out_card.vcard.valud = CardValue_None;
+	out_card.vcard.value = calc_card_value_by_pos_card_list(out_card.list);
 	-- 来自手牌
-	out_card.vcard.flag = CardFlag_FromHand;
+	out_card.vcard.flag = CardFlag_None;
 	
 	
 	return R_SUCC;
@@ -102,16 +102,9 @@ end
 -- 武器效果触发，在出牌时触发
 cfg.can_use[GameEvent_RoundOutCard] = 
 function(cfg, game, event, player, pos_card)--
-	-- 可以出杀，则可以使用该武器来提供杀
-	local c  = PosCard();
-	c.card.id = get_card_id_by_sid('sha');
-	c.card.color = CardColor_None;
-	c.card.value = CardValue_None;
-	c.card.flag = CardFlag_FromHand;
-	c.card.where = CardWhere_PlayerHand;
-	c.card.pos = -1;  -- no pos
-	
-	if  YES == game_card_can_out(game, event, player, c) 
+	-- 可以出杀，则可以使用该武器来提供杀	
+	if  event.trigger == player 
+		and card_can_out_by_sid(game, event, player, 'sha') 
 	then
 		return USE_MANUAL;
 	end
@@ -141,8 +134,8 @@ end
 cfg.can_use[GameEvent_PassiveOutCard] = 
 function (cfg, game, event, player)
 	-- 当需要出一张杀的时候
-	if(event.trigger == player and event.pattern_out.pattern.num == 1 and
-		event.pattern_out.pattern.patterns[0].id == get_card_id_by_sid('sha') ) 
+	if event.trigger == player and event.pattern_out.pattern.num == 1 
+		and  get_card_sid(event.pattern_out.pattern.patterns[0].id) == 'sha' 
 	then
 		return USE_MANUAL;
 	end

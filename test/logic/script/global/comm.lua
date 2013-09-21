@@ -50,7 +50,7 @@ function calc_card_color_by_pos_card_list(list)
 	end
 	
 	if o == 0  and r == 0 and b == 0 and h == 0 and c == 0 and d == 0 then
-		return Color_Spade;
+		return 	CardColor_Spade;
 	elseif o == 0  and r == 0 and b == 0 and s == 0 and c == 0 and d == 0 then
 		return CardColor_Heart;
  	elseif o == 0  and r == 0 and b == 0 and s == 0 and h == 0 and c == 0 then
@@ -64,6 +64,21 @@ function calc_card_color_by_pos_card_list(list)
 	else
 		return CardColor_None;
 	end
+end
+
+
+-- 根据一个牌组列表，计算综合的Value
+function calc_card_value_by_pos_card_list(list)
+	if list.num <= 0 then
+		return CardValue_None;
+	end
+	local val = list.pcards[0].card.value;
+	for n = 1, list.num - 1 do
+		if list.pcards[n].card.value ~= val then
+			return CardValue_None;
+		end
+	end
+	return val;
 end
 
 --  检查给出 的牌ID是否可出（按手牌计）

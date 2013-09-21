@@ -222,7 +222,10 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 
 		return R_SUCC;
 	}
-
+	else
+	{
+		MSG_OUT("当前状态不允许弃牌!\n");
+	}
 	return R_E_STATUS;
 }
 

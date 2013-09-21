@@ -8,46 +8,99 @@
 #include "load.h"
 
 
+#define LOAD_ERROR_TABLE(L)	do { \
+	if (lua_isnoneornil(L, -1) )  \
+	{ luaL_error(L, "load field \'%s\' is not defined!", lua_tostring(L, -2)); } \
+	else if (!lua_istable(L, -1) )  \
+	{ luaL_error(L, "load field \'%s\' is not a table!", lua_tostring(L, -2)); } \
+} while(0)
+
+#define LOAD_ERROR_FIELD_INT(L, field)	do { \
+	if(lua_isnoneornil(L, -1) ) \
+	{ luaL_error(L, "load field \"%s.%s\" is not defined!", lua_tostring(L, -3), #field); } \
+	else if(!lua_isnumber(L, -1) ) \
+	{ luaL_error(L, "load field \"%s.%s\" is not a number!", lua_tostring(L, -3), #field); } \
+} while(0)
+
+#define LOAD_ERROR_FIELD_INT_N(L, n)	do { \
+	if(lua_isnoneornil(L, -1) ) \
+	{ luaL_error(L, "load field \"%s[%d]\" is not defined!", lua_tostring(L, -3), (n)); } \
+	else if(!lua_isnumber(L, -1) ) \
+	{ luaL_error(L, "load field \"%s[%d]\" is not a number!", lua_tostring(L, -3), (n)); } \
+} while(0)
+
+#define LOAD_ERROR_FIELD_STRING(L, field)	do { \
+	if(lua_isnoneornil(L, -1) )  \
+	{ luaL_error(L, "load field \"%s.%s\" is not defined!", lua_tostring(L, -3), #field); } \
+	else if(!lua_isstring(L, -1) ) \
+	{ luaL_error(L, "load field \"%s.%s\" is not a string!", lua_tostring(L, -3), #field); } \
+} while(0)
+
+#define LOAD_ERROR_CHK(L,field, b, msg)     do { \
+	if(!(b)) { luaL_error(L, "load field \"%s.%s\" %s!", lua_tostring(L, -3), #field, ""msg); } \
+} while(0)
+
+#define LOAD_BEGIN_FIELD(L,field)   do { \
+	lua_pushfstring(L, "%s.%s", lua_tostring(L, -2), #field);  \
+	lua_pushstring(L, #field); \
+	lua_gettable(L, -3); \
+	LOAD_ERROR_TABLE(L); \
+} while(0)
+
+#define LOAD_BEGIN_FIELD_N(L, n) 	do { \
+	lua_pushfstring(L, "%s[%d]", lua_tostring(L, -2), (n));  \
+	lua_pushnumber(L, (n)); \
+	lua_gettable(L, -3); \
+	LOAD_ERROR_TABLE(L); \
+} while(0)
+
+
+#define LOAD_END_FIELD(L)     do { lua_pop(L, 2); } while(0)
+
+
+
 
 #define LOAD_INT(p,field,L)  do{ \
 	lua_getfield(L, -1, #field); \
-	if(lua_isnoneornil(L, -1)) {\
-	luaL_error(L, "attemp to get field \"%s\", a nil value!", #field);\
-	} else if(!lua_isnumber(L, -1)){ \
-	luaL_error(L, "attemp to get field \"%s\", not a number!", #field);\
-	} \
+	LOAD_ERROR_FIELD_INT(L, field); \
 	(p)->field = lua_tointeger(L, -1); \
 	lua_pop(L, 1); \
 } while(0)
 
 #define LOAD_INT_CAST(p,field,L,t)  do{ \
 	lua_getfield(L, -1, #field); \
-	if(lua_isnoneornil(L, -1)) {\
-	luaL_error(L, "attemp to get field \"%s\", a nil value!", #field);\
-	} else if(!lua_isnumber(L, -1)){ \
-	luaL_error(L, "attemp to get field \"%s\", not a number!", #field);\
-	} \
+	LOAD_ERROR_FIELD_INT(L, field); \
 	(p)->field = (t)lua_tointeger(L, -1); \
 	lua_pop(L, 1); \
 } while(0)
 
 #define LOAD_STRING(p,field,L)  do{ \
 	lua_getfield(L, -1, #field); \
+	LOAD_ERROR_FIELD_STRING(L, field); \
 	strncpy((p)->field, lua_tostring(L, -1), sizeof((p)->field)); \
 	lua_pop(L, 1); \
+} while(0)
+
+#define LOAD_FIELD_STRING(L,field) do{ \
+	lua_getfield(L, -1, #field); \
+	LOAD_ERROR_FIELD_STRING(L, field); \
+} while(0)
+
+#define LOAD_FIELD_INT_N(L,n) do{ \
+	lua_pushnumber(L, (n));\
+	lua_gettable(L, -2); \
+	LOAD_ERROR_FIELD_INT_N(L, (n)); \
 } while(0)
 
 
 static void game_load_card(lua_State* L, Card* pCard, int not_none)
 {
 	//LOAD_INT_CAST(pCard, id, L, CardID);
-	lua_getfield(L, -1, "sid");
+	LOAD_FIELD_STRING(L,sid);
+	LOAD_ERROR_CHK(L, sid, card_sid_valid(lua_tostring(L, -1), not_none), "is not a valid card sid");
 	pCard->id = card_sid2id(lua_tostring(L, -1));
+	//LOAD_ERROR_CHK(L, sid, (not_none && pCard->id == CardID_None), "is not a valid card sid");
 	lua_pop(L, 1);
-	if(not_none && pCard->id == CardID_None)
-	{
-		luaL_error(L, "expected a valid card id!");
-	}
 	LOAD_INT_CAST(pCard, color, L, CardColor);
 	LOAD_INT_CAST(pCard, value, L, CardValue);
 	LOAD_INT_CAST(pCard, flag, L, CardFlag);
@@ -57,29 +110,27 @@ static void game_load_vcard(lua_State* L, VCard* pVCard, int not_none)
 {
 	int n;
 	//LOAD_INT_CAST(pCard, id, L, CardID);
-	lua_getfield(L, -1, "vcard");
+	lua_pushfstring(L, "%s.%s", lua_tostring(L, -2), "vcard");
+	lua_getfield(L, -2, "vcard");
 	if(lua_istable(L, -1))
 	{
 		game_load_card(L, &pVCard->vcard, 1);
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 		LOAD_INT(pVCard, rnum, L);
-		if(pVCard->rnum <= 0 || pVCard->rnum > MAX_RCARD_NUM)
-		{
-			luaL_error(L, "error rcard num!");
-		}
+		LOAD_ERROR_CHK(L, rnum, (pVCard->rnum >= 0 || pVCard->rnum <= MAX_RCARD_NUM), "out of range");
+		LOAD_BEGIN_FIELD(L, rcards);
 		lua_getfield(L, -1, "rcards"); // ... [cardstack] [cardstack.cards]
 		for(n = 0; n < pVCard->rnum; n++)
 		{
-			lua_pushnumber(L, n+1);
-			lua_gettable(L, -2);
+			LOAD_BEGIN_FIELD_N(L, n+1);
 			game_load_card(L, &pVCard->rcards[n], 1);
-			lua_pop(L, 1);
+			LOAD_END_FIELD(L);
 		}
-		lua_pop(L, 1);
+		LOAD_END_FIELD(L);
 	}
 	else
 	{
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 		game_load_card(L, &pVCard->vcard, not_none);
 		pVCard->rnum = 1;
 		pVCard->rcards[0] = pVCard->vcard;
@@ -92,21 +143,15 @@ static void game_load_cardstack(lua_State* L, CardStack* pCardStack)
 {
 	int n;
 	LOAD_INT(pCardStack, count, L);
-
-	if(pCardStack->count > CARD_STACK_SIZE)
-	{
-		luaL_error(L, "error card stack count!");
-	}
-
-	lua_getfield(L, -1, "cards"); // ... [cardstack] [cardstack.cards]
+	LOAD_ERROR_CHK(L, count, (pCardStack->count >= 0 || pCardStack->count <= CARD_STACK_SIZE), "out of range");
+	LOAD_BEGIN_FIELD(L,cards);
 	for(n = 0; n < pCardStack->count; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);
+		LOAD_BEGIN_FIELD_N(L,n+1);
 		game_load_card(L, &pCardStack->cards[n], 1);
-		lua_pop(L, 1);
+		LOAD_END_FIELD(L);
 	}
-	lua_pop(L, 1);
+	LOAD_END_FIELD(L);
 }
 
 
@@ -116,7 +161,8 @@ static void game_load_player(lua_State* L, Player* pPlayer)
 
 	LOAD_INT_CAST(pPlayer, id, L, PlayerID);
 	//LOAD_INT_CAST(pPlayer, hero, L, HeroID);
-	lua_getfield(L, -1, "hero");
+	LOAD_FIELD_STRING(L, hero);
+	LOAD_ERROR_CHK(L, hero, hero_sid_valid(lua_tostring(L, -1), 0), "is not a valid hero sid");
 	pPlayer->hero = hero_sid2id(lua_tostring(L, -1));
 	lua_pop(L, 1);
 	LOAD_INT(pPlayer, max_life, L);
@@ -125,57 +171,47 @@ static void game_load_player(lua_State* L, Player* pPlayer)
 	LOAD_INT(pPlayer, hand_card_num, L);
 	LOAD_INT(pPlayer, judgment_card_num, L);
 
-	if(pPlayer->hand_card_num > MAX_HAND_CARD)
-	{
-		luaL_error(L, "error player hand card count!");
-	}
-	if(pPlayer->judgment_card_num > MAX_JUDGMENT_CARD)
-	{
-		luaL_error(L, "error player judgment card count!");
-	}
+	LOAD_ERROR_CHK(L, hand_card_num, (pPlayer->hand_card_num >= 0 && pPlayer->hand_card_num <= MAX_HAND_CARD), "out of range");
+	LOAD_ERROR_CHK(L, judgment_card_num, (pPlayer->judgment_card_num >= 0 && pPlayer->judgment_card_num <= MAX_JUDGMENT_CARD), "out of range");
 
-	lua_getfield(L, -1, "hand_cards");
+	LOAD_BEGIN_FIELD(L, hand_cards);
 	for(n = 0; n < pPlayer->hand_card_num; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);
+		LOAD_BEGIN_FIELD_N(L, n+1);
 		game_load_card(L, &pPlayer->hand_cards[n], 1);		
-		lua_pop(L, 1);
+		LOAD_END_FIELD(L);
 	}
-	lua_pop(L, 1);
+	LOAD_END_FIELD(L);
 
-	lua_getfield(L, -1, "equip_cards");
+	LOAD_BEGIN_FIELD(L, equip_cards);
 	for(n = 0; n < EquipIdx_Max; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);
+		LOAD_BEGIN_FIELD_N(L, n+1);
 		game_load_card(L, &pPlayer->equip_cards[n], 0);
-		lua_pop(L, 1);
+		LOAD_END_FIELD(L);
 	}
-	lua_pop(L, 1);
+	LOAD_END_FIELD(L);
 
-	lua_getfield(L, -1, "judgment_cards");
+	LOAD_BEGIN_FIELD(L, judgment_cards);
 	for(n = 0; n < pPlayer->judgment_card_num; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);
+		LOAD_BEGIN_FIELD_N(L, n+1);
 		game_load_vcard(L, &pPlayer->judgment_cards[n], 1);		
-		lua_pop(L, 1);
+		LOAD_END_FIELD(L);
 	}
-	lua_pop(L, 1);
+	LOAD_END_FIELD(L);
 
 	LOAD_INT_CAST(pPlayer, status, L, PlayerStatus);
 	LOAD_INT_CAST(pPlayer, flag, L, PlayerFlag);
 
-	lua_getfield(L, -1, "params");
+	LOAD_BEGIN_FIELD(L, params);
 	for(n = 0; n < MAX_PLAYER_PARAM; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);
+		LOAD_FIELD_INT_N(L, n+1);
 		pPlayer->params[n] = lua_tointeger(L, -1);
 		lua_pop(L, 1);
 	}
-	lua_pop(L, 1);
+	LOAD_END_FIELD(L);
 }
 
 static int lua_game_load(lua_State* L)
@@ -233,8 +269,9 @@ static int lua_game_load(lua_State* L)
 
 	//stack:  [t] 
 
+	lua_pushstring(L, "game");
 
-	lua_getfield(L, -1, "game"); // [t] [t.game]
+	lua_getfield(L, -2, "game"); // [t] ['game'] [t.game]
 	if(!lua_istable(L, -1))
 	{
 		luaL_error(L, "global define 'game' is not found!");
@@ -249,66 +286,54 @@ static int lua_game_load(lua_State* L)
 	LOAD_INT(pGame, spy_count, L);
 	LOAD_INT(pGame, mutineer_count, L);
 
-	if(pGame->player_count > MAX_PLAYER_NUM)
-	{
-		luaL_error(L, "error player count!");
-	}
+	LOAD_ERROR_CHK(L, player_count, pGame->player_count >= 0 && pGame->player_count <= MAX_PLAYER_NUM, "is out of range");
 
 	// players
-	lua_getfield(L, -1, "players"); // [t] [t.game] [t.game.players] 
-
-	//if(!lua_istable(L, -1))
-	//{
-	//	MSG_OUT("in 'game' table, sub table 'players' is not found!\n");
-	//	ret = R_E_FAIL;
-	//	break;
-	//}
+	LOAD_BEGIN_FIELD(L, players);
 
 	for(n = 0; n < pGame->player_count; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);   // [t] [t.game] [t.game.players] [t.game.players[n+1]]
+		LOAD_BEGIN_FIELD_N(L, n+1);
 		game_load_player(L, &pGame->players[n]);
-		lua_pop(L, 1);     // [t] [t.game] [t.game.players] 
+		LOAD_END_FIELD(L);     // [t] ['game'] [t.game] ['game.players'] [t.game.players] 
 	}
 
-	lua_pop(L, 1);  // [t] [t.game]
+	LOAD_END_FIELD(L);  // [t] ['game'] [t.game]
 
 	// get stack
-	lua_getfield(L, -1, "get_card_stack"); // [t] [t.game] [t.game.get_card_stack]
+	LOAD_BEGIN_FIELD(L, get_card_stack);
 	game_load_cardstack(L, &pGame->get_card_stack);
-	lua_pop(L, 1); // [t] [t.game]
+	LOAD_END_FIELD(L); // [t] ['game'] [t.game]
 
 	// get stack
-	lua_getfield(L, -1, "discard_card_stack"); // [t] [t.game] [t.game.discard_card_stack]
+	LOAD_BEGIN_FIELD(L, discard_card_stack);
 	game_load_cardstack(L, &pGame->discard_card_stack);
-	lua_pop(L, 1);  // [t] [t.game]
+	LOAD_END_FIELD(L);  // [t] ['game'] [t.game]
 
 	LOAD_INT(pGame, cur_discard_card_num, L);
-	if(pGame->cur_discard_card_num > MAX_CUR_DISCARD_NUM)
-	{
-		luaL_error(L, "error cur_discard_card_num!");
-	}
+	LOAD_ERROR_CHK(L, cur_discard_card_num, pGame->cur_discard_card_num >= 0 && pGame->cur_discard_card_num <= MAX_CUR_DISCARD_NUM, "is out of range");
 
-	lua_getfield(L, -1, "cur_discard_cards");  // [t] [t.game] [t.game.cur_discard_cards]
+	LOAD_BEGIN_FIELD(L, cur_discard_cards);
 	for(n = 0; n < pGame->cur_discard_card_num; n++)
 	{
-		lua_pushnumber(L, n+1);
-		lua_gettable(L, -2);   // [t] [t.game] [t.game.cur_discard_cards] [t.game.cur_discard_cards[n+1]]
+		LOAD_BEGIN_FIELD_N(L, n+1);
 		game_load_card(L, &pGame->cur_discard_cards[n], 0);
-		lua_pop(L, 1);    // [t] [t.game] [t.game.cur_discard_cards]
+		LOAD_END_FIELD(L);
 	}
-	lua_pop(L, 1);    // [t] [t.game] 
+	LOAD_END_FIELD(L);
 
 	LOAD_INT(pGame, round_num, L);
 	LOAD_INT(pGame, round_player, L);
 	LOAD_INT(pGame, cur_player, L);
+
+	LOAD_ERROR_CHK(L, round_player, pGame->round_player >= 0 && pGame->round_player < pGame->player_count, "is out of range");
+	LOAD_ERROR_CHK(L, cur_player, pGame->cur_player >= 0 && pGame->cur_player < pGame->player_count, "is out of range");
+
 	LOAD_INT_CAST(pGame, status, L, Status);
 
-	lua_pop(L, 1);   // [t]  
+	lua_pop(L, 2);   // [t]  
 
 	lua_pop(L, 1);   
-	//} while(0);
 
 	lua_settop(L, top);
 
