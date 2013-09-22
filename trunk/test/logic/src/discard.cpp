@@ -313,7 +313,7 @@ RESULT game_passive_discard(lua_State* L, GameContext* pGame, GameEventContext* 
 		set_game_cur_player(pGame, player);
 		ret = cmd_loop(pGame, &event, dis.force, dis.alter_text);
 
-		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+		CHECK_PLAYER_DEAD_RET(pGame, player, R_CANCEL);
 		RET_CHECK_RET(ret, ret);
 		EVENT_CHECK_BREAK( &event);
 		

@@ -79,7 +79,7 @@ static RESULT out_card_drive(GameContext* pGame, GameEventContext* pParentEvent,
 
 static RESULT do_out_card(GameContext* pGame, GameEventContext* pParentEvent, int trigger, int target, OutCard* out_card)
 {
-	RESULT   ret;
+	//RESULT   ret;
 
 	GameEventContext  stEvent;
 
@@ -487,7 +487,7 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 	ret = cmd_loop(pGame, pEvent, NO, "请出一张牌或者发动技能:");
 
-	CHECK_PLAYER_DEAD_RET(pGame, player, ret);
+	CHECK_PLAYER_DEAD_RET(pGame, player, R_CANCEL);
 	RET_CHECK_RET(ret, ret);
 	// 有没有可能在使用技能或者出牌之后，当前出牌阶段立刻中止？
 	EVENT_CHECK_BREAK_RET(pEvent,R_BACK);

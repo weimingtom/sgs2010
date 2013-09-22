@@ -115,10 +115,10 @@ game = {
 		},
 		{
 			id = PlayerID_Mutineer,
-			hero = 'dianwei',
+			hero = 'huanggai',
 			max_life = 4,
 			cur_life = 4,
-			name = 'µ‰Œ§',
+			name = 'ª∆∏«',
 			hand_card_num = 4,
 			judgment_card_num = 0,
 			hand_cards = {
