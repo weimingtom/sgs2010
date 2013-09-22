@@ -52,7 +52,7 @@ static RESULT game_judge_card(GameContext* pGame, GameEventContext* pEvent, int 
 	{
 		ret = game_add_discard_cur(pGame, &stJudgeCard.pos_vcard.list.pcards[n].card, &stJudgeCard.pos_vcard.list.pcards[n].pos);
 		stJudgeCard.pos_vcard.list.pcards[n].where = CardWhere_CurDiscardStack;
-		// CHECK_RET(ret,ret); // must be succes
+		RET_CHECK_RET(ret,ret); // must be succes
 	}
 
 	// calc
