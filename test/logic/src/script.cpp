@@ -633,7 +633,7 @@ static int luaex_game_load(lua_State* L)
 	}
 	else if(lua_type(L, 1) == LUA_TTABLE)
 	{
-		TEST_INFO(">> load game from table\n", lua_tostring(L, 1));
+		TEST_INFO(">> load game from a table.\n");
 	}
 	else 
 	{
@@ -696,6 +696,7 @@ static int luaex_test_send_cmd(lua_State* L)
 {
 	// return command string to cmd process
 	const char* cmd = luaL_checkstring(L, 1);
+	(void)cmd;
 	//TEST_INFO("send cmd: %s\n", cmd);
 	lua_pushnumber(L, TEST_CMD_SENDCMD);
 	lua_pushvalue(L, 1);
