@@ -925,8 +925,18 @@ RESULT cmd_loop(GameContext* pContext, GameEventContext* pEvent, YESNO force, co
 		snprintf(prompt, sizeof(prompt), "[%s] $ ", CUR_PLAYER(pContext)->name);
 	}
 
-	while( (strAlter ? MSG_OUT("%s\n", strAlter) : 0) , get_cmd_line(pContext, pEvent, prompt, cmdline, sizeof(cmdline)))
+	while(1)
 	{
+		if (strAlter != NULL) 
+		{
+			MSG_OUT("%s\n", strAlter) ;
+		}
+
+		if(NULL == get_cmd_line(pContext, pEvent, prompt, cmdline, sizeof(cmdline)))
+		{
+			break;
+		}
+
 		next =  cmdline;
 		argc = 0;
 		memset(argv, 0, sizeof(argv));
