@@ -13,7 +13,7 @@ static RESULT game_player_dead(lua_State* L, GameContext* pGame, GameEventContex
 
 	pPlayer = get_game_player(pGame, player);
 
-	MSG_OUT("【%s】体力过低，进入濒死状态。", pPlayer->name);
+	MSG_OUT("【%s】体力过低，进入濒死状态。\n", pPlayer->name);
 
 	// event perdead ?
 	INIT_EVENT(&event, GameEvent_PerDead, player, INVALID_PLAYER, pParentEvent);

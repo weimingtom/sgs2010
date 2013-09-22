@@ -87,7 +87,7 @@ local cfg = {
 		-- ¹¥»÷¾àÀë
 		[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
 			if(player == event.trigger ) then
-				message('attack base: 4');
+				--message('attack base: 4');
 				event.attack_dis.base = 4;
 			end
 			return R_DEF;
