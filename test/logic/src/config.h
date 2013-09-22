@@ -88,6 +88,19 @@ extern "C" {
 
 #define C2I(c)  ((int)(unsigned char)(c))
 
+#ifndef BOOL
+#define BOOL   int
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+
 
 // tolua_begin
 #define  MAX_NAME_LEN    32
