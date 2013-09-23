@@ -80,18 +80,23 @@ end
 
 
 liuli.event[GameEvent_OutCardSetTarget] = function(cfg, game, event, player)
+	-- 选择一个第3方目标
+	local target = select_target_check(game, event, player, event.out_card.vcard.id, NO, NO, 
+			'请为对你使用的【'..get_card_name(event.out_card.vcard.id)..'】重新指定一个新的目标：', 
+			function (t)
+				if t == player or t == event.trigger then
+					message('不能指定自己或者打出杀的玩家为目标。');
+					return false;
+				end
+				return true;
+			end);
+	if not target then
+		-- cancel
+		return R_DEF;
+	end
+
 	-- 弃一张牌
 	if R_SUCC == game_passive_discard(game, event, player, bitor(PatternWhere_Hand,PatternWhere_Equip), 1, NO, nil ) then
-		-- 选择一个第3方目标
-		local target = select_target_check(game, event, player, event.out_card.vcard.id, NO, YES, 
-				'请为对你使用的【'..get_card_name(event.out_card.vcard.id)..'】重新指定一个新的目标：', 
-				function (t)
-					if t == player or t == event.trigger then
-						message('不能指定自己或者打出杀的玩家为目标。');
-						return false;
-					end
-					return true;
-				end);
 		event.out_card.cur_target = target;
 		event.result = R_SUCC;
 		event.block = YES;
