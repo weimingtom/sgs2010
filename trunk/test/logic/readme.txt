@@ -32,3 +32,6 @@
 索引[2]的牌正在使用中!
 请出一张牌或者发动技能:
 [曹操] $ 3
+
+
+2013-9-28: 需要修改支持能指定PassiveDiscardCard的样式， 修改DisPattern 为OutCardPattern
