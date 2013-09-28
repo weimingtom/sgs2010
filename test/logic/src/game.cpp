@@ -290,8 +290,8 @@ RESULT init_game_context(GameContext* pGame, int ministers, int spies, int mutin
 				for(c = 0; c < hscnt; c++)
 				{
 					//pHero = get_hero_config((HeroID)hids[c]);
-					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "[%s], %s最大体力: %d", 
-						get_hero_name((HeroID)hids[c]), hero_master((HeroID)hids[c])==YES ? "[主公], ":"", hero_life((HeroID)hids[c]));
+					snprintf(sel_opts[sel_n].text, sizeof(sel_opts[sel_n].text), "【%s】, %s最大体力: %d", 
+						get_hero_name((HeroID)hids[c]), hero_master((HeroID)hids[c])==YES ? "主公, ":"", hero_life((HeroID)hids[c]));
 					sel_opts[sel_n].value = c+1;
 					sel_n++;
 				}
