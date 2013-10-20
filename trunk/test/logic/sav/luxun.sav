@@ -124,8 +124,8 @@ game = {
 			hand_cards = {
 				{ sid = 'shan', color = CardColor_Heart, value = CardValue_K, flag = CardFlag_None, },
 				{ sid = 'sha', color = CardColor_Spade, value = CardValue_9, flag = CardFlag_None, },
-				{ sid = 'shan', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_J, flag = CardFlag_None, },
+				{ sid = 'lbss', color = CardColor_Diamond, value = CardValue_5, flag = CardFlag_None, },
+				{ sid = 'ssqy', color = CardColor_Club, value = CardValue_J, flag = CardFlag_None, },
 			},
 			equip_cards = {
 				{ sid = 'zbsm', color = CardColor_Spade, value = CardValue_Q, flag = CardFlag_None, },
@@ -146,15 +146,10 @@ game = {
 			max_life = 3,
 			cur_life = 2,
 			name = '½ѷ',
-			hand_card_num = 6,
+			hand_card_num = 1,
 			judgment_card_num = 0,
 			hand_cards = {
-				{ sid = 'ghcq', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
-				{ sid = 'tao', color = CardColor_Heart, value = CardValue_4, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Club, value = CardValue_3, flag = CardFlag_None, },
-				{ sid = 'nmrq', color = CardColor_Club, value = CardValue_7, flag = CardFlag_None, },
-				{ sid = 'sha', color = CardColor_Heart, value = CardValue_10, flag = CardFlag_None, },
-				{ sid = 'bgz', color = CardColor_Spade, value = CardValue_2, flag = CardFlag_None, },
+				{ sid = 'shan', color = CardColor_Club, value = CardValue_4, flag = CardFlag_None, },
 			},
 			equip_cards = {
 				{ sid = 'none', color = CardColor_None, value = CardValue_None, flag = CardFlag_None, },

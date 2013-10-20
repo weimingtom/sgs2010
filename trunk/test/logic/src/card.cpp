@@ -263,6 +263,13 @@ void set_vcard_from_card(VCard* pVCard, const Card* pCard)
 	pVCard->rcards[0] = *pCard;
 }
 
+void set_posvcard_from_poscard(PosVCard* pPosVCard, const PosCard* pPosCard)
+{
+	pPosVCard->vcard = pPosCard->card;
+	pPosVCard->list.num = 1;
+	pPosVCard->list.pcards[0] = *pPosCard;
+}
+
 
 RESULT load_card_pattern(CardPattern* pCardPattern, const char* szPattern, int len)
 {

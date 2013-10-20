@@ -78,7 +78,7 @@ RESULT game_round_discard_card(GameContext* pGame, GameEventContext* pParentEven
 	if(p->hand_card_num > p->cur_life)
 	{
 		ST_ZERO(dis);
-		game_load_out_pattern(NULL, &dis.pattern, "h");
+		game_load_out_pattern(NULL, &dis.pattern, "hf:{none}?");
 		dis.pattern.num_type = p->hand_card_num - p->cur_life;
 		dis.force = YES;
 		snprintf(dis.alter_text, sizeof(dis.alter_text), "请弃[%d]张手牌:", dis.pattern.num_type);
@@ -192,6 +192,14 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 			{
 				MSG_OUT("索引[%d]的牌的位置不符合要求!\n", idx[n]);
 				return R_E_PARAM;
+							// 不能是虚拟牌
+			if(!VCARD_IS_REAL(&vcard))
+			{
+				MSG_OUT("索引[%d]的牌不能打出!\n", idx[n]);
+				return R_E_PARAM;
+			}
+			stCard[n].card = vcard.vcard;
+
 			}
 
 			if(get_player_card_flag(pPlayer, stCard[n].where, stCard[n].pos) != CardFlag_None)
@@ -202,6 +210,14 @@ RESULT game_cmd_discard_card(GameContext* pGame, GameEventContext* pParentEvent,
 
 			// must success
 			get_player_card(pPlayer,stCard[n].where, stCard[n].pos, &vcard);
+
+			// 不能是虚拟牌
+			//if(!VCARD_IS_REAL(&vcard))
+			//{
+			//	MSG_OUT("索引[%d]的牌不能打出!\n", idx[n]);
+			//	return R_E_PARAM;
+			//}
+			stCard[n].card = vcard.vcard;
 		}
 
 		// match pattern ?
@@ -392,11 +408,16 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 	// event: per discard card 
 	INIT_EVENT(&event, GameEvent_PerDiscardCard, player, INVALID_PLAYER, pParentEvent);
 	event.pos_vcard = &disCard;
-
 	trigger_game_event(pGame, &event);
 
 	// 暂时这里先不管返回值是否能防止弃牌。困为如果从这里返回，remove_discard_cards会进入死循环
 	//CHECK_BACK_RET(event.result);
+
+	// event per lost card
+	INIT_EVENT(&event, GameEvent_PerLostCard, player, INVALID_PLAYER, pParentEvent);
+	event.pos_vcard = &disCard;
+
+	trigger_game_event(pGame, &event);
 
 	if(R_SUCC == player_remove_card(pPlayer, where, pos, NULL))
 	{
@@ -417,6 +438,12 @@ RESULT game_player_discard_card(GameContext* pGame, GameEventContext* pParentEve
 			swhere = "判定区";
 
 		MSG_OUT("【%s】弃%s牌 %s\n", pPlayer->name, swhere, get_vcard_str(&stCard));
+
+
+		INIT_EVENT(&event, GameEvent_PostLostCard, player, INVALID_PLAYER, pParentEvent);
+		event.pos_vcard = &disCard;
+		trigger_game_event(pGame, &event);
+
 
 		// event: post discard card
 		

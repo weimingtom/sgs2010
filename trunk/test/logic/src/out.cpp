@@ -126,22 +126,35 @@ static RESULT post_out_card(GameContext* pGame, GameEventContext* pParentEvent, 
 	return event.result;	
 }
 
-static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
+static RESULT per_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, const Card* vcard, const PosCardList* pcard_list)
 {
 	GameEventContext   event;
+	PosVCard    pos_vcard;
+
+	//set_posvcard_from_poscard(&vcard, pos_card);
+	pos_vcard.vcard = *vcard;
+	pos_vcard.list = *pcard_list;
+
+
 	INIT_EVENT(&event, GameEvent_PerLostCard, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = pos_card;
+	event.pos_vcard = &pos_vcard;
 
 	trigger_game_event(pGame, &event);
 
 	return event.result;
 }
 
-static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, PosCard* pos_card)
+static RESULT post_lost_card(GameContext* pGame, GameEventContext* pParentEvent, int player, const Card* vcard, const PosCardList* pcard_list)
 {
 	GameEventContext   event;
+	PosVCard    pos_vcard;
+
+	//set_posvcard_from_poscard(&vcard, pos_card);
+	pos_vcard.vcard = *vcard;
+	pos_vcard.list = *pcard_list;
+
 	INIT_EVENT(&event, GameEvent_PostLostCard, player, INVALID_PLAYER, pParentEvent);
-	event.pos_card = pos_card;
+	event.pos_vcard = &pos_vcard;
 	
 	trigger_game_event(pGame, &event);
 	
@@ -253,6 +266,9 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 			}
 		}
 
+		// per_lost_card event
+		per_lost_card(pGame, pEvent, out_card->supply, &out_card->vcard, &out_card->list);
+
 		// real remove from supply
 		// 不能打出判定区的牌（可能是虚拟牌）
 		for(n = pPlayer->hand_card_num + EquipIdx_Max/* + pPlayer->judgment_card_num*/ - 1; n >= 0; n--)
@@ -284,7 +300,7 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 			if(CARD_VALID(&stCard.card) && stCard.card.flag == CardFlag_PrepareOut)
 			{
 				// todo : perlostcard
-				per_lost_card(pGame, pEvent, out_card->supply, &stCard);
+				//per_lost_card(pGame, pEvent, out_card->supply, &stCard);
 				if(R_SUCC != player_remove_card(pPlayer, stCard.where, stCard.pos, NULL))
 				{
 					// after check , fail is impossible
@@ -292,9 +308,10 @@ static RESULT remove_out_card(GameContext* pGame, GameEventContext* pEvent, OutC
 					return R_E_FAIL;
 				}
 				// todo : postlostcard
-				post_lost_card(pGame, pEvent, out_card->supply, &stCard);
+				//post_lost_card(pGame, pEvent, out_card->supply, &stCard);
 			}
 		}
+		post_lost_card(pGame, pEvent, out_card->supply, &out_card->vcard, &out_card->list);
 	}
 	return R_SUCC;
 }
