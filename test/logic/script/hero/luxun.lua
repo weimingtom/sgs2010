@@ -21,3 +21,75 @@ WU007　KayaK
 
 
 
+local cfg = {
+	sid = "luxun",
+	name = "陆逊",
+	desc = [==[【儒生雄才·陆逊】
+谦逊——锁定技，你不能成为【顺手牵羊】和【乐不思蜀】的目标。
+连营——每当你失去最后一张手牌时，可立即摸一张牌。]==],
+	group = HeroGroup_Wu,
+	sex = HeroSex_Male,
+	master = NO,
+	life = 3,
+};
+
+
+local qianxun={
+	name = "谦逊",
+	flag = SkillFlag_Passive,
+	can_use= { },
+	event = { },
+};
+
+qianxun.can_use[GameEvent_SelectTarget] = function(cfg, game, event, player)
+	if  event.target == player  -- 自己被选择为目标
+		and ( get_card_sid(event.select_target.card.id) == 'ssqy' 
+			or get_card_sid(event.select_target.card.id) == 'lbss' ) 
+	then
+		return USE_AUTO;
+	end
+	return USE_CANNOT;
+end
+
+qianxun.event[GameEvent_SelectTarget] = function(cfg, game, event, player)
+	event.result = R_CANCEL;
+	event.blok = YES;
+	event.select_target.message = '【'..cfg.name .. '】不能成为【'..get_card_name(event.select_target.card.id)..'】的目标。';
+	return R_SUCC;
+end
+
+
+local lianying={
+	name = "连营",
+	flag = 0,
+	can_use= { },
+	event = { },
+};
+
+lianying.can_use[GameEvent_PostLostCard] = function(cfg, game, event, player)
+	-- 每当自己推动最后一张手牌
+	if event.trigger == player            -- 自己
+		and event.pos_vcard.list.num > 0  -- 有牌（应该的）
+		and event.pos_vcard.list.pcards[0].where == CardWhere_PlayerHand   -- 失去了手牌 (必需的，不能仅仅根据手牌空来决定)
+		and get_game_player(game, player).hand_card_num == 0   -- 手牌为0
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+lianying.event[GameEvent_PostLostCard] = function(cfg, game, event, player)
+	-- 可以摸一张牌（非强制的）这里传入YES，表示使用技能后直接摸牌即可（技能已经可以选择是否使用）
+	return game_passive_getcard(game, event, player, 1, YES); 
+end
+
+
+cfg.skills = {
+	qianxun,
+	lianying,
+};
+
+
+
+reg_hero(cfg);
+

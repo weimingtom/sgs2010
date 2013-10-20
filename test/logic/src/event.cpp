@@ -473,8 +473,6 @@ PosCard* game_event_get_pos_card(lua_State* L, tolua_notnull GameEventContext* p
 	switch(pEvent->id)
 	{
 	case GameEvent_PostGetCard:
-	case GameEvent_PerLostCard:
-	case GameEvent_PostLostCard:
 	case GameEvent_CheckCardCanOut:
 		if(pEvent->pos_card == NULL && L != NULL)
 			luaL_error(L, "error unexpected a null point 'pos_card' is got in event object!");
@@ -492,6 +490,8 @@ PosVCard* game_event_get_pos_vcard(lua_State* L, tolua_notnull GameEventContext*
 	{
 	case GameEvent_PerDiscardCard:
 	case GameEvent_PostDiscardCard:
+	case GameEvent_PerLostCard:
+	case GameEvent_PostLostCard:
 		if(pEvent->pos_vcard == NULL && L != NULL)
 			luaL_error(L, "error unexpected a null point 'pos_vcard' is got in event object!");
 		return pEvent->pos_vcard;
