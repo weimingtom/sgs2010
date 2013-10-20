@@ -52,7 +52,7 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		{
 			// ÊÇ·ñÆ¥Åä
 			if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->pattern_out->pattern.where ) 
-				&& R_SUCC == card_match(&pos_card.card, sizeof(PosCard), 1, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+				&& R_SUCC == out_card_pattern_match_cards(&pEvent->pattern_out->pattern, &pos_card.card, sizeof(PosCard), 1))
 			{
 				cu = 1;
 			}
@@ -63,7 +63,8 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 		}
 		else if(pEvent->id == GameEvent_RoundDiscardCard || pEvent->id == GameEvent_PassiveDiscardCard)
 		{
-			if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->where ))
+			if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->pattern.where )
+				&& R_SUCC == out_card_pattern_match_cards(&pEvent->discard_pattern->pattern, &pos_card.card, sizeof(PosCard), 1))
 			{
 				cu = 1;
 			}
@@ -106,7 +107,8 @@ RESULT game_cur_info(GameContext* pGame, GameEventContext* pEvent)
 			}
 			else if(pEvent->id == GameEvent_RoundDiscardCard || pEvent->id == GameEvent_PassiveDiscardCard)
 			{
-				if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->where ))
+				if(CHECK_WHERE_PATTERN(pos_card.where, pEvent->discard_pattern->pattern.where )
+					&& R_SUCC == out_card_pattern_match_cards(&pEvent->discard_pattern->pattern, &pos_card.card, sizeof(PosCard), 1))
 				{
 					cu = 1;
 				}
@@ -507,6 +509,14 @@ static void p_out_card_pattern(const char* perffix, OutCardPattern* p)
 
 	MSG_OUT("    %s.where=%s;\n", perffix, BITOR2STRC(PatternWhere, p->where));
 	MSG_OUT("    %s.fixed=%s;\n", perffix, YESNO2STR(p->fixed));
+	if(p->num_type == NUM_ANY)
+	{
+		MSG_OUT("    %s.num_type=%s;\n", perffix, "NUM_ANY");
+	}
+	else
+	{
+		MSG_OUT("    %s.num_type=%d;\n", perffix, p->num_type);
+	}
 	MSG_OUT("    %s.num=%d;\n", perffix, p->num);
 	for(n = 0; n < p->num; n++)
 	{
@@ -786,9 +796,8 @@ static void game_event_param__discard_pattern(GameContext* pGame, GameEventConte
 	}
 	else
 	{
-		MSG_OUT("    discard_pattern.num=%d;\n", pEvent->discard_pattern->num);
-		MSG_OUT("    discard_pattern.where=%s;\n", BITOR2STRC(PatternWhere, pEvent->discard_pattern->where));
 		MSG_OUT("    discard_pattern.force=%s;\n", YESNO2STR(pEvent->discard_pattern->force));
+		p_out_card_pattern("discard_pattern.pattern", &pEvent->discard_pattern->pattern);
 		MSG_OUT("    discard_pattern.alter_text=\"%s\";\n", pEvent->discard_pattern->alter_text);
 	}
 }
@@ -801,7 +810,7 @@ static void game_event_param__select_target(GameContext* pGame, GameEventContext
 	}
 	else
 	{
-		p_card("select_target", &pEvent->select_target->card);
+		p_card("select_target.card", &pEvent->select_target->card);
 		MSG_OUT("    select_target.message=\"%s\";\n", pEvent->select_target->message);
 	}
 }

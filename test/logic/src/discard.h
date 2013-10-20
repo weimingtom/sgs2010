@@ -19,10 +19,9 @@ typedef struct tagGameEventContext GameEventContext;
 
 typedef struct tagDiscardPattern
 {
-	int    num;
-	int    where;
-	YESNO  force;
-	char   alter_text[MAX_ALTER_TEXT_LEN];
+	YESNO           force;
+	OutCardPattern  pattern;
+	char            alter_text[MAX_ALTER_TEXT_LEN];
 } DiscardPattern;
 
 
@@ -59,7 +58,9 @@ RESULT game_player_discard_card(tolua_notnull GameContext* pGame, tolua_notnull 
 
 RESULT game_passive_discard(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent
 							, int player, int where, int num, YESNO force, const char* alter_text, int* real_num = 0);
-game_passive_discard
+
+RESULT game_passive_discard_pattern(lua_State* L, tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pParentEvent
+							, int player, tolua_notnull OutCardPattern* pattern, YESNO force, const char* alter_text, int* real_num = 0);
 
 YESNO is_cur_card_valid(GameContext* pGame, CardWhere where, int pos);
 RESULT add_cur_card_to_player_hand(lua_State* L, tolua_notnull GameContext* pGame, CardWhere where, int pos, int player);
