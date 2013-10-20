@@ -120,10 +120,10 @@ qingnang.event[GameEvent_RoundOutCard] = function(cfg, game, event, player)
 	end
 
 	-- 弃一张红色手牌（这里要修改到支持按样式弃牌）
-	OutCardPattern  pattern = OutCardPattern();
-	game_load_out_pattern(out_pattern,  'hf:r?');
+	local  pattern = OutCardPattern();
+	game_load_out_pattern(out_pattern,  'hf1:r?');
 
-	if R_SUCC ~= game_passive_discard(game, event, player, PatternWhere_Hand, 1, NO, nil) then
+	if R_SUCC ~= game_passive_discard_pattern(game, event, player, pattern, NO, "请弃一张红色牌：") then
 		return R_DEF;
 	end
 	

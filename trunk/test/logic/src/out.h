@@ -34,11 +34,20 @@ typedef struct tagOutCard
 
 #define MAX_PATTERN_UD_LEN     256
 
+/*
+typedef enum enPatternNumType
+{
+	PatternNumType_Strict = 0,   // match cards with give number and pattern in pattern group 
+	PatternNumType_Anyone = 1,   // match one card with give any pattern in pattern group
+	PatternNumType_Any = 2,      // match any amount of cards with give any pattern in pattern group
+} PatternNumType;
+*/
+
 typedef struct tagOutCardPattern
 {
 	int         where;    // limited where the card is comes from 
 	YESNO       fixed;    // limited the card is fixed or can use hero skill,weapon skill or armor skill to generate 
-	YESNO       anyone;   // match of one card matched any one of the patterns 
+	int         num_type; // match num cards type in pattern group 
 	int         num;      // pattern count
 	CardPattern patterns[MAX_CARD_LIST_NUM];
 	char        ud[MAX_PATTERN_UD_LEN];     // 用于脚本通过pattern在各脚本间传递一些暗示信息
@@ -74,7 +83,7 @@ typedef enum enOutCardFlag
 // tolua_end
 
 
-#define PATTERN_MATCH_CARD_NUM(p)  ((p)->anyone == YES ? 1 : (p)->num)
+//#define PATTERN_MATCH_CARD_NUM(p, n)  ((p)->anyone == PatternNumType_Strict ? (n == (p)->num) : (p)->anyone == PatternNumType_Strict)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +98,8 @@ RESULT game_round_do_out(GameContext* pGame, GameEventContext* pEvent, int playe
 
 
 
+RESULT  out_card_pattern_match_num(const OutCardPattern* out_card_pattern, int num);
+RESULT  out_card_pattern_match_cards(const OutCardPattern* out_card_pattern, const Card*  cards, size_t offset, int card_num);
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -128,6 +139,8 @@ flags: 一个或者多个字符表示牌可以从哪里来和一些特殊标志：
 	  e - 可以从装备区打出
 	  j - 可以从判定区打出
 	  f - 固定格式，只能通过真实牌且同时打出满足完整样式的所有牌，没有该标识，则分别打出样式中的每张牌且可以使用技能来提供
+	  a - 任意张牌，每张需要符合给定样式组中的任意一个样式
+	  <num> - num张牌，每张都需要符合给定样式组中的任意一个样式
 card  pattern: <{sid}><color><val> , 至少需要指定一个样式
       {sid} - 牌的sid名称需要{} 括起来，可选。如果不指定表示可以是任意sid的牌,造价于 [none}。
 	  color - 牌的颜色，以下字符之一，可以省略，表示任意颜色的牌

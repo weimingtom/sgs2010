@@ -510,9 +510,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 	if(pEvent->id == GameEvent_PassiveOutCard)
 	{
 		// check out pattern
-		if(num != PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern))
+		if(R_SUCC != out_card_pattern_match_num(&pEvent->pattern_out->pattern, num))
 		{
-			MSG_OUT("出牌的数量不符合要求，应该出[%d]张牌!\n", PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern));
+			MSG_OUT("出牌的数量不符合要求!\n");
 			return R_E_PARAM;
 		}
 
@@ -558,7 +558,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(&stCard[0].card, sizeof(PosCard), num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+		if(R_SUCC != out_card_pattern_match_cards(&pEvent->pattern_out->pattern, &stCard[0].card, sizeof(stCard[0]), num))
 		{
 			MSG_OUT("你出的牌类型或者花色不符合要求!\n");
 			return R_E_PARAM;
@@ -593,9 +593,9 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		// check out pattern
 
 		// check out pattern
-		if(num != PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern))
+		if(R_SUCC != out_card_pattern_match_num(&pEvent->pattern_out->pattern, num))
 		{
-			MSG_OUT("提供的牌的数量不符合要求，应该提供[%d]张牌!\n", PATTERN_MATCH_CARD_NUM(&pEvent->pattern_out->pattern));
+			MSG_OUT("提供的牌的数量不符合要求!\n");
 			return R_E_PARAM;
 		}
 
@@ -642,7 +642,7 @@ RESULT game_cmd_outcard(GameContext* pGame, GameEventContext* pEvent,  int* idx,
 		}
 
 		// match pattern ?
-		if(R_SUCC != card_match(&stCard[0].card, sizeof(PosCard), num, pEvent->pattern_out->pattern.patterns, pEvent->pattern_out->pattern.num))
+		if(R_SUCC != out_card_pattern_match_cards(&pEvent->pattern_out->pattern, &stCard[0].card, sizeof(stCard[0]), num))
 		{
 			MSG_OUT("你提供的牌类型或者花色不符合要求!\n");
 			return R_E_PARAM;
@@ -825,6 +825,8 @@ YESNO game_card_can_out(GameContext* pGame, GameEventContext* pEvent, int player
 //         e : equip card is enable
 //         j : judgement card is enable
 //         f : fixed mode, need real card, skill for gen card is disabled
+//         a : any cards and each card must be match one of given card patterns. 
+//         <num> : num cards ...
 // card  pattern: <{sid}><color><val>
 //         each <...> can be [<from>-<to>] or [<p1><p2><p3>] ...
 //        <{sid}> : the card sid name. can be empty, that means any sid is valid, equal to {none}
@@ -853,6 +855,7 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 	p = szPattern;
 	
 	// parse <flags>
+	pPattern-> num_type = 0;
 
 	while(*p && *p != ':')
 	{
@@ -862,8 +865,29 @@ static RESULT  load_out_pattern(OutCardPattern* pPattern, const char* szPattern)
 		case 'e' : pPattern->where |= PatternWhere_Equip; break;
 		case 'j' : pPattern->where |=PatternWhere_Judgment; break;
 		case 'f' : pPattern->fixed = YES; break;
-		case 'a' : pPattern->anyone = YES; break;
-		default: return R_E_FAIL;  // invalid flsg char.
+		case 'a' : // a/n only be one 
+			if (pPattern-> num_type != 0)
+				return R_E_FAIL;
+			pPattern-> num_type = NUM_ANY; break;
+		default: 
+			if(*p >= '1' && *p <= '9')
+			{
+				// a/n only be one
+				if (pPattern-> num_type != 0)
+					return R_E_FAIL;
+
+				pPattern-> num_type = (*p - '0');
+				while( p[1] >= '0' && p[1] <='9')
+				{
+					p++;
+					pPattern-> num_type = pPattern-> num_type * 10 + (*p - '0');
+					//if(pPattern-> num_type > MAX_CARD_LIST_NUM)
+					//	return R_E_FAIL;
+				}
+
+				break;
+			}
+			return R_E_FAIL;  // invalid flag char.
 		}
 		p++;
 	}
@@ -1048,7 +1072,49 @@ void game_load_out_pattern(lua_State* L, OutCardPattern* out_pattern, const char
 {
 	if(R_SUCC != load_out_pattern(out_pattern, s_pattern))
 	{
-		luaL_error(GL(L), "game_passive_out: error card pattern \"%s\"", s_pattern);
+		luaL_error(GL(L), "game_load_out_pattern: error card pattern \"%s\"", s_pattern);
+	}
+}
+
+
+RESULT  out_card_pattern_match_num(const OutCardPattern* out_card_pattern, int num)
+{
+	switch(out_card_pattern->num_type)
+	{
+	case  0: return (num == out_card_pattern->num) ? R_SUCC : R_E_FAIL;
+	case NUM_ANY: return (num > 0) ? R_SUCC : R_E_FAIL;	
+	default: 
+		if(out_card_pattern->num_type > 0 )
+		{
+			return (num == out_card_pattern->num_type) ? R_SUCC : R_E_FAIL;
+		}
+		else
+		{
+			return R_E_FAIL;
+		}
+	}
+}
+
+RESULT  out_card_pattern_match_cards(const OutCardPattern* out_card_pattern, const Card*  cards, size_t offset, int card_num)
+{
+	int n;
+	RESULT ret;
+	if(0 == out_card_pattern->num_type )
+	{
+		return card_match(cards, offset, card_num, out_card_pattern->patterns, out_card_pattern->num);
+	}
+	else
+	{
+		for(n = 0; n < card_num; n++)
+		{
+			ret = card_match((Card*)((char*)cards + ( n * offset )), offset, 1, out_card_pattern->patterns, out_card_pattern->num);
+			if(ret != R_SUCC)
+			{
+				return ret;
+			}
+		}
+
+		return R_SUCC;
 	}
 }
 
