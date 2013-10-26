@@ -66,7 +66,8 @@ typedef struct tagPatternOut
 
 typedef struct tagBeforePassiveOut
 {
-	OutCardPattern pattern;
+	OutCardPattern pattern;    // original pattern , can be modified 
+	int            rep_num;     // do passive out repeat times  default = 1
 	char alter_text[MAX_ALTER_TEXT_LEN];
 }BeforePassiveOut;
 

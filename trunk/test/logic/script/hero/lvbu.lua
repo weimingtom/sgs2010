@@ -15,3 +15,61 @@ QUN002　KayaK
 [Q]吕布使用【杀】攻击装备了【八卦阵】只有一张手牌【闪】的陆逊，如果陆逊第一次判定八卦阵的结果是红色，能否放弃判定第二次八卦阵直接打出【闪】？[A]可以。并且可以发动【连营】。诸葛亮同理。
 --]]
 
+local cfg = {
+	sid = "lvbu",
+	name = "吕布",
+	desc = [==[【武的化身·吕布】
+无双——锁定技，你使用【杀】时，目标角色需连续使用两张【闪】才能抵消；与你进行【决斗】的角色每次需连续打出两张【杀】。
+★若对方只有一张【闪】或【杀】则即便使用（打出）了也无效。]==],
+	group = HeroGroup_People,
+	sex = HeroSex_Male,
+	master = NO,
+	life = 4,
+};
+
+
+local wushuang={
+	name = "无双",
+	flag = SkillFlag_Passive,
+	can_use= { },
+	event = { },
+};
+
+wushuang.can_use[GameEvent_BeforePassiveOut] = function(cfg, game, event, player)
+	if event.target == player and event.before_pout.pattern.num == 1    -- 目标
+		and ((event.before_pout.pattern.patterns[0].id == get_card_id_by_sid('shan')   -- 准备出‘闪’
+			and event.parent_event.id == GameEvent_OutCard    -- 出牌 
+			and event.parent_event.trigger == player          -- 我的出牌 				
+			and event.parent_event.out_card.vcard.id == get_card_id_by_sid('sha')  -- 出牌是‘杀’
+			and event.parent_event.target == event.trigger)    -- 目标是出闪的人 
+		or (event.before_pout.pattern.patterns[0].id == get_card_id_by_sid('sha')   -- 准备出‘杀’
+			and event.parent_event.id == GameEvent_OutCard    -- 出牌 
+			and event.parent_event.trigger == player          -- 我的出牌 				
+			and event.parent_event.out_card.vcard.id == get_card_id_by_sid('jd')  -- 出牌是‘决斗’
+			and event.parent_event.target == event.trigger))    -- 目标是出杀的人 
+	then
+		return USE_AUTO;
+	end
+	return USE_CANNOT;
+end
+
+
+
+wushuang.event[GameEvent_BeforePassiveOut] = function(cfg, game, event, player)
+	event.before_pout.rep_num = 2;  -- 需要出双倍
+	message("你需要连续出两张【"..get_card_name(event.before_pout.pattern.patterns[0].id).."】");
+	return R_SUCC;
+end
+
+
+
+cfg.skills = {
+	wushuang,
+};
+
+reg_hero(cfg);
+
+
+
+
+
