@@ -1237,7 +1237,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	OutCardPattern     t_out_pattern;
 	GameEventContext  event;
 	RESULT ret;
-	int n;
+	int n,  k;
 
 	if(pGame == NULL || pParentEvent == NULL)
 	{
@@ -1266,6 +1266,7 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	*/
 
 	before_pout.pattern = *out_pattern;
+	before_pout.rep_num = 1;
 	strncpy(before_pout.alter_text, alter_text, sizeof(before_pout.alter_text));
 
 	// before passive out , some skill can adjust the card pattern, or avoid the passive out.
@@ -1286,30 +1287,33 @@ RESULT game_passive_out(lua_State* L, GameContext* pGame, GameEventContext* pPar
 	RET_CHECK_SUCC_RET(event.result, R_SUCC);
 
 	// is pattern card is empty, success directly
-	if(before_pout.pattern.num == 0)
+	if(before_pout.rep_num == 0 || before_pout.pattern.num == 0)
 		return R_SUCC;
 
-	if(YES == before_pout.pattern.fixed || before_pout.pattern.num == 1)
+	// fix 模式，或者 数量模式为不为0 或者 样式数量为1
+	if( (YES == before_pout.pattern.fixed || before_pout.pattern.num_type != 0 || before_pout.pattern.num == 1))
 	{
 		// passive out whill complete out all the required cards;
+		for(k = 0; k < before_pout.rep_num; k++)
+		{
+			ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &before_pout.pattern, before_pout.alter_text);
 
-		ret = game_passive_out_card(L, pGame, pParentEvent, player, target, &before_pout.pattern, before_pout.alter_text);
+			memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
 
-		memcpy(out_pattern->ud, before_pout.pattern.ud, sizeof(out_pattern->ud));
+			CHECK_PLAYER_DEAD_RET(pGame, player, ret);
 
-		CHECK_PLAYER_DEAD_RET(pGame, player, ret);
-
-		RET_CHECK_RET(ret, ret);
+			RET_CHECK_RET(ret, ret);
+		}
 	}
 	else
 	{
 		// for each passive pattern card .do real out
-
 		for(n = 0; n < before_pout.pattern.num; n++)
 		{
 			ST_ZERO(t_out_pattern);
-			t_out_pattern.fixed = before_pout.pattern.fixed;
+			t_out_pattern.fixed = NO;
 			t_out_pattern.where = before_pout.pattern.where;
+			t_out_pattern.num_type = 0;
 			t_out_pattern.num = 1;
 			t_out_pattern.patterns[0] = before_pout.pattern.patterns[n];
 			memcpy(t_out_pattern.ud, before_pout.pattern.ud, sizeof(t_out_pattern.ud));
