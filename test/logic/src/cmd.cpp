@@ -1043,7 +1043,8 @@ static void  cmd_comm(GameContext* pContext, GameEventContext* pEvent, char*  cm
 	{
 		for(n= 0; n < CMD_NUM; n++)
 		{
-			if(!strcmp(argv[0], s_cmdDispatch[n].name) || (s_cmdDispatch[n].sort_name && !strcmp(argv[0], s_cmdDispatch[n].sort_name)))
+			if(s_cmdDispatch[n].flag == cmd_f_comm &&  
+				(!strcmp(argv[0], s_cmdDispatch[n].name) || (s_cmdDispatch[n].sort_name && !strcmp(argv[0], s_cmdDispatch[n].sort_name))))
 			{
 				break;
 			}
