@@ -44,9 +44,10 @@ wushuang.can_use[GameEvent_BeforePassiveOut] = function(cfg, game, event, player
 			and event.parent_event.target == event.trigger)    -- 目标是出闪的人 
 		or (event.before_pout.pattern.patterns[0].id == get_card_id_by_sid('sha')   -- 准备出‘杀’
 			and event.parent_event.id == GameEvent_OutCard    -- 出牌 
-			and event.parent_event.trigger == player          -- 我的出牌 				
+			-- and event.parent_event.trigger == player          -- 我的出牌 				
 			and event.parent_event.out_card.vcard.id == get_card_id_by_sid('jd')  -- 出牌是‘决斗’
-			and event.parent_event.target == event.trigger))    -- 目标是出杀的人 
+			-- and event.parent_event.target == event.trigger    -- 目标是出杀的人 
+			))
 	then
 		return USE_AUTO;
 	end

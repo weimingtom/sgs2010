@@ -16,6 +16,9 @@ PLAYER_PARAM_SHA_COUNTER = 0;
 -- 玩家触发青钢剑效果（无视防具）
 PLAYER_PARAM_QGJ_EFFECT  = 1;
 
+-- 玩家统计打出或者使用杀的次数（用于吕蒙的技能克己）
+PLAYER_PARAM_KEJI_DISABLE = 2;
+
 local player_event = {};
 
 
