@@ -16,3 +16,52 @@ SHU006　Kayak
 
 --]]
 
+
+local cfg={
+	sid="lvmeng",
+	name="马超",
+	desc=[==[【一骑当千·马超】
+马术——锁定技，当你计算与其他角色的距离时，始终-1。
+★【马术】的效果与装备【-1马】时很像，但你仍然可以装备一匹【-1马】。
+铁骑——当你使用【杀】指定一名角色为目标后，在【杀】结算前，你可以进行判定，若结果为红色，此【杀】不可被闪避。]==],
+	group = HeroGroup_Shu,
+	sex = HeroSex_Male,
+	master = NO,
+	life = 4,
+};
+
+
+local mashu = {	
+	name="马术",
+	flag = 0,
+	can_use= { },
+	event = { },
+};
+
+mashu.can_use[GameEvent_CalcAttackDis] = function(cfg, game, event, player)
+	if(player == event.trigger ) then
+		return USE_QUIET;
+	end
+	return USE_CANNOT;
+end
+
+
+
+mashu.event[GameEvent_CalcAttackDis] = function (cfg, game, event, player)
+	event.attack_dis.dis = event.attack_dis.dis - 1;
+	return R_DEF;
+end
+
+
+local teiji = {
+	name="",
+	flag=0,
+	can_use={},
+	event
+};
+
+
+
+
+
+
