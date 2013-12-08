@@ -312,7 +312,7 @@ BuildCmds= \
 	set DD=%cd% \
 	echo %DD% \
 	cd  ..\..\pkg \
-	"..\..\..\3p\tolua++-1.0.93/bin/toluapp.exe" -o "lua_export.cpp" -H "lua_export.h" -n game  lua_export.pkg \
+	"..\..\..\3p\tolua++-1.0.93/bin/toluapp.exe" -L "hook.lua"  -o "lua_export.cpp" -H "lua_export.h" -n game  lua_export.pkg \
 	cd %DD% \
 	
 
@@ -333,7 +333,7 @@ BuildCmds= \
 	set DD=%cd% \
 	echo %DD% \
 	cd  ..\..\pkg \
-	"..\..\..\3p\tolua++-1.0.93/bin/toluapp.exe" -o "lua_export.cpp" -H "lua_export.h" -n game  lua_export.pkg \
+	"..\..\..\3p\tolua++-1.0.93/bin/toluappd.exe" -L "hook.lua" -o "lua_export.cpp" -H "lua_export.h" -n game  lua_export.pkg \
 	cd %DD% \
 	
 
