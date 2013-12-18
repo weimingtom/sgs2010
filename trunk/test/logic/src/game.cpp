@@ -665,6 +665,12 @@ static int lua_game_main(lua_State* L)
 	GameContext* pGame = (GameContext*)lua_touserdata(L, 1);
 	GameEventContext* pEvent = (GameEventContext*)lua_touserdata(L, 2);
 
+	GameEventContext  event;
+
+	INIT_EVENT(&event, GameEvent_GameBegin, 0, 0, pEvent);
+	// game begin event
+	trigger_game_event(pGame, &event);
+
 	ret = game_loop(pGame, pEvent);
 	lua_pushnumber(L, ret);
 	return 1;
@@ -700,6 +706,8 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 {
 	int     state;
 	RESULT  ret;
+	GameEventContext  event;
+
 	lua_State* L = get_game_script();
 
 	do{
@@ -758,6 +766,11 @@ RESULT game_main(GameContext* pGame, GameEventContext* pEvent)
 			ret = R_SUCC;
 			break;
 		}
+
+
+		INIT_EVENT(&event, GameEvent_GameEnd, 0, 0, pEvent);
+		// game end event
+		trigger_game_event(pGame, &event);
 
 
 		ret = (RESULT)lua_tointeger(L, -1);

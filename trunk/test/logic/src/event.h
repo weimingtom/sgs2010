@@ -33,6 +33,8 @@ typedef enum _GameEvent
 	GameEvent_None = 0,         // no event
 	GameEvent_NewGame = 1,      // 父事件：开始新游戏
 	GameEvent_LoadGame,         // 父事件：加载保存的进度
+	GameEvent_GameBegin,        // 触发型：游戏开始（新游戏或者加载进度后）
+	GameEvent_GameEnd,		    // 触发型：游戏结束
 	GameEvent_RoundBegin,       // 触发型：回合开始阶段
 	GameEvent_PerRoundJudge,    // 触发型：回合判定阶段开始
 	GameEvent_RoundJudgeCard,   // 父事件：回合判定阶段

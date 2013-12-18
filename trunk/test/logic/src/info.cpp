@@ -658,7 +658,7 @@ static void game_event_param__before_pout(GameContext* pGame, GameEventContext* 
 	else
 	{
 		p_out_card_pattern("before_pout.pattern", &pEvent->before_pout->pattern);
-		MSG_OUT("    before_pout.rep_num=\"%s\";\n", pEvent->before_pout->rep_num);
+		MSG_OUT("    before_pout.rep_num=\"%d\";\n", pEvent->before_pout->rep_num);
 		MSG_OUT("    before_pout.alter_text=\"%s\";\n", pEvent->before_pout->alter_text);
 	}
 }
