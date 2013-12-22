@@ -43,7 +43,13 @@ liegong.can_use[GameEvent_BeforeOutCardEffect] = function(cfg, game, event, play
 		and event.parent_event.id == GameEvent_RoundOutCard   -- 出牌阶段
 		and event.parent_event.trigger == player              -- 我的回合
 	then
-		return USE_MANUAL;
+		local me = get_game_player(game, event.trigger);
+		local ta = get_game_player(game, event.target);
+		if ta.hand_card_num >= me.cur_life   -- 目标角色的手牌数大于或等于你的体力值
+			or ta.hand_card_num <= get_base_attack_dis(game, player, get_card_id_by_sid('sha'))  -- 目标角色的手牌数小于或等于你的攻击范围
+		then
+			return USE_MANUAL;
+		end
 	end
 	return USE_CANNOT;
 end
@@ -51,7 +57,7 @@ end
 
 liegong.event[GameEvent_BeforeOutCardEffect] = function(cfg, game, event, player)
 	-- 跳过驱动 
-	message('【'..liegong.name..'】的技能效果生效，本次出牌的【'..card_sid2name('sha')..'】将不能被闪避。');
+	message('【'..liegong.name..'】的技能效果生效，本次出牌的【'..get_card_name(event.out_card.vcard.id)..'】将不能被闪避。');
 	event.result = R_SKIP;
 	event.block = YES;
 	return R_SUCC;

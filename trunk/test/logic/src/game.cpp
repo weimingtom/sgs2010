@@ -161,6 +161,7 @@ int game_player_dis(GameContext* pGame, int p1, int p2)
 }
 
 
+
 static void game_init_getstack(CardStack* pCardStack)
 {
 	lua_State* L = get_game_script();

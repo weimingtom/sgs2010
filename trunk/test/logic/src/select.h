@@ -47,6 +47,9 @@ int game_select_items(lua_State* L, tolua_notnull GameContext* pGame, tolua_notn
 
 RESULT game_check_attack(tolua_notnull GameContext* pGame, tolua_notnull GameEventContext* pEvent, int player, int target, CardID  cid, int tip);
 
+// 计算基本攻击距离（武器相关，不包括自己与目标的马
+int  get_base_attack_dis(tolua_notnull GameContext* pGame, int player, CardID cid);
+
 
 // tolua_end
 

@@ -423,7 +423,6 @@ RESULT game_real_out(lua_State* L, GameContext* pGame, GameEventContext* pEvent,
 	// prepare out card
 	ret = out_card_prepare(pGame, pEvent, player, out_card);
 
-	;
 	RET_CHECK_RET(ret, (clear_prepare_out_flag(pGame, pEvent, out_card),ret));
 
 
