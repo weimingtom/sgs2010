@@ -305,3 +305,34 @@ RESULT game_check_attack(GameContext* pGame, GameEventContext* pParentEvent, int
 
 	return R_SUCC;
 }
+
+
+// 计算基本攻击距离（武器相关，不包括自己与目标的马
+int  get_base_attack_dis(tolua_notnull GameContext* pGame, int player, CardID cid)
+{
+	AttackDis   dis;
+	GameEventContext  event;
+	GameEventContext*  pParent = NULL;
+
+	ST_ZERO(dis);
+	dis.card.id = cid;  // 与牌无关的
+	dis.base = -1;           // calc the attack range
+	dis.inc = 0;            // calc the attack range append increase
+	dis.dis = 1;
+	dis.flag = 0;
+
+	INIT_EVENT(&event, GameEvent_GetBaseAttackDis, player, INVALID_PLAYER, pParent);
+	event.attack_dis = &dis;
+
+	// 先计算牌的基本攻击距离
+	call_card_event(cid, pGame, &event, player);
+
+	// 计算武器等调整
+	INIT_EVENT(&event, GameEvent_CalcAttackDis, player, INVALID_PLAYER, pParent);
+	event.attack_dis = &dis;
+
+	trigger_game_event(pGame, &event);
+
+	return dis.base;
+}
+

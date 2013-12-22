@@ -45,12 +45,12 @@ local cfg = {
 		-- 武器效果触发
 		[GameEvent_PerOutCardCalc] = function(cfg, game, event, player, pos_card)--
 			-- 如果结算的为自己出的杀。且目标为异性，则可以发动武器技能,(异性的判断暂时未实现)
-			if  event.out_card.vcard.id == get_card_id_by_sid('sha') 
-				and event.out_card.trigger == player
+			if player == event.trigger 
+				and get_card_sid(event.out_card.vcard.id) == 'sha'
 			then
 				local  pta = get_game_player(game, event.target);
 				local  pme = get_game_player(game, event.trigger);
-				if pta and pme  -- and get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
+				if pta and pme and get_hero_sex(pta.hero) ~= get_hero_sex(pme.hero) 
 					and nil == string.find(event.ud, '{cxsgj}')
 				then
 					return USE_MANUAL;

@@ -18,7 +18,7 @@ SHU006　Kayak
 
 
 local cfg={
-	sid="lvmeng",
+	sid="machao",
 	name="马超",
 	desc=[==[【一骑当千·马超】
 马术——锁定技，当你计算与其他角色的距离时，始终-1。
@@ -54,13 +54,44 @@ end
 
 
 local teiji = {
-	name="",
+	name="铁骑",
 	flag=0,
 	can_use={},
-	event
+	event={},
 };
 
 
+teiji.can_use[GameEvent_BeforeOutCardEffect] = function(cfg, game, event, player)
+	if player == event.trigger 
+		and get_card_sid(event.out_card.vcard.id) == 'sha'
+		and not string.find(event.ud, '[teiji]')
+	then
+		return USE_MANUAL;
+	end
+	return USE_CANNOT;
+end
+
+
+
+teiji.event[GameEvent_BeforeOutCardEffect] = function (cfg, game, event, player)
+	-- 判定，如果是红色牌，则不可闪避
+	if R_SUCC == game_decide_card(game, event, player, 'r') then
+		message('【'..teiji.name..'】的技能效果生效，本次出牌的【'..get_card_name(event.out_card.vcard.id)..'】将不能被闪避。');	
+		event.out_card.result = R_SKIP; -- skip the drive card process, disable response of 'sha'
+		event.out_card.block = YES;
+	end
+	event.ud = event.ud .. '[teiji]';
+	return R_DEF;
+end
+
+
+cfg.skills = {
+	mashu,
+	teiji,
+};
+
+-- register
+reg_hero(cfg);
 
 
 
