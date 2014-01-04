@@ -1,0 +1,42 @@
+sgs engine protocols
+
+
+
+// 初始化引擎，指定协议版本 1
+=>>sgsinit  1 
+// 返回可使用的选项
+<<=option <name>  <type>(<values>) [default <default value>]    
+<<=option debug list on off default off
+<<=option mode list normal fire sd default normal
+<<=info 0 max players 8
+<<=info 0 config 1 - 6 player: 1 master 1, minister 2,  
+// 返回引擎初始化OK 
+<<=ok
+
+// 返回错误 ID (带原因描述文本）
+<<=err <id> [<message text>]
+// 提示性的消息
+<<=info <id> <message text> 
+// 调试输出，一般不显示给player, 调试开关打开之后有效
+<<=debug <id> <message text> 
+// 设置out目标(player index： 1~N), 0：向所有player, -1: 控制信息，不向任何player
+<<=to <player index>  
+
+// [非游戏中时使用]开始一局游戏 <人数> <配置方式>
+=>>newgame <n> <config>
+<<=to 0
+<<=newgame <n> <config> // 向所有player
+<<=set master <n>  
+<<=to <n>
+<<=sel hero <sid> <sid> <sid> ... 
+=>>sel hero <sid>
+
+// [非游戏中时使用]加载一个保存的进度
+=>>load <name>
+
+// 初始化局面
+=>>to 0
+=>>position <n> <config> 
+
+// 
+
