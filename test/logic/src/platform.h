@@ -77,7 +77,7 @@ char* get_app_path(char*  buf, int buflen);
 char* get_cur_path(char*  buf, int buflen);
 int set_cur_path(const char* path);
 
-
+void sleep_us(int usec);
 
 #ifdef __cplusplus
 }
