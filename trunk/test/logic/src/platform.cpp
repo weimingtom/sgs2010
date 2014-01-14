@@ -53,3 +53,15 @@ int set_cur_path(const char* path)
 #endif
 	return chdir(path);
 }
+
+
+void sleep_us(int usec)
+{
+#ifdef WIN32
+	Sleep(usec/1000);
+#elif defined(LINUX)
+	usleep(usec);
+#endif
+}
+
+

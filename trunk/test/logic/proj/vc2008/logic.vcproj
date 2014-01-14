@@ -302,6 +302,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\logic.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\logic.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\main.cpp"
 				>
 			</File>
