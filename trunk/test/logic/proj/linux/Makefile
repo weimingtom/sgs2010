@@ -3,7 +3,7 @@
 CC=gcc
 CFLAGS=-g -Wall -O2 -fPIC 
 INCL=-I. -I../include -I../../../../3p/lua-5.1/include -I../../../../3p/tolua++-1.0.93/include
-LIBS=-L../../../../3p/lua-5.1/lib -L../../../../3p/tolua++-1.0.93/lib -ltolua++ -llua -lreadline -lhistory -lncurses -ldl -lm -lstdc++
+LIBS=-L../../../../3p/lua-5.1/lib -L../../../../3p/tolua++-1.0.93/lib -ltolua++ -llua -lreadline -lhistory -lncurses -ldl -lm -lpthread -lstdc++ 
 
 TOLUA=../../../3p/tolua++-1.0.93/bin/tolua++
 

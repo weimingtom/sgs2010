@@ -12,6 +12,7 @@
 #include "discard.h"
 #include "script.h"
 #include "save.h"
+#include "logic.h"
 
 
 #define MAX_PARAM_NUM   64
@@ -99,59 +100,7 @@ static char* get_word(char* cmd, char** next)
 }
 
 
-static char* get_line(const char* prompt, char* buf, int size)
-{
-#ifdef WIN32
-	int n,c;
 
-	//fflush(stdin);
-
-	MSG_OUT("%s", prompt);
-
-
-	for(n = 0; n < size-1; n++)
-	{
-		c = getchar();
-		if(c == EOF)
-		{
-			if(n == 0)
-				return NULL;
-			break;
-		}
-		else if(c=='\n')
-		{
-			break;
-		}
-		else
-		{
-			buf[n] = (char)c;
-		}
-	}
-	buf[n] = 0;
-
-#elif defined(LINUX)
-	char    utf8[1024];
-	char*   sl;
-
-
-	A2UTF8( prompt, utf8, sizeof(utf8));
-
-	log_text(utf8);
-	sl = readline(utf8);
-
-	if(strlen(sl) > 0)
-		add_history(sl);
-
-	strncpy(buf, sl, size);
-
-	free(sl);
-
-#endif
-
-	log_text("%s\n", buf);
-
-	return buf;
-}
 
 void cmd_output(const char* fmt, ...)
 {
@@ -901,7 +850,7 @@ static char* get_cmd_line(GameContext* pGame, GameEventContext* pEvent, const ch
 	else
 	{
 		mode = CMD_LINE_MODE_NORMAL;
-		return get_line(prompt, buf, len);
+		return logic_wait_cmd(prompt, buf, len);
 	}
 }
 
